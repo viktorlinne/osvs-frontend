@@ -25,7 +25,7 @@ export const LoginPage = () => {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen px-4">
+    <div className="flex flex-col items-center justify-center min-h-screen">
       <form onSubmit={submit} className="max-w-md w-full bg-white p-6 rounded shadow">
         <h2 className="text-2xl font-bold mb-4">Login</h2>
         {error && <div className="text-sm text-red-600 mb-2">{error}</div>}

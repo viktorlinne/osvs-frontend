@@ -10,12 +10,13 @@ type Props = {
 
 export default function AuthGuard({ children, roles }: Props) {
   const { user, loading } = useAuth();
+  const location = useLocation();
 
   if (loading) return <div>Loading...</div>;
 
   if (!user) {
     // not authenticated — redirect to login and preserve attempted path
-    return <Navigate to="/login" />;
+    return <Navigate to="/login" replace state={{ from: location }} />;
   }
 
   if (roles) {
@@ -24,7 +25,7 @@ export default function AuthGuard({ children, roles }: Props) {
     const has = required.some((r) => userRoles.includes(r));
     if (!has) {
       // Authenticated but missing required role — redirect to login (or show 403 page)
-      return <Navigate to="/login" />;
+      return <Navigate to="/login" replace state={{ from: location }} />;
     }
   }
 
