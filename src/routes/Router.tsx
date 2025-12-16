@@ -6,8 +6,10 @@ import {
   GdprPage,
   ContactPage,
   LoginPage,
+  NewsPage,
 } from "../pages";
 import { AppLayout } from "../app/appLayout";
+import AuthGuard from "./AuthGuard";
 
 const routes = [
   {
@@ -33,6 +35,14 @@ const routes = [
       {
         path: "login",
         element: <LoginPage />,
+      },
+      {
+        path: "news",
+        element: (
+          <AuthGuard>
+            <NewsPage />
+          </AuthGuard>
+        ),
       },
       {
         path: "*",
