@@ -4,3 +4,4 @@ export * from "./GdprPage";
 export * from "./AboutPage";
 export * from "./ContactPage";
 export * from "./LoginPage";
+export * from "./NewsPage";
