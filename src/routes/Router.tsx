@@ -8,7 +8,7 @@ import {
   LoginPage,
   NewsPage,
 } from "../pages";
-import { AppLayout } from "../app/appLayout";
+import { AppLayout } from "../app/AppLayout";
 import AuthGuard from "./AuthGuard";
 
 const routes = [
@@ -36,14 +36,16 @@ const routes = [
         path: "login",
         element: <LoginPage />,
       },
+      // Protected routes
       {
         path: "news",
         element: (
-          <AuthGuard>
+          <AuthGuard roles={"Admin"}>
             <NewsPage />
           </AuthGuard>
         ),
       },
+      // 404 route
       {
         path: "*",
         element: <NotFound />,

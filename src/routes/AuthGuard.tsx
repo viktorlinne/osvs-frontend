@@ -1,10 +1,32 @@
 import React from "react";
-import { Navigate } from "react-router";
+import { Navigate, useLocation } from "react-router";
 import { useAuth } from "../context/AuthContext";
 
-export default function AuthGuard({ children }: { children: React.ReactElement }) {
+type Props = {
+  children: React.ReactElement;
+  /** Required roles — user must have at least one of these to access */
+  roles?: string | string[];
+};
+
+export default function AuthGuard({ children, roles }: Props) {
   const { user, loading } = useAuth();
+
   if (loading) return <div>Loading...</div>;
-  if (!user) return <Navigate to="/login" replace />;
+
+  if (!user) {
+    // not authenticated — redirect to login and preserve attempted path
+    return <Navigate to="/login" />;
+  }
+
+  if (roles) {
+    const required = Array.isArray(roles) ? roles : [roles];
+    const userRoles = (user as any)?.roles ?? [];
+    const has = required.some((r) => userRoles.includes(r));
+    if (!has) {
+      // Authenticated but missing required role — redirect to login (or show 403 page)
+      return <Navigate to="/login" />;
+    }
+  }
+
   return children;
 }
