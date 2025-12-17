@@ -1,60 +1,66 @@
-import { useEffect, useState } from "react";
-import { listPosts } from "../services/posts";
+import { useEffect } from "react";
+import { Link } from "react-router-dom";
+import { listPosts } from "../services";
+import { Spinner, NotFound } from "../components";
+import type { Post } from "../types";
+import { useError } from "../context";
+import useFetch from "../hooks/useFetch";
 
-type PostItem = {
-  id: number;
-  title: string;
-  pictureUrl?: string;
-  description?: string;
-};
 
 export const NewsPage = () => {
-  const [posts, setPosts] = useState<PostItem[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const { data: posts, loading, notFound, run } = useFetch<Post[]>();
+  const { error, setError } = useError();
 
   useEffect(() => {
     let mounted = true;
-    setLoading(true);
-    listPosts()
-      .then((res: any) => {
-        const items = Array.isArray(res?.posts) ? res.posts : [];
-        if (mounted) setPosts(items);
+    run(() => listPosts())
+      .then((res) => {
+        if (!mounted) return;
+        if (!Array.isArray(res)) setError("Invalid posts response");
+        else if (res.length === 0) setError("No posts found");
       })
-      .catch((e: any) => {
-        if (mounted) setError(e?.message ?? String(e));
-      })
-      .finally(() => {
-        if (mounted) setLoading(false);
+      .catch(() => {
+        /* errors handled by useFetch */
       });
     return () => {
       mounted = false;
     };
-  }, []);
+  }, [run, setError]);
 
   return (
     <div className="flex flex-col items-center min-h-screen">
       <h2 className="text-3xl font-bold mb-4">News</h2>
+      <div className="grid gap-4 grid-cols-1">
 
-      {loading && <p>Loading posts...</p>}
-      {error && <p className="text-red-500">{error}</p>}
-
-      <div className="grid gap-6 md:grid-cols-2">
-        {posts.map((p) => (
-          <article key={p.id} className="border rounded overflow-hidden shadow-sm bg-white">
-            {p.pictureUrl && (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img src={p.pictureUrl} alt={p.title} className="w-full h-48 object-cover" />
-            )}
-            <div className="p-4">
-              <h3 className="text-xl font-semibold mb-2">{p.title}</h3>
-              <p className="text-sm text-gray-700">{p.description}</p>
-            </div>
-          </article>
-        ))}
+        {loading && <Spinner />}
+        {notFound ? (
+          <NotFound />
+        ) : error ? (
+          <p className="text-red-500">{error}</p>
+        ) : (
+          (posts ?? []).map((p) => (
+            <Link
+              to={`/news/${p.id}`}
+              key={p.id}
+              className="block rounded shadow-md bg-white overflow-hidden"
+            >
+              {p.pictureUrl && (
+                <img
+                  src={`${import.meta.env.VITE_BACKEND_URL}${p.pictureUrl}`}
+                  alt={p.title}
+                  className="w-full h-48 object-cover"
+                />
+              )}
+              <div className="p-4">
+                <h3 className="text-xl font-semibold mb-4">{p.title}</h3>
+                <p className="">{p.description}</p>
+              </div>
+            </Link>
+          ))
+        )}
       </div>
 
-      {!loading && posts.length === 0 && !error && (
+      {!loading && (posts ?? []).length === 0 && !error && (
         <p className="mt-6 text-gray-600">No posts yet.</p>
       )}
     </div>

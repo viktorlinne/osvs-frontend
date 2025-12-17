@@ -7,6 +7,7 @@ import {
   ContactPage,
   LoginPage,
   NewsPage,
+  NewsDetail,
 } from "../pages";
 import { AppLayout } from "../app/AppLayout";
 import AuthGuard from "./AuthGuard";
@@ -40,8 +41,16 @@ const routes = [
       {
         path: "news",
         element: (
-          <AuthGuard roles={"Admin"}>
+          <AuthGuard>
             <NewsPage />
+          </AuthGuard>
+        ),
+      },
+      {
+        path: "news/:id",
+        element: (
+          <AuthGuard>
+            <NewsDetail />
           </AuthGuard>
         ),
       },

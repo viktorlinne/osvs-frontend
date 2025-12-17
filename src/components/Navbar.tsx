@@ -1,17 +1,28 @@
+import axios from "axios";
 import { NavLink, useNavigate } from "react-router";
-import { useAuth } from "../context/AuthContext";
+import { useAuth, useError } from "../context";
+import { type ApiError, isApiError } from "../types";
 
 export const Navbar = () => {
   const { user, logout } = useAuth();
+  const { setError, clearError } = useError();
   const navigate = useNavigate();
 
   const handleLogout = async () => {
     try {
       await logout();
+      clearError();
       navigate("/login");
-    } catch (err) {
-      // ignore for now
-      navigate("/login");
+    } catch (e: unknown) {
+      if (axios.isAxiosError(e) && e.response) {
+        const data = e.response.data as ApiError;
+        setError(data?.message ?? "Logout failed");
+      } else if (isApiError(e)) {
+        setError(e.message ?? "Logout failed");
+      } else {
+        setError(String(e ?? "Logout failed"));
+      }
+      setTimeout(() => clearError(), 6000);
     }
   };
 
@@ -51,9 +62,7 @@ export const Navbar = () => {
         </NavLink>
       ) : (
         <div className="ml-auto flex items-center gap-2">
-          {typeof (user as any)?.firstname === "string" ? (
-            <span className="text-sm">{(user as any).firstname}</span>
-          ) : null}
+          {user.firstname ? <span className="text-sm">{user.firstname}</span> : null}
           <button
             onClick={handleLogout}
             className="p-2 rounded bg-red-600 hover:bg-red-700 transition text-white"

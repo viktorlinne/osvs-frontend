@@ -1,6 +1,8 @@
 import { useState } from "react";
-import { useNavigate } from "react-router";
-import { useAuth } from "../context/AuthContext";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "../context/useAuth";
+import { useError } from "../context";
+import useFetch from "../hooks/useFetch";
 
 export const LoginPage = () => {
   const { login } = useAuth();
@@ -8,17 +10,19 @@ export const LoginPage = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const { error, setError, clearError } = useError();
+  const { run } = useFetch();
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError(null);
+    clearError();
     setLoading(true);
     try {
-      await login(email, password);
-      navigate("/");
-    } catch (err: any) {
-      setError(err?.message ?? "Login failed");
+      const user = await run(() => login(email, password));
+      if (user) navigate("/news");
+      else setError("Login failed");
+    } catch {
+      // useFetch already sets friendly messages via global error
     } finally {
       setLoading(false);
     }
@@ -54,7 +58,7 @@ export const LoginPage = () => {
           className="px-4 py-2 rounded bg-green-600 hover:bg-green-700 text-white "
           disabled={loading}
         >
-          {loading ? "Logging in..." : "Login"}
+          {loading ? "Loggar in..." : "Logga in"}
         </button>
       </form>
     </div>

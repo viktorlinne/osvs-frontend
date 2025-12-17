@@ -1,13 +1,19 @@
-import axios, { AxiosError, type AxiosRequestConfig, type AxiosResponse } from "axios";
+import axios, {
+  AxiosError,
+  type AxiosRequestConfig,
+  type AxiosResponse,
+} from "axios";
+import { reportGlobalError } from "./globalError";
+import type { ApiError } from "../types";
 
-const BASE_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:4000/api";
+const BASE_URL = `${import.meta.env.VITE_BACKEND_URL}/api`;
 
 // Simple axios instance. `withCredentials` is required because the
 // backend stores access/refresh tokens in HTTP-only cookies.
 export const api = axios.create({
   baseURL: BASE_URL,
   withCredentials: true,
-  timeout: 10_000,
+  timeout: 10000,
 });
 
 // Minimal refresh strategy: on first 401 we POST to `/auth/refresh`
@@ -16,21 +22,26 @@ export const api = axios.create({
 api.interceptors.response.use(
   (r) => r,
   async (err: AxiosError) => {
-    const originalConfig = err.config as AxiosRequestConfig & { _retry?: boolean };
+    const originalConfig = err.config as AxiosRequestConfig & {
+      _retry?: boolean;
+    };
     if (!originalConfig) return Promise.reject(err);
 
     const status = err.response?.status;
     if (status === 401 && !originalConfig._retry) {
       originalConfig._retry = true;
       try {
-        const resp = await fetch(`${BASE_URL.replace(/\/$/, "")}/auth/refresh`, {
-          method: "POST",
-          credentials: "include",
-        });
+        const resp = await fetch(
+          `${BASE_URL.replace(/\/$/, "")}/auth/refresh`,
+          {
+            method: "POST",
+            credentials: "include",
+          }
+        );
         if (resp.ok) {
           return api.request(originalConfig);
         }
-      } catch (e) {
+      } catch {
         // fallthrough to reject with original error
       }
     }
@@ -49,8 +60,40 @@ export async function fetchData<T = unknown>(
   } catch (e) {
     const err = e as AxiosError;
     if (err && err.response) {
-      const apiErr = (err.response.data as any)?.error ?? (err.response.data as any)?.message;
-      throw new Error(apiErr ?? `Request failed with status ${err.response.status}`);
+      const status = err.response.status ?? 0;
+      const raw = err.response.data as unknown;
+      let serverMsg: string | undefined;
+      let code: string | undefined;
+      if (typeof raw === "object" && raw !== null) {
+        const rec = raw as Record<string, unknown>;
+        if (typeof rec.error === "string") serverMsg = rec.error;
+        else if (typeof rec.message === "string") serverMsg = rec.message;
+        if (typeof rec.code === "string") code = rec.code;
+      } else if (typeof raw === "string") {
+        serverMsg = raw;
+      }
+
+      const STATUS_MESSAGES: Record<number, string> = {
+        400: "Felaktig förfrågan",
+        401: "Vänligen logga in",
+        403: "Åtkomst nekad",
+        404: "Hittades inte",
+        429: "För många förfrågningar — försök igen senare",
+        500: "Serverfel — försök igen senare",
+      };
+
+      const message =
+        (serverMsg as string) ??
+        STATUS_MESSAGES[status] ??
+        `Request failed with status ${status}`;
+      const apiErr: ApiError = { status, code, message };
+      // Report to global error banner (if registered)
+      try {
+        reportGlobalError(message);
+      } catch {
+        // ignore
+      }
+      throw apiErr;
     }
     throw e;
   }

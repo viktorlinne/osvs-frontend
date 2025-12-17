@@ -1,6 +1,7 @@
 import React from "react";
 import { Navigate, useLocation } from "react-router";
-import { useAuth } from "../context/AuthContext";
+import { useAuth } from "../context";
+import { Spinner } from "../components";
 
 type Props = {
   children: React.ReactElement;
@@ -12,7 +13,7 @@ export default function AuthGuard({ children, roles }: Props) {
   const { user, loading } = useAuth();
   const location = useLocation();
 
-  if (loading) return <div>Loading...</div>;
+  if (loading) return <div><Spinner /></div>;
 
   if (!user) {
     // not authenticated — redirect to login and preserve attempted path
@@ -21,10 +22,9 @@ export default function AuthGuard({ children, roles }: Props) {
 
   if (roles) {
     const required = Array.isArray(roles) ? roles : [roles];
-    const userRoles = (user as any)?.roles ?? [];
+    const userRoles = user.roles ?? [];
     const has = required.some((r) => userRoles.includes(r));
     if (!has) {
-      // Authenticated but missing required role — redirect to login (or show 403 page)
       return <Navigate to="/login" replace state={{ from: location }} />;
     }
   }

@@ -24,11 +24,11 @@ export async function deleteEvent(id: number | string) {
 	return fetchData(api.delete(`/events/${id}`));
 }
 
-export async function linkLodge(eventId: number | string, lodgeId: number | string) {
+export async function linkLodgeEvent(eventId: number | string, lodgeId: number | string) {
 	return fetchData(api.post(`/events/${eventId}/lodges`, { lodgeId }));
 }
 
-export async function unlinkLodge(eventId: number | string, lodgeId: number | string) {
+export async function unlinkLodgeEvent(eventId: number | string, lodgeId: number | string) {
 	return fetchData(api.delete(`/events/${eventId}/lodges`, { data: { lodgeId } }));
 }
 
@@ -47,8 +47,8 @@ export default {
 	createEvent,
 	updateEvent,
 	deleteEvent,
-	linkLodge,
-	unlinkLodge,
+	linkLodgeEvent,
+	unlinkLodgeEvent,
 	setRsvp,
 	getRsvp,
 };

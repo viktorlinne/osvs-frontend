@@ -20,11 +20,11 @@ export async function deleteEstablishment(id: number | string) {
 	return fetchData(api.delete(`/establishments/${id}`));
 }
 
-export async function linkLodge(estId: number | string, lodgeId: number | string) {
+export async function linkLodgeEstablishment(estId: number | string, lodgeId: number | string) {
 	return fetchData(api.post(`/establishments/${estId}/lodges`, { lodgeId }));
 }
 
-export async function unlinkLodge(estId: number | string, lodgeId: number | string) {
+export async function unlinkLodgeEstablishment(estId: number | string, lodgeId: number | string) {
 	return fetchData(api.delete(`/establishments/${estId}/lodges`, { data: { lodgeId } }));
 }
 
@@ -34,6 +34,6 @@ export default {
 	createEstablishment,
 	updateEstablishment,
 	deleteEstablishment,
-	linkLodge,
-	unlinkLodge,
+	linkLodgeEstablishment,
+	unlinkLodgeEstablishment,
 };
