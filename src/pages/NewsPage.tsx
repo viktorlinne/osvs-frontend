@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import { Link } from "react-router-dom";
+import { useAuth } from "../context";
 import { listPosts } from "../services";
 import { Spinner, NotFound } from "../components";
 import type { Post } from "../types";
@@ -10,6 +11,7 @@ import useFetch from "../hooks/useFetch";
 export const NewsPage = () => {
   const { data: posts, loading, notFound, run } = useFetch<Post[]>();
   const { error, setError } = useError();
+  const { user } = useAuth();
 
   useEffect(() => {
     let mounted = true;
@@ -29,7 +31,17 @@ export const NewsPage = () => {
 
   return (
     <div className="flex flex-col items-center min-h-screen">
-      <h2 className="text-3xl font-bold mb-4">News</h2>
+      <div className="w-full max-w-3xl flex items-center justify-between mb-4">
+        <h2 className="text-3xl font-bold">News</h2>
+        {user && (user.roles ?? []).some((r) => ["Admin", "Editor"].includes(r)) && (
+          <Link
+            to="/news/create"
+            className="text-white bg-green-600 px-3 py-2 rounded"
+          >
+            Create Post
+          </Link>
+        )}
+      </div>
       <div className="grid gap-4 grid-cols-1">
 
         {loading && <Spinner />}

@@ -7,3 +7,4 @@ export * from "./ContactPage";
 export * from "./LoginPage";
 export * from "./NewsPage";
 export * from "./NewsDetail";
+export { default as CreatePost } from "./CreatePost";
