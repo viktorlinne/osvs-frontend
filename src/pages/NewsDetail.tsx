@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
+import { useAuth } from "../context";
 import { getPost } from "../services";
 import { Spinner, NotFound } from "../components";
 import type { Post } from "../types";
@@ -7,6 +8,7 @@ import { useError } from "../context";
 import useFetch from "../hooks/useFetch";
 
 export const NewsDetail = () => {
+    const { user } = useAuth();
     const { id } = useParams<{ id: string }>();
     const { error, setError, clearError } = useError();
     const { data, loading, notFound, run } = useFetch<Post | null>();
@@ -42,9 +44,19 @@ export const NewsDetail = () => {
     return (
         <div className="flex flex-col items-center min-h-screen">
             <div className="max-w-3xl w-full mx-auto p-6">
-                <Link to="/news" className="text-sm text-green-600 underline">
-                    ← Back to news
-                </Link>
+                <div className="flex items-center justify-between">
+                    <Link to="/news" className="text-sm text-green-600 underline">
+                        ← Tillbaka till nyheter
+                    </Link>
+                    {user && (user.roles ?? []).some((r) => ["Admin", "Editor"].includes(r)) && data && (
+                        <Link
+                            to={`/news/${data.id}/edit`}
+                            className="text-sm text-white bg-green-600 px-3 py-1 rounded"
+                        >
+                            Edit
+                        </Link>
+                    )}
+                </div>
                 {loading && <Spinner />}
                 {notFound ? (
                     <NotFound />
@@ -70,5 +82,3 @@ export const NewsDetail = () => {
         </div>
     );
 };
-
-export default NewsDetail;

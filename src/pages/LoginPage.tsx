@@ -31,7 +31,7 @@ export const LoginPage = () => {
   return (
     <div className="flex flex-col items-center justify-center min-h-screen">
       <form onSubmit={submit} className="max-w-md w-full bg-white p-6 rounded shadow">
-        <h2 className="text-2xl font-bold mb-4">Login</h2>
+        <h2 className="text-2xl font-bold mb-4">Logga in</h2>
         {error && <div className="text-sm text-red-600 mb-2">{error}</div>}
         <label className="block mb-2">
           <div className="text-sm">Email</div>
@@ -44,7 +44,7 @@ export const LoginPage = () => {
           />
         </label>
         <label className="block mb-4">
-          <div className="text-sm">Password</div>
+          <div className="text-sm">Lösenord</div>
           <input
             className="border p-2 w-full"
             value={password}

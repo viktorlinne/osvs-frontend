@@ -18,8 +18,8 @@ export const NewsPage = () => {
     run(() => listPosts())
       .then((res) => {
         if (!mounted) return;
-        if (!Array.isArray(res)) setError("Invalid posts response");
-        else if (res.length === 0) setError("No posts found");
+        if (!Array.isArray(res)) setError("Något gick fel vid hämtning av inlägg.");
+        else if (res.length === 0) setError("Inga inlägg än.");
       })
       .catch(() => {
         /* errors handled by useFetch */
@@ -32,7 +32,7 @@ export const NewsPage = () => {
   return (
     <div className="flex flex-col items-center min-h-screen">
       <div className="w-full max-w-3xl flex items-center justify-between mb-4">
-        <h2 className="text-3xl font-bold">News</h2>
+        <h2 className="text-3xl font-bold">Nyheter</h2>
         {user && (user.roles ?? []).some((r) => ["Admin", "Editor"].includes(r)) && (
           <Link
             to="/news/create"
@@ -73,7 +73,7 @@ export const NewsPage = () => {
       </div>
 
       {!loading && (posts ?? []).length === 0 && !error && (
-        <p className="mt-6 text-gray-600">No posts yet.</p>
+        <p className="mt-6 text-gray-600">Inga inlägg än.</p>
       )}
     </div>
   );

@@ -10,6 +10,7 @@ import {
   NewsDetail,
   // Create post page
   CreatePost,
+  EditPost,
 } from "../pages";
 import { AppLayout } from "../app/AppLayout";
 import AuthGuard from "./AuthGuard";
@@ -53,6 +54,14 @@ const routes = [
         element: (
           <AuthGuard roles={["Admin", "Editor"]}>
             <CreatePost />
+          </AuthGuard>
+        ),
+      },
+      {
+        path: "news/:id/edit",
+        element: (
+          <AuthGuard roles={["Admin", "Editor"]}>
+            <EditPost />
           </AuthGuard>
         ),
       },
