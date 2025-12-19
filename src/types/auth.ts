@@ -17,8 +17,24 @@ export type PublicUser = {
   address: string;
   zipcode: string;
   notes?: string | null;
+  achievements?: Array<{
+    id: number;
+    aid: number;
+    awardedAt: string;
+    title: string;
+  }>;
 };
 
-export type AuthUser = (PublicUser & { roles: string[] }) | null;
+export type AuthUser =
+  | (PublicUser & {
+      roles: string[];
+      achievements?: Array<{
+        id: number;
+        aid: number;
+        awardedAt: string;
+        title: string;
+      }>;
+    })
+  | null;
 
 export type LoginPayload = { email: string; password: string };

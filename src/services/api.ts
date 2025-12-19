@@ -86,7 +86,12 @@ export async function fetchData<T = unknown>(
         (serverMsg as string) ??
         STATUS_MESSAGES[status] ??
         `Request failed with status ${status}`;
-      const apiErr: ApiError = { status, code, message };
+      const apiErr: ApiError = {
+        status,
+        code,
+        message,
+        details: (raw as Record<string, unknown>)?.details,
+      };
       // Report to global error banner (if registered)
       try {
         reportGlobalError(message);

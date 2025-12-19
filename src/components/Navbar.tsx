@@ -62,7 +62,9 @@ export const Navbar = () => {
         </NavLink>
       ) : (
         <div className="ml-auto flex items-center gap-2">
-          {user.firstname ? <span className="text-sm">{user.firstname}</span> : null}
+          <NavLink to="/profile">
+            {user.firstname ? <span className="p-2 rounded bg-green-600 hover:bg-green-700 transition text-white">{user.firstname}</span> : null}
+          </NavLink>
           <button
             onClick={handleLogout}
             className="p-2 rounded bg-red-600 hover:bg-red-700 transition text-white"

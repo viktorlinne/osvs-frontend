@@ -4,37 +4,51 @@ import { createPost } from "../services";
 import useFetch from "../hooks/useFetch";
 import { Spinner } from "../components";
 import { useError } from "../context";
+import { createPostSchema } from "../validators/posts";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
 
 export default function CreatePost() {
-    const { setError, clearError } = useError();
+    const { clearError: clearGlobalError } = useError();
     const { run, loading } = useFetch<{ success: boolean; id?: number }>();
     const navigate = useNavigate();
 
-    const [title, setTitle] = useState("");
-    const [description, setDescription] = useState("");
     const [picture, setPicture] = useState<File | null>(null);
+    type CreatePostForm = z.infer<typeof createPostSchema>;
+    const { register, handleSubmit, formState: { errors }, setError: setFieldError } = useForm<CreatePostForm>({
+        resolver: zodResolver(createPostSchema),
+        defaultValues: { title: "", description: "" }
+    });
 
-    async function onSubmit(e: React.FormEvent) {
-        e.preventDefault();
-        clearError();
-        if (!title.trim() || !description.trim()) {
-            setError("Titel och beskrivning är obligatoriska");
-            return;
-        }
-
+    async function onSubmit(values: CreatePostForm) {
+        clearGlobalError();
         const fd = new FormData();
-        fd.append("title", title.trim());
-        fd.append("description", description.trim());
+        fd.append("title", values.title.trim());
+        fd.append("description", values.description.trim());
         if (picture) fd.append("picture", picture);
 
         try {
             const res = await run(() => createPost(fd as unknown as Record<string, unknown>));
-            // backend returns { success: true, id }
             const id = res?.id ?? null;
             if (id) navigate(`/news/${id}`);
             else navigate("/news");
-        } catch {
-            // errors handled by useFetch -> useError
+        } catch (e: unknown) {
+            // map server-side validation errors to fields when possible
+            const err = e as { status?: number; details?: unknown };
+            if (err?.status === 400 && err.details && typeof err.details === "object") {
+                const rec = err.details as Record<string, unknown>;
+                const missing = Array.isArray(rec.missing) ? rec.missing : undefined;
+                if (missing) {
+                    missing.forEach((p: unknown) => {
+                        if (typeof p === "string") {
+                            setFieldError(p as unknown as keyof CreatePostForm, { type: "server", message: "Ogiltigt värde" });
+                        }
+                    });
+                    return;
+                }
+            }
+            // otherwise rely on global error handling
         }
     }
 
@@ -45,24 +59,24 @@ export default function CreatePost() {
                     ← Tillbaka till nyheter
                 </Link>
                 <h2 className="text-2xl font-bold mt-4 mb-4">Skapa inlägg</h2>
-                <form onSubmit={onSubmit} className="bg-white p-4 rounded shadow">
+                <form onSubmit={handleSubmit(onSubmit)} className="bg-white p-4 rounded shadow">
                     <div className="mb-4">
                         <label className="block font-medium mb-1">Titel</label>
                         <input
-                            value={title}
-                            onChange={(e) => setTitle(e.target.value)}
+                            {...register("title")}
                             className="w-full border rounded px-3 py-2"
                         />
+                        {errors.title && <div className="text-red-600 mt-1">{errors.title?.message}</div>}
                     </div>
 
                     <div className="mb-4">
                         <label className="block font-medium mb-1">Beskrivning</label>
                         <textarea
-                            value={description}
-                            onChange={(e) => setDescription(e.target.value)}
+                            {...register("description")}
                             rows={6}
                             className="w-full border rounded px-3 py-2"
                         />
+                        {errors.description && <div className="text-red-600 mt-1">{errors.description?.message}</div>}
                     </div>
 
                     <div className="mb-4">

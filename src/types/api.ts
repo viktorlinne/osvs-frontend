@@ -2,7 +2,7 @@ export type ApiError = {
   status: number;
   code?: string;
   message?: string;
-  details?: string;
+  details?: unknown;
 };
 
 export function isApiError(v: unknown): v is ApiError {

@@ -19,6 +19,23 @@ function mergeAuthResponse(res: unknown): AuthUser {
   }
 
   const result = { ...rawUser, roles } as AuthUser;
+  // Attach achievements if provided either at top-level or on the user object
+  const rawAchievements = Array.isArray(rec.achievements)
+    ? rec.achievements
+    : Array.isArray(rawUser.achievements)
+    ? (rawUser.achievements as unknown[])
+    : undefined;
+  if (result && Array.isArray(rawAchievements)) {
+    result.achievements = rawAchievements
+      .map((a) => a as Record<string, unknown>)
+      .map((a) => ({
+        id: Number(a.id),
+        aid: Number(a.aid),
+        awardedAt: String(a.awardedAt ?? ""),
+        title: String(a.title ?? ""),
+      }))
+      .filter((a) => Number.isFinite(a.id));
+  }
   return result;
 }
 

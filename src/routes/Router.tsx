@@ -10,7 +10,11 @@ import {
   NewsDetail,
   // Create post page
   CreatePost,
-  EditPost,
+  // Members / profile
+  Profile,
+  MembersPage,
+  MemberDetail,
+  UsersCreate,
 } from "../pages";
 import { AppLayout } from "../app/AppLayout";
 import AuthGuard from "./AuthGuard";
@@ -58,10 +62,58 @@ const routes = [
         ),
       },
       {
+        path: "members",
+        element: (
+          <AuthGuard>
+            <MembersPage />
+          </AuthGuard>
+        ),
+      },
+      {
+        path: "users/create",
+        element: (
+          <AuthGuard roles={["Admin", "Editor"]}>
+            <UsersCreate />
+          </AuthGuard>
+        ),
+      },
+      {
+        path: "members/:id",
+        element: (
+          <AuthGuard>
+            <MemberDetail />
+          </AuthGuard>
+        ),
+      },
+      {
+        path: "members/:id/edit",
+        element: (
+          <AuthGuard roles={["Admin", "Editor"]}>
+            <MemberDetail />
+          </AuthGuard>
+        ),
+      },
+      {
+        path: "profile",
+        element: (
+          <AuthGuard>
+            <Profile />
+          </AuthGuard>
+        ),
+      },
+      {
+        path: "profile/edit",
+        element: (
+          <AuthGuard>
+            <Profile />
+          </AuthGuard>
+        ),
+      },
+      {
         path: "news/:id/edit",
         element: (
           <AuthGuard roles={["Admin", "Editor"]}>
-            <EditPost />
+            <NewsDetail />
           </AuthGuard>
         ),
       },
