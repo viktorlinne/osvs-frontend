@@ -3,7 +3,7 @@ import { useParams, Link, useLocation } from "react-router-dom";
 import { Spinner, NotFound } from "../components";
 import useFetch from "../hooks/useFetch";
 import { useError, useAuth } from "../context";
-import type { PublicUser } from "@osvs/types";
+import type { PublicUser, Achievement, Lodge, Role } from "@osvs/types";
 import { adminUpdateUser, uploadUserPicture, postAchievement, getUserLodge, setUserLodge } from "../services/users";
 import achievementsService from "../services/achievements";
 import lodgesService from "../services/lodges";
@@ -18,15 +18,15 @@ export default function MemberDetail() {
     const { run, loading, data: member, notFound } = useFetch<PublicUser | null>();
     const { setError: setGlobalError, clearError: clearGlobalError } = useError();
     const { user } = useAuth();
-    const [achievements, setAchievements] = useState<Array<{ id: number; aid: number; awardedAt: string; title: string }>>([]);
-    const [available, setAvailable] = useState<Array<{ id: number; title: string }>>([]);
     const { user: currentUser } = useAuth();
     const canAward = Boolean(currentUser && (currentUser.roles ?? []).some((r) => ["Admin", "Editor"].includes(r)));
     const [selectedAid, setSelectedAid] = useState<number | null>(null);
     const [awardDate, setAwardDate] = useState<string>("");
-    const [lodges, setLodges] = useState<Array<{ id: number; name: string }>>([]);
     const [selectedLid, setSelectedLid] = useState<number | null>(null);
-    const [rolesList, setRolesList] = useState<Array<{ id: number; name: string }>>([]);
+    const [available, setAvailable] = useState<Achievement[]>([]);
+    const [lodges, setLodges] = useState<Lodge[]>([]);
+    const [achievements, setAchievements] = useState<Achievement[]>([]);
+    const [rolesList, setRolesList] = useState<Role[]>([]);
     const [selectedRoleIds, setSelectedRoleIds] = useState<number[]>([]);
 
     const canEdit = Boolean(user && (user.roles ?? []).some((r) => ["Admin", "Editor"].includes(r)));

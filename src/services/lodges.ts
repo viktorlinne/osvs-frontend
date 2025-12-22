@@ -1,4 +1,5 @@
 import api, { fetchData } from "./api";
+import type { Lodge } from "@osvs/types";
 
 export async function listLodges() {
   const data = (await fetchData(api.get("/lodges"))) as unknown;
@@ -7,12 +8,9 @@ export async function listLodges() {
     data !== null &&
     Array.isArray((data as Record<string, unknown>).lodges)
   ) {
-    return (data as Record<string, unknown>).lodges as Array<{
-      id: number;
-      name: string;
-    }>;
+    return (data as Record<string, unknown>).lodges as Lodge[];
   }
-  return [] as Array<{ id: number; name: string }>;
+  return [] as Lodge[];
 }
 
 export async function createLodge(payload: Record<string, unknown>) {

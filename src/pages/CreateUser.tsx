@@ -3,6 +3,7 @@ import { useNavigate } from "react-router";
 import api, { fetchData } from "../services/api";
 import { listLodges } from "../services/lodges";
 import { registerSchema, type RegisterForm } from "../validators/users";
+import type { Lodge } from "@osvs/types";
 
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -12,7 +13,7 @@ export default function UsersCreate() {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [picture, setPicture] = useState<File | null>(null);
-    const [lodges, setLodges] = useState<Array<{ id: number; name: string }>>([]);
+    const [lodges, setLodges] = useState<Lodge[]>([]);
     const [lodgesLoading, setLodgesLoading] = useState(true);
 
     const {
@@ -103,11 +104,11 @@ export default function UsersCreate() {
                 setLodgesLoading(true);
                 const data = await listLodges();
                 if (Array.isArray(data)) {
-                    setLodges(data as Array<{ id: number; name: string }>);
+                    setLodges(data as Lodge[]);
                 } else if (data && typeof data === "object") {
                     const lodgesField = (data as Record<string, unknown>)["lodges"];
                     if (Array.isArray(lodgesField)) {
-                        setLodges(lodgesField as Array<{ id: number; name: string }>);
+                        setLodges(lodgesField as Lodge[]);
                     }
                 }
             } catch {

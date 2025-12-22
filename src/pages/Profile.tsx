@@ -5,7 +5,7 @@ import { postAchievement, updateMe, uploadMyPicture, getUserLodge, setRoles } fr
 import { listRoles } from "../services/admin";
 import achievementsService from "../services/achievements";
 import { Spinner } from "../components";
-import type { PublicUser, Lodge } from "@osvs/types";
+import type { PublicUser, Lodge, Achievement, Role } from "@osvs/types";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { updateUserSchema, type UpdateUserForm } from "../validators/users";
@@ -19,12 +19,12 @@ export default function Profile() {
     const [saving, setSaving] = useState(false);
     const [pictureFile, setPictureFile] = useState<File | null>(null);
     const achievements: PublicUser["achievements"] = user?.achievements ?? [];
-    const [available, setAvailable] = useState<Array<{ id: number; title: string }>>([]);
+    const [available, setAvailable] = useState<Achievement[]>([]);
     const [lodge, setLodge] = useState<Lodge | null>(null);
     const canAward = Boolean(user && (user.roles ?? []).some((r) => ["Admin", "Editor"].includes(r)));
     const canEditRoles = Boolean(user && (user.roles ?? []).some((r) => ["Admin", "Editor"].includes(r)));
     const [selectedAid, setSelectedAid] = useState<number | null>(null);
-    const [rolesList, setRolesList] = useState<Array<{ id: number; name: string }>>([]);
+    const [rolesList, setRolesList] = useState<Role[]>([]);
     const [selectedRoleIds, setSelectedRoleIds] = useState<number[]>([]);
     const [awardDate, setAwardDate] = useState<string>("");
 
