@@ -1,10 +1,11 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { useAuth, useError } from "../context";
-import { postAchievement, updateMe, uploadMyPicture } from "../services";
+import { postAchievement, updateMe, uploadMyPicture, getUserLodge, setRoles } from "../services";
+import { listRoles } from "../services/admin";
 import achievementsService from "../services/achievements";
 import { Spinner } from "../components";
-import type { PublicUser } from "../types/auth";
+import type { PublicUser, Lodge } from "../types";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { updateUserSchema } from "../validators/users";
@@ -20,8 +21,12 @@ export default function Profile() {
     const [pictureFile, setPictureFile] = useState<File | null>(null);
     const achievements: PublicUser["achievements"] = user?.achievements ?? [];
     const [available, setAvailable] = useState<Array<{ id: number; title: string }>>([]);
+    const [lodge, setLodge] = useState<Lodge | null>(null);
     const canAward = Boolean(user && (user.roles ?? []).some((r) => ["Admin", "Editor"].includes(r)));
+    const canEditRoles = Boolean(user && (user.roles ?? []).some((r) => ["Admin", "Editor"].includes(r)));
     const [selectedAid, setSelectedAid] = useState<number | null>(null);
+    const [rolesList, setRolesList] = useState<Array<{ id: number; name: string }>>([]);
+    const [selectedRoleIds, setSelectedRoleIds] = useState<number[]>([]);
     const [awardDate, setAwardDate] = useState<string>("");
 
     type UpdateUserForm = z.infer<typeof updateUserSchema>;
@@ -51,8 +56,46 @@ export default function Profile() {
                 // ignore
             }
         })();
+        // fetch current user's lodge
+        (async () => {
+            try {
+                if (user?.id) {
+                    const cur = await getUserLodge(user.id);
+                    if (cur && cur.lodge) setLodge(cur.lodge);
+                }
+                try {
+                    const r = await listRoles();
+                    // backend may return either an array or { roles: [...] }
+                    let items: Array<Record<string, unknown>> = [];
+                    const raw = r as Record<string, unknown> | undefined;
+                    if (Array.isArray(r)) items = r as Array<Record<string, unknown>>;
+                    else if (raw && Array.isArray(raw.roles)) items = raw.roles as Array<Record<string, unknown>>;
+
+                    if (items.length > 0) {
+                        const rolesArray = items.map(item => ({
+                            id: Number(item.id),
+                            name: String(item.name ?? item.role ?? item.roleName ?? "")
+                        }));
+                        setRolesList(rolesArray);
+                        // map current user roles (which may be strings or objects) to ids
+                        const ids = (user?.roles ?? []).map((rn) => {
+                            const rnName = typeof rn === "string" ? rn : ((): string => {
+                                const rec = rn as Record<string, unknown>;
+                                return String(rec['name'] ?? rec['role'] ?? rec['id'] ?? '');
+                            })();
+                            return rolesArray.find((x) => x.name === rnName)?.id;
+                        }).filter((v): v is number => Boolean(v));
+                        setSelectedRoleIds(ids);
+                    }
+                } catch {
+                    // ignore
+                }
+            } catch {
+                // ignore
+            }
+        })();
         return () => { mounted = false; };
-    }, []);
+    }, [user?.id, user?.roles]);
 
     useEffect(() => {
         // keep form in sync when `user` changes
@@ -112,7 +155,7 @@ export default function Profile() {
         <div className="flex flex-col items-center min-h-screen">
             <div className="max-w-3xl w-full mx-auto p-6">
                 <div className="flex items-center justify-between">
-                    <Link to="/" className="text-sm text-green-600 underline">← Tillbaka</Link>
+                    <Link to="/news" className="text-sm text-green-600 underline">← Tillbaka</Link>
                     {user && !isEditRoute && (
                         <Link to="/profile/edit" className="text-sm text-white bg-green-600 px-3 py-1 rounded">Edit</Link>
                     )}
@@ -120,11 +163,11 @@ export default function Profile() {
                 <h2 className="text-2xl font-bold mt-4 mb-4">Din profil</h2>
                 <form onSubmit={handleSubmit(onSave)} className="bg-white p-4 rounded shadow">
                     <div className="grid grid-cols-1 mb-4 justify-items-center">
-                        <img src={`${import.meta.env.VITE_BACKEND_URL}${user?.pictureUrl}`} alt={`${user?.pictureUrl}`} />
-                        <label className="block text-sm font-medium mb-1">Utmärkelser</label>
+                        <img className="rounded-full" src={`${import.meta.env.VITE_BACKEND_URL}${user?.pictureUrl}`} alt={`${user?.firstname} ${user?.lastname}`} />
+                        <label className="block text-sm font-medium mb-2">Utmärkelser</label>
                         <div>
                             {achievements && achievements.length > 0 ? (
-                                <select className="w-full border rounded px-3 py-2">
+                                <select className="w-full border rounded p-2 mb-4">
                                     {achievements.map((a) => (
                                         <option key={a.id} value={a.id}>
                                             {a.title} — {a.awardedAt ? new Date(a.awardedAt).toLocaleDateString() : ""}
@@ -135,30 +178,68 @@ export default function Profile() {
                                 <div className="text-sm text-gray-500">Inga utmärkelser</div>
                             )}
 
+                            <div className="mb-4 text-center">
+                                <label className="block text-sm font-medium mb-2">Loge</label>
+                                <div className="text-sm text-gray-700">{lodge?.name ?? "Ingen loge"}</div>
+                            </div>
+
                             {isEditRoute && canAward ? (
-                                <div className="mt-2">
-                                    <label className="block text-sm font-medium mb-1">Tilldela ny utmärkelse</label>
-                                    <div className="flex gap-2">
-                                        <select value={selectedAid ?? ""} onChange={(e) => setSelectedAid(e.target.value ? Number(e.target.value) : null)} className="border rounded px-3 py-2">
-                                            <option value="">Välj utmärkelse</option>
-                                            {available.map((opt) => (
-                                                <option key={opt.id} value={opt.id}>{opt.title}</option>
-                                            ))}
-                                        </select>
-                                        <input type="date" value={awardDate} onChange={(e) => setAwardDate(e.target.value)} className="border rounded px-3 py-2" />
-                                        <button type="button" className="bg-green-600 hover:bg-green-700 transition text-white px-3 py-2 rounded" disabled={!selectedAid} onClick={async () => {
-                                            if (!selectedAid || !user?.id) return;
-                                            try {
-                                                await postAchievement(user.id, { achievementId: selectedAid, awardedAt: awardDate || undefined });
-                                                await refresh();
-                                                setSelectedAid(null);
-                                                setAwardDate("");
-                                            } catch {
-                                                setGlobalError("Misslyckades att tilldela utmärkelse");
-                                            }
-                                        }}>Tilldela</button>
+                                <>
+                                    {canEditRoles ? (
+                                        <div className="mb-4">
+                                            <label className="block text-sm font-medium mb-1">Roller</label>
+                                            <div className="flex gap-2 flex-wrap">
+                                                {rolesList.map((r) => (
+                                                    <label key={r.id} className="inline-flex items-center gap-2">
+                                                        <input type="checkbox" checked={selectedRoleIds.includes(r.id)} onChange={(e) => {
+                                                            const next = e.target.checked ? [...selectedRoleIds, r.id] : selectedRoleIds.filter(id => id !== r.id);
+                                                            setSelectedRoleIds(next);
+                                                        }} />
+                                                        <span className="text-sm">{r.name}</span>
+                                                    </label>
+                                                ))}
+                                            </div>
+                                            <div className="mt-2">
+                                                <button type="button" className="bg-green-600 text-white px-3 py-1 rounded" onClick={async () => {
+                                                    if (!user?.id) return setGlobalError("Invalid target");
+                                                    clearGlobalError();
+                                                    setSaving(true);
+                                                    try {
+                                                        await setRoles(user.id, selectedRoleIds);
+                                                        await refresh();
+                                                    } catch {
+                                                        setGlobalError("Misslyckades att uppdatera roller");
+                                                    } finally {
+                                                        setSaving(false);
+                                                    }
+                                                }}>Spara roller</button>
+                                            </div>
+                                        </div>
+                                    ) : null}
+                                    <div className="mt-2">
+                                        <label className="block text-sm font-medium mb-1">Tilldela ny utmärkelse</label>
+                                        <div className="flex gap-2">
+                                            <select value={selectedAid ?? ""} onChange={(e) => setSelectedAid(e.target.value ? Number(e.target.value) : null)} className="border rounded px-3 py-2">
+                                                <option value="">Välj utmärkelse</option>
+                                                {available.map((opt) => (
+                                                    <option key={opt.id} value={opt.id}>{opt.title}</option>
+                                                ))}
+                                            </select>
+                                            <input type="date" value={awardDate} onChange={(e) => setAwardDate(e.target.value)} className="border rounded px-3 py-2" />
+                                            <button type="button" className="bg-green-600 hover:bg-green-700 transition text-white px-3 py-2 rounded" disabled={!selectedAid} onClick={async () => {
+                                                if (!selectedAid || !user?.id) return;
+                                                try {
+                                                    await postAchievement(user.id, { achievementId: selectedAid, awardedAt: awardDate || undefined });
+                                                    await refresh();
+                                                    setSelectedAid(null);
+                                                    setAwardDate("");
+                                                } catch {
+                                                    setGlobalError("Misslyckades att tilldela utmärkelse");
+                                                }
+                                            }}>Tilldela</button>
+                                        </div>
                                     </div>
-                                </div>
+                                </>
                             ) : null}
                         </div>
                     </div>
@@ -243,8 +324,7 @@ export default function Profile() {
 
                     {isEditRoute ? (
                         <div className="mb-4">
-                            <label className="block text-sm font-medium mb-1">Profilbild</label>
-
+                            <label className="block text-sm font-medium mt-1">Uppdatera Profilbild</label>
                             <input type="file" accept="image/*" onChange={(e) => setPictureFile(e.target.files ? e.target.files[0] : null)} />
 
                         </div>
@@ -261,5 +341,5 @@ export default function Profile() {
             </div>
         </div>
     );
-};
+}
 

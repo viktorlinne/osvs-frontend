@@ -7,6 +7,7 @@ export * from "./ContactPage";
 export * from "./LoginPage";
 export * from "./NewsPage";
 export * from "./NewsDetail";
+export * from "./LodgesPage";
 export { default as CreatePost } from "./CreatePost";
 export { default as Profile } from "./Profile";
 export { default as MembersPage } from "./MembersPage";

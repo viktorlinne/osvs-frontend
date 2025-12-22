@@ -15,6 +15,7 @@ import {
   MembersPage,
   MemberDetail,
   UsersCreate,
+  LodgesPage,
 } from "../pages";
 import { AppLayout } from "../app/AppLayout";
 import AuthGuard from "./AuthGuard";
@@ -122,6 +123,14 @@ const routes = [
         element: (
           <AuthGuard>
             <NewsDetail />
+          </AuthGuard>
+        ),
+      },
+      {
+        path: "lodges",
+        element: (
+          <AuthGuard>
+            <LodgesPage />
           </AuthGuard>
         ),
       },
