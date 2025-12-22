@@ -1,5 +1,5 @@
 import api, { fetchData } from "./api";
-import type { Lodge } from "../types";
+import type { Lodge } from "@osvs/types";
 
 export type UserLodgeResponse = { lodge: Lodge | null } | null;
 
@@ -26,7 +26,9 @@ export async function uploadUserPicture(id: number | string, file: File) {
   return fetchData(api.post(`/users/${id}/picture`, fd));
 }
 
-export async function getUserLodge(id: number | string): Promise<UserLodgeResponse> {
+export async function getUserLodge(
+  id: number | string
+): Promise<UserLodgeResponse> {
   return fetchData<UserLodgeResponse>(api.get(`/users/${id}/lodges`));
 }
 

@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Spinner } from "../components";
 import useFetch from "../hooks/useFetch";
-import type { PublicUser } from "../types";
+import type { PublicUser } from "@osvs/types";
 
 // Placeholder members page. Backend endpoints for listing members aren't implemented yet.
 export default function MembersPage() {

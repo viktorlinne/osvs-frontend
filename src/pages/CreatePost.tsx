@@ -4,10 +4,10 @@ import { createPost } from "../services";
 import useFetch from "../hooks/useFetch";
 import { Spinner } from "../components";
 import { useError } from "../context";
-import { createPostSchema } from "../validators/posts";
+import { createPostSchema, type CreatePostForm } from "../validators/posts";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
+
 
 export default function CreatePost() {
     const { clearError: clearGlobalError } = useError();
@@ -15,7 +15,6 @@ export default function CreatePost() {
     const navigate = useNavigate();
 
     const [picture, setPicture] = useState<File | null>(null);
-    type CreatePostForm = z.infer<typeof createPostSchema>;
     const { register, handleSubmit, formState: { errors }, setError: setFieldError } = useForm<CreatePostForm>({
         resolver: zodResolver(createPostSchema),
         defaultValues: { title: "", description: "" }
@@ -25,7 +24,7 @@ export default function CreatePost() {
         clearGlobalError();
         const fd = new FormData();
         fd.append("title", values.title.trim());
-        fd.append("description", values.description.trim());
+        fd.append("description", String(values.description ?? "").trim());
         if (picture) fd.append("picture", picture);
 
         try {

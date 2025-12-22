@@ -2,15 +2,8 @@
 import { useEffect } from "react";
 import { Spinner } from "../components";
 import useFetch from "../hooks/useFetch";
-import type { } from "../types";
+import type { Lodge } from "@osvs/types";
 import { listLodges } from "../services";
-
-type Lodge = {
-    id: number;
-    name: string;
-    description?: string;
-    address?: string;
-}
 
 export const LodgesPage = () => {
     async function fetchLodges(): Promise<Lodge[]> {

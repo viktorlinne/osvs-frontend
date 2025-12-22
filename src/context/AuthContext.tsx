@@ -1,5 +1,5 @@
 import { createContext } from "react";
-import type { AuthUser } from "../types";
+import type { AuthUser } from "@osvs/types";
 
 export type AuthContextValue = {
   user: AuthUser | null;

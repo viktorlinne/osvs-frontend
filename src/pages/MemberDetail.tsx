@@ -3,7 +3,7 @@ import { useParams, Link, useLocation } from "react-router-dom";
 import { Spinner, NotFound } from "../components";
 import useFetch from "../hooks/useFetch";
 import { useError, useAuth } from "../context";
-import type { PublicUser } from "../types";
+import type { PublicUser } from "@osvs/types";
 import { adminUpdateUser, uploadUserPicture, postAchievement, getUserLodge, setUserLodge } from "../services/users";
 import achievementsService from "../services/achievements";
 import lodgesService from "../services/lodges";
@@ -11,8 +11,7 @@ import { listRoles } from "../services/admin";
 import { setRoles } from "../services";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { updateUserSchema } from "../validators/users";
-import { z } from "zod";
+import { updateUserSchema, type UpdateUserForm } from "../validators/users";
 
 export default function MemberDetail() {
     const { id } = useParams<{ id: string }>();
@@ -38,7 +37,6 @@ export default function MemberDetail() {
     const [pictureFile, setPictureFile] = useState<File | null>(null);
     // removed duplicate useError destructure; use `setGlobalError` / `clearGlobalError`
 
-    type UpdateUserForm = z.infer<typeof updateUserSchema>;
     const { register, handleSubmit, reset, setError: setFieldError, formState: { errors } } = useForm<UpdateUserForm>({
         resolver: zodResolver(updateUserSchema),
         defaultValues: {

@@ -1,7 +1,8 @@
 import axios from "axios";
 import { NavLink, useNavigate } from "react-router";
 import { useAuth, useError } from "../context";
-import { type ApiError, isApiError } from "../types";
+import type { ApiError } from "@osvs/types";
+import { isApiError } from "../types/api";
 
 export const Navbar = () => {
   const { user, logout } = useAuth();

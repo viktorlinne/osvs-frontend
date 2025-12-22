@@ -3,19 +3,18 @@ import { useParams, Link, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../context";
 import { getPost, updatePost } from "../services";
 import { Spinner, NotFound } from "../components";
-import type { Post } from "../types";
+import type { Post } from "@osvs/types";
 import { useError } from "../context";
 import useFetch from "../hooks/useFetch";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { updatePostSchema } from "../validators/posts";
-import { z } from "zod";
+import { updatePostSchema, type UpdatePostForm } from "../validators/posts";
 
 export const NewsDetail = () => {
     const { user } = useAuth();
     const { id } = useParams<{ id: string }>();
     const { error, setError: setGlobalError, clearError: clearGlobalError } = useError();
-    const { data:post, loading, notFound, run } = useFetch<Post | null>();
+    const { data: post, loading, notFound, run } = useFetch<Post | null>();
     const { run: runSubmit, loading: submitting } = useFetch<{ success: boolean }>();
     const navigate = useNavigate();
     const location = useLocation();
@@ -25,7 +24,6 @@ export const NewsDetail = () => {
 
     const [picture, setPicture] = useState<File | null>(null);
 
-    type UpdatePostForm = z.infer<typeof updatePostSchema>;
     const { register, handleSubmit, setError: setFieldError, reset, formState: { errors } } = useForm<UpdatePostForm>({
         resolver: zodResolver(updatePostSchema),
         defaultValues: { title: "", description: "" },

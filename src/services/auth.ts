@@ -1,5 +1,5 @@
 import api, { fetchData } from "./api";
-import type { AuthUser, LoginPayload } from "../types/auth";
+import type { AuthUser, LoginPayload } from "@osvs/types";
 
 function mergeAuthResponse(res: unknown): AuthUser {
   if (res == null) return null;

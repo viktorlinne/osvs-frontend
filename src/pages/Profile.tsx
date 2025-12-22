@@ -5,11 +5,10 @@ import { postAchievement, updateMe, uploadMyPicture, getUserLodge, setRoles } fr
 import { listRoles } from "../services/admin";
 import achievementsService from "../services/achievements";
 import { Spinner } from "../components";
-import type { PublicUser, Lodge } from "../types";
+import type { PublicUser, Lodge } from "@osvs/types";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { updateUserSchema } from "../validators/users";
-import { z } from "zod";
+import { updateUserSchema, type UpdateUserForm } from "../validators/users";
 
 export default function Profile() {
     const { user, refresh } = useAuth();
@@ -29,7 +28,6 @@ export default function Profile() {
     const [selectedRoleIds, setSelectedRoleIds] = useState<number[]>([]);
     const [awardDate, setAwardDate] = useState<string>("");
 
-    type UpdateUserForm = z.infer<typeof updateUserSchema>;
     const { register, handleSubmit, reset, setError: setFieldError, formState: { errors } } = useForm<UpdateUserForm>({
         resolver: zodResolver(updateUserSchema),
         defaultValues: {

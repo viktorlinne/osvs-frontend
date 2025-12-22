@@ -2,8 +2,8 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router";
 import api, { fetchData } from "../services/api";
 import { listLodges } from "../services/lodges";
-import { registerSchema } from "../validators/users";
-import { z } from "zod";
+import { registerSchema, type RegisterForm } from "../validators/users";
+
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
@@ -14,8 +14,6 @@ export default function UsersCreate() {
     const [picture, setPicture] = useState<File | null>(null);
     const [lodges, setLodges] = useState<Array<{ id: number; name: string }>>([]);
     const [lodgesLoading, setLodgesLoading] = useState(true);
-
-    type RegisterForm = z.infer<typeof registerSchema>;
 
     const {
         register,

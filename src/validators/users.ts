@@ -59,3 +59,33 @@ export const registerSchema = z.object({
   notes: z.string().optional().nullable(),
   lodgeId: z.string().optional().nullable(),
 });
+
+export type RegisterForm = {
+  username: string;
+  email: string;
+  password: string;
+  firstname: string;
+  lastname: string;
+  dateOfBirth: string;
+  official?: string;
+  mobile: string;
+  homeNumber?: string | null;
+  city: string;
+  address: string;
+  zipcode: string;
+  notes?: string | null;
+  lodgeId?: string | null;
+};
+
+export type UpdateUserForm = {
+  firstname?: string;
+  lastname?: string;
+  dateOfBirth?: string;
+  official?: string | null;
+  homeNumber?: string | null;
+  notes?: string | null;
+  mobile?: string;
+  city?: string;
+  address?: string;
+  zipcode?: string;
+};
