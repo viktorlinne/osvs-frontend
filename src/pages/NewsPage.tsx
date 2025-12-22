@@ -36,7 +36,7 @@ export const NewsPage = () => {
         {user && (user.roles ?? []).some((r) => ["Admin", "Editor"].includes(r)) && (
           <Link
             to="/news/create"
-            className="text-white bg-green-600 px-3 py-2 rounded"
+            className="text-white bg-green-600 hover:bg-green-700 px-3 py-2 rounded"
           >
             Create Post
           </Link>

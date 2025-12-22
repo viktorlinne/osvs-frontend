@@ -8,14 +8,15 @@ import {
   LoginPage,
   NewsPage,
   NewsDetail,
-  // Create post page
   CreatePost,
-  // Members / profile
   Profile,
   MembersPage,
   MemberDetail,
   UsersCreate,
   LodgesPage,
+  EventDetail,
+  EventsPage,
+  CreateEvent,
 } from "../pages";
 import { AppLayout } from "../app/AppLayout";
 import AuthGuard from "./AuthGuard";
@@ -55,7 +56,7 @@ const routes = [
         ),
       },
       {
-        path: "news/create",
+        path: "posts/create",
         element: (
           <AuthGuard roles={["Admin", "Editor"]}>
             <CreatePost />
@@ -71,7 +72,7 @@ const routes = [
         ),
       },
       {
-        path: "users/create",
+        path: "members/create",
         element: (
           <AuthGuard roles={["Admin", "Editor"]}>
             <UsersCreate />
@@ -134,6 +135,39 @@ const routes = [
           </AuthGuard>
         ),
       },
+      {
+        path: "events",
+        element: (
+          <AuthGuard>
+            <EventsPage />
+          </AuthGuard>
+        ),
+      },
+      {
+        path: "events/:id",
+        element: (
+          <AuthGuard>
+            <EventDetail />
+          </AuthGuard>
+        ),
+      },
+      {
+        path: "events/:id/edit",
+        element: (
+          <AuthGuard roles={["Admin", "Editor"]}>
+            <EventDetail />
+          </AuthGuard>
+        ),
+      },
+      {
+        path: "events/create",
+        element: (
+          <AuthGuard roles={["Admin", "Editor"]}>
+            <CreateEvent />
+          </AuthGuard>
+        ),
+      },
+
       // 404 route
       {
         path: "*",
