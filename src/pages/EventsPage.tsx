@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { listMyEvents } from "../services";
+import { listMyEvents, listEvents } from "../services";
+import { useAuth } from "../context";
 import type { events as EventRecord, ApiError } from "@osvs/types";
 import axios from "axios";
 import { isApiError } from "../types/api";
@@ -78,13 +79,16 @@ export const EventsPage: React.FC = () => {
 
     const monthMatrix = useMemo(() => getMonthMatrix(year, month), [year, month]);
 
+    const { user } = useAuth();
+
     useEffect(() => {
         let mounted = true;
         async function fetchEvents() {
             setLoading(true);
             setError(null);
             try {
-                const res: unknown = await listMyEvents();
+                const isAdmin = Boolean(user && Array.isArray(user.roles) && user.roles.includes("Admin"));
+                const res: unknown = await (isAdmin ? listEvents() : listMyEvents());
                 if (!mounted) return;
                 const payload = res as { events?: EventRecord[] } | undefined;
                 const arr = payload?.events ?? [];
