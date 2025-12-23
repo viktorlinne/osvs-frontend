@@ -6,6 +6,7 @@ import { useError, useAuth } from "../context";
 import type { events as EventRecord, lodges as Lodge } from "@osvs/types";
 import { getEvent, updateEvent, listEventLodges, linkLodgeEvent, unlinkLodgeEvent } from "../services";
 import { listLodges } from "../services/lodges";
+import { getRsvp, setRsvp } from "../services/events";
 
 function formatDisplayDate(s?: string) {
     if (!s) return "";
@@ -36,6 +37,8 @@ export default function EventDetail() {
     const canEdit = Boolean(user && (user.roles ?? []).some((r) => ["Admin", "Editor"].includes(r)));
 
     const [saving, setSaving] = useState(false);
+    const [rsvp, setRsvpState] = useState<string | null>(null);
+    const [rsvpLoading, setRsvpLoading] = useState(false);
     const [form, setForm] = useState({
         title: "",
         description: "",
@@ -85,6 +88,18 @@ export default function EventDetail() {
                 const linkedIds = Array.isArray(linked) ? linked.map((l: Lodge) => Number(l.id)).filter((n: number) => Number.isFinite(n)) : [];
                 setSelectedLodgeIds(linkedIds);
                 setOriginalLinkedIds(linkedIds);
+                // fetch RSVP for this event
+                try {
+                    const r = await getRsvp(event.id as unknown as number);
+                    const val = (r as { rsvp?: string | null })?.rsvp ?? null;
+                    if (!mounted) return;
+                    // backend returns 'going' | 'not-going' | null; map to local values
+                    if (val === "going") setRsvpState("yes");
+                    else if (val === "not-going") setRsvpState("no");
+                    else setRsvpState(null);
+                } catch {
+                    // ignore RSVP errors
+                }
             } catch {
                 // ignore
             }
@@ -126,6 +141,23 @@ export default function EventDetail() {
             setGlobalError("Failed to save event");
         } finally {
             setSaving(false);
+        }
+    }
+
+    async function handleSetRsvp(status: string) {
+        if (!event) return;
+        if (!user) return setGlobalError("Du måste vara inloggad för att svara på inbjudningar");
+        setRsvpLoading(true);
+        clearGlobalError();
+        try {
+            // map UI statuses to backend accepted statuses
+            const apiStatus = status === "no" ? "not-going" : "going"; // treat 'yes' as 'going'
+            await setRsvp(event.id as unknown as number, apiStatus);
+            setRsvpState(status);
+        } catch {
+            setGlobalError("Det gick inte att uppdatera ditt svar");
+        } finally {
+            setRsvpLoading(false);
         }
     }
 
@@ -215,6 +247,26 @@ export default function EventDetail() {
                                 ) : (
                                     <div className="text-sm text-gray-500 mt-1">Inga kopplade loger</div>
                                 )}
+                            </div>
+                            <div className="mb-2"><strong>Deltagande (RSVP):</strong>
+                                <div className="mt-2 flex items-center gap-2">
+                                    {!user && <div className="text-sm text-gray-500">Logga in för att svara</div>}
+                                    {user && (
+                                        <>
+                                            <button
+                                                className={`px-3 py-1 rounded ${rsvp === "yes" ? "bg-green-600 text-white" : "bg-gray-100"}`}
+                                                onClick={() => void handleSetRsvp("yes")}
+                                                disabled={rsvpLoading}
+                                            >Ja</button>
+                                            <button
+                                                className={`px-3 py-1 rounded ${rsvp === "no" ? "bg-red-600 text-white" : "bg-gray-100"}`}
+                                                onClick={() => void handleSetRsvp("no")}
+                                                disabled={rsvpLoading}
+                                            >Nej</button>
+                                            {rsvpLoading && <div className="text-sm text-gray-500 ml-2">Uppdaterar…</div>}
+                                        </>
+                                    )}
+                                </div>
                             </div>
                         </div>
                     )}
