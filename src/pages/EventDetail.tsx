@@ -105,7 +105,15 @@ export default function EventDetail() {
                 try {
                     if (user && Array.isArray(user.roles) && user.roles.includes("Admin")) {
                         const s = await getEventStats(event.id as unknown as number);
-                        const st = (s as { stats?: { invited: number; answered: number; going: number } })?.stats ?? s ?? null;
+                        // getEventStats may return either { stats: { ... } } or the stats object directly; handle both explicitly
+                        type Stats = { invited: number; answered: number; going: number };
+                        const response = s as { stats?: Stats } | Stats | null | undefined;
+                        let st: Stats | null = null;
+                        if (response && "stats" in response && response.stats) {
+                            st = response.stats;
+                        } else if (response && "invited" in response && "answered" in response && "going" in response) {
+                            st = response as Stats;
+                        }
                         if (mounted && st) setStats(st as { invited: number; answered: number; going: number });
                     }
                 } catch {
@@ -160,6 +168,12 @@ export default function EventDetail() {
         if (!user) return setGlobalError("Du måste vara inloggad för att svara på inbjudningar");
         setRsvpLoading(true);
         clearGlobalError();
+        // validate that status is one of the expected values before mapping
+        if (status !== "yes" && status !== "no") {
+            setGlobalError("Ogiltigt svar");
+            setRsvpLoading(false);
+            return;
+        }
         try {
             // map UI statuses to backend accepted statuses
             const apiStatus: "going" | "not-going" = status === "no" ? "not-going" : "going"; // treat 'yes' as 'going'
