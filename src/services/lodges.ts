@@ -1,5 +1,9 @@
 import api, { fetchData } from "./api";
-import type { Lodge } from "@osvs/types";
+import type {
+  Lodge,
+  CreateLodgePayload,
+  UpdateLodgePayload,
+} from "@osvs/types";
 
 export async function listLodges() {
   const data = (await fetchData(api.get("/lodges"))) as unknown;
@@ -13,13 +17,13 @@ export async function listLodges() {
   return [] as Lodge[];
 }
 
-export async function createLodge(payload: Record<string, unknown>) {
+export async function createLodge(payload: CreateLodgePayload) {
   return fetchData(api.post("/lodges", payload));
 }
 
 export async function updateLodge(
   id: number | string,
-  payload: Record<string, unknown>
+  payload: UpdateLodgePayload
 ) {
   return fetchData(api.put(`/lodges/${id}`, payload));
 }

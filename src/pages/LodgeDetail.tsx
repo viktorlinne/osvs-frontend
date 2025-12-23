@@ -39,7 +39,7 @@ export const LodgeDetail = () => {
     clearGlobalError();
     setSaving(true);
     try {
-      const payload: Record<string, unknown> = {
+      const payload = {
         name: form.name,
         description: form.description || null,
         address: form.address || null,
