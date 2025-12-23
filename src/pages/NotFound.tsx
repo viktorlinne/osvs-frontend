@@ -5,7 +5,7 @@ export const NotFound = () => {
       <p className="mb-4">Page Not Found</p>
       <a
         href="/"
-        className="p-2 rounded bg-green-600 hover:bg-green-700 text-white transition"
+        className="p-2 rounded bg-green-600 hover:bg-green-700 transition text-white transition"
       >
         Go to Home
       </a>

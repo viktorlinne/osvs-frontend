@@ -24,4 +24,8 @@ export async function updateLodge(
   return fetchData(api.put(`/lodges/${id}`, payload));
 }
 
+export async function getLodge(id: number | string) {
+  return fetchData<{ lodge?: Lodge }>(api.get(`/lodges/${id}`));
+}
+
 export default { listLodges, createLodge, updateLodge };

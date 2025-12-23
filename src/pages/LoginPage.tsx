@@ -55,7 +55,7 @@ export const LoginPage = () => {
         </label>
         <button
           type="submit"
-          className="px-4 py-2 rounded bg-green-600 hover:bg-green-700 text-white "
+          className="px-4 py-2 rounded bg-green-600 hover:bg-green-700 transition text-white "
           disabled={loading}
         >
           {loading ? "Loggar in..." : "Logga in"}

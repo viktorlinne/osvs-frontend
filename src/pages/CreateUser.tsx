@@ -172,7 +172,7 @@ export default function UsersCreate() {
                     <input type="file" accept="image/*" onChange={(e) => setPicture(e.target.files?.[0] ?? null)} className="w-full p-2" />
                 </label>
                 <div>
-                    <button type="button" onClick={handleSubmit(onSubmit)} disabled={loading} className="p-2 bg-green-600 hover:bg-green-700 transition text-white rounded">
+                    <button type="button" onClick={handleSubmit(onSubmit)} disabled={loading} className="p-2 bg-green-600 hover:bg-green-700 transition transition text-white rounded">
                         {loading ? "Skapar..." : "Skapa användare"}
                     </button>
                 </div>

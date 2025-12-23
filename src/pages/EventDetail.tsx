@@ -194,7 +194,7 @@ export default function EventDetail() {
             <div className="flex items-center justify-between">
                 <Link to="/events" className="text-sm text-green-600 underline">← Tillbaka till möten</Link>
                 {canEdit && !isEditRoute && (
-                    <Link to={`/events/${id}/edit`} className="text-sm text-white bg-green-600 hover:bg-green-700 hover:bg-green-700 px-3 py-1 rounded">Edit</Link>
+                    <Link to={`/events/${id}/edit`} className="text-sm text-white bg-green-600 hover:bg-green-700 transition hover:bg-green-700 px-3 py-1 rounded">Edit</Link>
                 )}
             </div>
 
@@ -248,7 +248,7 @@ export default function EventDetail() {
                                 </div>
                             </div>
                             <div className="flex gap-2">
-                                <button className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded" onClick={handleSave} disabled={saving}>{saving ? "Sparar…" : "Spara"}</button>
+                                <button className="bg-green-600 hover:bg-green-700 transition text-white px-4 py-2 rounded" onClick={handleSave} disabled={saving}>{saving ? "Sparar…" : "Spara"}</button>
                                 <Link to={`/events/${id}`} className="px-4 py-2 rounded border">Avbryt</Link>
                             </div>
                         </div>

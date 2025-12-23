@@ -8,6 +8,7 @@ export * from "./LoginPage";
 export * from "./NewsPage";
 export * from "./NewsDetail";
 export * from "./LodgesPage";
+export *from "./LodgeDetail";
 export * from "./EventsPage";
 export * from "./CreateEvent";
 export { default as EventDetail } from "./EventDetail";

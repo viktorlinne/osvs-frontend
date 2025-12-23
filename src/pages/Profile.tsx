@@ -155,7 +155,7 @@ export default function Profile() {
                 <div className="flex items-center justify-between">
                     <Link to="/news" className="text-sm text-green-600 underline">← Tillbaka</Link>
                     {user && !isEditRoute && (
-                        <Link to="/profile/edit" className="text-sm text-white bg-green-600 hover:bg-green-700 px-3 py-1 rounded">Edit</Link>
+                        <Link to="/profile/edit" className="text-sm text-white bg-green-600 hover:bg-green-700 transition px-3 py-1 rounded">Edit</Link>
                     )}
                 </div>
                 <h2 className="text-2xl font-bold mt-4 mb-4">Din profil</h2>
@@ -198,7 +198,7 @@ export default function Profile() {
                                                 ))}
                                             </div>
                                             <div className="mt-2">
-                                                <button type="button" className="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded" onClick={async () => {
+                                                <button type="button" className="bg-green-600 hover:bg-green-700 transition text-white px-3 py-1 rounded" onClick={async () => {
                                                     if (!user?.id) return setGlobalError("Invalid target");
                                                     clearGlobalError();
                                                     setSaving(true);
@@ -224,7 +224,7 @@ export default function Profile() {
                                                 ))}
                                             </select>
                                             <input type="date" value={awardDate} onChange={(e) => setAwardDate(e.target.value)} className="border rounded px-3 py-2" />
-                                            <button type="button" className="bg-green-600 hover:bg-green-700 transition text-white px-3 py-2 rounded" disabled={!selectedAid} onClick={async () => {
+                                            <button type="button" className="bg-green-600 hover:bg-green-700 transition transition text-white px-3 py-2 rounded" disabled={!selectedAid} onClick={async () => {
                                                 if (!selectedAid || !user?.id) return;
                                                 try {
                                                     await postAchievement(user.id, { achievementId: selectedAid, awardedAt: awardDate || undefined });
@@ -329,7 +329,7 @@ export default function Profile() {
                     ) : null}
                     {isEditRoute ? (
                         <div className="flex items-center gap-2">
-                            <button type="submit" className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded" disabled={saving}>
+                            <button type="submit" className="bg-green-600 hover:bg-green-700 transition text-white px-4 py-2 rounded" disabled={saving}>
                                 Spara
                             </button>
                             {saving && <Spinner />}

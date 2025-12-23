@@ -30,25 +30,25 @@ export const Navbar = () => {
   return (
     <nav className="flex gap-4 p-4 bg-gray-100 items-center">
       <NavLink
-        className="p-2 rounded bg-green-600 hover:bg-green-700 transition text-white"
+        className="p-2 rounded bg-green-600 hover:bg-green-700 transition transition text-white"
         to="/"
       >
         Hem
       </NavLink>
       <NavLink
-        className="p-2 rounded bg-green-600 hover:bg-green-700 transition text-white"
+        className="p-2 rounded bg-green-600 hover:bg-green-700 transition transition text-white"
         to="/about"
       >
         Om VS
       </NavLink>
       <NavLink
-        className="p-2 rounded bg-green-600 hover:bg-green-700 transition text-white"
+        className="p-2 rounded bg-green-600 hover:bg-green-700 transition transition text-white"
         to="/gdpr"
       >
         GDPR
       </NavLink>
       <NavLink
-        className="p-2 rounded bg-green-600 hover:bg-green-700 transition text-white"
+        className="p-2 rounded bg-green-600 hover:bg-green-700 transition transition text-white"
         to="/contact"
       >
         Kontakt
@@ -56,7 +56,7 @@ export const Navbar = () => {
 
       {!user ? (
         <NavLink
-          className="p-2 rounded bg-green-600 hover:bg-green-700 transition text-white ml-auto"
+          className="p-2 rounded bg-green-600 hover:bg-green-700 transition transition text-white ml-auto"
           to="/login"
         >
           Logga In
@@ -64,7 +64,7 @@ export const Navbar = () => {
       ) : (
         <div className="ml-auto flex items-center gap-2">
           <NavLink to="/profile">
-            {user.firstname ? <span className="p-2 rounded bg-green-600 hover:bg-green-700 transition text-white">{user.firstname}</span> : null}
+            {user.firstname ? <span className="p-2 rounded bg-green-600 hover:bg-green-700 transition transition text-white">{user.firstname}</span> : null}
           </NavLink>
           <button
             onClick={handleLogout}

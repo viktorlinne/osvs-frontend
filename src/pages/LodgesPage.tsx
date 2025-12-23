@@ -1,9 +1,9 @@
-// ...existing code...
 import { useEffect } from "react";
 import { Spinner } from "../components";
 import useFetch from "../hooks/useFetch";
 import type { Lodge } from "@osvs/types";
 import { listLodges } from "../services";
+import { Link } from "react-router-dom";
 
 export const LodgesPage = () => {
     async function fetchLodges(): Promise<Lodge[]> {
@@ -25,11 +25,11 @@ export const LodgesPage = () => {
                 {Array.isArray(lodges) && (
                     <div className="grid gap-4">
                         {lodges.map((lodge: Lodge) => (
-                            <div key={lodge.id} className="block p-3 bg-white rounded shadow">
+                            <Link to={`/lodges/${lodge.id}`} key={lodge.id} className="block p-3 bg-white rounded shadow">
                                 <div className="font-semibold">{lodge.name}</div>
                                 {lodge.description && <div className="text-sm text-gray-500">{lodge.description}</div>}
-                                {lodge.address && <div className="text-sm text-gray-500">{lodge.description}</div>}
-                            </div>
+                                {lodge.address && <div className="text-sm text-gray-500">{lodge.address}</div>}
+                            </Link >
                         ))}
                     </div>
                 )}

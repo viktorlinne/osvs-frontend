@@ -14,6 +14,7 @@ import {
   MemberDetail,
   UsersCreate,
   LodgesPage,
+  LodgeDetail,
   EventDetail,
   EventsPage,
   CreateEvent,
@@ -132,6 +133,22 @@ const routes = [
         element: (
           <AuthGuard>
             <LodgesPage />
+          </AuthGuard>
+        ),
+      },
+      {
+        path: "lodges/:id",
+        element: (
+          <AuthGuard>
+            <LodgeDetail />
+          </AuthGuard>
+        ),
+      },
+      {
+        path: "lodges/:id/edit",
+        element: (
+          <AuthGuard roles={["Admin", "Editor"]}>
+            <LodgeDetail />
           </AuthGuard>
         ),
       },

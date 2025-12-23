@@ -106,7 +106,7 @@ export const NewsDetail = () => {
                     {canEdit && post && !isEditRoute && (
                         <Link
                             to={`/news/${post.id}/edit`}
-                            className="text-sm text-white bg-green-600 hover:bg-green-700 px-3 py-1 rounded"
+                            className="text-sm text-white bg-green-600 hover:bg-green-700 transition px-3 py-1 rounded"
                         >
                             Edit
                         </Link>
@@ -170,7 +170,7 @@ export const NewsDetail = () => {
                         <div className="flex items-center gap-2">
                             <button
                                 type="submit"
-                                className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded disabled:opacity-60"
+                                className="bg-green-600 hover:bg-green-700 transition text-white px-4 py-2 rounded disabled:opacity-60"
                                 disabled={submitting}
                             >
                                 Spara
