@@ -122,7 +122,7 @@ export const EventsPage: React.FC = () => {
         return () => {
             mounted = false;
         };
-    }, []);
+    }, [user]);
 
     function prevMonth() {
         setViewDate((d) => new Date(d.getFullYear(), d.getMonth() - 1, 1));

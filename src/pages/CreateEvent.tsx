@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useError, useAuth } from "../context";
 import { createEvent as createEventSvc, linkLodgeEvent } from "../services";
+import type { CreateEventPayload } from "@osvs/types";
 import { listLodges } from "../services/lodges";
 import type { Lodge } from "@osvs/types";
 
@@ -48,7 +49,7 @@ export const CreateEvent = () => {
         if (!form.endDate) return setGlobalError("Slutdatum är obligatoriskt");
         setSaving(true);
         try {
-            const payload: Record<string, unknown> = {
+            const payload: CreateEventPayload = {
                 title: form.title,
                 description: form.description || null,
                 startDate: form.startDate || null,

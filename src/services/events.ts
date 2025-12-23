@@ -1,5 +1,11 @@
 import api, { fetchData } from "./api";
-import type { events as EventRecord, lodges as Lodge } from "@osvs/types";
+import type {
+  events as EventRecord,
+  lodges as Lodge,
+  CreateEventPayload,
+  UpdateEventPayload,
+  RsvpApiStatus,
+} from "@osvs/types";
 
 export async function listEvents(): Promise<{ events: EventRecord[] }> {
   return fetchData<{ events: EventRecord[] }>(api.get("/events"));
@@ -16,7 +22,7 @@ export async function listMyEvents(): Promise<{ events: EventRecord[] }> {
 }
 
 export async function createEvent(
-  payload: Record<string, unknown>
+  payload: CreateEventPayload
 ): Promise<{ success?: boolean; id?: number } | unknown> {
   return fetchData<{ success?: boolean; id?: number }>(
     api.post(`/events`, payload)
@@ -25,7 +31,7 @@ export async function createEvent(
 
 export async function updateEvent(
   id: number | string,
-  payload: Record<string, unknown>
+  payload: UpdateEventPayload
 ): Promise<{ success?: boolean } | unknown> {
   return fetchData<{ success?: boolean }>(api.put(`/events/${id}`, payload));
 }
@@ -64,7 +70,7 @@ export async function listEventLodges(
 
 export async function setRsvp(
   eventId: number | string,
-  status: string
+  status: RsvpApiStatus
 ): Promise<{ success?: boolean; status?: string } | unknown> {
   return fetchData<{ success?: boolean; status?: string }>(
     api.post(`/events/${eventId}/rsvp`, { status })
@@ -75,6 +81,16 @@ export async function getRsvp(
   eventId: number | string
 ): Promise<{ rsvp: string | null } | unknown> {
   return fetchData<{ rsvp: string | null }>(api.get(`/events/${eventId}/rsvp`));
+}
+
+export async function getEventStats(
+  eventId: number | string
+): Promise<
+  { stats: { invited: number; answered: number; going: number } } | unknown
+> {
+  return fetchData<{
+    stats: { invited: number; answered: number; going: number };
+  }>(api.get(`/events/${eventId}/stats`));
 }
 
 export default {
@@ -89,4 +105,5 @@ export default {
   listEventLodges,
   setRsvp,
   getRsvp,
+  getEventStats,
 };

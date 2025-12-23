@@ -6,7 +6,7 @@ import { useError, useAuth } from "../context";
 import type { events as EventRecord, lodges as Lodge } from "@osvs/types";
 import { getEvent, updateEvent, listEventLodges, linkLodgeEvent, unlinkLodgeEvent } from "../services";
 import { listLodges } from "../services/lodges";
-import { getRsvp, setRsvp } from "../services/events";
+import { getRsvp, setRsvp, getEventStats } from "../services/events";
 
 function formatDisplayDate(s?: string) {
     if (!s) return "";
@@ -39,6 +39,7 @@ export default function EventDetail() {
     const [saving, setSaving] = useState(false);
     const [rsvp, setRsvpState] = useState<string | null>(null);
     const [rsvpLoading, setRsvpLoading] = useState(false);
+    const [stats, setStats] = useState<{ invited: number; answered: number; going: number } | null>(null);
     const [form, setForm] = useState({
         title: "",
         description: "",
@@ -100,12 +101,22 @@ export default function EventDetail() {
                 } catch {
                     // ignore RSVP errors
                 }
+                // fetch admin stats
+                try {
+                    if (user && Array.isArray(user.roles) && user.roles.includes("Admin")) {
+                        const s = await getEventStats(event.id as unknown as number);
+                        const st = (s as { stats?: { invited: number; answered: number; going: number } })?.stats ?? s ?? null;
+                        if (mounted && st) setStats(st as { invited: number; answered: number; going: number });
+                    }
+                } catch {
+                    // ignore stats errors
+                }
             } catch {
                 // ignore
             }
         })();
         return () => { mounted = false; };
-    }, [event]);
+    }, [event, user]);
 
     async function handleSave() {
         if (!id) return setGlobalError("Missing event id");
@@ -151,7 +162,7 @@ export default function EventDetail() {
         clearGlobalError();
         try {
             // map UI statuses to backend accepted statuses
-            const apiStatus = status === "no" ? "not-going" : "going"; // treat 'yes' as 'going'
+            const apiStatus: "going" | "not-going" = status === "no" ? "not-going" : "going"; // treat 'yes' as 'going'
             await setRsvp(event.id as unknown as number, apiStatus);
             setRsvpState(status);
         } catch {
@@ -248,7 +259,7 @@ export default function EventDetail() {
                                     <div className="text-sm text-gray-500 mt-1">Inga kopplade loger</div>
                                 )}
                             </div>
-                            <div className="mb-2"><strong>Deltagande (RSVP):</strong>
+                            <div className="mb-2"><strong>Mitt Deltagande (RSVP):</strong>
                                 <div className="mt-2 flex items-center gap-2">
                                     {!user && <div className="text-sm text-gray-500">Logga in för att svara</div>}
                                     {user && (
@@ -268,6 +279,15 @@ export default function EventDetail() {
                                     )}
                                 </div>
                             </div>
+                            {user && Array.isArray(user.roles) && user.roles.includes("Admin") && stats && (
+                                <div className="mb-2"><strong>Totalt Deltagande:</strong>
+                                    <div className="mt-1 text-sm text-gray-700">
+                                        <div>Inbjudna: {stats.invited}</div>
+                                        <div>Svarat: {stats.answered}</div>
+                                        <div>Kommer: {stats.going}</div>
+                                    </div>
+                                </div>
+                            )}
                         </div>
                     )}
                 </div>
