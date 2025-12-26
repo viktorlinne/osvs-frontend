@@ -35,7 +35,7 @@ export const NewsPage = () => {
         <h2 className="text-3xl font-bold">Nyheter</h2>
         {user && (user.roles ?? []).some((r) => ["Admin", "Editor"].includes(r)) && (
           <Link
-            to="/news/create"
+            to="/posts/create"
             className="text-white bg-green-600 hover:bg-green-700 transition px-3 py-2 rounded"
           >
             Create Post
