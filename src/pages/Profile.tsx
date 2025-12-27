@@ -5,10 +5,9 @@ import { postAchievement, updateMe, uploadMyPicture, getUserLodge, setRoles } fr
 import { listRoles } from "../services/admin";
 import achievementsService from "../services/achievements";
 import { Spinner } from "../components";
-import type { PublicUser, Lodge, Achievement, Role } from "@osvs/types";
+import type { PublicUser, Lodge, Achievement, Role } from "../types";
 import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { updateUserSchema, type UpdateUserForm } from "../validators/users";
+import type { UpdateUserForm } from "../types";
 
 export default function Profile() {
     const { user, refresh } = useAuth();
@@ -29,7 +28,7 @@ export default function Profile() {
     const [awardDate, setAwardDate] = useState<string>("");
 
     const { register, handleSubmit, reset, setError: setFieldError, formState: { errors } } = useForm<UpdateUserForm>({
-        resolver: zodResolver(updateUserSchema),
+        // runtime validation removed; relying on TypeScript types and controller-side checks
         defaultValues: {
             firstname: user?.firstname ?? "",
             lastname: user?.lastname ?? "",

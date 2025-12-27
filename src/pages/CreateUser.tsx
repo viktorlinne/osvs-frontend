@@ -2,11 +2,9 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router";
 import api, { fetchData } from "../services/api";
 import { listLodges } from "../services/lodges";
-import { registerSchema, type RegisterForm } from "../validators/users";
-import type { Lodge } from "@osvs/types";
+import type { RegisterForm, Lodge } from "../types";
 
 import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
 
 export default function UsersCreate() {
     const navigate = useNavigate();
@@ -22,7 +20,6 @@ export default function UsersCreate() {
         setError: setFieldError,
         formState: { errors },
     } = useForm<RegisterForm>({
-        resolver: zodResolver(registerSchema),
         defaultValues: {
             username: "",
             email: "",

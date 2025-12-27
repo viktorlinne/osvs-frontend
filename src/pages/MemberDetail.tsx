@@ -3,15 +3,14 @@ import { useParams, Link, useLocation } from "react-router-dom";
 import { Spinner, NotFound } from "../components";
 import useFetch from "../hooks/useFetch";
 import { useError, useAuth } from "../context";
-import type { PublicUser, Achievement, Lodge, Role } from "@osvs/types";
+import type { PublicUser, Achievement, Lodge, Role } from "../types";
 import { adminUpdateUser, uploadUserPicture, postAchievement, getUserLodge, setUserLodge } from "../services/users";
 import achievementsService from "../services/achievements";
 import lodgesService from "../services/lodges";
 import { listRoles } from "../services/admin";
 import { setRoles } from "../services";
 import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { updateUserSchema, type UpdateUserForm } from "../validators/users";
+import type { UpdateUserForm } from "../types";
 
 export default function MemberDetail() {
     const { id } = useParams<{ id: string }>();
@@ -38,7 +37,6 @@ export default function MemberDetail() {
     // removed duplicate useError destructure; use `setGlobalError` / `clearGlobalError`
 
     const { register, handleSubmit, reset, setError: setFieldError, formState: { errors } } = useForm<UpdateUserForm>({
-        resolver: zodResolver(updateUserSchema),
         defaultValues: {
             firstname: "",
             lastname: "",

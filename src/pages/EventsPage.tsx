@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { listMyEvents, listEvents } from "../services";
 import { useAuth } from "../context";
-import type { events as EventRecord, ApiError } from "@osvs/types";
+import type { Event as EventRecord, ApiError } from "../types";
 import axios from "axios";
 import { isApiError } from "../types/api";
 import { Link } from "react-router-dom";

@@ -2,7 +2,7 @@ import { useEffect, useState, useCallback } from "react";
 import { Link } from "react-router-dom";
 import { Spinner } from "../components";
 import useFetch from "../hooks/useFetch";
-import type { PublicUser } from "@osvs/types";
+import type { PublicUser } from "../types";
 import { listAchievements } from "../services/achievements";
 import { listLodges } from "../services/lodges";
 

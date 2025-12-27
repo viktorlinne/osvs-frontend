@@ -1,11 +1,11 @@
 import api, { fetchData } from "./api";
 import type {
-  events as EventRecord,
-  lodges as Lodge,
-  CreateEventPayload,
-  UpdateEventPayload,
+  Event as EventRecord,
+  Lodge,
+  CreateEventBody,
+  UpdateEventBody,
   RsvpApiStatus,
-} from "@osvs/types";
+} from "../types";
 
 export async function listEvents(): Promise<{ events: EventRecord[] }> {
   return fetchData<{ events: EventRecord[] }>(api.get("/events"));
@@ -22,7 +22,7 @@ export async function listMyEvents(): Promise<{ events: EventRecord[] }> {
 }
 
 export async function createEvent(
-  payload: CreateEventPayload
+  payload: CreateEventBody
 ): Promise<{ success?: boolean; id?: number } | unknown> {
   return fetchData<{ success?: boolean; id?: number }>(
     api.post(`/events`, payload)
@@ -31,7 +31,7 @@ export async function createEvent(
 
 export async function updateEvent(
   id: number | string,
-  payload: UpdateEventPayload
+  payload: UpdateEventBody
 ): Promise<{ success?: boolean } | unknown> {
   return fetchData<{ success?: boolean }>(api.put(`/events/${id}`, payload));
 }

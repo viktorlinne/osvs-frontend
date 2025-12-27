@@ -3,7 +3,7 @@ import { useParams, Link, useLocation, useNavigate } from "react-router-dom";
 import { Spinner, NotFound } from "../components";
 import useFetch from "../hooks/useFetch";
 import { useError, useAuth } from "../context";
-import type { events as EventRecord, lodges as Lodge } from "@osvs/types";
+import type { Event as EventRecord, Lodge } from "../types";
 import { getEvent, updateEvent, listEventLodges, linkLodgeEvent, unlinkLodgeEvent } from "../services";
 import { createEventPayment } from "../services/stripe";
 import { loadStripe } from "@stripe/stripe-js";

@@ -4,9 +4,8 @@ import { createPost } from "../services";
 import useFetch from "../hooks/useFetch";
 import { Spinner } from "../components";
 import { useError } from "../context";
-import { createPostSchema, type CreatePostForm } from "../validators/posts";
+import type { CreatePostForm } from "../types";
 import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
 
 
 export default function CreatePost() {
@@ -16,7 +15,6 @@ export default function CreatePost() {
 
     const [picture, setPicture] = useState<File | null>(null);
     const { register, handleSubmit, formState: { errors }, setError: setFieldError } = useForm<CreatePostForm>({
-        resolver: zodResolver(createPostSchema),
         defaultValues: { title: "", description: "" }
     });
 

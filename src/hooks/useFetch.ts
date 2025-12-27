@@ -1,7 +1,7 @@
 import { useCallback, useState } from "react";
 import axios from "axios";
 import { useError } from "../context";
-import type { ApiError } from "@osvs/types";
+import type { ApiError } from "../types";
 import { isApiError } from "../types/api";
 
 export default function useFetch<T>() {

@@ -3,7 +3,7 @@ import { useParams, Link, useLocation, useNavigate } from "react-router-dom";
 import { Spinner, NotFound } from "../components";
 import useFetch from "../hooks/useFetch";
 import { useError, useAuth } from "../context";
-import type { Lodge } from "@osvs/types";
+import type { Lodge } from "../types";
 import { getLodge, updateLodge } from "../services/lodges";
 
 export const LodgeDetail = () => {

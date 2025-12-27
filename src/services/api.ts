@@ -4,7 +4,7 @@ import axios, {
   type AxiosResponse,
 } from "axios";
 import { reportGlobalError } from "./globalError";
-import type { ApiError } from "@osvs/types";
+import type { ApiError } from "../types";
 
 const BASE_URL = `${import.meta.env.VITE_BACKEND_URL}/api`;
 

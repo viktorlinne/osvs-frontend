@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { Spinner } from "../components";
 import useFetch from "../hooks/useFetch";
-import type { Lodge } from "@osvs/types";
+import type { Lodge } from "../types";
 import { listLodges } from "../services";
 import { Link } from "react-router-dom";
 

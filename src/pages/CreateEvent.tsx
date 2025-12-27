@@ -2,9 +2,8 @@ import { useEffect, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useError, useAuth } from "../context";
 import { createEvent as createEventSvc, linkLodgeEvent } from "../services";
-import type { CreateEventPayload } from "@osvs/types";
+import type { CreateEventPayload, Lodge } from "../types";
 import { listLodges } from "../services/lodges";
-import type { Lodge } from "@osvs/types";
 
 
 export const CreateEvent = () => {

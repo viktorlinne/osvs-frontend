@@ -1,5 +1,5 @@
 import api, { fetchData } from "./api";
-import type { Lodge } from "@osvs/types";
+import type { Lodge } from "../types";
 
 export type UserLodgeResponse = { lodge: Lodge | null } | null;
 

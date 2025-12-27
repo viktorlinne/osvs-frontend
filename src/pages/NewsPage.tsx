@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { useAuth } from "../context";
 import { listPosts } from "../services";
 import { Spinner, NotFound } from "../components";
-import type { Post } from "@osvs/types";
+import type { Post } from "../types";
 import { useError } from "../context";
 import useFetch from "../hooks/useFetch";
 

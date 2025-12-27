@@ -3,12 +3,11 @@ import { useParams, Link, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../context";
 import { getPost, updatePost } from "../services";
 import { Spinner, NotFound } from "../components";
-import type { Post } from "@osvs/types";
+import type { Post } from "../types";
 import { useError } from "../context";
 import useFetch from "../hooks/useFetch";
 import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { updatePostSchema, type UpdatePostForm } from "../validators/posts";
+import type { UpdatePostForm } from "../types";
 
 export const NewsDetail = () => {
     const { user } = useAuth();
@@ -25,7 +24,6 @@ export const NewsDetail = () => {
     const [picture, setPicture] = useState<File | null>(null);
 
     const { register, handleSubmit, setError: setFieldError, reset, formState: { errors } } = useForm<UpdatePostForm>({
-        resolver: zodResolver(updatePostSchema),
         defaultValues: { title: "", description: "" },
     });
 

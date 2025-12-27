@@ -1,5 +1,5 @@
 import api, { fetchData } from "./api";
-import type { Post } from "@osvs/types";
+import type { Post } from "../types";
 
 function normalizePost(raw: Post): Post | null {
   const id = Number(raw?.id);

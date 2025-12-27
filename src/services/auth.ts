@@ -1,7 +1,7 @@
 import api, { fetchData } from "./api";
-import type { AuthUser, LoginPayload } from "@osvs/types";
+import type { AuthUser, LoginPayload } from "../types";
 
-function mergeAuthResponse(res: unknown): AuthUser {
+function mergeAuthResponse(res: unknown): AuthUser | null {
   if (res == null) return null;
   if (typeof res !== "object") return null;
   const rec = res as Record<string, unknown>;
@@ -42,7 +42,7 @@ function mergeAuthResponse(res: unknown): AuthUser {
 export async function login({
   email,
   password,
-}: LoginPayload): Promise<AuthUser> {
+}: LoginPayload): Promise<AuthUser | null> {
   await fetchData(api.post<LoginPayload>("/auth/login", { email, password }));
   const res = await fetchData(api.get("/auth/me"));
   return mergeAuthResponse(res);
@@ -52,7 +52,7 @@ export async function logout(): Promise<void> {
   await fetchData(api.post<void>("/auth/logout"));
 }
 
-export async function me(): Promise<AuthUser> {
+export async function me(): Promise<AuthUser | null> {
   const res = await fetchData(api.get("/auth/me"));
   return mergeAuthResponse(res);
 }

@@ -1,5 +1,5 @@
 import api, { fetchData } from "./api";
-import type { Achievement } from "@osvs/types";
+import type { Achievement } from "../types";
 
 export async function listAchievements() {
   const res = await fetchData(api.get("/achievements"));
