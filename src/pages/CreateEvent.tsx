@@ -148,7 +148,7 @@ export const CreateEvent = () => {
 
                 <div className="flex gap-2">
                     <button type="submit" className="bg-green-600 text-white px-4 py-2 rounded" disabled={saving}>{saving ? "Skapar…" : "Skapa"}</button>
-                    <Link to="/events" className="px-4 py-2 rounded border">Avbryt</Link>
+                    <Link to="/events" className="bg-gray-100 hover:bg-gray-200 transition px-4 py-2 rounded border">Avbryt</Link>
                 </div>
             </form>
         </div>

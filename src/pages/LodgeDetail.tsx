@@ -25,7 +25,7 @@ export const LodgeDetail = () => {
       const resp = await getLodge(id);
       const l = (resp as { lodge?: Lodge })?.lodge ?? null;
       return l as Lodge | null;
-    }).catch(() => {});
+    }).catch(() => { });
   }, [id, run, setGlobalError]);
 
   useEffect(() => {
@@ -42,7 +42,7 @@ export const LodgeDetail = () => {
       const payload = {
         name: form.name,
         description: form.description || null,
-        address: form.address || null,
+        address: form.address || undefined,
       };
       await updateLodge(id, payload);
       await run(async () => {
@@ -90,7 +90,7 @@ export const LodgeDetail = () => {
               </div>
               <div className="flex gap-2">
                 <button className="bg-green-600 hover:bg-green-700 transition text-white px-4 py-2 rounded" onClick={handleSave} disabled={saving}>{saving ? "Sparar…" : "Spara"}</button>
-                <Link to={`/lodges/${id}`} className="px-4 py-2 rounded border">Avbryt</Link>
+                <Link to={`/lodges/${id}`} className="bg-gray-100 hover:bg-gray-200 transition px-4 py-2 rounded border">Avbryt</Link>
               </div>
             </div>
           ) : (

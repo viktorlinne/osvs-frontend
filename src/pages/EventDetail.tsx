@@ -5,6 +5,10 @@ import useFetch from "../hooks/useFetch";
 import { useError, useAuth } from "../context";
 import type { events as EventRecord, lodges as Lodge } from "@osvs/types";
 import { getEvent, updateEvent, listEventLodges, linkLodgeEvent, unlinkLodgeEvent } from "../services";
+import { createEventPayment } from "../services/stripe";
+import { loadStripe } from "@stripe/stripe-js";
+import { Elements } from "@stripe/react-stripe-js";
+import StripeForm from "../components/StripeForm";
 import { listLodges } from "../services/lodges";
 import { getRsvp, setRsvp, getEventStats } from "../services/events";
 
@@ -51,6 +55,24 @@ export default function EventDetail() {
     const [lodges, setLodges] = useState<Array<{ id: number; name: string }>>([]);
     const [selectedLodgeIds, setSelectedLodgeIds] = useState<number[]>([]);
     const [originalLinkedIds, setOriginalLinkedIds] = useState<number[]>([]);
+    const [showCheckout, setShowCheckout] = useState(false);
+    const [checkoutLoading, setCheckoutLoading] = useState(false);
+    const [clientSecret, setClientSecret] = useState<string | null>(null);
+    const [eventPayment, setEventPayment] = useState<Record<string, unknown> | null>(null);
+    const rawPaymentStatus = eventPayment ? (eventPayment as Record<string, unknown>)['status'] : undefined;
+    const paymentStatus = typeof rawPaymentStatus === 'string' ? rawPaymentStatus : undefined;
+
+    const stripePromise = (typeof window !== "undefined" && (import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY as string)) ? loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY as string) : null;
+    const eventPriceValue = (() => {
+        if (!event) return 0;
+        const raw = (event as unknown as Record<string, unknown>)['price'];
+        if (typeof raw === 'number') return raw;
+        if (typeof raw === 'string' && raw.trim() !== '') {
+            const n = Number(raw);
+            return Number.isFinite(n) ? n : 0;
+        }
+        return 0;
+    })();
 
     useEffect(() => {
         if (!id) return setGlobalError("Missing event id");
@@ -83,6 +105,20 @@ export default function EventDetail() {
             try {
                 const all = await listLodges();
                 const linkedResp = await listEventLodges(event.id as unknown as number);
+                // load current user's payment for this event (single fetch)
+                try {
+                    if (user) {
+                        const p = await createEventPayment(event.id as unknown as number);
+                        const paymentRow = (p as Record<string, unknown>)?.payment ?? p ?? null;
+                        if (!mounted) return;
+                        setEventPayment(paymentRow as Record<string, unknown> | null);
+                    } else {
+                        // not logged in — no payment to check
+                        setEventPayment(null);
+                    }
+                } catch {
+                    // ignore — show pay UI if check fails
+                }
                 const linked = (linkedResp as { lodges?: Lodge[] })?.lodges ?? linkedResp ?? [];
                 if (!mounted) return;
                 setLodges(Array.isArray(all) ? all : []);
@@ -101,6 +137,7 @@ export default function EventDetail() {
                 } catch {
                     // ignore RSVP errors
                 }
+                // no automatic fetching of payment state here
                 // fetch admin stats
                 try {
                     if (user && Array.isArray(user.roles) && user.roles.includes("Admin")) {
@@ -249,7 +286,7 @@ export default function EventDetail() {
                             </div>
                             <div className="flex gap-2">
                                 <button className="bg-green-600 hover:bg-green-700 transition text-white px-4 py-2 rounded" onClick={handleSave} disabled={saving}>{saving ? "Sparar…" : "Spara"}</button>
-                                <Link to={`/events/${id}`} className="px-4 py-2 rounded border">Avbryt</Link>
+                                <Link to={`/events/${id}`} className="bg-gray-100 hover:bg-gray-200 transition px-4 py-2 rounded border">Avbryt</Link>
                             </div>
                         </div>
                     ) : (
@@ -258,7 +295,6 @@ export default function EventDetail() {
                             <div className="mb-2"><strong>Beskrivning:</strong> {event.description}</div>
                             <div className="mb-2"><strong>Startdatum:</strong> {formatDisplayDate(event.startDate)}</div>
                             <div className="mb-2"><strong>Slutdatum:</strong> {formatDisplayDate(event.endDate)}</div>
-                            <div className="mb-2"><strong>Pris:</strong> {String(event.price ?? "")}</div>
                             <div className="mb-2"><strong>Logemöte:</strong> {event.lodgeMeeting ? "Ja" : "Nej"}</div>
                             <div className="mb-2"><strong>Associerade loger:</strong>
                                 {Array.isArray(lodges) && originalLinkedIds.length > 0 ? (
@@ -275,16 +311,15 @@ export default function EventDetail() {
                             </div>
                             <div className="mb-2"><strong>Mitt Deltagande (RSVP):</strong>
                                 <div className="mt-2 flex items-center gap-2">
-                                    {!user && <div className="text-sm text-gray-500">Logga in för att svara</div>}
                                     {user && (
                                         <>
                                             <button
-                                                className={`px-3 py-1 rounded ${rsvp === "yes" ? "bg-green-600 text-white" : "bg-gray-100"}`}
+                                                className={`px-3 py-1 rounded ${rsvp === "yes" ? "bg-green-600 hover:bg-green-700 transition text-white" : "bg-gray-100 hover:bg-gray-200 transition"}`}
                                                 onClick={() => void handleSetRsvp("yes")}
                                                 disabled={rsvpLoading}
                                             >Ja</button>
                                             <button
-                                                className={`px-3 py-1 rounded ${rsvp === "no" ? "bg-red-600 text-white" : "bg-gray-100"}`}
+                                                className={`px-3 py-1 rounded ${rsvp === "no" ? "bg-red-600 hover:bg-red-700 transition text-white" : "bg-gray-100 hover:bg-gray-200 transition"}`}
                                                 onClick={() => void handleSetRsvp("no")}
                                                 disabled={rsvpLoading}
                                             >Nej</button>
@@ -293,6 +328,60 @@ export default function EventDetail() {
                                     )}
                                 </div>
                             </div>
+                            {eventPriceValue > 0 && !isEditRoute && (
+                                <div className="mt-4">
+                                    {paymentStatus === "Paid" ? (
+                                        <div className="text-sm text-green-700">Betalt</div>
+                                    ) : (
+                                        !showCheckout ? (
+                                            <button
+                                                className="bg-green-600 hover:bg-green-700 transition text-white px-4 py-2 rounded"
+                                                onClick={async () => {
+                                                    if (!event || !id) return;
+                                                    if (checkoutLoading || showCheckout) return;
+                                                    if (paymentStatus === "Paid") return;
+                                                    setCheckoutLoading(true);
+                                                    try {
+                                                        // create (or get existing) payment and PaymentIntent
+                                                        const resp = await createEventPayment(id);
+                                                        const cs = ((resp as Record<string, unknown>)['client_secret'] as string | undefined) ?? null;
+                                                        if (!cs) throw new Error("Missing client_secret from server");
+                                                        setClientSecret(cs);
+                                                        setShowCheckout(true);
+                                                    } catch (err) {
+                                                        setGlobalError(String(err));
+                                                    } finally {
+                                                        setCheckoutLoading(false);
+                                                    }
+                                                }}
+                                                disabled={checkoutLoading}
+                                            >
+                                                {checkoutLoading ? "Förbereder…" : `Betala (${eventPriceValue} SEK)`}
+                                            </button>
+                                        ) : null
+                                    )
+                                    }
+                                </div>
+                            )}
+
+                            {showCheckout && clientSecret && stripePromise && (!eventPayment || paymentStatus !== "Paid") && (
+                                <div className="mt-4 bg-gray-50 p-4 rounded">
+                                    <Elements stripe={stripePromise} options={{ clientSecret }}>
+                                        <StripeForm onClose={async () => {
+                                            setShowCheckout(false);
+                                            setClientSecret(null);
+                                            if (!event) return;
+                                            try {
+                                                const p = await createEventPayment(event.id as unknown as number);
+                                                const paymentRow = ((p as Record<string, unknown>)['payment'] ?? p) as Record<string, unknown> | null;
+                                                setEventPayment(paymentRow);
+                                            } catch {
+                                                // ignore
+                                            }
+                                        }} />
+                                    </Elements>
+                                </div>
+                            )}
                             {user && Array.isArray(user.roles) && user.roles.includes("Admin") && stats && (
                                 <div className="mb-2"><strong>Totalt Deltagande:</strong>
                                     <div className="mt-1 text-sm text-gray-700">
@@ -310,4 +399,4 @@ export default function EventDetail() {
             )}
         </div>
     );
-}
+};
