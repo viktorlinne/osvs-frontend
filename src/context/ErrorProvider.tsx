@@ -18,6 +18,13 @@ export function ErrorProvider({ children }: { children: React.ReactNode }) {
         return () => unregisterGlobalErrorHandler();
     }, []);
 
+    // Auto-dismiss any error after 10 seconds
+    useEffect(() => {
+        if (!error) return;
+        const t = setTimeout(() => setErrorState(null), 10000);
+        return () => clearTimeout(t);
+    }, [error]);
+
     return (
         <ErrorContext.Provider value={{ error, setError, clearError }}>
             <div className="relative">

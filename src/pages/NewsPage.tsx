@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../context";
 import { listPosts } from "../services";
@@ -9,17 +9,23 @@ import useFetch from "../hooks/useFetch";
 
 export const NewsPage = () => {
   const { data: posts, loading, notFound, run } = useFetch<Post[]>();
-  const { error, setError } = useError();
+  const { setError, clearError } = useError();
+  const [empty, setEmpty] = useState(false);
   const { user } = useAuth();
 
   useEffect(() => {
     let mounted = true;
+    clearError();
     run(() => listPosts())
       .then((res) => {
         if (!mounted) return;
-        if (!Array.isArray(res))
+        if (!Array.isArray(res)) {
           setError("Något gick fel vid hämtning av inlägg.");
-        else if (res.length === 0) setError("Inga inlägg än.");
+        } else if (res.length === 0) {
+          setEmpty(true);
+        } else {
+          setEmpty(false);
+        }
       })
       .catch(() => {
         /* errors handled by useFetch */
@@ -27,7 +33,7 @@ export const NewsPage = () => {
     return () => {
       mounted = false;
     };
-  }, [run, setError]);
+  }, [run, setError, clearError]);
 
   return (
     <div className="flex flex-col items-center min-h-screen">
@@ -47,8 +53,6 @@ export const NewsPage = () => {
         {loading && <Spinner />}
         {notFound ? (
           <NotFound />
-        ) : error ? (
-          <p className="text-red-500">{error}</p>
         ) : (
           (posts ?? []).map((p) => (
             <Link
@@ -72,7 +76,7 @@ export const NewsPage = () => {
         )}
       </div>
 
-      {!loading && (posts ?? []).length === 0 && !error && (
+      {!loading && (posts ?? []).length === 0 && !notFound && empty && (
         <p className="mt-6 text-gray-600">Inga inlägg än.</p>
       )}
     </div>

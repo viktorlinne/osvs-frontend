@@ -5,14 +5,17 @@ import { listLodges } from "../services/lodges";
 import type { RegisterForm, Lodge } from "../types";
 
 import { useForm } from "react-hook-form";
+import type { FieldError } from "react-hook-form";
+import useError from "../context/useError";
 
 export const CreateUser = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const [picture, setPicture] = useState<File | null>(null);
   const [lodges, setLodges] = useState<Lodge[]>([]);
   const [lodgesLoading, setLodgesLoading] = useState(true);
+
+  const { setError } = useError();
 
   const {
     register,
@@ -126,54 +129,58 @@ export const CreateUser = () => {
     })();
   }, []);
 
+  // error display handled by global ErrorProvider
   return (
     <div className="max-w-xl mx-auto p-4 min-h-screen">
       <h2 className="text-2xl mb-4">Skapa användare</h2>
-      {error && <div className="text-red-600 mb-2">{error}</div>}
+      {/* Centralized field error list (component is source of truth) */}
+      {Object.keys(errors).length > 0 && (
+        <div className="text-red-600 mb-2">
+          <ul className="list-disc pl-5">
+            {(Object.keys(errors) as Array<keyof RegisterForm>).map((k) => {
+              const fieldErr = errors[k] as FieldError | undefined;
+              const msg = fieldErr?.message;
+              return msg ? (
+                <li key={String(k)}>{`${String(k)}: ${msg}`}</li>
+              ) : null;
+            })}
+          </ul>
+        </div>
+      )}
       <form className="space-y-3">
         <input
           placeholder="Användarnamn"
           {...register("username")}
           className="w-full px-4 py-2 border"
         />
-        {errors.username && (
-          <div className="text-red-600">{errors.username?.message}</div>
-        )}
+        {/* field errors shown centrally above */}
         <input
           placeholder="Email"
           {...register("email")}
           className="w-full px-4 py-2 border"
         />
-        {errors.email && (
-          <div className="text-red-600">{errors.email?.message}</div>
-        )}
+        {/* field errors shown centrally above */}
         <input
           placeholder="Lösenord"
           type="password"
           {...register("password")}
           className="w-full px-4 py-2 border"
         />
-        {errors.password && (
-          <div className="text-red-600">{errors.password?.message}</div>
-        )}
+        {/* field errors shown centrally above */}
         <input
           placeholder="Förnamn"
           type="text"
           {...register("firstname")}
           className="w-full px-4 py-2 border"
         />
-        {errors.firstname && (
-          <div className="text-red-600">{errors.firstname?.message}</div>
-        )}
+        {/* field errors shown centrally above */}
         <input
           placeholder="Efternamn"
           type="text"
           {...register("lastname")}
           className="w-full px-4 py-2 border"
         />
-        {errors.lastname && (
-          <div className="text-red-600">{errors.lastname?.message}</div>
-        )}
+        {/* field errors shown centrally above */}
         <label className="block">
           <div className="text-sm text-gray-600">Födelsedatum</div>
           <input
@@ -181,9 +188,7 @@ export const CreateUser = () => {
             {...register("dateOfBirth")}
             className="w-full px-4 py-2 border"
           />
-          {errors.dateOfBirth && (
-            <div className="text-red-600">{errors.dateOfBirth?.message}</div>
-          )}
+          {/* field errors shown centrally above */}
         </label>
         <input
           placeholder="Tjänst"
@@ -191,68 +196,57 @@ export const CreateUser = () => {
           {...register("official")}
           className="w-full px-4 py-2 border"
         />
-        {errors.official && (
-          <div className="text-red-600">{errors.official?.message}</div>
-        )}
+        {/* field errors shown centrally above */}
         <input
           placeholder="Mobilnummer"
           type="text"
           {...register("mobile")}
           className="w-full px-4 py-2 border"
         />
-        {errors.mobile && (
-          <div className="text-red-600">{errors.mobile?.message}</div>
-        )}
+        {/* field errors shown centrally above */}
         <input
           placeholder="Hemnummer"
           type="text"
           {...register("homeNumber")}
           className="w-full px-4 py-2 border"
         />
-        {errors.homeNumber && (
-          <div className="text-red-600">{errors.homeNumber?.message}</div>
-        )}
+        {/* field errors shown centrally above */}
         <input
           placeholder="Stad"
           type="text"
           {...register("city")}
           className="w-full px-4 py-2 border"
         />
-        {errors.city && (
-          <div className="text-red-600">{errors.city?.message}</div>
-        )}
+        {/* field errors shown centrally above */}
         <input
           placeholder="Adress"
           type="text"
           {...register("address")}
           className="w-full px-4 py-2 border"
         />
-        {errors.address && (
-          <div className="text-red-600">{errors.address?.message}</div>
-        )}
+        {/* field errors shown centrally above */}
         <input
           placeholder="Postnummer"
           type="text"
           {...register("zipcode")}
           className="w-full px-4 py-2 border"
         />
-        {errors.zipcode && (
-          <div className="text-red-600">{errors.zipcode?.message}</div>
-        )}
+        {/* field errors shown centrally above */}
         <input
           placeholder="Noteringar "
           type="text"
           {...register("notes")}
           className="w-full px-4 py-2 border"
         />
-        {errors.notes && (
-          <div className="text-red-600">{errors.notes?.message}</div>
-        )}
+        {/* field errors shown centrally above */}
         <label className="block">
           {lodgesLoading ? (
             <div className="px-4 py-2">Laddar loger…</div>
           ) : (
-            <select {...register("lodgeId")} className="w-full px-4 py-2 border">
+            <select
+              {...register("lodgeId")}
+              className="w-full px-4 py-2 border"
+            >
               <option value="">Välj loge...</option>
               {lodges.map((l) => (
                 <option key={l.id} value={String(l.id)}>
@@ -261,9 +255,7 @@ export const CreateUser = () => {
               ))}
             </select>
           )}
-          {errors.lodgeId && (
-            <div className="text-red-600">{errors.lodgeId?.message}</div>
-          )}
+          {/* field errors shown centrally above */}
         </label>
         <label className="block border">
           <input
@@ -286,4 +278,4 @@ export const CreateUser = () => {
       </form>
     </div>
   );
-}
+};

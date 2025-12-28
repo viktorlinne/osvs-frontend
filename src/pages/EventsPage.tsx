@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { listMyEvents, listEvents } from "../services";
 import { useAuth } from "../context";
+import { useError } from "../context";
 import type { Event as EventRecord, ApiError } from "../types";
 import axios from "axios";
 import { isApiError } from "../types/api";
@@ -76,7 +77,7 @@ export const EventsPage = () => {
     Record<string, EventRecord[]>
   >({});
   const [loading, setLoading] = useState<boolean>(false);
-  const [error, setError] = useState<string | null>(null);
+  const { setError, clearError } = useError();
 
   const year = viewDate.getFullYear();
   const month = viewDate.getMonth();
@@ -89,7 +90,7 @@ export const EventsPage = () => {
     let mounted = true;
     async function fetchEvents() {
       setLoading(true);
-      setError(null);
+      clearError();
       try {
         const isAdmin = Boolean(
           user && Array.isArray(user.roles) && user.roles.includes("Admin")
@@ -128,7 +129,7 @@ export const EventsPage = () => {
     return () => {
       mounted = false;
     };
-  }, [user]);
+  }, [user, setError, clearError]);
 
   function prevMonth() {
     setViewDate((d) => new Date(d.getFullYear(), d.getMonth() - 1, 1));
@@ -229,9 +230,8 @@ export const EventsPage = () => {
 
                   <div className="mt-2 text-xs text-gray-600 min-w-0 overflow-hidden">
                     {loading && <div className="text-gray-400">Laddar…</div>}
-                    {error && <div className="text-red-500">{error}</div>}
                     {!loading &&
-                      !error &&
+                      !Error &&
                       date &&
                       (() => {
                         const key = formatDateKey(date);

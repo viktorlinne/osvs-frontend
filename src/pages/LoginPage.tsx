@@ -10,7 +10,7 @@ export const LoginPage = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
-  const { error, setError, clearError } = useError();
+  const { setError, clearError } = useError();
   const { run } = useFetch();
 
   const submit = async (e: React.FormEvent) => {
@@ -35,7 +35,7 @@ export const LoginPage = () => {
         className="max-w-md w-full bg-white p-6 rounded shadow"
       >
         <h2 className="text-2xl font-bold mb-4">Logga in</h2>
-        {error && <div className="text-sm text-red-600 mb-2">{error}</div>}
+        {/* top-level errors shown by ErrorProvider */}
         <label className="block mb-2">
           <div className="text-sm">Email</div>
           <input
