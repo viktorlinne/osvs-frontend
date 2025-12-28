@@ -170,6 +170,15 @@ export const EventsPage = () => {
           >
             Nästa
           </button>
+          {user &&
+            (user.roles ?? []).some((r) => ["Admin", "Editor"].includes(r)) && (
+              <Link
+                to="/events/create"
+                className="text-white bg-green-600 hover:bg-green-700 transition px-3 py-2 rounded"
+              >
+                Skapa Möte
+              </Link>
+            )}
         </div>
       </div>
 

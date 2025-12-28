@@ -409,7 +409,7 @@ export const EventDetail = () => {
                 <label className="block text-sm font-medium mb-1">
                   Associera loger
                 </label>
-                <div className="grid grid-cols-2 gapx-4 py-2 max-h-40 overflow-auto px-4 py-2 border rounded bg-gray-50">
+                <div className="grid grid-cols-2 gapx-4 py-2 max-h-40 overflow-auto px-4 border rounded bg-gray-50">
                   {lodges.map((l) => (
                     <label key={l.id} className="flex items-center gapx-4 py-2">
                       <input
@@ -615,4 +615,4 @@ export const EventDetail = () => {
       )}
     </div>
   );
-}
+};

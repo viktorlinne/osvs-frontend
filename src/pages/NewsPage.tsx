@@ -39,7 +39,7 @@ export const NewsPage = () => {
               to="/posts/create"
               className="text-white bg-green-600 hover:bg-green-700 transition px-3 py-2 rounded"
             >
-              Create Post
+              Skapa Inlägg
             </Link>
           )}
       </div>

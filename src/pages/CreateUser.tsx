@@ -127,7 +127,7 @@ export const CreateUser = () => {
   }, []);
 
   return (
-    <div className="max-w-xl mx-auto p-4">
+    <div className="max-w-xl mx-auto p-4 min-h-screen">
       <h2 className="text-2xl mb-4">Skapa användare</h2>
       {error && <div className="text-red-600 mb-2">{error}</div>}
       <form className="space-y-3">

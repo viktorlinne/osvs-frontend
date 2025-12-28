@@ -1,6 +1,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { Link } from "react-router-dom";
 import { Spinner } from "../components";
+import { useAuth } from "../context";
 import useFetch from "../hooks/useFetch";
 import type { PublicUser } from "../types";
 import { listAchievements } from "../services/achievements";
@@ -32,6 +33,7 @@ async function fetchMembers({
 
 export const MembersPage = () => {
   const { run, loading, data: members } = useFetch<PublicUser[]>();
+  const { user } = useAuth();
   const [query, setQuery] = useState("");
   const [achievementId, setAchievementId] = useState<number | null>(null);
   const [lodgeId, setLodgeId] = useState<number | null>(null);
@@ -66,8 +68,17 @@ export const MembersPage = () => {
     <div className="flex flex-col items-center min-h-screen">
       <div className="max-w-3xl w-full mx-auto p-6">
         <h2 className="text-2xl font-bold mb-4">Medlemmar</h2>
+        {user &&
+          (user.roles ?? []).some((r) => ["Admin", "Editor"].includes(r)) && (
+            <Link
+              to="/users/create"
+              className="text-white bg-green-600 hover:bg-green-700 transition px-3 py-2 rounded"
+            >
+              Skapa Användare
+            </Link>
+          )}
 
-        <div className="flex gapx-4 py-2 mb-4">
+        <div className="flex gap-x-4 py-2 mb-4">
           <input
             type="search"
             placeholder="Sök förnamn eller efternamn"
@@ -132,4 +143,4 @@ export const MembersPage = () => {
       </div>
     </div>
   );
-}
+};
