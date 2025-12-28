@@ -12,12 +12,13 @@ import {
   Profile,
   MembersPage,
   MemberDetail,
-  UsersCreate,
+  CreateUser,
   LodgesPage,
   LodgeDetail,
   EventDetail,
   EventsPage,
   CreateEvent,
+  MembershipPage,
 } from "../pages";
 import { AppLayout } from "../app/AppLayout";
 import AuthGuard from "./AuthGuard";
@@ -76,7 +77,7 @@ const routes = [
         path: "members/create",
         element: (
           <AuthGuard roles={["Admin", "Editor"]}>
-            <UsersCreate />
+            <CreateUser />
           </AuthGuard>
         ),
       },

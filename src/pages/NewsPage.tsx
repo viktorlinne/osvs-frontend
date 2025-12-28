@@ -7,7 +7,6 @@ import type { Post } from "../types";
 import { useError } from "../context";
 import useFetch from "../hooks/useFetch";
 
-
 export const NewsPage = () => {
   const { data: posts, loading, notFound, run } = useFetch<Post[]>();
   const { error, setError } = useError();
@@ -18,7 +17,8 @@ export const NewsPage = () => {
     run(() => listPosts())
       .then((res) => {
         if (!mounted) return;
-        if (!Array.isArray(res)) setError("Något gick fel vid hämtning av inlägg.");
+        if (!Array.isArray(res))
+          setError("Något gick fel vid hämtning av inlägg.");
         else if (res.length === 0) setError("Inga inlägg än.");
       })
       .catch(() => {
@@ -33,17 +33,17 @@ export const NewsPage = () => {
     <div className="flex flex-col items-center min-h-screen">
       <div className="w-full max-w-3xl flex items-center justify-between mb-4">
         <h2 className="text-3xl font-bold">Nyheter</h2>
-        {user && (user.roles ?? []).some((r) => ["Admin", "Editor"].includes(r)) && (
-          <Link
-            to="/posts/create"
-            className="text-white bg-green-600 hover:bg-green-700 transition px-3 py-2 rounded"
-          >
-            Create Post
-          </Link>
-        )}
+        {user &&
+          (user.roles ?? []).some((r) => ["Admin", "Editor"].includes(r)) && (
+            <Link
+              to="/posts/create"
+              className="text-white bg-green-600 hover:bg-green-700 transition px-3 py-2 rounded"
+            >
+              Create Post
+            </Link>
+          )}
       </div>
       <div className="grid gap-4 grid-cols-1">
-
         {loading && <Spinner />}
         {notFound ? (
           <NotFound />
