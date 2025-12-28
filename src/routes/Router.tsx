@@ -114,6 +114,14 @@ const routes = [
         ),
       },
       {
+        path: "profile/memberships",
+        element: (
+          <AuthGuard>
+            <MembershipPage />
+          </AuthGuard>
+        ),
+      },
+      {
         path: "news/:id/edit",
         element: (
           <AuthGuard roles={["Admin", "Editor"]}>
@@ -185,7 +193,6 @@ const routes = [
           </AuthGuard>
         ),
       },
-
       // 404 route
       {
         path: "*",

@@ -12,6 +12,11 @@ export async function getMembershipStatusByToken(token: string) {
 	return fetchData(api.get(`/stripe/membership/status/${token}`));
 }
 
+export async function getMyMemberships(year?: number) {
+	const qs = year ? `?year=${encodeURIComponent(String(year))}` : "";
+	return fetchData(api.get(`/stripe/membership${qs}`));
+}
+
 export async function createEventPayment(eventId: string | number, payload: Record<string, unknown> = {}) {
 	return fetchData(api.post(`/stripe/event/${eventId}`, payload));
 }
@@ -28,6 +33,7 @@ export default {
 	createMembershipPayment,
 	getMembershipPayment,
 	getMembershipStatusByToken,
+	getMyMemberships,
 	createEventPayment,
 	getEventPayment,
 	getEventStatusByToken,
