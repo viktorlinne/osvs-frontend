@@ -7,7 +7,7 @@ import { isApiError } from "../types/api";
 import { Link } from "react-router-dom";
 
 // Start week on Monday
-const WEEK_DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+const WEEK_DAYS = ["Mån", "Tis", "Ons", "Tor", "Fre", "Lör", "Sön"];
 
 function formatMonthNameSv(date: Date) {
   const name = new Intl.DateTimeFormat("sv-SE", { month: "long" }).format(date);
@@ -67,7 +67,7 @@ function dateKeyFromString(s?: string) {
   return formatDateKey(d);
 }
 
-export const EventsPage: React.FC = () => {
+export const EventsPage = () => {
   const today = new Date();
   const [viewDate, setViewDate] = useState(
     () => new Date(today.getFullYear(), today.getMonth(), 1)
@@ -152,23 +152,23 @@ export const EventsPage: React.FC = () => {
         <div className="flex items-center gapx-4 py-2">
           <button
             onClick={prevMonth}
-            className="px-3 py-1 rounded-md bg-gray-100 hover:bg-gray-200"
+            className="px-3 py-1 rounded-md bg-gray-100 hover:bg-gray-200 transition"
             aria-label="Previous month"
           >
-            ◀
+            Förra
           </button>
           <button
             onClick={jumpToToday}
-            className="px-3 py-1 rounded-md bg-white border hover:bg-gray-50"
+            className="px-3 py-1 rounded-md bg-white border hover:bg-gray-50 transition"
           >
             Hoppa till idag
           </button>
           <button
             onClick={nextMonth}
-            className="px-3 py-1 rounded-md bg-gray-100 hover:bg-gray-200"
+            className="px-3 py-1 rounded-md bg-gray-100 hover:bg-gray-200 transition"
             aria-label="Next month"
           >
-            ▶
+            Nästa
           </button>
         </div>
       </div>
@@ -219,7 +219,7 @@ export const EventsPage: React.FC = () => {
                   </div>
 
                   <div className="mt-2 text-xs text-gray-600 min-w-0 overflow-hidden">
-                    {loading && <div className="text-gray-400">Loading…</div>}
+                    {loading && <div className="text-gray-400">Laddar…</div>}
                     {error && <div className="text-red-500">{error}</div>}
                     {!loading &&
                       !error &&
@@ -235,7 +235,7 @@ export const EventsPage: React.FC = () => {
                               <Link
                                 key={e.id}
                                 to={`/events/${e.id}`}
-                                className="block w-full truncate rounded px-1 py-0.5 text-xs bg-green-50 text-green-800 hover:bg-green-100 overflow-hidden"
+                                className="block w-full truncate rounded px-1 py-0.5 text-xs bg-green-50 text-green-800 hover:bg-green-100 transition overflow-hidden"
                                 title={e.title}
                               >
                                 {e.title}
@@ -243,7 +243,7 @@ export const EventsPage: React.FC = () => {
                             ))}
                             {evs.length > 3 && (
                               <div className="text-xs text-gray-500">
-                                +{evs.length - 3} more
+                                +{evs.length - 3} fler...
                               </div>
                             )}
                           </div>
