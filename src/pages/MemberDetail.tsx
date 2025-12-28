@@ -245,7 +245,7 @@ export const MemberDetail = () => {
                       <label className="block text-sm font-medium mb-1">
                         Tilldela ny utmärkelse
                       </label>
-                      <div className="flex justify-center gap-2">
+                      <div className="flex justify-center gapx-4 py-2">
                         <select
                           value={selectedAid ?? ""}
                           onChange={(e) =>
@@ -266,11 +266,11 @@ export const MemberDetail = () => {
                           type="date"
                           value={awardDate}
                           onChange={(e) => setAwardDate(e.target.value)}
-                          className="border rounded p-2"
+                          className="border rounded px-4 py-2"
                         />
                         <button
                           type="button"
-                          className="bg-green-600 hover:bg-green-700 transition text-white p-2 rounded"
+                          className="bg-green-600 hover:bg-green-700 transition text-white px-4 py-2 rounded"
                           disabled={!selectedAid}
                           onClick={async () => {
                             if (!selectedAid || !id)
@@ -326,7 +326,7 @@ export const MemberDetail = () => {
                     <label className="block text-sm font-medium mb-1">
                       Loge
                     </label>
-                    <div className="flex gap-2 items-center justify-center">
+                    <div className="flex gapx-4 py-2 items-center justify-center">
                       <select
                         value={selectedLid ?? ""}
                         onChange={(e) =>
@@ -392,11 +392,11 @@ export const MemberDetail = () => {
                     <label className="block text-sm font-medium mb-1">
                       Roller
                     </label>
-                    <div className="flex gap-2 flex-wrap">
+                    <div className="flex gapx-4 py-2 flex-wrap">
                       {rolesList.map((r) => (
                         <label
                           key={r.id}
-                          className="inline-flex items-center gap-2"
+                          className="inline-flex items-center gapx-4 py-2"
                         >
                           <input
                             type="checkbox"
@@ -694,7 +694,7 @@ export const MemberDetail = () => {
               )}
 
               {canEdit && isEditRoute && (
-                <div className="flex items-center gap-2 mt-4">
+                <div className="flex items-center gapx-4 py-2 mt-4">
                   <button
                     type="button"
                     className="bg-green-600 hover:bg-green-700 transition text-white px-4 py-2 rounded"

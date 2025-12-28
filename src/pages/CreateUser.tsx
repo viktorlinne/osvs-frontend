@@ -134,7 +134,7 @@ export const CreateUser = () => {
         <input
           placeholder="Användarnamn"
           {...register("username")}
-          className="w-full p-2 border"
+          className="w-full px-4 py-2 border"
         />
         {errors.username && (
           <div className="text-red-600">{errors.username?.message}</div>
@@ -142,7 +142,7 @@ export const CreateUser = () => {
         <input
           placeholder="Email"
           {...register("email")}
-          className="w-full p-2 border"
+          className="w-full px-4 py-2 border"
         />
         {errors.email && (
           <div className="text-red-600">{errors.email?.message}</div>
@@ -151,7 +151,7 @@ export const CreateUser = () => {
           placeholder="Lösenord"
           type="password"
           {...register("password")}
-          className="w-full p-2 border"
+          className="w-full px-4 py-2 border"
         />
         {errors.password && (
           <div className="text-red-600">{errors.password?.message}</div>
@@ -160,7 +160,7 @@ export const CreateUser = () => {
           placeholder="Förnamn"
           type="text"
           {...register("firstname")}
-          className="w-full p-2 border"
+          className="w-full px-4 py-2 border"
         />
         {errors.firstname && (
           <div className="text-red-600">{errors.firstname?.message}</div>
@@ -169,7 +169,7 @@ export const CreateUser = () => {
           placeholder="Efternamn"
           type="text"
           {...register("lastname")}
-          className="w-full p-2 border"
+          className="w-full px-4 py-2 border"
         />
         {errors.lastname && (
           <div className="text-red-600">{errors.lastname?.message}</div>
@@ -179,7 +179,7 @@ export const CreateUser = () => {
           <input
             type="date"
             {...register("dateOfBirth")}
-            className="w-full p-2 border"
+            className="w-full px-4 py-2 border"
           />
           {errors.dateOfBirth && (
             <div className="text-red-600">{errors.dateOfBirth?.message}</div>
@@ -189,7 +189,7 @@ export const CreateUser = () => {
           placeholder="Tjänst"
           type="text"
           {...register("official")}
-          className="w-full p-2 border"
+          className="w-full px-4 py-2 border"
         />
         {errors.official && (
           <div className="text-red-600">{errors.official?.message}</div>
@@ -198,7 +198,7 @@ export const CreateUser = () => {
           placeholder="Mobilnummer"
           type="text"
           {...register("mobile")}
-          className="w-full p-2 border"
+          className="w-full px-4 py-2 border"
         />
         {errors.mobile && (
           <div className="text-red-600">{errors.mobile?.message}</div>
@@ -207,7 +207,7 @@ export const CreateUser = () => {
           placeholder="Hemnummer"
           type="text"
           {...register("homeNumber")}
-          className="w-full p-2 border"
+          className="w-full px-4 py-2 border"
         />
         {errors.homeNumber && (
           <div className="text-red-600">{errors.homeNumber?.message}</div>
@@ -216,7 +216,7 @@ export const CreateUser = () => {
           placeholder="Stad"
           type="text"
           {...register("city")}
-          className="w-full p-2 border"
+          className="w-full px-4 py-2 border"
         />
         {errors.city && (
           <div className="text-red-600">{errors.city?.message}</div>
@@ -225,7 +225,7 @@ export const CreateUser = () => {
           placeholder="Adress"
           type="text"
           {...register("address")}
-          className="w-full p-2 border"
+          className="w-full px-4 py-2 border"
         />
         {errors.address && (
           <div className="text-red-600">{errors.address?.message}</div>
@@ -234,7 +234,7 @@ export const CreateUser = () => {
           placeholder="Postnummer"
           type="text"
           {...register("zipcode")}
-          className="w-full p-2 border"
+          className="w-full px-4 py-2 border"
         />
         {errors.zipcode && (
           <div className="text-red-600">{errors.zipcode?.message}</div>
@@ -243,16 +243,16 @@ export const CreateUser = () => {
           placeholder="Noteringar "
           type="text"
           {...register("notes")}
-          className="w-full p-2 border"
+          className="w-full px-4 py-2 border"
         />
         {errors.notes && (
           <div className="text-red-600">{errors.notes?.message}</div>
         )}
         <label className="block">
           {lodgesLoading ? (
-            <div className="p-2">Laddar loger…</div>
+            <div className="px-4 py-2">Laddar loger…</div>
           ) : (
-            <select {...register("lodgeId")} className="w-full p-2 border">
+            <select {...register("lodgeId")} className="w-full px-4 py-2 border">
               <option value="">Välj loge...</option>
               {lodges.map((l) => (
                 <option key={l.id} value={String(l.id)}>
@@ -270,7 +270,7 @@ export const CreateUser = () => {
             type="file"
             accept="image/*"
             onChange={(e) => setPicture(e.target.files?.[0] ?? null)}
-            className="w-full p-2"
+            className="w-full px-4 py-2"
           />
         </label>
         <div>
@@ -278,7 +278,7 @@ export const CreateUser = () => {
             type="button"
             onClick={handleSubmit(onSubmit)}
             disabled={loading}
-            className="p-2 bg-green-600 hover:bg-green-700 transition text-white rounded"
+            className="px-4 py-2 bg-green-600 hover:bg-green-700 transition text-white rounded"
           >
             {loading ? "Skapar..." : "Skapa användare"}
           </button>

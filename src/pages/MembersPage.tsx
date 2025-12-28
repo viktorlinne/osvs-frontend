@@ -67,20 +67,20 @@ export const MembersPage = () => {
       <div className="max-w-3xl w-full mx-auto p-6">
         <h2 className="text-2xl font-bold mb-4">Medlemmar</h2>
 
-        <div className="flex gap-2 mb-4">
+        <div className="flex gapx-4 py-2 mb-4">
           <input
             type="search"
             placeholder="Sök förnamn eller efternamn"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            className="flex-1 p-2 border rounded"
+            className="flex-1 px-4 py-2 border rounded"
           />
           <select
             value={achievementId ?? ""}
             onChange={(e) =>
               setAchievementId(e.target.value ? Number(e.target.value) : null)
             }
-            className="p-2 border rounded"
+            className="px-4 py-2 border rounded"
           >
             <option value="">Alla grader</option>
             {achievements.map((a) => (
@@ -94,7 +94,7 @@ export const MembersPage = () => {
             onChange={(e) =>
               setLodgeId(e.target.value ? Number(e.target.value) : null)
             }
-            className="p-2 border rounded"
+            className="px-4 py-2 border rounded"
           >
             <option value="">Alla loger</option>
             {lodges.map((l) => (

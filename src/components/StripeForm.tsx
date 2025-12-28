@@ -33,7 +33,7 @@ export default function StripeForm({ onClose }: { onClose: () => void }) {
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <PaymentElement />
-      <div className="flex gap-2">
+      <div className="flex gapx-4 py-2">
         <button
           type="submit"
           disabled={!stripe || submitting}

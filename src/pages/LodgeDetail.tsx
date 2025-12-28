@@ -119,7 +119,7 @@ export const LodgeDetail = () => {
                   className="w-full border rounded px-3 py-2"
                 />
               </div>
-              <div className="flex gap-2">
+              <div className="flex gapx-4 py-2">
                 <button
                   className="bg-green-600 hover:bg-green-700 transition text-white px-4 py-2 rounded"
                   onClick={handleSave}

@@ -149,7 +149,7 @@ export const EventsPage: React.FC = () => {
           <p className="text-sm text-gray-500">Möteskalender</p>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gapx-4 py-2">
           <button
             onClick={prevMonth}
             className="px-3 py-1 rounded-md bg-gray-100 hover:bg-gray-200"
@@ -203,7 +203,7 @@ export const EventsPage: React.FC = () => {
               return (
                 <div
                   key={di}
-                  className={`min-h-[80px] md:min-h-[100px] lg:min-h-[120px] p-2 text-sm border-t border-l bg-white min-w-0 ${
+                  className={`min-h-[80px] md:min-h-[100px] lg:min-h-[120px] px-4 py-2 text-sm border-t border-l bg-white min-w-0 ${
                     inMonth ? "" : "bg-gray-50 text-gray-400"
                   }`}
                   style={{ display: "flex", flexDirection: "column" }}

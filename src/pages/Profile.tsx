@@ -214,7 +214,7 @@ export const Profile = () => {
             </label>
             <div>
               {achievements && achievements.length > 0 ? (
-                <select className="w-full border rounded p-2 mb-4">
+                <select className="w-full border rounded px-4 py-2 mb-4">
                   {achievements.map((a) => (
                     <option key={a.id} value={a.id}>
                       {a.title} —{" "}
@@ -242,11 +242,11 @@ export const Profile = () => {
                       <label className="block text-sm font-medium mb-1">
                         Roller
                       </label>
-                      <div className="flex gap-2 flex-wrap">
+                      <div className="flex gapx-4 py-2 flex-wrap">
                         {rolesList.map((r) => (
                           <label
                             key={r.id}
-                            className="inline-flex items-center gap-2"
+                            className="inline-flex items-center gapx-4 py-2"
                           >
                             <input
                               type="checkbox"
@@ -292,7 +292,7 @@ export const Profile = () => {
                     <label className="block text-sm font-medium mb-1">
                       Tilldela ny utmärkelse
                     </label>
-                    <div className="flex gap-2">
+                    <div className="flex gapx-4 py-2">
                       <select
                         value={selectedAid ?? ""}
                         onChange={(e) =>
@@ -570,7 +570,7 @@ export const Profile = () => {
             </div>
           ) : null}
           {isEditRoute ? (
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gapx-4 py-2">
               <button
                 type="submit"
                 className="bg-green-600 hover:bg-green-700 transition text-white px-4 py-2 rounded"

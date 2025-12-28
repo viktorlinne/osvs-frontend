@@ -9,13 +9,11 @@ export const MembershipPage = () => {
   const [payments, setPayments] = useState<MembershipPayment[] | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [refreshing, setRefreshing] = useState(false);
+  // removed unused `refreshing` state (we use `loading` and `checkoutLoading`)
   const [showCheckout, setShowCheckout] = useState(false);
   const [checkoutLoading, setCheckoutLoading] = useState(false);
   const [clientSecret, setClientSecret] = useState<string | null>(null);
-  const [selectedPaymentId, setSelectedPaymentId] = useState<number | null>(
-    null
-  );
+  // removed per-payment selection state; not required for simplified flow
 
   const stripePromise =
     typeof window !== "undefined" && import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY
@@ -52,11 +50,9 @@ export const MembershipPage = () => {
     let mounted = true;
     const id = setInterval(() => {
       if (!mounted) return;
-      setRefreshing(true);
       getMyMemberships()
         .then((res) => setPayments(res as MembershipPayment[]))
-        .catch(() => {})
-        .finally(() => mounted && setRefreshing(false));
+        .catch(() => {});
     }, 8000);
 
     return () => {
@@ -65,13 +61,7 @@ export const MembershipPage = () => {
     };
   }, [payments]);
 
-  function handleRefresh() {
-    setRefreshing(true);
-    getMyMemberships()
-      .then((res) => setPayments(res as MembershipPayment[]))
-      .catch((err) => setError(String(err?.message ?? err)))
-      .finally(() => setRefreshing(false));
-  }
+  // explicit refresh handler removed — not used in current UI
 
   async function handlePay(payment: MembershipPayment) {
     if (checkoutLoading || showCheckout) return;
@@ -84,7 +74,6 @@ export const MembershipPage = () => {
           | undefined) ?? null;
       if (!cs) throw new Error("Missing client_secret from server");
       setClientSecret(cs);
-      setSelectedPaymentId(payment.id);
       setShowCheckout(true);
     } catch (err) {
       setError(String(err));
@@ -93,13 +82,23 @@ export const MembershipPage = () => {
     }
   }
 
+  function formatDate(d: string | Date | null | undefined) {
+    if (!d) return "";
+    const dt = typeof d === "string" ? new Date(d) : d;
+    if (!dt || Number.isNaN(dt.getTime())) return String(d).slice(0, 10);
+    const y = dt.getFullYear();
+    const m = String(dt.getMonth() + 1).padStart(2, "0");
+    const day = String(dt.getDate()).padStart(2, "0");
+    return `${y}-${m}-${day}`;
+  }
+
   return (
     <div className="flex flex-col items-center justify-start min-h-screen p-6">
-      <h2 className="text-2xl font-bold mb-4">Membership Payments</h2>
-      {loading && <div>Loading…</div>}
+      <h2 className="text-2xl font-bold mb-4">Medlemskaps Betalningar</h2>
+      {loading && <div>Laddar…</div>}
       {error && <div className="text-red-600">{error}</div>}
       {!loading && payments && payments.length === 0 && (
-        <div>No membership payments found.</div>
+        <div>Inga medlemskapsbetalningar hittades.</div>
       )}
       {!loading && payments && payments.length > 0 && (
         <ul className="w-full max-w-2xl space-y-2">
@@ -109,14 +108,14 @@ export const MembershipPage = () => {
               className="border rounded p-3 flex justify-between items-center"
             >
               <div>
-                <div className="font-semibold">Year: {p.year}</div>
+                <div className="font-semibold">År: {p.year}</div>
                 <div>
-                  Amount: {p.amount} {p.currency}
+                  Belopp: {p.amount} {p.currency}
                 </div>
                 <div>Status: {p.status}</div>
               </div>
-              <div className="flex items-center gap-2">
-                <div className="text-sm text-gray-500">{p.createdAt}</div>
+              <div className="flex items-center gapx-4 py-2">
+                <div className="text-sm text-gray-500">{formatDate(p.createdAt)}</div>
                 {p.status === "Pending" && (
                   <button
                     className="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded"
@@ -139,7 +138,6 @@ export const MembershipPage = () => {
               onClose={async () => {
                 setShowCheckout(false);
                 setClientSecret(null);
-                setSelectedPaymentId(null);
                 // refresh payments
                 try {
                   const res = await getMyMemberships();

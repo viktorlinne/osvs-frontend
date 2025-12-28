@@ -39,7 +39,7 @@ export const LoginPage = () => {
         <label className="block mb-2">
           <div className="text-sm">Email</div>
           <input
-            className="border p-2 w-full"
+            className="border px-4 py-2 w-full"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             type="email"
@@ -49,7 +49,7 @@ export const LoginPage = () => {
         <label className="block mb-4">
           <div className="text-sm">Lösenord</div>
           <input
-            className="border p-2 w-full"
+            className="border px-4 py-2 w-full"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             type="password"
