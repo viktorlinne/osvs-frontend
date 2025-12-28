@@ -270,7 +270,7 @@ export const MemberDetail = () => {
                         />
                         <button
                           type="button"
-                          className="bg-green-600 hover:bg-green-700 transition transition text-white p-2 rounded"
+                          className="bg-green-600 hover:bg-green-700 transition text-white p-2 rounded"
                           disabled={!selectedAid}
                           onClick={async () => {
                             if (!selectedAid || !id)
@@ -345,7 +345,7 @@ export const MemberDetail = () => {
                       </select>
                       <button
                         type="button"
-                        className="bg-green-600 hover:bg-green-700 transition transition text-white px-3 py-2 rounded"
+                        className="bg-green-600 hover:bg-green-700 text-white px-3 py-2 rounded"
                         onClick={async () => {
                           if (!id) return setGlobalError("Invalid target");
                           clearGlobalError();

@@ -278,7 +278,7 @@ export const CreateUser = () => {
             type="button"
             onClick={handleSubmit(onSubmit)}
             disabled={loading}
-            className="p-2 bg-green-600 hover:bg-green-700 transition transition text-white rounded"
+            className="p-2 bg-green-600 hover:bg-green-700 transition text-white rounded"
           >
             {loading ? "Skapar..." : "Skapa användare"}
           </button>

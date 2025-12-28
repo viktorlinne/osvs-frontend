@@ -94,12 +94,7 @@ export const EventDetail = () => {
     : undefined;
   const paymentStatus =
     typeof rawPaymentStatus === "string" ? rawPaymentStatus : undefined;
-
-  const stripePromise =
-    typeof window !== "undefined" &&
-    (import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY as string)
-      ? loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY as string)
-      : null;
+  // compute event price value (used by payable logic)
   const eventPriceValue = (() => {
     if (!event) return 0;
     const raw = (event as unknown as Record<string, unknown>)["price"];
@@ -110,6 +105,28 @@ export const EventDetail = () => {
     }
     return 0;
   })();
+
+  // Determine if current user may pay this invoice
+  const paymentUid = eventPayment
+    ? Number((eventPayment as Record<string, unknown>)["uid"] ?? 0)
+    : 0;
+  const isOwned = Boolean(user && paymentUid && Number(user.id) === paymentUid);
+  const rawExpires = eventPayment
+    ? (eventPayment as Record<string, unknown>)["expiresAt"]
+    : null;
+  const notExpired =
+    !rawExpires || new Date(String(rawExpires)).getTime() > Date.now();
+  const isPayable =
+    eventPriceValue > 0 &&
+    paymentStatus === "Pending" &&
+    notExpired &&
+    !!isOwned;
+
+  const stripePromise =
+    typeof window !== "undefined" &&
+    (import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY as string)
+      ? loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY as string)
+      : null;
 
   useEffect(() => {
     if (!id) return setGlobalError("Missing event id");
@@ -302,7 +319,7 @@ export const EventDetail = () => {
         {canEdit && !isEditRoute && (
           <Link
             to={`/events/${id}/edit`}
-            className="text-sm text-white bg-green-600 hover:bg-green-700 transition hover:bg-green-700 px-3 py-1 rounded"
+            className="text-sm text-white bg-green-600 hover:bg-green-700 transition px-3 py-1 rounded"
           >
             Edit
           </Link>
@@ -513,13 +530,13 @@ export const EventDetail = () => {
                 <div className="mt-4">
                   {paymentStatus === "Paid" ? (
                     <div className="text-sm text-green-700">Betalt</div>
-                  ) : !showCheckout ? (
+                  ) : isPayable && !showCheckout ? (
                     <button
                       className="bg-green-600 hover:bg-green-700 transition text-white px-4 py-2 rounded"
                       onClick={async () => {
                         if (!event || !id) return;
                         if (checkoutLoading || showCheckout) return;
-                        if (paymentStatus === "Paid") return;
+                        if (!isPayable) return;
                         setCheckoutLoading(true);
                         try {
                           // create (or get existing) payment and PaymentIntent
