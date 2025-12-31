@@ -270,7 +270,7 @@ export const CreateUser = () => {
             type="button"
             onClick={handleSubmit(onSubmit)}
             disabled={loading}
-            className="px-4 py-2 bg-green-600 hover:bg-green-700 transition text-white rounded"
+            className="bg-green-600 hover:bg-green-700 transition text-white px-3 py-2 rounded w-auto"
           >
             {loading ? "Skapar..." : "Skapa användare"}
           </button>

@@ -270,7 +270,7 @@ export const MemberDetail = () => {
                         />
                         <button
                           type="button"
-                          className="bg-green-600 hover:bg-green-700 transition text-white px-4 py-2 rounded"
+                          className="bg-green-600 hover:bg-green-700 transition text-white px-3 py-2 rounded w-auto"
                           disabled={!selectedAid}
                           onClick={async () => {
                             if (!selectedAid || !id)
@@ -345,7 +345,7 @@ export const MemberDetail = () => {
                       </select>
                       <button
                         type="button"
-                        className="bg-green-600 hover:bg-green-700 text-white px-3 py-2 rounded"
+                        className="bg-green-600 hover:bg-green-700 transition text-white px-3 py-2 rounded w-auto"
                         onClick={async () => {
                           if (!id) return setGlobalError("Invalid target");
                           clearGlobalError();
@@ -415,7 +415,7 @@ export const MemberDetail = () => {
                     <div className="mt-2">
                       <button
                         type="button"
-                        className="bg-green-600 hover:bg-green-700 transition text-white px-3 py-1 rounded"
+                        className="bg-green-600 hover:bg-green-700 transition text-white px-3 py-2 rounded w-auto"
                         onClick={async () => {
                           if (!id) return setGlobalError("Invalid target");
                           clearGlobalError();
@@ -697,7 +697,7 @@ export const MemberDetail = () => {
                 <div className="flex items-center gapx-4 py-2 mt-4">
                   <button
                     type="button"
-                    className="bg-green-600 hover:bg-green-700 transition text-white px-4 py-2 rounded"
+                    className="bg-green-600 hover:bg-green-700 transition text-white px-3 py-2 rounded w-auto"
                     disabled={saving}
                     onClick={handleSubmit(async (values) => {
                       if (!id) return setGlobalError("Saknar medlems-id");
@@ -784,4 +784,4 @@ export const MemberDetail = () => {
       </div>
     </div>
   );
-}
+};
