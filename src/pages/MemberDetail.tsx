@@ -4,19 +4,18 @@ import { Spinner, NotFound } from "../components";
 import useFetch from "../hooks/useFetch";
 import { useError, useAuth } from "../context";
 import type { PublicUser, Achievement, Lodge, Role } from "../types";
-import {
-  adminUpdateUser,
-  uploadUserPicture,
-  postAchievement,
-  getUserLodge,
-  setUserLodge,
-} from "../services/users";
+import { postAchievement, getUserLodge, setUserLodge } from "../services/users";
 import achievementsService from "../services/achievements";
 import lodgesService from "../services/lodges";
 import { listRoles } from "../services/admin";
 import { setRoles } from "../services";
 import { useForm } from "react-hook-form";
 import type { UpdateUserForm } from "../types";
+import {
+  AchievementsPanel,
+  RolesManager,
+  ProfileForm,
+} from "../components/profile/";
 
 export const MemberDetail = () => {
   const { id } = useParams<{ id: string }>();
@@ -56,7 +55,6 @@ export const MemberDetail = () => {
     register,
     handleSubmit,
     reset,
-    setError: setFieldError,
     formState: { errors },
   } = useForm<UpdateUserForm>({
     defaultValues: {
@@ -207,577 +205,138 @@ export const MemberDetail = () => {
           member && (
             <form
               onSubmit={handleSubmit(async () => {
-                /* noop; Save button handles submit */
+                /* noop; Save button inside ProfileForm handles submit */
               })}
               className="bg-white p-4 rounded shadow"
             >
-              <div className="grid grid-cols-1 mb-4 justify-items-center">
-                <img
-                  src={`${`${import.meta.env.VITE_BACKEND_URL}${
-                    member.pictureUrl
-                  }`}`}
-                  alt={`${member.firstname} ${member.lastname}`}
-                  className="w-32 h-32 rounded-full object-cover"
-                />
-                <label className="block text-sm font-medium mb-1">
-                  Utmärkelser
-                </label>
-                <div className="flex flex-col items-center">
-                  {achievements && achievements.length > 0 ? (
-                    <select className="border rounded px-3 py-2 mb-2">
-                      {achievements.map((a) => (
-                        <option key={a.id} value={a.id}>
-                          {a.title} —{" "}
-                          {a.awardedAt
-                            ? new Date(a.awardedAt).toLocaleDateString()
-                            : ""}
-                        </option>
-                      ))}
-                    </select>
-                  ) : (
-                    <div className="text-sm text-gray-500">
-                      Inga utmärkelser
-                    </div>
-                  )}
+              {/* Compose shared profile components to match `Profile` structure */}
+              <AchievementsPanel
+                user={member}
+                achievements={achievements}
+                available={available}
+                lodge={lodges.find((l) => l.id === selectedLid) ?? null}
+                lodges={lodges}
+                selectedLid={selectedLid}
+                setSelectedLid={setSelectedLid}
+                onSaveLodge={async (
+                  targetUserId: number,
+                  lodgeId: number | null
+                ) => {
+                  if (!targetUserId) throw new Error("Invalid target");
+                  clearGlobalError();
+                  setSaving(true);
+                  try {
+                    await setUserLodge(
+                      String(targetUserId),
+                      lodgeId === null ? null : Number(lodgeId)
+                    );
+                    await run(async () => {
+                      const resp = await fetch(
+                        `${import.meta.env.VITE_BACKEND_URL}/api/users/${id}`,
+                        { credentials: "include" }
+                      );
+                      if (!resp.ok)
+                        throw new Error("Misslyckades att hämta medlem");
+                      const json = await resp.json();
+                      setAchievements(
+                        Array.isArray(json.achievements)
+                          ? json.achievements
+                          : []
+                      );
+                      return (json.user ?? null) as PublicUser | null;
+                    });
+                  } catch {
+                    setGlobalError("Misslyckades att uppdatera loge");
+                  } finally {
+                    setSaving(false);
+                  }
+                }}
+                isEditRoute={isEditRoute}
+                selectedAid={selectedAid}
+                setSelectedAid={setSelectedAid}
+                awardDate={awardDate}
+                setAwardDate={setAwardDate}
+                canAward={canAward}
+                assignAchievement={async (
+                  targetUserId: number,
+                  achievementId: number,
+                  awardedAt?: string
+                ) => {
+                  if (!targetUserId) throw new Error("Invalid target");
+                  clearGlobalError();
+                  setSaving(true);
+                  try {
+                    await postAchievement(String(targetUserId), {
+                      achievementId,
+                      awardedAt,
+                    });
+                    await run(async () => {
+                      const resp = await fetch(
+                        `${import.meta.env.VITE_BACKEND_URL}/api/users/${id}`,
+                        { credentials: "include" }
+                      );
+                      if (!resp.ok)
+                        throw new Error("Misslyckades att hämta medlem");
+                      const json = await resp.json();
+                      setAchievements(
+                        Array.isArray(json.achievements)
+                          ? json.achievements
+                          : []
+                      );
+                      return (json.user ?? null) as PublicUser | null;
+                    });
+                  } finally {
+                    setSaving(false);
+                  }
+                }}
+              />
 
-                  {canAward && isEditRoute && (
-                    <div className="text-center">
-                      <label className="block text-sm font-medium mb-1">
-                        Tilldela ny utmärkelse
-                      </label>
-                      <div className="flex justify-center gapx-4 py-2">
-                        <select
-                          value={selectedAid ?? ""}
-                          onChange={(e) =>
-                            setSelectedAid(
-                              e.target.value ? Number(e.target.value) : null
-                            )
-                          }
-                          className="border rounded px-3 py-2"
-                        >
-                          <option value="">Välj utmärkelse</option>
-                          {available.map((opt) => (
-                            <option key={opt.id} value={opt.id}>
-                              {opt.title}
-                            </option>
-                          ))}
-                        </select>
-                        <input
-                          type="date"
-                          value={awardDate}
-                          onChange={(e) => setAwardDate(e.target.value)}
-                          className="border rounded px-4 py-2"
-                        />
-                        <button
-                          type="button"
-                          className="bg-green-600 hover:bg-green-700 transition text-white px-3 py-2 rounded w-auto"
-                          disabled={!selectedAid}
-                          onClick={async () => {
-                            if (!selectedAid || !id)
-                              return setGlobalError("Invalid target");
-                            clearGlobalError();
-                            setSaving(true);
-                            try {
-                              await postAchievement(id as string, {
-                                achievementId: selectedAid,
-                                awardedAt: awardDate || undefined,
-                              });
-                              await run(async () => {
-                                const resp = await fetch(
-                                  `${
-                                    import.meta.env.VITE_BACKEND_URL
-                                  }/api/users/${id}`,
-                                  { credentials: "include" }
-                                );
-                                if (!resp.ok)
-                                  throw new Error(
-                                    "Misslyckades att hämta medlem"
-                                  );
-                                const json = await resp.json();
-                                setAchievements(
-                                  Array.isArray(json.achievements)
-                                    ? json.achievements
-                                    : []
-                                );
-                                return (json.user ?? null) as PublicUser | null;
-                              });
-                              setSelectedAid(null);
-                              setAwardDate("");
-                            } catch {
-                              setGlobalError(
-                                "Misslyckades att tilldela utmärkelse"
-                              );
-                            } finally {
-                              setSaving(false);
-                            }
-                          }}
-                        >
-                          Tilldela
-                        </button>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </div>
+              {/* lodge editor moved into AchievementsPanel; no-op here */}
 
-              <div className="mb-4 text-center">
-                {canEdit && isEditRoute ? (
-                  <div>
-                    <label className="block text-sm font-medium mb-1">
-                      Loge
-                    </label>
-                    <div className="flex gapx-4 py-2 items-center justify-center">
-                      <select
-                        value={selectedLid ?? ""}
-                        onChange={(e) =>
-                          setSelectedLid(
-                            e.target.value ? Number(e.target.value) : null
-                          )
-                        }
-                        className="border rounded px-3 py-2"
-                      >
-                        <option value="">Ingen loge</option>
-                        {lodges.map((l) => (
-                          <option key={l.id} value={l.id}>
-                            {l.name}
-                          </option>
-                        ))}
-                      </select>
-                      <button
-                        type="button"
-                        className="bg-green-600 hover:bg-green-700 transition text-white px-3 py-2 rounded w-auto"
-                        onClick={async () => {
-                          if (!id) return setGlobalError("Invalid target");
-                          clearGlobalError();
-                          setSaving(true);
-                          try {
-                            await setUserLodge(
-                              id as string,
-                              selectedLid === null ? null : Number(selectedLid)
-                            );
-                            await run(async () => {
-                              const resp = await fetch(
-                                `${
-                                  import.meta.env.VITE_BACKEND_URL
-                                }/api/users/${id}`,
-                                { credentials: "include" }
-                              );
-                              if (!resp.ok)
-                                throw new Error(
-                                  "Misslyckades att hämta medlem"
-                                );
-                              const json = await resp.json();
-                              setAchievements(
-                                Array.isArray(json.achievements)
-                                  ? json.achievements
-                                  : []
-                              );
-                              return (json.user ?? null) as PublicUser | null;
-                            });
-                          } catch {
-                            setGlobalError("Misslyckades att uppdatera loge");
-                          } finally {
-                            setSaving(false);
-                          }
-                        }}
-                      >
-                        Spara loge
-                      </button>
-                    </div>
-                  </div>
-                ) : null}
+              <RolesManager
+                userId={member?.id}
+                rolesList={rolesList}
+                selectedRoleIds={selectedRoleIds}
+                setSelectedRoleIds={setSelectedRoleIds}
+                canEditRoles={canEdit}
+                isEditRoute={isEditRoute}
+                saveRoles={async (targetUserId: number, ids: number[]) => {
+                  if (!targetUserId) throw new Error("Invalid target");
+                  clearGlobalError();
+                  setSaving(true);
+                  try {
+                    await setRoles(String(targetUserId), ids);
+                    await run(async () => {
+                      const resp = await fetch(
+                        `${import.meta.env.VITE_BACKEND_URL}/api/users/${id}`,
+                        { credentials: "include" }
+                      );
+                      if (!resp.ok)
+                        throw new Error("Misslyckades att hämta medlem");
+                      const json = await resp.json();
+                      setAchievements(
+                        Array.isArray(json.achievements)
+                          ? json.achievements
+                          : []
+                      );
+                      return (json.user ?? null) as PublicUser | null;
+                    });
+                  } finally {
+                    setSaving(false);
+                  }
+                }}
+                setGlobalError={setGlobalError}
+                setSaving={setSaving}
+              />
 
-                {canEdit && isEditRoute ? (
-                  <div className="mt-4">
-                    <label className="block text-sm font-medium mb-1">
-                      Roller
-                    </label>
-                    <div className="flex gapx-4 py-2 flex-wrap">
-                      {rolesList.map((r) => (
-                        <label
-                          key={r.id}
-                          className="inline-flex items-center gapx-4 py-2"
-                        >
-                          <input
-                            type="checkbox"
-                            checked={selectedRoleIds.includes(r.id)}
-                            onChange={(e) => {
-                              const next = e.target.checked
-                                ? [...selectedRoleIds, r.id]
-                                : selectedRoleIds.filter((id) => id !== r.id);
-                              setSelectedRoleIds(next);
-                            }}
-                          />
-                          <span className="text-sm">{r.name}</span>
-                        </label>
-                      ))}
-                    </div>
-                    <div className="mt-2">
-                      <button
-                        type="button"
-                        className="bg-green-600 hover:bg-green-700 transition text-white px-3 py-2 rounded w-auto"
-                        onClick={async () => {
-                          if (!id) return setGlobalError("Invalid target");
-                          clearGlobalError();
-                          setSaving(true);
-                          try {
-                            await setRoles(id as string, selectedRoleIds);
-                            await run(async () => {
-                              const resp = await fetch(
-                                `${
-                                  import.meta.env.VITE_BACKEND_URL
-                                }/api/users/${id}`,
-                                { credentials: "include" }
-                              );
-                              if (!resp.ok)
-                                throw new Error(
-                                  "Misslyckades att hämta medlem"
-                                );
-                              const json = await resp.json();
-                              setAchievements(
-                                Array.isArray(json.achievements)
-                                  ? json.achievements
-                                  : []
-                              );
-                              return (json.user ?? null) as PublicUser | null;
-                            });
-                          } catch {
-                            setGlobalError("Misslyckades att uppdatera roller");
-                          } finally {
-                            setSaving(false);
-                          }
-                        }}
-                      >
-                        Spara roller
-                      </button>
-                    </div>
-                  </div>
-                ) : (
-                  <div>
-                    <label className="block text-sm font-medium mb-1">
-                      Loge
-                    </label>
-                    <div className="text-sm text-gray-700">
-                      {lodges.find((l) => l.id === selectedLid)?.name ??
-                        "Ingen loge"}
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              <div className="grid grid-cols-2 gap-4 mb-4">
-                <div>
-                  <label className="block text-sm font-medium mb-1">
-                    Användarnamn
-                  </label>
-                  <input
-                    value={member.username ?? ""}
-                    readOnly
-                    className="w-full border rounded px-3 py-2 bg-gray-100"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium mb-1">
-                    E-post
-                  </label>
-                  <input
-                    value={member.email ?? ""}
-                    readOnly
-                    className="w-full border rounded px-3 py-2 bg-gray-100"
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4 mb-4">
-                <div>
-                  <label className="block text-sm font-medium mb-1">
-                    Förnamn
-                  </label>
-                  <input
-                    {...register("firstname")}
-                    readOnly={!(canEdit && isEditRoute)}
-                    className={`${
-                      canEdit && isEditRoute ? "" : "bg-gray-100"
-                    } w-full border rounded px-3 py-2`}
-                  />
-                  {errors.firstname && (
-                    <p className="text-red-500 text-sm mt-1">
-                      {errors.firstname?.message}
-                    </p>
-                  )}
-                </div>
-                <div>
-                  <label className="block text-sm font-medium mb-1">
-                    Efternamn
-                  </label>
-                  <input
-                    {...register("lastname")}
-                    readOnly={!(canEdit && isEditRoute)}
-                    className={`${
-                      canEdit && isEditRoute ? "" : "bg-gray-100"
-                    } w-full border rounded px-3 py-2`}
-                  />
-                  {errors.lastname && (
-                    <p className="text-red-500 text-sm mt-1">
-                      {errors.lastname?.message}
-                    </p>
-                  )}
-                </div>
-                <div>
-                  <label className="block text-sm font-medium mb-1">
-                    Födelsedatum
-                  </label>
-                  <input
-                    type="date"
-                    {...register("dateOfBirth")}
-                    readOnly={!(canEdit && isEditRoute)}
-                    className={`${
-                      canEdit && isEditRoute ? "" : "bg-gray-100"
-                    } w-full border rounded px-3 py-2`}
-                  />
-                  {errors.dateOfBirth && (
-                    <p className="text-red-500 text-sm mt-1">
-                      {errors.dateOfBirth?.message}
-                    </p>
-                  )}
-                </div>
-                <div>
-                  <label className="block text-sm font-medium mb-1">
-                    Gick med
-                  </label>
-                  <input
-                    value={
-                      member.createdAt
-                        ? new Date(member.createdAt).toLocaleDateString()
-                        : ""
-                    }
-                    readOnly
-                    className="w-full border rounded px-3 py-2 bg-gray-100"
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4 mb-4">
-                <div className="mb-4">
-                  <label className="block text-sm font-medium mb-1">
-                    Mobilnummer
-                  </label>
-                  <input
-                    type="number"
-                    {...register("mobile")}
-                    readOnly={!(canEdit && isEditRoute)}
-                    className={`${
-                      canEdit && isEditRoute ? "" : "bg-gray-100"
-                    } w-full border rounded px-3 py-2`}
-                  />
-                  {errors.mobile && (
-                    <p className="text-red-500 text-sm mt-1">
-                      {errors.mobile?.message}
-                    </p>
-                  )}
-                </div>
-                <div className="mb-4">
-                  <label className="block text-sm font-medium mb-1">
-                    Hemnummer
-                  </label>
-                  <input
-                    type="number"
-                    {...register("homeNumber")}
-                    readOnly={!(canEdit && isEditRoute)}
-                    className={`${
-                      canEdit && isEditRoute ? "" : "bg-gray-100"
-                    } w-full border rounded px-3 py-2`}
-                  />
-                </div>
-              </div>
-
-              <div className="mb-4">
-                <label className="block text-sm font-medium mb-1">Adress</label>
-                <input
-                  {...register("address")}
-                  readOnly={!(canEdit && isEditRoute)}
-                  className={`${
-                    canEdit && isEditRoute ? "" : "bg-gray-100"
-                  } w-full border rounded px-3 py-2`}
-                />
-                {errors.address && (
-                  <p className="text-red-500 text-sm mt-1">
-                    {errors.address?.message}
-                  </p>
-                )}
-              </div>
-
-              <div className="grid grid-cols-2 gap-4 mb-4">
-                <div>
-                  <label className="block text-sm font-medium mb-1">
-                    Postnummer
-                  </label>
-                  <input
-                    type="number"
-                    {...register("zipcode")}
-                    readOnly={!(canEdit && isEditRoute)}
-                    className={`${
-                      canEdit && isEditRoute ? "" : "bg-gray-100"
-                    } w-full border rounded px-3 py-2`}
-                  />
-                  {errors.zipcode && (
-                    <p className="text-red-500 text-sm mt-1">
-                      {errors.zipcode?.message}
-                    </p>
-                  )}
-                </div>
-                <div>
-                  <label className="block text-sm font-medium mb-1">Stad</label>
-                  <input
-                    {...register("city")}
-                    readOnly={!(canEdit && isEditRoute)}
-                    className={`${
-                      canEdit && isEditRoute ? "" : "bg-gray-100"
-                    } w-full border rounded px-3 py-2`}
-                  />
-                  {errors.city && (
-                    <p className="text-red-500 text-sm mt-1">
-                      {errors.city?.message}
-                    </p>
-                  )}
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium mb-1">Tjänst</label>
-                <input
-                  type="text"
-                  {...register("official")}
-                  readOnly={!(canEdit && isEditRoute)}
-                  className={`${
-                    canEdit && isEditRoute ? "" : "bg-gray-100"
-                  } w-full border rounded px-3 py-2`}
-                />
-                {errors.official && (
-                  <p className="text-red-500 text-sm mt-1">
-                    {errors.official?.message}
-                  </p>
-                )}
-              </div>
-
-              <div className="mb-4">
-                <label className="block text-sm font-medium mb-1">
-                  Noteringar
-                </label>
-                <input
-                  type="text"
-                  {...register("notes")}
-                  readOnly={!(canEdit && isEditRoute)}
-                  className={`${
-                    canEdit && isEditRoute ? "" : "bg-gray-100"
-                  } w-full border rounded px-3 py-2`}
-                />
-              </div>
-
-              {canEdit && isEditRoute && (
-                <div className="mt-2">
-                  <label className="block text-sm font-medium mb-1">
-                    Uppdatera profilbild
-                  </label>
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={(e) =>
-                      setPictureFile(
-                        e.target.files && e.target.files.length > 0
-                          ? e.target.files[0]
-                          : null
-                      )
-                    }
-                  />
-                </div>
-              )}
-
-              {canEdit && isEditRoute && (
-                <div className="flex items-center gapx-4 py-2 mt-4">
-                  <button
-                    type="button"
-                    className="bg-green-600 hover:bg-green-700 transition text-white px-3 py-2 rounded w-auto"
-                    disabled={saving}
-                    onClick={handleSubmit(async (values) => {
-                      if (!id) return setGlobalError("Saknar medlems-id");
-                      clearGlobalError();
-                      setSaving(true);
-                      try {
-                        await adminUpdateUser(id as string, {
-                          firstname: String(values.firstname ?? "").trim(),
-                          lastname: String(values.lastname ?? "").trim(),
-                          mobile: String(values.mobile ?? "").trim(),
-                          homeNumber: values.homeNumber
-                            ? String(values.homeNumber)
-                            : null,
-                          city: String(values.city ?? "").trim(),
-                          dateOfBirth: values.dateOfBirth
-                            ? String(values.dateOfBirth)
-                            : null,
-                          address: values.address
-                            ? String(values.address)
-                            : null,
-                          zipcode: values.zipcode
-                            ? String(values.zipcode)
-                            : null,
-                          official: values.official ?? null,
-                          notes: values.notes ?? null,
-                        });
-                        if (pictureFile)
-                          await uploadUserPicture(id as string, pictureFile);
-                        // re-fetch
-                        await run(async () => {
-                          const resp = await fetch(
-                            `${
-                              import.meta.env.VITE_BACKEND_URL
-                            }/api/users/${id}`,
-                            { credentials: "include" }
-                          );
-                          if (!resp.ok)
-                            throw new Error("Misslyckades att hämta medlem");
-                          const json = await resp.json();
-                          setAchievements(
-                            Array.isArray(json.achievements)
-                              ? json.achievements
-                              : []
-                          );
-                          return (json.user ?? null) as PublicUser | null;
-                        });
-                      } catch (e: unknown) {
-                        const err = e as { status?: number; details?: unknown };
-                        if (
-                          err?.status === 400 &&
-                          err.details &&
-                          typeof err.details === "object"
-                        ) {
-                          const rec = err.details as Record<string, unknown>;
-                          const missing = Array.isArray(rec.missing)
-                            ? rec.missing
-                            : undefined;
-                          if (missing) {
-                            missing.forEach((p: unknown) => {
-                              if (typeof p === "string")
-                                setFieldError(p as keyof UpdateUserForm, {
-                                  type: "server",
-                                  message: "Ogiltigt värde",
-                                });
-                            });
-                            setSaving(false);
-                            return;
-                          }
-                        }
-                        setGlobalError("Misslyckades att uppdatera medlem");
-                      } finally {
-                        setSaving(false);
-                      }
-                    })}
-                  >
-                    Spara
-                  </button>
-                  {saving && <Spinner />}
-                </div>
-              )}
+              <ProfileForm
+                user={member}
+                register={register}
+                errors={errors}
+                isEditRoute={isEditRoute}
+                setPictureFile={setPictureFile}
+                saving={saving}
+              />
             </form>
           )
         )}

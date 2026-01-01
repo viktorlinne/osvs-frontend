@@ -1,7 +1,7 @@
 import { Spinner } from "../../components";
 import type { PublicUser, UpdateUserForm } from "../../types";
 import type { UseFormRegister, FieldErrors } from "react-hook-form";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 
 export const ProfileForm = ({
   user,
@@ -19,8 +19,10 @@ export const ProfileForm = ({
   saving: boolean;
 }) => {
   const navigate = useNavigate();
+  const location = useLocation();
   const handleSubmit = () => {
-    navigate("/profile");
+    const newPath = location.pathname.replace(/\/edit$/, "");
+    navigate(newPath, { replace: true });
   };
   return (
     <>

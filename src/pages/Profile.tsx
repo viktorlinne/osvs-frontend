@@ -1,5 +1,8 @@
 import { useState, useEffect } from "react";
 import { useLocation } from "react-router-dom";
+import lodgesService from "../services/lodges";
+import { setUserLodge } from "../services/users";
+import type { Lodge } from "../types";
 import { useAuth, useError } from "../context";
 import { updateMe, uploadMyPicture } from "../services";
 import { useForm } from "react-hook-form";
@@ -20,6 +23,8 @@ export const Profile = () => {
 
   const [saving, setSaving] = useState(false);
   const [pictureFile, setPictureFile] = useState<File | null>(null);
+  const [lodges, setLodges] = useState<Lodge[]>([]);
+  const [selectedLid, setSelectedLid] = useState<number | null>(null);
   const {
     achievements,
     available,
@@ -76,6 +81,25 @@ export const Profile = () => {
       zipcode: user?.zipcode ?? "",
     });
   }, [user, reset]);
+
+  useEffect(() => {
+    let mounted = true;
+    (async () => {
+      try {
+        const list = await lodgesService.listLodges();
+        if (mounted) setLodges(Array.isArray(list) ? list : []);
+      } catch {
+        // ignore
+      }
+    })();
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  useEffect(() => {
+    setSelectedLid(lodge?.id ? Number(lodge.id) : null);
+  }, [lodge]);
 
   async function onSave(values: Record<string, unknown>) {
     clearGlobalError();
@@ -137,6 +161,21 @@ export const Profile = () => {
             achievements={achievements}
             available={available}
             lodge={lodge}
+            lodges={lodges}
+            selectedLid={selectedLid}
+            setSelectedLid={setSelectedLid}
+            onSaveLodge={async (targetUserId: number, lodgeId: number | null) => {
+              if (!targetUserId) throw new Error("Invalid target");
+              setSaving(true);
+              try {
+                await setUserLodge(String(targetUserId), lodgeId === null ? null : Number(lodgeId));
+                await refresh();
+              } catch {
+                // signal handled by useProfile refresh fallback
+              } finally {
+                setSaving(false);
+              }
+            }}
             isEditRoute={isEditRoute}
             selectedAid={selectedAid}
             setSelectedAid={setSelectedAid}
