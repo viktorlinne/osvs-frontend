@@ -76,7 +76,7 @@ export const LodgeDetail = () => {
         {canEdit && !isEditRoute && (
           <Link
             to={`/lodges/${id}/edit`}
-            className="text-sm text-white bg-green-600 hover:bg-green-700 transition px-3 py-1 rounded"
+            className="text-sm text-white bg-green-600 hover:bg-green-700 transition px-3 py-1 rounded-md"
           >
             Edit
           </Link>
@@ -86,7 +86,7 @@ export const LodgeDetail = () => {
       <h2 className="text-2xl font-bold mt-4 mb-4">Loge</h2>
 
       {lodge ? (
-        <div className="bg-white p-4 rounded shadow">
+        <div className="bg-white p-4 rounded-md shadow">
           {isEditRoute && canEdit ? (
             <div className="space-y-4">
               <div>
@@ -94,7 +94,7 @@ export const LodgeDetail = () => {
                 <input
                   value={form.name}
                   onChange={(e) => setForm({ ...form, name: e.target.value })}
-                  className="w-full border rounded px-3 py-2"
+                  className="w-full border rounded-md px-3 py-2"
                 />
               </div>
               <div>
@@ -106,7 +106,7 @@ export const LodgeDetail = () => {
                   onChange={(e) =>
                     setForm({ ...form, description: e.target.value })
                   }
-                  className="w-full border rounded px-3 py-2"
+                  className="w-full border rounded-md px-3 py-2"
                 />
               </div>
               <div>
@@ -116,12 +116,12 @@ export const LodgeDetail = () => {
                   onChange={(e) =>
                     setForm({ ...form, address: e.target.value })
                   }
-                  className="w-full border rounded px-3 py-2"
+                  className="w-full border rounded-md px-3 py-2"
                 />
               </div>
               <div className="flex gapx-4 py-2">
                 <button
-                  className="bg-green-600 hover:bg-green-700 transition text-white px-4 py-2 rounded"
+                  className="bg-green-600 hover:bg-green-700 transition text-white px-4 py-2 rounded-md"
                   onClick={handleSave}
                   disabled={saving}
                 >
@@ -129,7 +129,7 @@ export const LodgeDetail = () => {
                 </button>
                 <Link
                   to={`/lodges/${id}`}
-                  className="bg-gray-100 hover:bg-gray-200 transition px-4 py-2 rounded border"
+                  className="bg-gray-100 hover:bg-gray-200 transition px-4 py-2 rounded-md border"
                 >
                   Avbryt
                 </Link>

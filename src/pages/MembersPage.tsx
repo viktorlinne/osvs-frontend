@@ -72,7 +72,7 @@ export const MembersPage = () => {
           (user.roles ?? []).some((r) => ["Admin", "Editor"].includes(r)) && (
             <Link
               to="/users/create"
-              className="text-white bg-green-600 hover:bg-green-700 transition px-3 py-2 rounded"
+              className="text-white bg-green-600 hover:bg-green-700 transition px-3 py-2 rounded-md"
             >
               Skapa Användare
             </Link>
@@ -84,14 +84,14 @@ export const MembersPage = () => {
             placeholder="Sök förnamn eller efternamn"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            className="flex-1 px-4 py-2 border rounded"
+            className="flex-1 px-4 py-2 border rounded-md"
           />
           <select
             value={achievementId ?? ""}
             onChange={(e) =>
               setAchievementId(e.target.value ? Number(e.target.value) : null)
             }
-            className="px-4 py-2 border rounded"
+            className="px-4 py-2 border rounded-md"
           >
             <option value="">Alla grader</option>
             {achievements.map((a) => (
@@ -105,7 +105,7 @@ export const MembersPage = () => {
             onChange={(e) =>
               setLodgeId(e.target.value ? Number(e.target.value) : null)
             }
-            className="px-4 py-2 border rounded"
+            className="px-4 py-2 border rounded-md"
           >
             <option value="">Alla loger</option>
             {lodges.map((l) => (
@@ -123,14 +123,14 @@ export const MembersPage = () => {
               <Link
                 to={`/members/${member.id}`}
                 key={member.id}
-                className="block p-3 bg-white rounded shadow"
+                className="block p-3 bg-white rounded-md shadow"
               >
                 <img
                   src={`${import.meta.env.VITE_BACKEND_URL}${
                     member.pictureUrl
                   }`}
                   alt={`${member.firstname} ${member.lastname}`}
-                  className="w-16 h-16 rounded-full mb-2"
+                  className="w-16 h-16 rounded-md-full mb-2"
                 />
                 <div className="font-semibold">
                   {member.firstname} {member.lastname}

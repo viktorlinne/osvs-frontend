@@ -140,21 +140,25 @@ export const NewsDetail = () => {
           <p className="text-red-500">{error}</p>
         ) : null}
 
-        {post && !isEditRoute && (
-          <>
-            <h1 className="text-2xl font-bold mt-4 mb-2">{post.title}</h1>
-            {post.pictureUrl && (
-              <img
-                src={`${import.meta.env.VITE_BACKEND_URL}${post.pictureUrl}`}
-                alt={post.title}
-                className="w-full h-64 object-cover rounded mb-4"
-              />
-            )}
-            <div className="prose">
-              <p>{post.description}</p>
+          {post && !isEditRoute && (
+            <div className="mt-4 grid gap-4 md:grid-cols-3">
+              {post.pictureUrl && (
+                <div className="md:col-span-1">
+                  <img
+                    src={`${import.meta.env.VITE_BACKEND_URL}${post.pictureUrl}`}
+                    alt={post.title}
+                    className="w-full h-64 md:h-full object-cover rounded"
+                  />
+                </div>
+              )}
+              <div className="md:col-span-2">
+                <h1 className="text-2xl font-bold mb-2">{post.title}</h1>
+                <div className="prose">
+                  <p>{post.description}</p>
+                </div>
+              </div>
             </div>
-          </>
-        )}
+          )}
 
         {post && isEditRoute && canEdit && (
           <form
@@ -199,7 +203,7 @@ export const NewsDetail = () => {
               />
             </div>
 
-            <div className="flex items-center gapx-4 py-2">
+            <div className="flex items-center gap-x-4 py-2">
               <button
                 type="submit"
                 className="bg-green-600 hover:bg-green-700 transition text-white px-4 py-2 rounded disabled:opacity-60"

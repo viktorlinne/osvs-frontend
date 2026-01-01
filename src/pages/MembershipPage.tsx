@@ -105,7 +105,7 @@ export const MembershipPage = () => {
           {payments.map((p) => (
             <li
               key={p.id}
-              className="border rounded p-3 flex justify-between items-center"
+              className="border rounded-md p-3 flex justify-between items-center"
             >
               <div>
                 <div className="font-semibold">År: {p.year}</div>
@@ -120,7 +120,7 @@ export const MembershipPage = () => {
                 </div>
                 {p.status === "Pending" && (
                   <button
-                    className="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded"
+                    className="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded-md"
                     onClick={() => void handlePay(p)}
                     disabled={checkoutLoading}
                   >
@@ -134,7 +134,7 @@ export const MembershipPage = () => {
       )}
 
       {showCheckout && clientSecret && stripePromise && (
-        <div className="mt-4 w-full max-w-2xl bg-gray-50 p-4 rounded">
+        <div className="mt-4 w-full max-w-2xl bg-gray-50 p-4 rounded-md">
           <Elements stripe={stripePromise} options={{ clientSecret }}>
             <StripeForm
               onClose={async () => {

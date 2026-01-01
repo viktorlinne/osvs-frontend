@@ -175,7 +175,7 @@ export const EventsPage = () => {
             (user.roles ?? []).some((r) => ["Admin", "Editor"].includes(r)) && (
               <Link
                 to="/events/create"
-                className="text-white bg-green-600 hover:bg-green-700 transition px-3 py-2 rounded"
+                className="text-white bg-green-600 hover:bg-green-700 transition px-3 py-2 rounded-md"
               >
                 Skapa Möte
               </Link>
@@ -189,7 +189,7 @@ export const EventsPage = () => {
         </div>
       </div>
 
-      <div className="grid grid-cols-7 gap-1 border rounded-lg overflow-hidden">
+      <div className="grid grid-cols-7 gap-1 border rounded-md-lg overflow-hidden">
         {WEEK_DAYS.map((wd) => (
           <div
             key={wd}
@@ -220,7 +220,7 @@ export const EventsPage = () => {
                 >
                   <div className="flex items-start justify-between">
                     <div
-                      className={`w-6 h-6 flex items-center justify-center rounded-full ${
+                      className={`w-6 h-6 flex items-center justify-center rounded-md-full ${
                         isToday ? "bg-green-600 text-white" : "text-gray-700"
                       }`}
                     >
@@ -244,7 +244,7 @@ export const EventsPage = () => {
                               <Link
                                 key={e.id}
                                 to={`/events/${e.id}`}
-                                className="block w-full truncate rounded px-1 py-0.5 text-xs bg-green-50 text-green-800 hover:bg-green-100 transition overflow-hidden"
+                                className="block w-full truncate rounded-md px-1 py-0.5 text-xs bg-green-50 text-green-800 hover:bg-green-100 transition overflow-hidden"
                                 title={e.title}
                               >
                                 {e.title}

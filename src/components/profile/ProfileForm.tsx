@@ -32,7 +32,7 @@ export const ProfileForm = ({
           <input
             value={user?.username ?? ""}
             readOnly
-            className="w-full border rounded px-3 py-2 bg-gray-100"
+            className="w-full border rounded-md px-3 py-2 bg-gray-100"
           />
         </div>
         <div className="mb-4">
@@ -40,7 +40,7 @@ export const ProfileForm = ({
           <input
             value={user?.email ?? ""}
             readOnly
-            className="w-full border rounded px-3 py-2 bg-gray-100"
+            className="w-full border rounded-md px-3 py-2 bg-gray-100"
           />
         </div>
       </div>
@@ -53,7 +53,7 @@ export const ProfileForm = ({
             readOnly={!isEditRoute}
             className={`${
               isEditRoute ? "" : "bg-gray-100"
-            } w-full border rounded px-3 py-2`}
+            } w-full border rounded-md px-3 py-2`}
           />
           {errors.firstname && (
             <p className="text-red-500 text-sm  ">
@@ -68,7 +68,7 @@ export const ProfileForm = ({
             readOnly={!isEditRoute}
             className={`${
               isEditRoute ? "" : "bg-gray-100"
-            } w-full border rounded px-3 py-2`}
+            } w-full border rounded-md px-3 py-2`}
           />
           {errors.lastname && (
             <p className="text-red-500 text-sm  ">{errors.lastname?.message}</p>
@@ -85,7 +85,7 @@ export const ProfileForm = ({
             readOnly={!isEditRoute}
             className={`${
               isEditRoute ? "" : "bg-gray-100"
-            } w-full border rounded px-3 py-2`}
+            } w-full border rounded-md px-3 py-2`}
           />
           {errors.dateOfBirth && (
             <p className="text-red-500 text-sm  ">
@@ -102,7 +102,7 @@ export const ProfileForm = ({
                 : ""
             }
             readOnly
-            className="w-full border rounded px-3 py-2 bg-gray-100"
+            className="w-full border rounded-md px-3 py-2 bg-gray-100"
           />
         </div>
       </div>
@@ -116,7 +116,7 @@ export const ProfileForm = ({
             readOnly={!isEditRoute}
             className={`${
               isEditRoute ? "" : "bg-gray-100"
-            } w-full border rounded px-3 py-2`}
+            } w-full border rounded-md px-3 py-2`}
           />
           {errors.mobile && (
             <p className="text-red-500 text-sm  ">{errors.mobile?.message}</p>
@@ -130,7 +130,7 @@ export const ProfileForm = ({
             readOnly={!isEditRoute}
             className={`${
               isEditRoute ? "" : "bg-gray-100"
-            } w-full border rounded px-3 py-2`}
+            } w-full border rounded-md px-3 py-2`}
           />
         </div>
       </div>
@@ -143,7 +143,7 @@ export const ProfileForm = ({
             readOnly={!isEditRoute}
             className={`${
               isEditRoute ? "" : "bg-gray-100"
-            } w-full border rounded px-3 py-2`}
+            } w-full border rounded-md px-3 py-2`}
           />
           {errors.address && (
             <p className="text-red-500 text-sm  ">{errors.address?.message}</p>
@@ -157,7 +157,7 @@ export const ProfileForm = ({
             readOnly={!isEditRoute}
             className={`${
               isEditRoute ? "" : "bg-gray-100"
-            } w-full border rounded px-3 py-2`}
+            } w-full border rounded-md px-3 py-2`}
           />
           {errors.zipcode && (
             <p className="text-red-500 text-sm  ">{errors.zipcode?.message}</p>
@@ -170,7 +170,7 @@ export const ProfileForm = ({
             readOnly={!isEditRoute}
             className={`${
               isEditRoute ? "" : "bg-gray-100"
-            } w-full border rounded px-3 py-2`}
+            } w-full border rounded-md px-3 py-2`}
           />
           {errors.city && (
             <p className="text-red-500 text-sm  ">{errors.city?.message}</p>
@@ -186,7 +186,7 @@ export const ProfileForm = ({
           readOnly={!isEditRoute}
           className={`${
             isEditRoute ? "" : "bg-gray-100"
-          } w-full border rounded px-3 py-2`}
+          } w-full border rounded-md px-3 py-2`}
         />
         {errors.official && (
           <p className="text-red-500 text-sm  ">{errors.official?.message}</p>
@@ -201,7 +201,7 @@ export const ProfileForm = ({
           readOnly={!isEditRoute}
           className={`${
             isEditRoute ? "" : "bg-gray-100"
-          } w-full border rounded px-3 py-2`}
+          } w-full border rounded-md px-3 py-2`}
         />
         {errors.notes && (
           <p className="text-red-500 text-sm  ">{errors.notes?.message}</p>
@@ -228,7 +228,7 @@ export const ProfileForm = ({
           <button
             type="submit"
             onClick={handleSubmit}
-            className="bg-green-600 hover:bg-green-700 transition text-white px-4 py-2 rounded"
+            className="bg-green-600 hover:bg-green-700 transition text-white px-4 py-2 rounded-md"
             disabled={saving}
           >
             Spara

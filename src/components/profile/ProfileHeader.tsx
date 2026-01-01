@@ -15,7 +15,7 @@ export const ProfileHeader = ({
     {user && !isEditRoute && (
       <Link
         to="/profile/edit"
-        className="bg-green-600 hover:bg-green-700 transition text-white px-2 py-1 rounded w-auto"
+        className="bg-green-600 hover:bg-green-700 transition text-white px-2 py-1 rounded-md w-auto"
       >
         Edit
       </Link>

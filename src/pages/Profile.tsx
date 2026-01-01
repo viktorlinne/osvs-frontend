@@ -154,7 +154,7 @@ export const Profile = () => {
         <h2 className="text-2xl font-bold mt-4 mb-4">Din profil</h2>
         <form
           onSubmit={handleSubmit(onSave)}
-          className="bg-white p-4 rounded shadow"
+          className="bg-white p-4 rounded-md shadow"
         >
           <AchievementsPanel
             user={user}

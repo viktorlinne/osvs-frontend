@@ -319,7 +319,7 @@ export const EventDetail = () => {
         {canEdit && !isEditRoute && (
           <Link
             to={`/events/${id}/edit`}
-            className="text-sm text-white bg-green-600 hover:bg-green-700 transition px-3 py-1 rounded"
+            className="text-sm text-white bg-green-600 hover:bg-green-700 transition px-3 py-1 rounded-md"
           >
             Edit
           </Link>
@@ -329,7 +329,7 @@ export const EventDetail = () => {
       <h2 className="text-2xl font-bold mt-4 mb-4">Möte</h2>
 
       {event ? (
-        <div className="bg-white p-4 rounded shadow">
+        <div className="bg-white p-4 rounded-md shadow">
           {isEditRoute && canEdit ? (
             <div className="space-y-4">
               <div>
@@ -337,7 +337,7 @@ export const EventDetail = () => {
                 <input
                   value={form.title}
                   onChange={(e) => setForm({ ...form, title: e.target.value })}
-                  className="w-full border rounded px-3 py-2"
+                  className="w-full border rounded-md px-3 py-2"
                 />
               </div>
               <div>
@@ -349,7 +349,7 @@ export const EventDetail = () => {
                   onChange={(e) =>
                     setForm({ ...form, description: e.target.value })
                   }
-                  className="w-full border rounded px-3 py-2"
+                  className="w-full border rounded-md px-3 py-2"
                 />
               </div>
               <div className="grid grid-cols-2 gap-4">
@@ -363,7 +363,7 @@ export const EventDetail = () => {
                     onChange={(e) =>
                       setForm({ ...form, startDate: e.target.value })
                     }
-                    className="w-full border rounded px-3 py-2"
+                    className="w-full border rounded-md px-3 py-2"
                   />
                 </div>
                 <div>
@@ -376,7 +376,7 @@ export const EventDetail = () => {
                     onChange={(e) =>
                       setForm({ ...form, endDate: e.target.value })
                     }
-                    className="w-full border rounded px-3 py-2"
+                    className="w-full border rounded-md px-3 py-2"
                   />
                 </div>
               </div>
@@ -388,7 +388,7 @@ export const EventDetail = () => {
                     onChange={(e) =>
                       setForm({ ...form, price: e.target.value })
                     }
-                    className="w-full border rounded px-3 py-2"
+                    className="w-full border rounded-md px-3 py-2"
                   />
                 </div>
                 <div className="flex items-center gapx-4 py-2">
@@ -409,7 +409,7 @@ export const EventDetail = () => {
                 <label className="block text-sm font-medium mb-1">
                   Associera loger
                 </label>
-                <div className="grid grid-cols-2 gapx-4 py-2 max-h-40 overflow-auto px-4 border rounded bg-gray-50">
+                <div className="grid grid-cols-2 gapx-4 py-2 max-h-40 overflow-auto px-4 border rounded-md bg-gray-50">
                   {lodges.map((l) => (
                     <label key={l.id} className="flex items-center gapx-4 py-2">
                       <input
@@ -436,7 +436,7 @@ export const EventDetail = () => {
               </div>
               <div className="flex gapx-4 py-2">
                 <button
-                  className="bg-green-600 hover:bg-green-700 transition text-white px-4 py-2 rounded"
+                  className="bg-green-600 hover:bg-green-700 transition text-white px-4 py-2 rounded-md"
                   onClick={handleSave}
                   disabled={saving}
                 >
@@ -444,7 +444,7 @@ export const EventDetail = () => {
                 </button>
                 <Link
                   to={`/events/${id}`}
-                  className="bg-gray-100 hover:bg-gray-200 transition px-4 py-2 rounded border"
+                  className="bg-gray-100 hover:bg-gray-200 transition px-4 py-2 rounded-md border"
                 >
                   Avbryt
                 </Link>
@@ -496,7 +496,7 @@ export const EventDetail = () => {
                   {user && (
                     <>
                       <button
-                        className={`px-3 py-1 rounded ${
+                        className={`px-3 py-1 rounded-md ${
                           rsvp === "yes"
                             ? "bg-green-600 hover:bg-green-700 transition text-white"
                             : "bg-gray-100 hover:bg-gray-200 transition"
@@ -507,7 +507,7 @@ export const EventDetail = () => {
                         Ja
                       </button>
                       <button
-                        className={`px-3 py-1 rounded ${
+                        className={`px-3 py-1 rounded-md ${
                           rsvp === "no"
                             ? "bg-red-600 hover:bg-red-700 transition text-white"
                             : "bg-gray-100 hover:bg-gray-200 transition"
@@ -532,7 +532,7 @@ export const EventDetail = () => {
                     <div className="text-sm text-green-700">Betalt</div>
                   ) : isPayable && !showCheckout ? (
                     <button
-                      className="bg-green-600 hover:bg-green-700 transition text-white px-4 py-2 rounded"
+                      className="bg-green-600 hover:bg-green-700 transition text-white px-4 py-2 rounded-md"
                       onClick={async () => {
                         if (!event || !id) return;
                         if (checkoutLoading || showCheckout) return;
@@ -571,7 +571,7 @@ export const EventDetail = () => {
                 clientSecret &&
                 stripePromise &&
                 (!eventPayment || paymentStatus !== "Paid") && (
-                  <div className="mt-4 bg-gray-50 p-4 rounded">
+                  <div className="mt-4 bg-gray-50 p-4 rounded-md">
                     <Elements stripe={stripePromise} options={{ clientSecret }}>
                       <StripeForm
                         onClose={async () => {

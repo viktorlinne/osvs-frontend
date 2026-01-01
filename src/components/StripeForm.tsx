@@ -37,11 +37,11 @@ export default function StripeForm({ onClose }: { onClose: () => void }) {
         <button
           type="submit"
           disabled={!stripe || submitting}
-          className="bg-green-600 hover:bg-green-700 transition text-white px-4 py-2 rounded"
+          className="bg-green-600 hover:bg-green-700 transition text-white px-4 py-2 rounded-md"
         >
           {submitting ? "Betalar…" : "Betala"}
         </button>
-        <button type="button" onClick={onClose} className="bg-gray-100 hover:bg-gray-200 transition px-4 py-2 border rounded">
+        <button type="button" onClick={onClose} className="bg-gray-100 hover:bg-gray-200 transition px-4 py-2 border rounded-md">
           Avbryt
         </button>
       </div>

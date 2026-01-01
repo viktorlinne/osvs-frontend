@@ -107,7 +107,7 @@ export const CreateEvent = () => {
 
       <form
         onSubmit={handleCreate}
-        className="bg-white p-4 rounded shadow space-y-4"
+        className="bg-white p-4 rounded-md shadow space-y-4"
       >
         <div>
           <label className="block text-sm font-medium mb-1">Titel</label>
@@ -115,7 +115,7 @@ export const CreateEvent = () => {
             required
             value={form.title}
             onChange={(e) => setForm({ ...form, title: e.target.value })}
-            className="w-full border rounded px-3 py-2"
+            className="w-full border rounded-md px-3 py-2"
           />
         </div>
 
@@ -125,7 +125,7 @@ export const CreateEvent = () => {
             required
             value={form.description}
             onChange={(e) => setForm({ ...form, description: e.target.value })}
-            className="w-full border rounded px-3 py-2"
+            className="w-full border rounded-md px-3 py-2"
           />
         </div>
 
@@ -137,7 +137,7 @@ export const CreateEvent = () => {
               type="date"
               value={form.startDate}
               onChange={(e) => setForm({ ...form, startDate: e.target.value })}
-              className="w-full border rounded px-3 py-2"
+              className="w-full border rounded-md px-3 py-2"
             />
           </div>
           <div>
@@ -147,7 +147,7 @@ export const CreateEvent = () => {
               type="date"
               value={form.endDate}
               onChange={(e) => setForm({ ...form, endDate: e.target.value })}
-              className="w-full border rounded px-3 py-2"
+              className="w-full border rounded-md px-3 py-2"
             />
           </div>
         </div>
@@ -158,7 +158,7 @@ export const CreateEvent = () => {
             <input
               value={form.price}
               onChange={(e) => setForm({ ...form, price: e.target.value })}
-              className="w-full border rounded px-3 py-2"
+              className="w-full border rounded-md px-3 py-2"
             />
           </div>
           <div className="flex items-center gapx-4 py-2">
@@ -180,7 +180,7 @@ export const CreateEvent = () => {
           <label className="block text-sm font-medium mb-1">
             Associera loger
           </label>
-          <div className="grid grid-cols-2 gapx-4 max-h-40 overflow-auto px-4 py-2 border rounded bg-gray-50">
+          <div className="grid grid-cols-2 gapx-4 max-h-40 overflow-auto px-4 py-2 border rounded-md bg-gray-50">
             {lodges.map((l) => (
               <label key={l.id} className="flex items-center gapx-4 py-2">
                 <input
@@ -207,14 +207,14 @@ export const CreateEvent = () => {
         <div className="flex gapx-4 py-2">
           <button
             type="submit"
-            className="bg-green-600 text-white px-4 py-2 rounded"
+            className="bg-green-600 text-white px-4 py-2 rounded-md"
             disabled={saving}
           >
             {saving ? "Skapar…" : "Skapa"}
           </button>
           <Link
             to="/events"
-            className="bg-gray-100 hover:bg-gray-200 transition px-4 py-2 rounded border"
+            className="bg-gray-100 hover:bg-gray-200 transition px-4 py-2 rounded-md border"
           >
             Avbryt
           </Link>

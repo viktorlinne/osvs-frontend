@@ -30,7 +30,7 @@ export const LodgesPage = () => {
               <Link
                 to={`/lodges/${lodge.id}`}
                 key={lodge.id}
-                className="block p-3 bg-white rounded shadow"
+                className="block p-3 bg-white rounded-md shadow"
               >
                 <div className="font-semibold">{lodge.name}</div>
                 {lodge.description && (

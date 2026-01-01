@@ -32,7 +32,7 @@ export const LoginPage = () => {
     <div className="flex flex-col items-center justify-center min-h-screen">
       <form
         onSubmit={submit}
-        className="max-w-md w-full bg-white p-6 rounded shadow"
+        className="max-w-md w-full bg-white p-6 rounded-md shadow"
       >
         <h2 className="text-2xl font-bold mb-4">Logga in</h2>
         {/* top-level errors shown by ErrorProvider */}
@@ -58,7 +58,7 @@ export const LoginPage = () => {
         </label>
         <button
           type="submit"
-          className="px-4 py-2 rounded bg-green-600 hover:bg-green-700 transition text-white "
+          className="px-4 py-2 rounded-md bg-green-600 hover:bg-green-700 transition text-white "
           disabled={loading}
         >
           {loading ? "Loggar in..." : "Logga in"}

@@ -71,13 +71,13 @@ export const CreatePost = () => {
         <h2 className="text-2xl font-bold mt-4 mb-4">Skapa inlägg</h2>
         <form
           onSubmit={handleSubmit(onSubmit)}
-          className="bg-white p-4 rounded shadow"
+          className="bg-white p-4 rounded-md shadow"
         >
           <div className="mb-4">
             <label className="block font-medium mb-1">Titel</label>
             <input
               {...register("title")}
-              className="w-full border rounded px-3 py-2"
+              className="w-full border rounded-md px-3 py-2"
             />
             {errors.title && (
               <div className="text-red-600 mt-1">{errors.title?.message}</div>
@@ -89,7 +89,7 @@ export const CreatePost = () => {
             <textarea
               {...register("description")}
               rows={6}
-              className="w-full border rounded px-3 py-2"
+              className="w-full border rounded-md px-3 py-2"
             />
             {errors.description && (
               <div className="text-red-600 mt-1">
@@ -112,7 +112,7 @@ export const CreatePost = () => {
           <div className="flex items-center gapx-4 py-2">
             <button
               type="submit"
-              className="bg-green-600 hover:bg-green-700 transition text-white px-4 py-2 rounded disabled:opacity-60"
+              className="text-sm text-white bg-green-600 hover:bg-green-700 transition px-3 py-2 rounded-md"
               disabled={loading}
             >
               Skapa

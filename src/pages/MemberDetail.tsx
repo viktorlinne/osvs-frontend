@@ -190,7 +190,7 @@ export const MemberDetail = () => {
           {canEdit && !isEditRoute && (
             <Link
               to={`/members/${id}/edit`}
-              className="text-sm text-white bg-green-600 hover:bg-green-700 transition px-3 py-1 rounded"
+              className="text-sm text-white bg-green-600 hover:bg-green-700 transition px-3 py-1 rounded-md"
             >
               Edit
             </Link>
@@ -207,7 +207,7 @@ export const MemberDetail = () => {
               onSubmit={handleSubmit(async () => {
                 /* noop; Save button inside ProfileForm handles submit */
               })}
-              className="bg-white p-4 rounded shadow"
+              className="bg-white p-4 rounded-md shadow"
             >
               {/* Compose shared profile components to match `Profile` structure */}
               <AchievementsPanel

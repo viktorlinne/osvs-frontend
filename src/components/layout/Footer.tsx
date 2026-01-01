@@ -21,25 +21,25 @@ export const Footer: React.FC = () => {
             <div className="flex flex-wrap justify-center gap-2">
               <NavLink
                 to="/"
-                className="px-3 py-1 text-sm rounded hover:bg-gray-100"
+                className="px-3 py-1 text-sm rounded-md hover:bg-gray-100"
               >
                 Hem
               </NavLink>
               <NavLink
                 to="/about"
-                className="px-3 py-1 text-sm rounded hover:bg-gray-100"
+                className="px-3 py-1 text-sm rounded-md hover:bg-gray-100"
               >
                 Om VS
               </NavLink>
               <NavLink
                 to="/gdpr"
-                className="px-3 py-1 text-sm rounded hover:bg-gray-100"
+                className="px-3 py-1 text-sm rounded-md hover:bg-gray-100"
               >
                 GDPR
               </NavLink>
               <NavLink
                 to="/contact"
-                className="px-3 py-1 text-sm rounded hover:bg-gray-100"
+                className="px-3 py-1 text-sm rounded-md hover:bg-gray-100"
               >
                 Kontakt
               </NavLink>
@@ -47,19 +47,19 @@ export const Footer: React.FC = () => {
                 <>
                   <NavLink
                     to="/news"
-                    className="px-3 py-1 text-sm rounded hover:bg-gray-100"
+                    className="px-3 py-1 text-sm rounded-md hover:bg-gray-100"
                   >
                     Nyheter
                   </NavLink>
                   <NavLink
                     to="/members"
-                    className="px-3 py-1 text-sm rounded hover:bg-gray-100"
+                    className="px-3 py-1 text-sm rounded-md hover:bg-gray-100"
                   >
                     Medlemmar
                   </NavLink>
                   <NavLink
                     to="/lodges"
-                    className="px-3 py-1 text-sm rounded hover:bg-gray-100"
+                    className="px-3 py-1 text-sm rounded-md hover:bg-gray-100"
                   >
                     Lodger
                   </NavLink>

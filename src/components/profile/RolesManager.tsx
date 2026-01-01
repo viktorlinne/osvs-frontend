@@ -31,7 +31,7 @@ export const RolesManager = ({
           {rolesList.map((r) => (
             <label
               key={r.id}
-              className="inline-flex items-center gap-2 border rounded px-3 py-2"
+              className="inline-flex items-center gap-2 border rounded-md px-3 py-2"
             >
               <input
                 type="checkbox"
@@ -48,7 +48,7 @@ export const RolesManager = ({
           ))}
           <button
             type="button"
-            className="bg-green-600 hover:bg-green-700 transition text-white px-3 py-2 rounded w-auto"
+            className="bg-green-600 hover:bg-green-700 transition text-white px-3 py-2 rounded-md w-auto"
             onClick={async () => {
               if (!userId) return setGlobalError("Invalid target");
               try {
