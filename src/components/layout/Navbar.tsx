@@ -1,9 +1,9 @@
 import React, { useState } from "react";
 import axios from "axios";
 import { NavLink, useNavigate } from "react-router-dom";
-import { useAuth, useError } from "../context";
-import type { ApiError } from "../types";
-import { isApiError } from "../types/api";
+import { useAuth, useError } from "../../context";
+import type { ApiError } from "../../types";
+import { isApiError } from "../../types/api";
 
 export const Navbar: React.FC = () => {
   const { user, logout } = useAuth();
