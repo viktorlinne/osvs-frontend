@@ -321,7 +321,7 @@ export const EventDetail = () => {
             to={`/events/${id}/edit`}
             className="text-sm text-white bg-green-600 hover:bg-green-700 transition px-3 py-1 rounded-md"
           >
-            Edit
+            Redigera
           </Link>
         )}
       </div>

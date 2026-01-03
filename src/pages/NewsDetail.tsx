@@ -129,7 +129,7 @@ export const NewsDetail = () => {
               to={`/news/${post.id}/edit`}
               className="text-sm text-white bg-green-600 hover:bg-green-700 transition px-3 py-1 rounded"
             >
-              Edit
+              Redigera
             </Link>
           )}
         </div>

@@ -17,7 +17,7 @@ export const ProfileHeader = ({
         to="/profile/edit"
         className="bg-green-600 hover:bg-green-700 transition text-white px-2 py-1 rounded-md w-auto"
       >
-        Edit
+        Redigera
       </Link>
     )}
   </div>
