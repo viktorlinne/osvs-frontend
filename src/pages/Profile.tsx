@@ -13,7 +13,7 @@ import {
   AchievementsPanel,
   RolesManager,
   ProfileForm,
-} from "../components/profile/";
+} from "../components/profile";
 
 export const Profile = () => {
   const { user, refresh } = useAuth();

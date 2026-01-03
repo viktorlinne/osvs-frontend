@@ -41,7 +41,7 @@ export const AchievementsPanel = ({
     <div className="w-full flex flex-col gap-4 mb-4">
       <div className="flex flex-col items-center">
         <img
-          className="rounded-md-full w-28 h-28 md:w-40 md:h-40 object-cover mb-1"
+          className="rounded-full w-28 h-28 md:w-40 md:h-40 object-cover mb-1"
           src={`${import.meta.env.VITE_BACKEND_URL}${user?.pictureUrl}`}
           alt={`${user?.firstname} ${user?.lastname}`}
         />

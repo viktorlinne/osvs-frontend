@@ -65,20 +65,20 @@ export const MembersPage = () => {
   }, [doFetch]);
 
   return (
-    <div className="flex flex-col items-center min-h-screen">
-      <div className="max-w-3xl w-full mx-auto p-6">
+    <div className="flex flex-col items-center min-h-screen py-6 px-4">
+      <div className="w-full max-w-4xl mx-auto p-4 md:p-6">
         <h2 className="text-2xl font-bold mb-4">Medlemmar</h2>
         {user &&
           (user.roles ?? []).some((r) => ["Admin", "Editor"].includes(r)) && (
             <Link
-              to="/users/create"
+              to="/members/create"
               className="text-white bg-green-600 hover:bg-green-700 transition px-3 py-2 rounded-md"
             >
               Skapa Användare
             </Link>
           )}
 
-        <div className="flex gap-x-4 py-2 mb-4">
+        <div className="flex flex-col sm:flex-row gap-y-2 sm:gap-y-0 sm:gap-x-4 py-2 mb-4">
           <input
             type="search"
             placeholder="Sök förnamn eller efternamn"
@@ -118,24 +118,24 @@ export const MembersPage = () => {
 
         {loading && <Spinner />}
         {Array.isArray(members) && (
-          <div className="grid gap-4">
+          <div className="w-full grid gap-4 grid-cols-1 sm:grid-cols-2 md:grid-cols-3">
             {members.map((member: PublicUser) => (
               <Link
                 to={`/members/${member.id}`}
                 key={member.id}
-                className="block p-3 bg-white rounded-md shadow"
+                className="p-4 bg-white rounded-md shadow flex items-center gap-x-4"
               >
                 <img
-                  src={`${import.meta.env.VITE_BACKEND_URL}${
-                    member.pictureUrl
-                  }`}
+                  src={`${import.meta.env.VITE_BACKEND_URL}${member.pictureUrl}`}
                   alt={`${member.firstname} ${member.lastname}`}
-                  className="w-16 h-16 rounded-md-full mb-2"
+                  className="w-16 h-16 rounded-full flex-shrink-0"
                 />
-                <div className="font-semibold">
-                  {member.firstname} {member.lastname}
+                <div>
+                  <div className="font-semibold">
+                    {member.firstname} {member.lastname}
+                  </div>
+                  <div className="text-sm text-gray-500">{member.email}</div>
                 </div>
-                <div className="text-sm text-gray-500">{member.email}</div>
               </Link>
             ))}
           </div>
