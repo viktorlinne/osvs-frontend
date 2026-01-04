@@ -220,7 +220,7 @@ export const EventsPage = () => {
                 >
                   <div className="flex items-start justify-between">
                     <div
-                      className={`w-6 h-6 flex items-center justify-center rounded-md-full ${
+                      className={`w-6 h-6 flex items-center justify-center rounded-md ${
                         isToday ? "bg-green-600 text-white" : "text-gray-700"
                       }`}
                     >

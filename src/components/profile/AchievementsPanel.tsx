@@ -55,7 +55,7 @@ export const AchievementsPanel = ({
         <div className="text-center mb-1 w-full">
           <label className="block font-medium">Loge</label>
           {isEditRoute && lodges && setSelectedLid && onSaveLodge ? (
-            <div className="flex flex-col md:flex-row items-center justify-center gap-x-4 py-2">
+            <div className="flex flex-col md:flex-row items-center justify-center gap-2 py-2">
               <select
                 value={selectedLid ?? ""}
                 onChange={(e) => setSelectedLid(e.target.value ? Number(e.target.value) : null)}
