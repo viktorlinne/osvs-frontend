@@ -145,14 +145,9 @@ export const EventsPage = () => {
 
   return (
     <div className="p-6 w-full xl:max-w-[1100px] mx-auto min-h-screen">
-      <h2 className="text-2xl font-bold mb-4">Möteskalender</h2>
       <div className="flex flex-col sm:flex-row gap-y-2 sm:gap-y-0 sm:gap-x-4 py-2 mb-4">
         <div className="flex items-center justify-between w-full ">
-          <div className="mb-4 flex items-center justify-between">
-            <p className="text-xl font-medium">
-              {formatMonthNameSv(viewDate)} {year}
-            </p>
-          </div>
+          <h2 className="text-2xl font-bold mb-4">Möteskalender</h2>
           <div className="flex flex-col sm:flex-row gap-y-2 sm:gap-y-0 sm:gap-x-2">
             <button
               onClick={prevMonth}
@@ -187,6 +182,11 @@ export const EventsPage = () => {
               )}
           </div>
         </div>
+      </div>
+      <div className="mb-4 flex items-center justify-between">
+        <p className="text-xl font-medium">
+          {formatMonthNameSv(viewDate)} {year}
+        </p>
       </div>
       <div className="grid grid-cols-7 gap-1 border rounded-md-lg overflow-hidden">
         {WEEK_DAYS.map((wd) => (
@@ -229,7 +229,9 @@ export const EventsPage = () => {
 
                   <div className="mt-2 text-xs text-gray-600 min-w-0 overflow-hidden">
                     {loading && <div className="text-gray-400">Laddar…</div>}
-                    {!loading && date && (() => {
+                    {!loading &&
+                      date &&
+                      (() => {
                         const key = formatDateKey(date);
                         const evs = eventsByDate[key] ?? [];
                         if (evs.length === 0) return null;

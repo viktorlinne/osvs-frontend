@@ -12,13 +12,21 @@ export const ProfileHeader = ({
     <Link to="/news" className="text-sm text-green-600 underline">
       ← Tillbaka
     </Link>
-    {user && !isEditRoute && (
+    <div className="flex flex-col md:flex-row items-center gap-2">
+      {user && !isEditRoute && (
+        <Link
+          to="/profile/edit"
+          className="w-full text-sm font-medium text-white text-center bg-green-600 hover:bg-green-700 transition px-3 py-2 rounded-md"
+        >
+          Redigera
+        </Link>
+      )}
       <Link
-        to="/profile/edit"
-        className="text-sm font-medium text-white bg-green-600 hover:bg-green-700 transition px-3 py-2 rounded-md"
+        to="/profile/memberships"
+        className="w-full text-sm font-medium text-white bg-green-600 hover:bg-green-700 transition px-3 py-2 rounded-md"
       >
-        Redigera
+        Medlemskap
       </Link>
-    )}
+    </div>
   </div>
 );

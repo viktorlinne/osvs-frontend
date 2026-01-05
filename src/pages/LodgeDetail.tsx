@@ -71,7 +71,7 @@ export const LodgeDetail = () => {
     <div className="max-w-3xl w-full mx-auto p-6 min-h-screen">
       <div className="flex items-center justify-between">
         <Link to="/lodges" className="text-sm text-green-600 underline">
-          ← Tillbaka till loger
+          ← Tillbaka
         </Link>
         {canEdit && !isEditRoute && (
           <Link

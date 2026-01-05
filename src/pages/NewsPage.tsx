@@ -37,7 +37,7 @@ export const NewsPage = () => {
   }, [run, setError, clearError]);
 
   return (
-    <div className="flex flex-col items-center min-h-screen py-6 px-4">
+    <div className="flex flex-col items-center min-h-screen p-6">
       <div className="w-full max-w-3xl flex items-center justify-between mb-4">
         <h2 className="text-2xl font-bold mb-4">Nyheter</h2>
         {user &&

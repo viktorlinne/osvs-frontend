@@ -5,6 +5,7 @@ import { loadStripe } from "@stripe/stripe-js";
 import { Elements } from "@stripe/react-stripe-js";
 import StripeForm from "../components/StripeForm";
 import type { MembershipPayment } from "../types";
+import { Link } from "react-router-dom";
 
 export const MembershipPage = () => {
   const [payments, setPayments] = useState<MembershipPayment[] | null>(null);
@@ -94,8 +95,12 @@ export const MembershipPage = () => {
   }
 
   return (
-    <div className="flex flex-col items-center justify-start min-h-screen p-6">
+    <div className="max-w-3xl w-full mx-auto p-6 min-h-screen flex flex-col items-center">
+      <Link to="/profile" className="w-full flex justify-start mb-4 text-sm text-green-600 underline">
+        ← Tillbaka
+      </Link>
       <h2 className="text-2xl font-bold mb-4">Medlemskaps Betalningar</h2>
+      
       {loading && <div>Laddar…</div>}
       {!loading && payments && payments.length === 0 && (
         <div>Inga medlemskapsbetalningar hittades.</div>
@@ -114,13 +119,13 @@ export const MembershipPage = () => {
                 </div>
                 <div>Status: {p.status}</div>
               </div>
-              <div className="flex items-center gapx-4 py-2">
+              <div className="flex items-center gap-x-4 py-2">
                 <div className="text-sm text-gray-500">
                   {formatDate(p.createdAt)}
                 </div>
                 {p.status === "Pending" && (
                   <button
-                    className="bg-green-600 hover:bg-green-700 text-sm font-medium text-white px-3 py-1 rounded-md"
+                    className="bg-green-600 hover:bg-green-700 text-sm font-medium text-white px-3 py-2 rounded-md"
                     onClick={() => void handlePay(p)}
                     disabled={checkoutLoading}
                   >

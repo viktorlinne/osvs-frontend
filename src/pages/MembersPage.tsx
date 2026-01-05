@@ -65,7 +65,7 @@ export const MembersPage = () => {
   }, [doFetch]);
 
   return (
-    <div className="flex flex-col items-center min-h-screen py-6 px-4">
+    <div className="flex flex-col items-center min-h-screen p-6">
       <div className="w-full max-w-4xl mx-auto p-4 md:p-6">
         <h2 className="text-2xl font-bold mb-4">Medlemmar</h2>
         <div className="flex flex-col md:flex-row gap-y-2 md:gap-y-0 md:gap-x-4 py-2 mb-4">

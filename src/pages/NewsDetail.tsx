@@ -122,7 +122,7 @@ export const NewsDetail = () => {
       <div className="max-w-3xl w-full mx-auto p-6">
         <div className="flex items-center justify-between">
           <Link to="/news" className="text-sm text-green-600 underline">
-            ← Tillbaka till nyheter
+            ← Tillbaka
           </Link>
           {canEdit && post && !isEditRoute && (
             <Link

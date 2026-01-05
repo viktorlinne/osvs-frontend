@@ -185,7 +185,7 @@ export const MemberDetail = () => {
       <div className="max-w-3xl w-full mx-auto p-6">
         <div className="flex items-center justify-between">
           <Link to="/members" className="text-sm text-green-600 underline">
-            ← Tillbaka till medlemmar
+            ← Tillbaka
           </Link>
           {canEdit && !isEditRoute && (
             <Link
