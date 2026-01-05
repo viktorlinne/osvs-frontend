@@ -112,7 +112,7 @@ export const CreatePost = () => {
           <div className="flex items-center gapx-4 py-2">
             <button
               type="submit"
-              className="text-sm text-white bg-green-600 hover:bg-green-700 transition px-3 py-2 rounded-md"
+              className="text-sm font-medium text-white bg-green-600 hover:bg-green-700 transition px-3 py-2 rounded-md"
               disabled={loading}
             >
               Skapa

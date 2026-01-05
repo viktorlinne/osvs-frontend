@@ -68,17 +68,7 @@ export const MembersPage = () => {
     <div className="flex flex-col items-center min-h-screen py-6 px-4">
       <div className="w-full max-w-4xl mx-auto p-4 md:p-6">
         <h2 className="text-2xl font-bold mb-4">Medlemmar</h2>
-        {user &&
-          (user.roles ?? []).some((r) => ["Admin", "Editor"].includes(r)) && (
-            <Link
-              to="/members/create"
-              className="text-white bg-green-600 hover:bg-green-700 transition px-3 py-2 rounded-md"
-            >
-              Skapa Användare
-            </Link>
-          )}
-
-        <div className="flex flex-col sm:flex-row gap-y-2 sm:gap-y-0 sm:gap-x-4 py-2 mb-4">
+        <div className="flex flex-col md:flex-row gap-y-2 md:gap-y-0 md:gap-x-4 py-2 mb-4">
           <input
             type="search"
             placeholder="Sök förnamn eller efternamn"
@@ -114,11 +104,20 @@ export const MembersPage = () => {
               </option>
             ))}
           </select>
+          {user &&
+            (user.roles ?? []).some((r) => ["Admin", "Editor"].includes(r)) && (
+              <Link
+                to="/members/create"
+                className="flex items-center text-white bg-green-600 hover:bg-green-700 text-sm font-medium transition px-3 py-2 rounded-md"
+              >
+                Skapa
+              </Link>
+            )}
         </div>
 
         {loading && <Spinner />}
         {Array.isArray(members) && (
-          <div className="w-full grid gap-4 grid-cols-1 sm:grid-cols-2 md:grid-cols-3">
+          <div className="w-full grid gap-4 grid-cols-1 sm:grid-cols-1 lg:grid-cols-3">
             {members.map((member: PublicUser) => (
               <Link
                 to={`/members/${member.id}`}
@@ -126,7 +125,9 @@ export const MembersPage = () => {
                 className="p-4 bg-white rounded-md shadow flex items-center gap-x-4"
               >
                 <img
-                  src={`${import.meta.env.VITE_BACKEND_URL}${member.pictureUrl}`}
+                  src={`${import.meta.env.VITE_BACKEND_URL}${
+                    member.pictureUrl
+                  }`}
                   alt={`${member.firstname} ${member.lastname}`}
                   className="w-16 h-16 rounded-full flex-shrink-0"
                 />

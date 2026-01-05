@@ -76,7 +76,7 @@ export const LodgeDetail = () => {
         {canEdit && !isEditRoute && (
           <Link
             to={`/lodges/${id}/edit`}
-            className="text-sm text-white bg-green-600 hover:bg-green-700 transition px-3 py-1 rounded-md"
+            className="text-sm font-medium text-white bg-green-600 hover:bg-green-700  transition px-3 py-2 rounded-md"
           >
             Redigera
           </Link>
@@ -121,7 +121,7 @@ export const LodgeDetail = () => {
               </div>
               <div className="flex gapx-4 py-2">
                 <button
-                  className="bg-green-600 hover:bg-green-700 transition text-white px-4 py-2 rounded-md"
+                  className="bg-green-600 hover:bg-green-700 text-sm font-medium transition text-white px-4 py-2 rounded-md"
                   onClick={handleSave}
                   disabled={saving}
                 >

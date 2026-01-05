@@ -68,7 +68,7 @@ export const AchievementsPanel = ({
               </select>
               <button
                 type="button"
-                className="bg-green-600 hover:bg-green-700 transition text-white px-3 py-2 rounded-md w-full md:w-auto"
+                className="bg-green-600 hover:bg-green-700 text-sm font-medium transition text-white px-3 py-2 rounded-md w-full md:w-auto"
                 onClick={async () => {
                   if (!user?.id) return;
                   await onSaveLodge(user.id, selectedLid ?? null);
@@ -126,7 +126,7 @@ export const AchievementsPanel = ({
               />
               <button
                 type="button"
-                className="bg-green-600 hover:bg-green-700 transition text-white px-3 py-2 rounded-md w-auto"
+                className="bg-green-600 hover:bg-green-700 text-sm font-medium transition text-white px-3 py-2 rounded-md w-auto"
                 disabled={!selectedAid || !user?.id}
                 onClick={async () => {
                   if (!selectedAid || !user?.id) return;

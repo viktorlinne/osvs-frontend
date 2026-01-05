@@ -39,12 +39,12 @@ export const NewsPage = () => {
   return (
     <div className="flex flex-col items-center min-h-screen py-6 px-4">
       <div className="w-full max-w-3xl flex items-center justify-between mb-4">
-        <h2 className="text-3xl font-bold">Nyheter</h2>
+        <h2 className="text-2xl font-bold mb-4">Nyheter</h2>
         {user &&
           (user.roles ?? []).some((r) => ["Admin", "Editor"].includes(r)) && (
             <Link
               to="/posts/create"
-              className="text-sm text-white bg-green-600 hover:bg-green-700 transition px-3 py-2 rounded-md"
+              className="flex text-white bg-green-600 hover:bg-green-700 text-sm font-medium transition px-3 py-2 rounded-md "
             >
               Skapa Inlägg
             </Link>

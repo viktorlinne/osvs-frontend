@@ -190,7 +190,7 @@ export const MemberDetail = () => {
           {canEdit && !isEditRoute && (
             <Link
               to={`/members/${id}/edit`}
-              className="text-sm text-white bg-green-600 hover:bg-green-700 transition px-3 py-1 rounded-md"
+              className="text-sm font-medium text-white bg-green-600 hover:bg-green-700 transition px-3 py-2 rounded-md"
             >
               Redigera
             </Link>

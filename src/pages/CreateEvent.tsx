@@ -207,14 +207,14 @@ export const CreateEvent = () => {
         <div className="flex gapx-4 py-2">
           <button
             type="submit"
-            className="bg-green-600 text-white px-4 py-2 rounded-md"
+            className="bg-green-600 hover:bg-green-700 text-sm font-medium text-white px-4 py-2 rounded-md"
             disabled={saving}
           >
             {saving ? "Skapar…" : "Skapa"}
           </button>
           <Link
             to="/events"
-            className="bg-gray-100 hover:bg-gray-200 transition px-4 py-2 rounded-md border"
+            className="bg-gray-100 hover:bg-gray-200 text-sm font-medium transition px-4 py-2 rounded-md border"
           >
             Avbryt
           </Link>

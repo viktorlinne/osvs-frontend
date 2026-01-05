@@ -48,7 +48,7 @@ export const RolesManager = ({
           ))}
           <button
             type="button"
-            className="bg-green-600 hover:bg-green-700 transition text-white px-3 py-2 rounded-md w-auto"
+            className="bg-green-600 hover:bg-green-700 text-sm font-medium transition text-white px-3 py-2 rounded-md w-auto"
             onClick={async () => {
               if (!userId) return setGlobalError("Invalid target");
               try {

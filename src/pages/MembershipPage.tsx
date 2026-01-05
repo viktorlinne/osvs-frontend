@@ -120,7 +120,7 @@ export const MembershipPage = () => {
                 </div>
                 {p.status === "Pending" && (
                   <button
-                    className="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded-md"
+                    className="bg-green-600 hover:bg-green-700 text-sm font-medium text-white px-3 py-1 rounded-md"
                     onClick={() => void handlePay(p)}
                     disabled={checkoutLoading}
                   >

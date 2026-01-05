@@ -81,7 +81,7 @@ export const Navbar: React.FC = () => {
                   <NavButton to="/profile">Profil</NavButton>
                   <button
                     onClick={handleLogout}
-                    className="px-3 py-2 rounded-md bg-red-600 text-white hover:bg-red-700 transition"
+                    className="block px-3 py-2 rounded-md text-sm font-medium transition bg-red-600 hover:bg-red-700 text-white"
                   >
                     Logga ut
                   </button>
@@ -150,7 +150,7 @@ export const Navbar: React.FC = () => {
                       setOpen(false);
                       void handleLogout();
                     }}
-                    className="w-full text-left px-3 py-2 rounded-md text-sm font-medium text-red-600 hover:bg-gray-100"
+                    className="block px-3 py-2 rounded-md text-sm font-medium transition text-red-600 hover:bg-gray-100"
                   >
                     Logga ut
                   </button>

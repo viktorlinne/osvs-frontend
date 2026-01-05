@@ -144,51 +144,50 @@ export const EventsPage = () => {
   }
 
   return (
-    <div className="p-6 w-full max-w-4xl md:max-w-5xl lg:max-w-6xl xl:max-w-[1100px] mx-auto min-h-screen">
-      <div className="flex items-center justify-between mb-4">
-        <div>
-          <p className="text-sm text-gray-500">Möteskalender</p>
-        </div>
-
-        <div className="flex items-center gapx-4 py-2">
-          <button
-            onClick={prevMonth}
-            className="px-3 py-1 rounded-md bg-gray-100 hover:bg-gray-200 transition"
-            aria-label="Previous month"
-          >
-            Förra
-          </button>
-          <button
-            onClick={jumpToToday}
-            className="px-3 py-1 rounded-md bg-white border hover:bg-gray-50 transition"
-          >
-            Hoppa till idag
-          </button>
-          <button
-            onClick={nextMonth}
-            className="px-3 py-1 rounded-md bg-gray-100 hover:bg-gray-200 transition"
-            aria-label="Next month"
-          >
-            Nästa
-          </button>
-          {user &&
-            (user.roles ?? []).some((r) => ["Admin", "Editor"].includes(r)) && (
-              <Link
-                to="/events/create"
-                className="text-white bg-green-600 hover:bg-green-700 transition px-3 py-2 rounded-md"
-              >
-                Skapa Möte
-              </Link>
-            )}
+    <div className="p-6 w-full xl:max-w-[1100px] mx-auto min-h-screen">
+      <h2 className="text-2xl font-bold mb-4">Möteskalender</h2>
+      <div className="flex flex-col sm:flex-row gap-y-2 sm:gap-y-0 sm:gap-x-4 py-2 mb-4">
+        <div className="flex items-center justify-between w-full ">
+          <div className="mb-4 flex items-center justify-between">
+            <p className="text-xl font-medium">
+              {formatMonthNameSv(viewDate)} {year}
+            </p>
+          </div>
+          <div className="flex flex-col sm:flex-row gap-y-2 sm:gap-y-0 sm:gap-x-2">
+            <button
+              onClick={prevMonth}
+              className="transition px-3 py-2 rounded-md text-sm font-medium bg-gray-100 hover:bg-gray-200"
+              aria-label="Previous month"
+            >
+              Förra
+            </button>
+            <button
+              onClick={jumpToToday}
+              className="transition px-3 py-2 rounded-md text-sm font-medium bg-gray-100 hover:bg-gray-200"
+            >
+              Hoppa till idag
+            </button>
+            <button
+              onClick={nextMonth}
+              className="transition px-3 py-2 rounded-md text-sm font-medium bg-gray-100 hover:bg-gray-200"
+              aria-label="Next month"
+            >
+              Nästa
+            </button>
+            {user &&
+              (user.roles ?? []).some((r) =>
+                ["Admin", "Editor"].includes(r)
+              ) && (
+                <Link
+                  to="/events/create"
+                  className="flex text-white bg-green-600 hover:bg-green-700 text-sm font-medium transtion px-3 py-2 rounded-md"
+                >
+                  Skapa Möte
+                </Link>
+              )}
+          </div>
         </div>
       </div>
-
-      <div className="mb-4 flex items-center justify-between">
-        <div className="text-lg font-medium">
-          {formatMonthNameSv(viewDate)} {year}
-        </div>
-      </div>
-
       <div className="grid grid-cols-7 gap-1 border rounded-md-lg overflow-hidden">
         {WEEK_DAYS.map((wd) => (
           <div
@@ -220,7 +219,7 @@ export const EventsPage = () => {
                 >
                   <div className="flex items-start justify-between">
                     <div
-                      className={`w-6 h-6 flex items-center justify-center rounded-md ${
+                      className={`w-6 h-6 flex items-center justify-center rounded-full ${
                         isToday ? "bg-green-600 text-white" : "text-gray-700"
                       }`}
                     >

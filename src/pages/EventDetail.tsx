@@ -319,7 +319,7 @@ export const EventDetail = () => {
         {canEdit && !isEditRoute && (
           <Link
             to={`/events/${id}/edit`}
-            className="text-sm text-white bg-green-600 hover:bg-green-700 transition px-3 py-1 rounded-md"
+            className="text-sm font-medium text-white bg-green-600 hover:bg-green-700 transition px-3 py-2 rounded-md"
           >
             Redigera
           </Link>
@@ -436,7 +436,7 @@ export const EventDetail = () => {
               </div>
               <div className="flex gapx-4 py-2">
                 <button
-                  className="bg-green-600 hover:bg-green-700 transition text-white px-4 py-2 rounded-md"
+                  className="bg-green-600 hover:bg-green-700 text-sm font-medium transition text-white px-4 py-2 rounded-md"
                   onClick={handleSave}
                   disabled={saving}
                 >
@@ -498,8 +498,8 @@ export const EventDetail = () => {
                       <button
                         className={`px-3 py-1 rounded-md ${
                           rsvp === "yes"
-                            ? "bg-green-600 hover:bg-green-700 transition text-white"
-                            : "bg-gray-100 hover:bg-gray-200 transition"
+                            ? "bg-green-600 hover:bg-green-700 text-sm font-medium transition text-white"
+                            : "bg-gray-100 hover:bg-gray-200 text-sm font-medium transition"
                         }`}
                         onClick={() => void handleSetRsvp("yes")}
                         disabled={rsvpLoading}
@@ -509,8 +509,8 @@ export const EventDetail = () => {
                       <button
                         className={`px-3 py-1 rounded-md ${
                           rsvp === "no"
-                            ? "bg-red-600 hover:bg-red-700 transition text-white"
-                            : "bg-gray-100 hover:bg-gray-200 transition"
+                            ? "bg-red-600 hover:bg-red-700 text-sm font-medium transition text-white"
+                            : "bg-gray-100 hover:bg-gray-200 text-sm font-medium transition"
                         }`}
                         onClick={() => void handleSetRsvp("no")}
                         disabled={rsvpLoading}
@@ -532,7 +532,7 @@ export const EventDetail = () => {
                     <div className="text-sm text-green-700">Betalt</div>
                   ) : isPayable && !showCheckout ? (
                     <button
-                      className="bg-green-600 hover:bg-green-700 transition text-white px-4 py-2 rounded-md"
+                      className="bg-green-600 hover:bg-green-700 text-sm font-medium transition text-white px-4 py-2 rounded-md"
                       onClick={async () => {
                         if (!event || !id) return;
                         if (checkoutLoading || showCheckout) return;

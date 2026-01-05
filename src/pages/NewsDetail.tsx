@@ -127,7 +127,7 @@ export const NewsDetail = () => {
           {canEdit && post && !isEditRoute && (
             <Link
               to={`/news/${post.id}/edit`}
-              className="text-sm text-white bg-green-600 hover:bg-green-700 transition px-3 py-1 rounded"
+              className="text-sm font-medium text-white bg-green-600 hover:bg-green-700 transition px-3 py-2 rounded-md"
             >
               Redigera
             </Link>
@@ -140,25 +140,25 @@ export const NewsDetail = () => {
           <p className="text-red-500">{error}</p>
         ) : null}
 
-          {post && !isEditRoute && (
-            <div className="mt-4 grid gap-4 md:grid-cols-3">
-              {post.pictureUrl && (
-                <div className="md:col-span-1">
-                  <img
-                    src={`${import.meta.env.VITE_BACKEND_URL}${post.pictureUrl}`}
-                    alt={post.title}
-                    className="w-full h-64 md:h-full object-cover rounded"
-                  />
-                </div>
-              )}
-              <div className="md:col-span-2">
-                <h1 className="text-2xl font-bold mb-2">{post.title}</h1>
-                <div className="prose">
-                  <p>{post.description}</p>
-                </div>
+        {post && !isEditRoute && (
+          <div className="mt-4 grid gap-4 md:grid-cols-3">
+            {post.pictureUrl && (
+              <div className="md:col-span-1">
+                <img
+                  src={`${import.meta.env.VITE_BACKEND_URL}${post.pictureUrl}`}
+                  alt={post.title}
+                  className="w-full h-64 md:h-full object-cover rounded"
+                />
+              </div>
+            )}
+            <div className="md:col-span-2">
+              <h1 className="text-2xl font-bold mb-2">{post.title}</h1>
+              <div className="prose">
+                <p>{post.description}</p>
               </div>
             </div>
-          )}
+          </div>
+        )}
 
         {post && isEditRoute && canEdit && (
           <form
@@ -206,7 +206,7 @@ export const NewsDetail = () => {
             <div className="flex items-center gap-x-4 py-2">
               <button
                 type="submit"
-                className="bg-green-600 hover:bg-green-700 transition text-white px-4 py-2 rounded disabled:opacity-60"
+                className="bg-green-600 hover:bg-green-700 text-sm font-medium transition text-white px-4 py-2 rounded disabled:opacity-60"
                 disabled={submitting}
               >
                 Spara
