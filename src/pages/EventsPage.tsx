@@ -229,10 +229,7 @@ export const EventsPage = () => {
 
                   <div className="mt-2 text-xs text-gray-600 min-w-0 overflow-hidden">
                     {loading && <div className="text-gray-400">Laddar…</div>}
-                    {!loading &&
-                      !Error &&
-                      date &&
-                      (() => {
+                    {!loading && date && (() => {
                         const key = formatDateKey(date);
                         const evs = eventsByDate[key] ?? [];
                         if (evs.length === 0) return null;
