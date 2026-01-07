@@ -1,10 +1,16 @@
 import { useEffect, useState } from "react";
-import { useParams, Link, useLocation } from "react-router-dom";
+import { useParams, Link, useLocation, useNavigate } from "react-router-dom";
 import { Spinner, NotFound } from "../components";
 import useFetch from "../hooks/useFetch";
 import { useError, useAuth } from "../context";
 import type { PublicUser, Achievement, Lodge, Role } from "../types";
-import { postAchievement, getUserLodge, setUserLodge } from "../services/users";
+import {
+  postAchievement,
+  getUserLodge,
+  setUserLodge,
+  adminUpdateUser,
+  uploadUserPicture,
+} from "../services/users";
 import achievementsService from "../services/achievements";
 import lodgesService from "../services/lodges";
 import { listRoles } from "../services/admin";
@@ -55,6 +61,7 @@ export const MemberDetail = () => {
     register,
     handleSubmit,
     reset,
+    setError,
     formState: { errors },
   } = useForm<UpdateUserForm>({
     defaultValues: {
@@ -71,6 +78,8 @@ export const MemberDetail = () => {
     },
   });
 
+  const navigate = useNavigate();
+
   useEffect(() => {
     if (!id) return setGlobalError("Saknar medlems-id");
     run(async () => {
@@ -83,7 +92,26 @@ export const MemberDetail = () => {
       setAchievements(
         Array.isArray(json.achievements) ? json.achievements : []
       );
-      return (json.user ?? null) as PublicUser | null;
+      // Ensure returned user includes `roles`. Older responses may omit it.
+      let userObj = (json.user ?? null) as PublicUser | null;
+      if (userObj && !Array.isArray((userObj as any).roles)) {
+        try {
+          const rresp = await fetch(
+            `${import.meta.env.VITE_BACKEND_URL}/api/users/${id}/roles`,
+            { credentials: "include" }
+          );
+          if (rresp.ok) {
+            const rjson = await rresp.json();
+            userObj = {
+              ...(userObj as any),
+              roles: Array.isArray(rjson.roles) ? rjson.roles : [],
+            } as PublicUser;
+          }
+        } catch {
+          // ignore - fallback to whatever `userObj` contained
+        }
+      }
+      return userObj;
     }).catch(() => {});
     (async () => {
       try {
@@ -204,8 +232,107 @@ export const MemberDetail = () => {
         ) : (
           member && (
             <form
-              onSubmit={handleSubmit(async () => {
-                /* noop; Save button inside ProfileForm handles submit */
+              onSubmit={handleSubmit(async (values) => {
+                clearGlobalError();
+                setSaving(true);
+                try {
+                  if (!id) throw new Error("Missing id");
+                  const uid = id as string;
+                  await adminUpdateUser(uid, {
+                    firstname: String(values.firstname ?? "").trim(),
+                    lastname: String(values.lastname ?? "").trim(),
+                    mobile: String(values.mobile ?? "").trim(),
+                    city: String(values.city ?? "").trim(),
+                    dateOfBirth: values.dateOfBirth
+                      ? String(values.dateOfBirth)
+                      : null,
+                    address: values.address ? String(values.address) : null,
+                    zipcode: values.zipcode ? String(values.zipcode) : null,
+                    official: values.official ?? null,
+                    notes: values.notes ?? null,
+                  });
+                  if (pictureFile) {
+                    await uploadUserPicture(uid, pictureFile);
+                  }
+
+                  // save roles
+                  try {
+                    console.debug("Saving roles for", uid, selectedRoleIds);
+                    await setRoles(uid, selectedRoleIds);
+                    // signal success briefly
+                    setGlobalError("");
+                  } catch (err) {
+                    console.error("Failed to save roles", err);
+                    setGlobalError("Misslyckades att uppdatera roller");
+                  }
+
+                  // assign achievement if selected
+                  try {
+                    if (selectedAid) {
+                      await postAchievement(uid, {
+                        achievementId: selectedAid,
+                        awardedAt: awardDate || undefined,
+                      });
+                      setSelectedAid(null);
+                      setAwardDate("");
+                    }
+                  } catch {
+                    setGlobalError("Misslyckades att tilldela utmärkelse");
+                  }
+
+                  // update lodge
+                  try {
+                    await setUserLodge(
+                      uid,
+                      selectedLid === null ? null : Number(selectedLid)
+                    );
+                  } catch {
+                    setGlobalError("Misslyckades att uppdatera loge");
+                  }
+
+                  // refresh member data then navigate back to view
+                  await run(async () => {
+                    const resp = await fetch(
+                      `${import.meta.env.VITE_BACKEND_URL}/api/users/${id}`,
+                      { credentials: "include" }
+                    );
+                    if (!resp.ok)
+                      throw new Error("Misslyckades att hämta medlem");
+                    const json = await resp.json();
+                    setAchievements(
+                      Array.isArray(json.achievements) ? json.achievements : []
+                    );
+                    return (json.user ?? null) as PublicUser | null;
+                  });
+
+                  navigate(`/members/${id}`, { replace: true });
+                } catch (e: unknown) {
+                  const err = e as { status?: number; details?: unknown };
+                  if (
+                    err?.status === 400 &&
+                    err.details &&
+                    typeof err.details === "object"
+                  ) {
+                    const rec = err.details as Record<string, unknown>;
+                    const missing = Array.isArray(rec.missing)
+                      ? rec.missing
+                      : undefined;
+                    if (missing) {
+                      missing.forEach((p: unknown) => {
+                        if (typeof p === "string")
+                          setError(p as keyof UpdateUserForm, {
+                            type: "server",
+                            message: "Ogiltigt värde",
+                          });
+                      });
+                      setSaving(false);
+                      return;
+                    }
+                  }
+                  setGlobalError("Misslyckades att uppdatera medlem");
+                } finally {
+                  setSaving(false);
+                }
               })}
               className="bg-white p-4 rounded-md shadow"
             >
@@ -337,6 +464,18 @@ export const MemberDetail = () => {
                 setPictureFile={setPictureFile}
                 saving={saving}
               />
+              {isEditRoute ? (
+                <div className="flex items-center gap-x-4 py-4">
+                  <button
+                    type="submit"
+                    className="bg-green-600 hover:bg-green-700 text-sm font-medium transition text-white px-4 py-2 rounded-md"
+                    disabled={saving}
+                  >
+                    Spara
+                  </button>
+                  {saving && <Spinner />}
+                </div>
+              ) : null}
             </form>
           )
         )}

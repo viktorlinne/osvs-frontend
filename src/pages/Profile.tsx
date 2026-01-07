@@ -142,7 +142,10 @@ export const Profile = () => {
         }
 
         try {
-          await setUserLodge(String(uid), selectedLid === null ? null : Number(selectedLid));
+          await setUserLodge(
+            String(uid),
+            selectedLid === null ? null : Number(selectedLid)
+          );
         } catch {
           setGlobalError("Misslyckades att uppdatera loge");
         }
@@ -195,11 +198,17 @@ export const Profile = () => {
             lodges={lodges}
             selectedLid={selectedLid}
             setSelectedLid={setSelectedLid}
-            onSaveLodge={async (targetUserId: number, lodgeId: number | null) => {
+            onSaveLodge={async (
+              targetUserId: number,
+              lodgeId: number | null
+            ) => {
               if (!targetUserId) throw new Error("Invalid target");
               setSaving(true);
               try {
-                await setUserLodge(String(targetUserId), lodgeId === null ? null : Number(lodgeId));
+                await setUserLodge(
+                  String(targetUserId),
+                  lodgeId === null ? null : Number(lodgeId)
+                );
                 await refresh();
               } catch {
                 // signal handled by useProfile refresh fallback
@@ -241,7 +250,7 @@ export const Profile = () => {
                 className="bg-green-600 hover:bg-green-700 text-sm font-medium transition text-white px-4 py-2 rounded-md"
                 disabled={saving}
               >
-                Spara allt
+                Spara
               </button>
             </div>
           ) : null}
