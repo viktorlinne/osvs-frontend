@@ -1,14 +1,10 @@
 import type { Role } from "../../types";
 
 export const RolesManager = ({
-  userId,
   rolesList,
   selectedRoleIds,
   setSelectedRoleIds,
   canEditRoles,
-  saveRoles,
-  setGlobalError,
-  setSaving,
   isEditRoute,
 }: {
   userId?: number | null;
@@ -46,24 +42,7 @@ export const RolesManager = ({
               <span className="text-sm text-gray-700">{r.name}</span>
             </label>
           ))}
-          <button
-            type="button"
-            className="bg-green-600 hover:bg-green-700 text-sm font-medium transition text-white px-3 py-2 rounded-md w-auto"
-            onClick={async () => {
-              if (!userId) return setGlobalError("Invalid target");
-              try {
-                setGlobalError("");
-                setSaving(true);
-                await saveRoles(userId, selectedRoleIds);
-              } catch {
-                setGlobalError("Misslyckades att uppdatera roller");
-              } finally {
-                setSaving(false);
-              }
-            }}
-          >
-            Spara roller
-          </button>
+          {/* Role save is handled by parent consolidated save */}
         </div>
       </div>
     </div>

@@ -1,7 +1,5 @@
-import { Spinner } from "../../components";
 import type { PublicUser, UpdateUserForm } from "../../types";
 import type { UseFormRegister, FieldErrors } from "react-hook-form";
-import { useLocation, useNavigate } from "react-router-dom";
 
 export const ProfileForm = ({
   user,
@@ -9,7 +7,6 @@ export const ProfileForm = ({
   errors,
   isEditRoute,
   setPictureFile,
-  saving,
 }: {
   user?: PublicUser | null;
   register: UseFormRegister<UpdateUserForm>;
@@ -18,12 +15,6 @@ export const ProfileForm = ({
   setPictureFile: (f: File | null) => void;
   saving: boolean;
 }) => {
-  const navigate = useNavigate();
-  const location = useLocation();
-  const handleSubmit = () => {
-    const newPath = location.pathname.replace(/\/edit$/, "");
-    navigate(newPath, { replace: true });
-  };
   return (
     <>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
@@ -223,19 +214,7 @@ export const ProfileForm = ({
         </div>
       ) : null}
 
-      {isEditRoute ? (
-        <div className="flex items-center gap-x-4 py-2 mb-4">
-          <button
-            type="submit"
-            onClick={handleSubmit}
-            className="bg-green-600 hover:bg-green-700 text-sm font-medium transition text-white px-4 py-2 rounded-md"
-            disabled={saving}
-          >
-            Spara
-          </button>
-          {saving && <Spinner />}
-        </div>
-      ) : null}
+      {/* Parent renders the consolidated save button */}
     </>
   );
 };

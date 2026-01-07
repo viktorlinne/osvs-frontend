@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import lodgesService from "../services/lodges";
 import { setUserLodge } from "../services/users";
 import type { Lodge } from "../types";
@@ -18,6 +18,7 @@ import {
 export const Profile = () => {
   const { user, refresh } = useAuth();
   const location = useLocation();
+  const navigate = useNavigate();
   const isEditRoute = location.pathname.endsWith("/edit");
   const { setError: setGlobalError, clearError: clearGlobalError } = useError();
 
@@ -119,7 +120,37 @@ export const Profile = () => {
       if (pictureFile) {
         await uploadMyPicture(pictureFile);
       }
+      // save roles, lodge and achievements as part of consolidated save
+      const uid = user?.id;
+      if (uid) {
+        try {
+          if (Array.isArray(selectedRoleIds) && selectedRoleIds.length > 0) {
+            await saveRoles(uid, selectedRoleIds);
+          }
+        } catch {
+          setGlobalError("Misslyckades att uppdatera roller");
+        }
+
+        try {
+          if (selectedAid) {
+            await assignAchievement(uid, selectedAid, awardDate || undefined);
+            setSelectedAid(null);
+            setAwardDate("");
+          }
+        } catch {
+          setGlobalError("Misslyckades att tilldela utmärkelse");
+        }
+
+        try {
+          await setUserLodge(String(uid), selectedLid === null ? null : Number(selectedLid));
+        } catch {
+          setGlobalError("Misslyckades att uppdatera loge");
+        }
+      }
+
       await refresh();
+      // navigate back to profile view after successful save
+      navigate("/profile", { replace: true });
     } catch (e: unknown) {
       const err = e as { status?: number; details?: unknown };
       if (
@@ -203,6 +234,17 @@ export const Profile = () => {
             setPictureFile={setPictureFile}
             saving={saving}
           />
+          {isEditRoute ? (
+            <div className="flex items-center gap-x-4 py-4">
+              <button
+                type="submit"
+                className="bg-green-600 hover:bg-green-700 text-sm font-medium transition text-white px-4 py-2 rounded-md"
+                disabled={saving}
+              >
+                Spara allt
+              </button>
+            </div>
+          ) : null}
         </form>
       </div>
     </div>

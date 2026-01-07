@@ -9,12 +9,10 @@ export const AchievementsPanel = ({
   awardDate,
   setAwardDate,
   canAward,
-  assignAchievement,
   lodge,
   lodges,
   selectedLid,
   setSelectedLid,
-  onSaveLodge,
   isEditRoute,
 }: {
   user?: PublicUser | null;
@@ -54,31 +52,27 @@ export const AchievementsPanel = ({
 
         <div className="text-center mb-1 w-full">
           <label className="block font-medium">Loge</label>
-          {isEditRoute && lodges && setSelectedLid && onSaveLodge ? (
+          {isEditRoute && lodges && setSelectedLid ? (
             <div className="flex flex-col md:flex-row items-center justify-center gap-2 py-2">
               <select
                 value={selectedLid ?? ""}
-                onChange={(e) => setSelectedLid(e.target.value ? Number(e.target.value) : null)}
+                onChange={(e) =>
+                  setSelectedLid(e.target.value ? Number(e.target.value) : null)
+                }
                 className="border rounded-md px-3 py-2 w-full md:w-auto"
               >
                 <option value="">Ingen loge</option>
                 {lodges.map((l) => (
-                  <option key={l.id} value={l.id}>{l.name}</option>
+                  <option key={l.id} value={l.id}>
+                    {l.name}
+                  </option>
                 ))}
               </select>
-              <button
-                type="button"
-                className="bg-green-600 hover:bg-green-700 text-sm font-medium transition text-white px-3 py-2 rounded-md w-full md:w-auto"
-                onClick={async () => {
-                  if (!user?.id) return;
-                  await onSaveLodge(user.id, selectedLid ?? null);
-                }}
-              >
-                Spara loge
-              </button>
             </div>
           ) : (
-            <div className="text-sm text-gray-700 mb-4">{lodge?.name ?? "Ingen loge"}</div>
+            <div className="text-sm text-gray-700 mb-4">
+              {lodge?.name ?? "Ingen loge"}
+            </div>
           )}
         </div>
 
@@ -124,23 +118,7 @@ export const AchievementsPanel = ({
                 onChange={(e) => setAwardDate(e.target.value)}
                 className="border rounded-md px-3 py-2 w-full"
               />
-              <button
-                type="button"
-                className="bg-green-600 hover:bg-green-700 text-sm font-medium transition text-white px-3 py-2 rounded-md w-auto"
-                disabled={!selectedAid || !user?.id}
-                onClick={async () => {
-                  if (!selectedAid || !user?.id) return;
-                  await assignAchievement(
-                    user.id,
-                    selectedAid,
-                    awardDate || undefined
-                  );
-                  setSelectedAid(null);
-                  setAwardDate("");
-                }}
-              >
-                Tilldela
-              </button>
+              {/* Assignment is handled by parent consolidated save */}
             </div>
           </div>
         ) : null}
