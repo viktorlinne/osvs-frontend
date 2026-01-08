@@ -11,10 +11,6 @@ import {
   linkLodgeEvent,
   unlinkLodgeEvent,
 } from "../services";
-import { createEventPayment } from "../services/stripe";
-import { loadStripe } from "@stripe/stripe-js";
-import { Elements } from "@stripe/react-stripe-js";
-import StripeForm from "../components/StripeForm";
 import { listLodges } from "../services/lodges";
 import { getRsvp, setRsvp, getEventStats } from "../services/events";
 
@@ -82,51 +78,6 @@ export const EventDetail = () => {
   const [lodges, setLodges] = useState<Array<{ id: number; name: string }>>([]);
   const [selectedLodgeIds, setSelectedLodgeIds] = useState<number[]>([]);
   const [originalLinkedIds, setOriginalLinkedIds] = useState<number[]>([]);
-  const [showCheckout, setShowCheckout] = useState(false);
-  const [checkoutLoading, setCheckoutLoading] = useState(false);
-  const [clientSecret, setClientSecret] = useState<string | null>(null);
-  const [eventPayment, setEventPayment] = useState<Record<
-    string,
-    unknown
-  > | null>(null);
-  const rawPaymentStatus = eventPayment
-    ? (eventPayment as Record<string, unknown>)["status"]
-    : undefined;
-  const paymentStatus =
-    typeof rawPaymentStatus === "string" ? rawPaymentStatus : undefined;
-  // compute event price value (used by payable logic)
-  const eventPriceValue = (() => {
-    if (!event) return 0;
-    const raw = (event as unknown as Record<string, unknown>)["price"];
-    if (typeof raw === "number") return raw;
-    if (typeof raw === "string" && raw.trim() !== "") {
-      const n = Number(raw);
-      return Number.isFinite(n) ? n : 0;
-    }
-    return 0;
-  })();
-
-  // Determine if current user may pay this invoice
-  const paymentUid = eventPayment
-    ? Number((eventPayment as Record<string, unknown>)["uid"] ?? 0)
-    : 0;
-  const isOwned = Boolean(user && paymentUid && Number(user.id) === paymentUid);
-  const rawExpires = eventPayment
-    ? (eventPayment as Record<string, unknown>)["expiresAt"]
-    : null;
-  const notExpired =
-    !rawExpires || new Date(String(rawExpires)).getTime() > Date.now();
-  const isPayable =
-    eventPriceValue > 0 &&
-    paymentStatus === "Pending" &&
-    notExpired &&
-    !!isOwned;
-
-  const stripePromise =
-    typeof window !== "undefined" &&
-    (import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY as string)
-      ? loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY as string)
-      : null;
 
   useEffect(() => {
     if (!id) return setGlobalError("Missing event id");
@@ -161,21 +112,7 @@ export const EventDetail = () => {
       try {
         const all = await listLodges();
         const linkedResp = await listEventLodges(event.id as unknown as number);
-        // load current user's payment for this event (single fetch)
-        try {
-          if (user) {
-            const p = await createEventPayment(event.id as unknown as number);
-            const paymentRow =
-              (p as Record<string, unknown>)?.payment ?? p ?? null;
-            if (!mounted) return;
-            setEventPayment(paymentRow as Record<string, unknown> | null);
-          } else {
-            // not logged in — no payment to check
-            setEventPayment(null);
-          }
-        } catch {
-          // ignore — show pay UI if check fails
-        }
+        // no payment checks in frontend EventDetail (Stripe flow removed)
         const linked =
           (linkedResp as { lodges?: Lodge[] })?.lodges ?? linkedResp ?? [];
         if (!mounted) return;
@@ -526,74 +463,7 @@ export const EventDetail = () => {
                   )}
                 </div>
               </div>
-              {eventPriceValue > 0 && !isEditRoute && (
-                <div className="mt-4">
-                  {paymentStatus === "Paid" ? (
-                    <div className="text-sm text-green-700">Betalt</div>
-                  ) : isPayable && !showCheckout ? (
-                    <button
-                      className="bg-green-600 hover:bg-green-700 text-sm font-medium transition text-white px-4 py-2 rounded-md"
-                      onClick={async () => {
-                        if (!event || !id) return;
-                        if (checkoutLoading || showCheckout) return;
-                        if (!isPayable) return;
-                        setCheckoutLoading(true);
-                        try {
-                          // create (or get existing) payment and PaymentIntent
-                          const resp = await createEventPayment(id);
-                          const cs =
-                            ((resp as Record<string, unknown>)[
-                              "client_secret"
-                            ] as string | undefined) ?? null;
-                          if (!cs)
-                            throw new Error(
-                              "Missing client_secret from server"
-                            );
-                          setClientSecret(cs);
-                          setShowCheckout(true);
-                        } catch (err) {
-                          setGlobalError(String(err));
-                        } finally {
-                          setCheckoutLoading(false);
-                        }
-                      }}
-                      disabled={checkoutLoading}
-                    >
-                      {checkoutLoading
-                        ? "Förbereder…"
-                        : `Betala (${eventPriceValue} SEK)`}
-                    </button>
-                  ) : null}
-                </div>
-              )}
-
-              {showCheckout &&
-                clientSecret &&
-                stripePromise &&
-                (!eventPayment || paymentStatus !== "Paid") && (
-                  <div className="mt-4 bg-gray-50 p-4 rounded-md">
-                    <Elements stripe={stripePromise} options={{ clientSecret }}>
-                      <StripeForm
-                        onClose={async () => {
-                          setShowCheckout(false);
-                          setClientSecret(null);
-                          if (!event) return;
-                          try {
-                            const p = await createEventPayment(
-                              event.id as unknown as number
-                            );
-                            const paymentRow = ((p as Record<string, unknown>)[
-                              "payment"
-                            ] ?? p) as Record<string, unknown> | null;
-                            setEventPayment(paymentRow);
-                          } catch {
-                            // ignore
-                          }
-                        }}
-                      />
-                    </Elements>
-                  </div>
-                )}
+              {/* Stripe payment flow removed from EventDetail */}
               {user &&
                 Array.isArray(user.roles) &&
                 user.roles.includes("Admin") &&
