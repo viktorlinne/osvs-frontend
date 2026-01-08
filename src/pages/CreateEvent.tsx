@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useError, useAuth } from "../context";
-import { createEvent as createEventSvc, linkLodgeEvent } from "../services";
+import { createEvent as createEventSvc } from "../services";
 import type { CreateEventPayload, Lodge } from "../types";
 import { listLodges } from "../services/lodges";
 
@@ -60,6 +60,7 @@ export const CreateEvent = () => {
         endDate: form.endDate || null,
         price: form.price ? Number(form.price) : undefined,
         lodgeMeeting: form.lodgeMeeting,
+        lodgeIds: selectedLodgeIds.length > 0 ? selectedLodgeIds : undefined,
       };
 
       const resp = await createEventSvc(payload);
@@ -78,12 +79,6 @@ export const CreateEvent = () => {
 
       if (createdIdNum !== null) {
         const eventId = createdIdNum;
-        if (selectedLodgeIds.length > 0) {
-          // link selected lodges; don't block navigation on individual failures
-          await Promise.allSettled(
-            selectedLodgeIds.map((lid) => linkLodgeEvent(eventId, lid))
-          );
-        }
         navigate(`/events/${eventId}`);
       } else {
         navigate(`/events`);

@@ -173,6 +173,7 @@ export type CreateEventBody = {
   price?: number;
   startDate?: string | null;
   endDate?: string | null;
+  lodgeIds?: number[];
 };
 export type UpdateEventBody = Partial<CreateEventBody>;
 export type LinkLodgeBody = { lodgeId?: number | string | undefined };
