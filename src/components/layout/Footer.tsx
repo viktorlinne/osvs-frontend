@@ -52,6 +52,12 @@ export const Footer: React.FC = () => {
                     Nyheter
                   </NavLink>
                   <NavLink
+                    to="/events"
+                    className="px-3 py-1 text-sm rounded-md hover:bg-gray-100"
+                  >
+                    Möten
+                  </NavLink>
+                  <NavLink
                     to="/members"
                     className="px-3 py-1 text-sm rounded-md hover:bg-gray-100"
                   >

@@ -9,10 +9,12 @@ import {
   updateEvent,
   listEventLodges,
   linkLodgeEvent,
+  listLodges,
   unlinkLodgeEvent,
+  getRsvp,
+  setRsvp,
+  getEventStats,
 } from "../services";
-import { listLodges } from "../services/lodges";
-import { getRsvp, setRsvp, getEventStats } from "../services/events";
 
 function formatDisplayDate(s?: string) {
   if (!s) return "";
@@ -225,18 +227,24 @@ export const EventDetail = () => {
       );
     setRsvpLoading(true);
     clearGlobalError();
-    // validate that status is one of the expected values before mapping
-    if (status !== "yes" && status !== "no") {
+    // If user clicks the currently selected answer, clear the RSVP (toggle off)
+    const newUiValue: string | null = status === rsvp ? null : status;
+    // validate that newUiValue is one of the expected values (or null)
+    if (newUiValue !== null && newUiValue !== "yes" && newUiValue !== "no") {
       setGlobalError("Ogiltigt svar");
       setRsvpLoading(false);
       return;
     }
     try {
-      // map UI statuses to backend accepted statuses
-      const apiStatus: "going" | "not-going" =
-        status === "no" ? "not-going" : "going"; // treat 'yes' as 'going'
-      await setRsvp(event.id as unknown as number, apiStatus);
-      setRsvpState(status);
+      // map UI statuses to backend accepted statuses, or leave undefined to clear
+      const apiStatus: "going" | "not-going" | undefined =
+        newUiValue === null
+          ? undefined
+          : newUiValue === "no"
+          ? "not-going"
+          : "going";
+      await setRsvp(event.id as unknown as number, apiStatus as any);
+      setRsvpState(newUiValue);
     } catch {
       setGlobalError("Det gick inte att uppdatera ditt svar");
     } finally {
@@ -328,7 +336,7 @@ export const EventDetail = () => {
                     className="w-full border rounded-md px-3 py-2"
                   />
                 </div>
-                <div className="flex items-center gapx-4 py-2">
+                <div className="flex items-center gap-x-4 py-2">
                   <input
                     id="lodgeMeeting"
                     type="checkbox"
@@ -346,9 +354,9 @@ export const EventDetail = () => {
                 <label className="block text-sm font-medium mb-1">
                   Associera loger
                 </label>
-                <div className="grid grid-cols-2 gapx-4 py-2 max-h-40 overflow-auto px-4 border rounded-md bg-gray-50">
+                <div className="grid grid-cols-2 gap-x-4 py-2 max-h-40 overflow-auto px-4 border rounded-md bg-gray-50">
                   {lodges.map((l) => (
-                    <label key={l.id} className="flex items-center gapx-4 py-2">
+                    <label key={l.id} className="flex items-center gap-x-4 py-2">
                       <input
                         type="checkbox"
                         checked={selectedLodgeIds.includes(l.id)}
@@ -371,7 +379,7 @@ export const EventDetail = () => {
                   )}
                 </div>
               </div>
-              <div className="flex gapx-4 py-2">
+              <div className="flex gap-x-4 py-2">
                 <button
                   className="bg-green-600 hover:bg-green-700 text-sm font-medium transition text-white px-4 py-2 rounded-md"
                   onClick={handleSave}
@@ -408,7 +416,7 @@ export const EventDetail = () => {
               <div className="mb-2">
                 <strong>Associerade loger:</strong>
                 {Array.isArray(lodges) && originalLinkedIds.length > 0 ? (
-                  <div className="mt-1 flex flex-wrap gapx-4 py-2">
+                  <div className="mt-1 flex flex-wrap gap-x-4 py-2">
                     {lodges
                       .filter((l) => originalLinkedIds.includes(l.id))
                       .map((l) => (
@@ -429,7 +437,7 @@ export const EventDetail = () => {
               </div>
               <div className="mb-2">
                 <strong>Mitt Deltagande (RSVP):</strong>
-                <div className="mt-2 flex items-center gapx-4 py-2">
+                <div className="mt-2 flex items-center gap-x-4 py-2">
                   {user && (
                     <>
                       <button
@@ -463,7 +471,6 @@ export const EventDetail = () => {
                   )}
                 </div>
               </div>
-              {/* Stripe payment flow removed from EventDetail */}
               {user &&
                 Array.isArray(user.roles) &&
                 user.roles.includes("Admin") &&
