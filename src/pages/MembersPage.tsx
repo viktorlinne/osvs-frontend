@@ -122,7 +122,7 @@ export const MembersPage = () => {
               <Link
                 to={`/members/${member.id}`}
                 key={member.id}
-                className="p-4 bg-white rounded-md shadow flex items-center gap-x-4"
+                className="p-4 bg-white rounded-md shadow-md hover:shadow-lg transition flex items-center gap-x-4"
               >
                 <img
                   src={`${import.meta.env.VITE_BACKEND_URL}${

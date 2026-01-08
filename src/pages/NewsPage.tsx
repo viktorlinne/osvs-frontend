@@ -59,7 +59,7 @@ export const NewsPage = () => {
             <Link
               to={`/news/${p.id}`}
               key={p.id}
-              className="rounded-md shadow-md bg-white flex flex-col p-4 md:p-6"
+              className="rounded-md shadow-md hover:shadow-lg transition bg-white flex flex-col p-4 md:p-6"
             >
               {p.pictureUrl && (
                 <img
