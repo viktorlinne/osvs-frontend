@@ -8,12 +8,7 @@ import {
   getEvent,
   updateEvent,
   listEventLodges,
-  linkLodgeEvent,
   listLodges,
-  unlinkLodgeEvent,
-  getRsvp,
-  setRsvp,
-  getEventStats,
 } from "../services";
 
 function formatDisplayDate(s?: string) {
@@ -62,13 +57,7 @@ export const EventDetail = () => {
   );
 
   const [saving, setSaving] = useState(false);
-  const [rsvp, setRsvpState] = useState<string | null>(null);
-  const [rsvpLoading, setRsvpLoading] = useState(false);
-  const [stats, setStats] = useState<{
-    invited: number;
-    answered: number;
-    going: number;
-  } | null>(null);
+
   const [form, setForm] = useState({
     title: "",
     description: "",
@@ -78,7 +67,6 @@ export const EventDetail = () => {
     lodgeMeeting: false,
   });
   const [lodges, setLodges] = useState<Array<{ id: number; name: string }>>([]);
-  const [selectedLodgeIds, setSelectedLodgeIds] = useState<number[]>([]);
   const [originalLinkedIds, setOriginalLinkedIds] = useState<number[]>([]);
 
   useEffect(() => {
@@ -124,51 +112,7 @@ export const EventDetail = () => {
               .map((l: Lodge) => Number(l.id))
               .filter((n: number) => Number.isFinite(n))
           : [];
-        setSelectedLodgeIds(linkedIds);
         setOriginalLinkedIds(linkedIds);
-        // fetch RSVP for this event
-        try {
-          const r = await getRsvp(event.id as unknown as number);
-          const val = (r as { rsvp?: string | null })?.rsvp ?? null;
-          if (!mounted) return;
-          // backend returns 'going' | 'not-going' | null; map to local values
-          if (val === "going") setRsvpState("yes");
-          else if (val === "not-going") setRsvpState("no");
-          else setRsvpState(null);
-        } catch {
-          // ignore RSVP errors
-        }
-        // no automatic fetching of payment state here
-        // fetch admin stats
-        try {
-          if (
-            user &&
-            Array.isArray(user.roles) &&
-            user.roles.includes("Admin")
-          ) {
-            const s = await getEventStats(event.id as unknown as number);
-            // getEventStats may return either { stats: { ... } } or the stats object directly; handle both explicitly
-            type Stats = { invited: number; answered: number; going: number };
-            const response = s as { stats?: Stats } | Stats | null | undefined;
-            let st: Stats | null = null;
-            if (response && "stats" in response && response.stats) {
-              st = response.stats;
-            } else if (
-              response &&
-              "invited" in response &&
-              "answered" in response &&
-              "going" in response
-            ) {
-              st = response as Stats;
-            }
-            if (mounted && st)
-              setStats(
-                st as { invited: number; answered: number; going: number }
-              );
-          }
-        } catch {
-          // ignore stats errors
-        }
       } catch {
         // ignore
       }
@@ -192,20 +136,7 @@ export const EventDetail = () => {
         lodgeMeeting: form.lodgeMeeting,
       };
       await updateEvent(id, payload);
-      // link/unlink lodges according to selection
-      const eventId = Number(id);
-      if (Number.isFinite(eventId)) {
-        const toAdd = selectedLodgeIds.filter(
-          (n) => !originalLinkedIds.includes(n)
-        );
-        const toRemove = originalLinkedIds.filter(
-          (n) => !selectedLodgeIds.includes(n)
-        );
-        await Promise.allSettled([
-          ...toAdd.map((lid) => linkLodgeEvent(eventId, lid)),
-          ...toRemove.map((lid) => unlinkLodgeEvent(eventId, lid)),
-        ]);
-      }
+      // Lodges are no longer edited here; only update event data
       // re-fetch and navigate back to view
       await run(async () => {
         const resp = await getEvent(id);
@@ -219,39 +150,6 @@ export const EventDetail = () => {
     }
   }
 
-  async function handleSetRsvp(status: string) {
-    if (!event) return;
-    if (!user)
-      return setGlobalError(
-        "Du måste vara inloggad för att svara på inbjudningar"
-      );
-    setRsvpLoading(true);
-    clearGlobalError();
-    // If user clicks the currently selected answer, clear the RSVP (toggle off)
-    const newUiValue: string | null = status === rsvp ? null : status;
-    // validate that newUiValue is one of the expected values (or null)
-    if (newUiValue !== null && newUiValue !== "yes" && newUiValue !== "no") {
-      setGlobalError("Ogiltigt svar");
-      setRsvpLoading(false);
-      return;
-    }
-    try {
-      // map UI statuses to backend accepted statuses, or leave undefined to clear
-      const apiStatus: "going" | "not-going" | undefined =
-        newUiValue === null
-          ? undefined
-          : newUiValue === "no"
-          ? "not-going"
-          : "going";
-      await setRsvp(event.id as unknown as number, apiStatus as any);
-      setRsvpState(newUiValue);
-    } catch {
-      setGlobalError("Det gick inte att uppdatera ditt svar");
-    } finally {
-      setRsvpLoading(false);
-    }
-  }
-
   if (loading) return <Spinner />;
   if (notFound) return <NotFound />;
 
@@ -261,14 +159,14 @@ export const EventDetail = () => {
         <Link to="/events" className="text-sm text-green-600 underline">
           ← Tillbaka
         </Link>
-        {canEdit && !isEditRoute && (
+        {/* {canEdit && !isEditRoute && (
           <Link
             to={`/events/${id}/edit`}
             className="text-sm font-medium text-white bg-green-600 hover:bg-green-700 transition px-3 py-2 rounded-md"
           >
             Redigera
           </Link>
-        )}
+        )} */}
       </div>
 
       <h2 className="text-2xl font-bold mt-4 mb-4">Möte</h2>
@@ -350,35 +248,7 @@ export const EventDetail = () => {
                   </label>
                 </div>
               </div>
-              <div>
-                <label className="block text-sm font-medium mb-1">
-                  Associera loger
-                </label>
-                <div className="grid grid-cols-2 gap-x-4 py-2 max-h-40 overflow-auto px-4 border rounded-md bg-gray-50">
-                  {lodges.map((l) => (
-                    <label key={l.id} className="flex items-center gap-x-4 py-2">
-                      <input
-                        type="checkbox"
-                        checked={selectedLodgeIds.includes(l.id)}
-                        onChange={(e) => {
-                          if (e.target.checked)
-                            setSelectedLodgeIds((s) =>
-                              Array.from(new Set([...s, l.id]))
-                            );
-                          else
-                            setSelectedLodgeIds((s) =>
-                              s.filter((id) => id !== l.id)
-                            );
-                        }}
-                      />
-                      <span className="text-sm">{l.name}</span>
-                    </label>
-                  ))}
-                  {lodges.length === 0 && (
-                    <div className="text-sm text-gray-500">Inga loger</div>
-                  )}
-                </div>
-              </div>
+
               <div className="flex gap-x-4 py-2">
                 <button
                   className="bg-green-600 hover:bg-green-700 text-sm font-medium transition text-white px-4 py-2 rounded-md"
@@ -435,55 +305,6 @@ export const EventDetail = () => {
                   </div>
                 )}
               </div>
-              <div className="mb-2">
-                <strong>Mitt Deltagande (RSVP):</strong>
-                <div className="mt-2 flex items-center gap-x-4 py-2">
-                  {user && (
-                    <>
-                      <button
-                        className={`px-3 py-1 rounded-md ${
-                          rsvp === "yes"
-                            ? "bg-green-600 hover:bg-green-700 text-sm font-medium transition text-white"
-                            : "bg-gray-100 hover:bg-gray-200 text-sm font-medium transition"
-                        }`}
-                        onClick={() => void handleSetRsvp("yes")}
-                        disabled={rsvpLoading}
-                      >
-                        Ja
-                      </button>
-                      <button
-                        className={`px-3 py-1 rounded-md ${
-                          rsvp === "no"
-                            ? "bg-red-600 hover:bg-red-700 text-sm font-medium transition text-white"
-                            : "bg-gray-100 hover:bg-gray-200 text-sm font-medium transition"
-                        }`}
-                        onClick={() => void handleSetRsvp("no")}
-                        disabled={rsvpLoading}
-                      >
-                        Nej
-                      </button>
-                      {rsvpLoading && (
-                        <div className="text-sm text-gray-500 ml-2">
-                          Uppdaterar…
-                        </div>
-                      )}
-                    </>
-                  )}
-                </div>
-              </div>
-              {user &&
-                Array.isArray(user.roles) &&
-                user.roles.includes("Admin") &&
-                stats && (
-                  <div className="mb-2">
-                    <strong>Totalt Deltagande:</strong>
-                    <div className="mt-1 text-sm text-gray-700">
-                      <div>Inbjudna: {stats.invited}</div>
-                      <div>Svarat: {stats.answered}</div>
-                      <div>Kommer: {stats.going}</div>
-                    </div>
-                  </div>
-                )}
             </div>
           )}
         </div>

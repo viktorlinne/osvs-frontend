@@ -73,14 +73,14 @@ export const LodgeDetail = () => {
         <Link to="/lodges" className="text-sm text-green-600 underline">
           ← Tillbaka
         </Link>
-        {canEdit && !isEditRoute && (
+        {/* {canEdit && !isEditRoute && (
           <Link
             to={`/lodges/${id}/edit`}
             className="text-sm font-medium text-white bg-green-600 hover:bg-green-700  transition px-3 py-2 rounded-md"
           >
             Redigera
           </Link>
-        )}
+        )} */}
       </div>
 
       <h2 className="text-2xl font-bold mt-4 mb-4">Loge</h2>

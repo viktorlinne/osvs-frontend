@@ -153,14 +153,14 @@ const routes = [
           </AuthGuard>
         ),
       },
-      {
-        path: "lodges/:id/edit",
-        element: (
-          <AuthGuard roles={["Admin", "Editor"]}>
-            <LodgeDetail />
-          </AuthGuard>
-        ),
-      },
+      // {
+      //   path: "lodges/:id/edit",
+      //   element: (
+      //     <AuthGuard roles={["Admin", "Editor"]}>
+      //       <LodgeDetail />
+      //     </AuthGuard>
+      //   ),
+      // },
       {
         path: "events",
         element: (
@@ -177,14 +177,14 @@ const routes = [
           </AuthGuard>
         ),
       },
-      {
-        path: "events/:id/edit",
-        element: (
-          <AuthGuard roles={["Admin", "Editor"]}>
-            <EventDetail />
-          </AuthGuard>
-        ),
-      },
+      // {
+      //   path: "events/:id/edit",
+      //   element: (
+      //     <AuthGuard roles={["Admin", "Editor"]}>
+      //       <EventDetail />
+      //     </AuthGuard>
+      //   ),
+      // },
       {
         path: "events/create",
         element: (
