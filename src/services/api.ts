@@ -6,7 +6,9 @@ import axios, {
 import { reportGlobalError } from "./globalError";
 import type { ApiError } from "../types";
 
-const BASE_URL = `${import.meta.env.VITE_BACKEND_URL}/api`;
+const BASE_URL = import.meta.env.DEV
+  ? "/api"
+  : `${import.meta.env.VITE_BACKEND_URL}/api`;
 
 // Simple axios instance. `withCredentials` is required because the
 // backend stores access/refresh tokens in HTTP-only cookies.
@@ -56,6 +58,31 @@ export async function fetchData<T = unknown>(
 ): Promise<T> {
   try {
     const { data } = await req;
+
+    // Defensive: some deployments may return a 200 with an error payload
+    // (e.g. { error: 'Vänligen logga in', status: 401 }). Treat that as an error.
+    if (data && typeof data === "object") {
+      const rec = data as Record<string, unknown>;
+      const maybeError =
+        (typeof rec.error === "string" && rec.error) ||
+        (typeof rec.message === "string" && rec.message);
+      if (maybeError) {
+        const status = typeof rec.status === "number" ? rec.status : 401;
+        const apiErr: ApiError = {
+          status,
+          code: typeof rec.code === "string" ? (rec.code as string) : undefined,
+          message: String(maybeError),
+          details: rec.details,
+        };
+        try {
+          reportGlobalError(apiErr.message);
+        } catch {
+          /* ignore */
+        }
+        throw apiErr;
+      }
+    }
+
     return data;
   } catch (e) {
     const err = e as AxiosError;
