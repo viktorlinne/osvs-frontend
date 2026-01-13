@@ -40,7 +40,7 @@ export const AchievementsPanel = ({
       <div className="flex flex-col items-center">
         <img
           className="rounded-full w-28 h-28 md:w-40 md:h-40 object-cover mb-1"
-          src={user?.picture}
+          src={user?.pictureUrl}
           alt={`${user?.firstname} ${user?.lastname}`}
         />
 

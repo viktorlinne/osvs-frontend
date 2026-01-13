@@ -127,7 +127,7 @@ export const MembersPage = () => {
                 className="p-4 bg-white rounded-md shadow-md hover:shadow-lg transition flex items-center gap-x-4"
               >
                 <img
-                  src={member.picture}
+                  src={member.pictureUrl}
                   alt={`${member.firstname} ${member.lastname}`}
                   className="w-16 h-16 rounded-full flex-shrink-0"
                 />
