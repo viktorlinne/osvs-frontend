@@ -61,13 +61,11 @@ export const NewsPage = () => {
               key={p.id}
               className="rounded-md shadow-md hover:shadow-lg transition bg-white flex flex-col p-4 md:p-6"
             >
-              {p.pictureUrl && (
-                <img
-                  src={`${import.meta.env.VITE_BACKEND_URL}${p.pictureUrl}`}
-                  alt={p.title}
-                  className="w-full h-48 md:h-56 lg:h-48 object-cover rounded-t-md"
-                />
-              )}
+              <img
+                src={p.picture ?? ""}
+                alt={p.title}
+                className="w-full h-48 md:h-56 lg:h-48 object-cover rounded-t-md"
+              />
               <div className="p-4 flex-1">
                 <h3 className="text-xl font-semibold mb-2 truncate">
                   {p.title}

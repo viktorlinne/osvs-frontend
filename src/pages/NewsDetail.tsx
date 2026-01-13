@@ -142,15 +142,13 @@ export const NewsDetail = () => {
 
         {post && !isEditRoute && (
           <div className="mt-4 grid gap-4 md:grid-cols-3">
-            {post.pictureUrl && (
-              <div className="md:col-span-1">
-                <img
-                  src={`${import.meta.env.VITE_BACKEND_URL}${post.pictureUrl}`}
-                  alt={post.title}
-                  className="w-full h-64 md:h-full object-cover rounded"
-                />
-              </div>
-            )}
+            <div className="md:col-span-1">
+              <img
+                src={post.picture ?? ""}
+                alt={post.title}
+                className="w-full h-64 md:h-full object-cover rounded"
+              />
+            </div>
             <div className="md:col-span-2">
               <h1 className="text-2xl font-bold mb-2">{post.title}</h1>
               <div className="prose">
