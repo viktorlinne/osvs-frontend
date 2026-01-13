@@ -62,7 +62,7 @@ export const NewsPage = () => {
               className="rounded-md shadow-md hover:shadow-lg transition bg-white flex flex-col p-4 md:p-6"
             >
               <img
-                src={p.picture ?? ""}
+                src={p.pictureUrl ?? ""}
                 alt={p.title}
                 className="w-full h-48 md:h-56 lg:h-48 object-cover rounded-t-md"
               />

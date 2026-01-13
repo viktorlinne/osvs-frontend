@@ -144,7 +144,7 @@ export const NewsDetail = () => {
           <div className="mt-4 grid gap-4 md:grid-cols-3">
             <div className="md:col-span-1">
               <img
-                src={post.picture ?? ""}
+                src={post.pictureUrl ?? ""}
                 alt={post.title}
                 className="w-full h-64 md:h-full object-cover rounded"
               />
