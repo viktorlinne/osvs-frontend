@@ -5,6 +5,25 @@ import { useAuth, useError } from "../../context";
 import type { ApiError } from "../../types";
 import { isApiError } from "../../types/api";
 
+type NavButtonProps = {
+  to: string;
+  children: React.ReactNode;
+  onClick?: () => void;
+};
+
+const NavButton: React.FC<NavButtonProps> = ({ to, children, onClick }) => (
+  <NavLink
+    to={to}
+    onClick={onClick}
+    className={({ isActive }) =>
+      `block px-3 py-2 rounded-md text-sm font-medium transition ${isActive ? "bg-green-600 text-white" : "text-gray-700 hover:bg-gray-100"
+      }`
+    }
+  >
+    {children}
+  </NavLink>
+);
+
 export const Navbar: React.FC = () => {
   const { user, logout } = useAuth();
   const { setError, clearError } = useError();
@@ -29,24 +48,7 @@ export const Navbar: React.FC = () => {
     }
   };
 
-  const NavButton: React.FC<{
-    to: string;
-    children: React.ReactNode;
-  }> = ({ to, children }) => (
-    <NavLink
-      to={to}
-      onClick={() => setOpen(false)}
-      className={({ isActive }) =>
-        `block px-3 py-2 rounded-md text-sm font-medium transition ${
-          isActive
-            ? "bg-green-600 text-white"
-            : "text-gray-700 hover:bg-gray-100"
-        }`
-      }
-    >
-      {children}
-    </NavLink>
-  );
+
 
   return (
     <header className="bg-white shadow-sm">
@@ -57,16 +59,32 @@ export const Navbar: React.FC = () => {
               OSVS
             </NavLink>
             <div className="hidden md:flex items-center space-x-2">
-              <NavButton to="/">Hem</NavButton>
-              <NavButton to="/about">Om VS</NavButton>
-              <NavButton to="/gdpr">GDPR</NavButton>
-              <NavButton to="/contact">Kontakt</NavButton>
+              <NavButton to="/" onClick={() => setOpen(false)}>
+                Hem
+              </NavButton>
+              <NavButton to="/about" onClick={() => setOpen(false)}>
+                Om VS
+              </NavButton>
+              <NavButton to="/gdpr" onClick={() => setOpen(false)}>
+                GDPR
+              </NavButton>
+              <NavButton to="/contact" onClick={() => setOpen(false)}>
+                Kontakt
+              </NavButton>
               {user ? (
                 <>
-                  <NavButton to="/news">Nyheter</NavButton>
-                  <NavButton to="/events">Möten</NavButton>
-                  <NavButton to="/members">Medlemmar</NavButton>
-                  <NavButton to="/lodges">Loger</NavButton>
+                  <NavButton to="/news" onClick={() => setOpen(false)}>
+                    Nyheter
+                  </NavButton>
+                  <NavButton to="/events" onClick={() => setOpen(false)}>
+                    Möten
+                  </NavButton>
+                  <NavButton to="/members" onClick={() => setOpen(false)}>
+                    Medlemmar
+                  </NavButton>
+                  <NavButton to="/lodges" onClick={() => setOpen(false)}>
+                    Loger
+                  </NavButton>
                 </>
               ) : null}
             </div>
@@ -75,10 +93,14 @@ export const Navbar: React.FC = () => {
           <div className="flex items-center gap-3">
             <div className="hidden md:flex items-center gap-2">
               {!user ? (
-                <NavButton to="/login">Logga in</NavButton>
+                <NavButton to="/login" onClick={() => setOpen(false)}>
+                  Logga in
+                </NavButton>
               ) : (
                 <>
-                  <NavButton to="/profile">Profil</NavButton>
+                  <NavButton to="/profile" onClick={() => setOpen(false)}>
+                    Profil
+                  </NavButton>
                   <button
                     onClick={handleLogout}
                     className="block px-3 py-2 rounded-md text-sm font-medium transition bg-red-600 hover:bg-red-700 text-white"
@@ -128,23 +150,43 @@ export const Navbar: React.FC = () => {
         {open && (
           <div className="md:hidden pb-4">
             <div className="px-2 space-y-1">
-              <NavButton to="/">Hem</NavButton>
-              <NavButton to="/about">Om VS</NavButton>
-              <NavButton to="/gdpr">GDPR</NavButton>
-              <NavButton to="/contact">Kontakt</NavButton>
+              <NavButton to="/" onClick={() => setOpen(false)}>
+                Hem
+              </NavButton>
+              <NavButton to="/about" onClick={() => setOpen(false)}>
+                Om VS
+              </NavButton>
+              <NavButton to="/gdpr" onClick={() => setOpen(false)}>
+                GDPR
+              </NavButton>
+              <NavButton to="/contact" onClick={() => setOpen(false)}>
+                Kontakt
+              </NavButton>
               {user ? (
                 <>
-                  <NavButton to="/news">Nyheter</NavButton>
-                  <NavButton to="/events">Möten</NavButton>
-                  <NavButton to="/members">Medlemmar</NavButton>
-                  <NavButton to="/lodges">Loger</NavButton>
+                  <NavButton to="/news" onClick={() => setOpen(false)}>
+                    Nyheter
+                  </NavButton>
+                  <NavButton to="/events" onClick={() => setOpen(false)}>
+                    Möten
+                  </NavButton>
+                  <NavButton to="/members" onClick={() => setOpen(false)}>
+                    Medlemmar
+                  </NavButton>
+                  <NavButton to="/lodges" onClick={() => setOpen(false)}>
+                    Loger
+                  </NavButton>
                 </>
               ) : null}
               {!user ? (
-                <NavButton to="/login">Logga in</NavButton>
+                <NavButton to="/login" onClick={() => setOpen(false)}>
+                  Logga in
+                </NavButton>
               ) : (
                 <>
-                  <NavButton to="/profile">Profil</NavButton>
+                  <NavButton to="/profile" onClick={() => setOpen(false)}>
+                    Profil
+                  </NavButton>
                   <button
                     onClick={() => {
                       setOpen(false);
