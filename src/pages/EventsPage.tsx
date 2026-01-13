@@ -191,53 +191,47 @@ export const EventsPage = () => {
           {formatMonthNameSv(viewDate)} {year}
         </p>
       </div>
-      {/* Mobile: weekday rows */}
+      {/* Mobile: single column, date-ordered list */}
       <div className="block sm:hidden border rounded-md overflow-hidden">
-        {WEEK_DAYS.map((wd, wi) => {
-          // collect all dates in the month that fall on weekday `wi`
-          const datesForWd: Array<Date | null> = [];
-          for (const week of monthMatrix) {
-            datesForWd.push(week[wi] ?? null);
-          }
+        {(() => {
+          const end = endOfMonth(year, month);
+          const daysInMonth = end.getDate();
+          const rows: React.ReactElement[] = [];
+          for (let d = 1; d <= daysInMonth; d++) {
+            const date = new Date(year, month, d);
+            const key = formatDateKey(date);
+            const evs = eventsByDate[key] ?? [];
+            const weekday = WEEK_DAYS[(date.getDay() + 6) % 7];
 
-          return (
-            <div key={wd} className="flex items-stretch border-b last:border-b-0">
-              <div className="w-24 min-w-[6rem] p-3 bg-gray-50 border-r text-sm font-medium">
-                {wd}
-              </div>
-              <div className="flex-1 p-3 text-sm">
-                <div className="flex flex-col gap-2">
-                  {datesForWd.map((date, idx) => {
-                    if (!date) return null;
-                    const key = formatDateKey(date);
-                    const evs = eventsByDate[key] ?? [];
-                    return (
-                      <div key={idx} className="flex items-start gap-3">
-                        <div className="w-8 text-xs text-gray-500">{date.getDate()}</div>
-                        <div className="flex-1">
-                          {evs.length === 0 ? (
-                            <div className="text-xs text-gray-300">Ingen</div>
-                          ) : (
-                            evs.slice(0, 2).map((e) => (
-                              <Link
-                                key={e.id}
-                                to={`/events/${e.id}`}
-                                className="block truncate text-xs bg-green-50 text-green-800 px-1 py-0.5 rounded-md"
-                                title={e.title}
-                              >
-                                {e.title}
-                              </Link>
-                            ))
-                          )}
-                        </div>
-                      </div>
-                    );
-                  })}
+            rows.push(
+              <div key={key} className="flex items-start border-b last:border-b-0 p-3 gap-3">
+                <div className="w-20 min-w-[5rem] bg-gray-50 p-2 rounded text-sm font-medium text-center">
+                  <div className="text-xs text-gray-500">{weekday}</div>
+                  <div className="text-sm font-semibold">{d}</div>
+                </div>
+                <div className="flex-1">
+                  {evs.length === 0 ? (
+                    <div className="text-xs text-gray-400">Ingen möten</div>
+                  ) : (
+                    <div className="flex flex-col gap-2">
+                      {evs.map((e) => (
+                        <Link
+                          key={e.id}
+                          to={`/events/${e.id}`}
+                          className="block truncate text-sm bg-green-50 text-green-800 px-2 py-1 rounded-md"
+                          title={e.title}
+                        >
+                          {e.title}
+                        </Link>
+                      ))}
+                    </div>
+                  )}
                 </div>
               </div>
-            </div>
-          );
-        })}
+            );
+          }
+          return rows;
+        })()}
       </div>
 
       {/* Desktop / tablet: month grid */}
