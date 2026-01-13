@@ -75,7 +75,7 @@ export async function fetchData<T = unknown>(
           details: rec.details,
         };
         try {
-          reportGlobalError(apiErr.message);
+          reportGlobalError(apiErr.message ?? "Ett fel uppstod");
         } catch {
           /* ignore */
         }
