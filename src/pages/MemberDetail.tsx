@@ -92,8 +92,8 @@ export const MemberDetail = () => {
         Array.isArray(json.achievements) ? json.achievements : []
       );
       // Ensure returned user includes `roles`. Older responses may omit it.
-      let userObj = (json.user ?? null) as PublicUser | null;
-      if (userObj && !Array.isArray((userObj as any).roles)) {
+      let userObj = (json.user ?? null) as unknown as PublicUser | null;
+      if (userObj && !Array.isArray((userObj as unknown as { roles?: unknown }).roles)) {
         try {
           const rresp = await fetch(
             `${import.meta.env.VITE_BACKEND_URL}/api/users/${id}/roles`,
@@ -102,9 +102,9 @@ export const MemberDetail = () => {
           if (rresp.ok) {
             const rjson = await rresp.json();
             userObj = {
-              ...(userObj as any),
+              ...(userObj as unknown as Record<string, unknown>),
               roles: Array.isArray(rjson.roles) ? rjson.roles : [],
-            } as PublicUser;
+            } as unknown as PublicUser;
           }
         } catch {
           // ignore - fallback to whatever `userObj` contained
@@ -128,24 +128,30 @@ export const MemberDetail = () => {
       } catch {
         // ignore
       }
-      try {
-        const r = await listRoles();
-        // accept either an array or { roles: [...] }
-        const raw = r as Record<string, unknown> | undefined;
-        let items: Array<Record<string, unknown>> = [];
-        if (Array.isArray(r)) items = r as Array<Record<string, unknown>>;
-        else if (raw && Array.isArray(raw.roles))
-          items = raw.roles as Array<Record<string, unknown>>;
-        if (items.length > 0) {
-          const rolesArray = items.map((item) => ({
-            id: Number(item.id),
-            name: String(item.name ?? item.role ?? item.roleName ?? ""),
-          }));
-          setRolesList(rolesArray);
+
+      // Only fetch role list if current user can edit (Admin or Editor).
+      // This avoids 403 Forbidden requests for ordinary or anonymous users.
+      if (canEdit) {
+        try {
+          const r = await listRoles();
+          // accept either an array or { roles: [...] }
+          const raw = r as Record<string, unknown> | undefined;
+          let items: Array<Record<string, unknown>> = [];
+          if (Array.isArray(r)) items = r as Array<Record<string, unknown>>;
+          else if (raw && Array.isArray(raw.roles))
+            items = raw.roles as Array<Record<string, unknown>>;
+          if (items.length > 0) {
+            const rolesArray = items.map((item) => ({
+              id: Number(item.id),
+              name: String(item.name ?? item.role ?? item.roleName ?? ""),
+            }));
+            setRolesList(rolesArray);
+          }
+        } catch {
+          // ignore
         }
-      } catch {
-        // ignore
       }
+
       try {
         const cur = await getUserLodge(id as string);
         setSelectedLid(cur?.lodge ? Number(cur.lodge.id) : null);
@@ -153,7 +159,7 @@ export const MemberDetail = () => {
         // ignore
       }
     })();
-  }, [id, run, setGlobalError]);
+  }, [id, run, setGlobalError, canEdit]);
 
   useEffect(() => {
     // when member and rolesList available, set selectedRoleIds
@@ -299,7 +305,7 @@ export const MemberDetail = () => {
                     setAchievements(
                       Array.isArray(json.achievements) ? json.achievements : []
                     );
-                    return (json.user ?? null) as PublicUser | null;
+                    return (json.user ?? null) as unknown as PublicUser | null;
                   });
 
                   navigate(`/members/${id}`, { replace: true });
@@ -367,7 +373,7 @@ export const MemberDetail = () => {
                           ? json.achievements
                           : []
                       );
-                      return (json.user ?? null) as PublicUser | null;
+                      return (json.user ?? null) as unknown as PublicUser | null;
                     });
                   } catch {
                     setGlobalError("Misslyckades att uppdatera loge");
@@ -407,7 +413,7 @@ export const MemberDetail = () => {
                           ? json.achievements
                           : []
                       );
-                      return (json.user ?? null) as PublicUser | null;
+                      return (json.user ?? null) as unknown as PublicUser | null;
                     });
                   } finally {
                     setSaving(false);
@@ -443,7 +449,7 @@ export const MemberDetail = () => {
                           ? json.achievements
                           : []
                       );
-                      return (json.user ?? null) as PublicUser | null;
+                      return (json.user ?? null) as unknown as PublicUser | null;
                     });
                   } finally {
                     setSaving(false);
