@@ -163,7 +163,7 @@ export const EventsPage = () => {
               onClick={jumpToToday}
               className="transition px-3 py-2 rounded-md text-sm font-medium bg-gray-100 hover:bg-gray-200"
             >
-              Hoppa till idag
+              Idag
             </button>
             <button
               onClick={nextMonth}
@@ -180,7 +180,7 @@ export const EventsPage = () => {
                   to="/events/create"
                   className="flex text-white bg-green-600 hover:bg-green-700 text-sm font-medium transtion px-3 py-2 rounded-md"
                 >
-                  Skapa Möte
+                  Skapa
                 </Link>
               )}
           </div>
@@ -211,7 +211,7 @@ export const EventsPage = () => {
                 </div>
                 <div className="flex-1">
                   {evs.length === 0 ? (
-                    <div className="text-xs text-gray-400">Ingen möten</div>
+                    <div className="text-xs text-gray-400">Inga möten</div>
                   ) : (
                     <div className="flex flex-col gap-2">
                       {evs.map((e) => (
