@@ -35,6 +35,7 @@ export const MembersPage = () => {
   const { run, loading, data: members } = useFetch<PublicUser[]>();
   const { user } = useAuth();
   const [query, setQuery] = useState("");
+  const [debouncedQuery, setDebouncedQuery] = useState(query);
   const [achievementId, setAchievementId] = useState<number | null>(null);
   const [lodgeId, setLodgeId] = useState<number | null>(null);
   const [achievements, setAchievements] = useState<
@@ -55,14 +56,20 @@ export const MembersPage = () => {
   const doFetch = useCallback(
     () =>
       run(() =>
-        fetchMembers({ name: query || undefined, achievementId, lodgeId })
+        fetchMembers({ name: debouncedQuery || undefined, achievementId, lodgeId })
       ),
-    [run, query, achievementId, lodgeId]
+    [run, debouncedQuery, achievementId, lodgeId]
   );
 
   useEffect(() => {
     doFetch().catch(() => { });
   }, [doFetch]);
+
+  // debounce query to avoid fetching on every keystroke
+  useEffect(() => {
+    const t = setTimeout(() => setDebouncedQuery(query), 1000);
+    return () => clearTimeout(t);
+  }, [query]);
 
   if (loading) return <div className="flex justify-center items-center min-h-screen"><Spinner /></div>;
 
