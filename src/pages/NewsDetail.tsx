@@ -202,9 +202,8 @@ export const NewsDetail = () => {
                 className="bg-green-600 hover:bg-green-700 text-sm font-medium transition text-white px-4 py-2 rounded disabled:opacity-60"
                 disabled={submitting}
               >
-                Spara
+                {submitting ? "Sparar..." : "Spara"}
               </button>
-              {(submitting || loading) && <Spinner />}
             </div>
           </form>
         )}
