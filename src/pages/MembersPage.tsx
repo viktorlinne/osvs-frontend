@@ -46,10 +46,10 @@ export const MembersPage = () => {
   useEffect(() => {
     listAchievements()
       .then((list) => setAchievements(list))
-      .catch(() => {});
+      .catch(() => { });
     listLodges()
       .then((list) => setLodges(list))
-      .catch(() => {});
+      .catch(() => { });
   }, []);
 
   const doFetch = useCallback(
@@ -61,8 +61,10 @@ export const MembersPage = () => {
   );
 
   useEffect(() => {
-    doFetch().catch(() => {});
+    doFetch().catch(() => { });
   }, [doFetch]);
+
+  if (loading) return <div className="flex justify-center items-center min-h-screen"><Spinner /></div>;
 
   return (
     <div className="flex flex-col items-center min-h-screen p-6">

@@ -6,6 +6,7 @@ import { Elements } from "@stripe/react-stripe-js";
 import StripeForm from "../components/StripeForm";
 import type { MembershipPayment } from "../types";
 import { Link } from "react-router-dom";
+import { Spinner } from "../components";
 
 export const MembershipPage = () => {
   const [payments, setPayments] = useState<MembershipPayment[] | null>(null);
@@ -54,7 +55,7 @@ export const MembershipPage = () => {
       if (!mounted) return;
       getMyMemberships()
         .then((res) => setPayments(res as MembershipPayment[]))
-        .catch(() => {});
+        .catch(() => { });
     }, 8000);
 
     return () => {
@@ -94,13 +95,15 @@ export const MembershipPage = () => {
     return `${y}-${m}-${day}`;
   }
 
+  if (loading) return <div className="flex justify-center items-center min-h-screen"><Spinner /></div>;
+
   return (
     <div className="max-w-3xl w-full mx-auto p-6 min-h-screen flex flex-col items-center">
       <Link to="/profile" className="w-full flex justify-start mb-4 text-sm text-green-600 underline">
         ← Tillbaka
       </Link>
       <h2 className="text-2xl font-bold mb-4">Medlemskaps Betalningar</h2>
-      
+
       {loading && <div>Laddar…</div>}
       {!loading && payments && payments.length === 0 && (
         <div>Inga medlemskapsbetalningar hittades.</div>

@@ -2,10 +2,10 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../context";
 import { listPosts } from "../services";
-import { Spinner, NotFound } from "../components";
 import type { Post } from "../types";
 import { useError } from "../context";
 import useFetch from "../hooks/useFetch";
+import { Spinner } from "../components";
 
 //! TODO agg pagination, search and filtering
 export const NewsPage = () => {
@@ -36,6 +36,8 @@ export const NewsPage = () => {
     };
   }, [run, setError, clearError]);
 
+  if (loading) return <div className="flex justify-center items-center min-h-screen"><Spinner /></div>;
+
   return (
     <div className="flex flex-col items-center min-h-screen p-6">
       <div className="w-full max-w-3xl flex items-center justify-between mb-4">
@@ -51,39 +53,35 @@ export const NewsPage = () => {
           )}
       </div>
       <div className="w-full max-w-3xl grid gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-3 mx-auto">
-        {loading && <Spinner />}
-        {notFound ? (
-          <NotFound />
-        ) : (
-          (posts ?? []).map((p) => (
-            <Link
-              to={`/news/${p.id}`}
-              key={p.id}
-              className="rounded-md shadow-md hover:shadow-lg transition bg-white flex flex-col p-4 md:p-6"
-            >
-              <img
-                src={p.pictureUrl ?? ""}
-                alt={p.title}
-                className="w-full h-48 md:h-56 lg:h-48 object-cover rounded-t-md"
-              />
-              <div className="p-4 flex-1">
-                <h3 className="text-xl font-semibold mb-2 truncate">
-                  {p.title}
-                </h3>
-                <p
-                  className="text-gray-700 overflow-hidden"
-                  style={{
-                    display: "-webkit-box",
-                    WebkitLineClamp: 2,
-                    WebkitBoxOrient: "vertical",
-                  }}
-                >
-                  {p.description}
-                </p>
-              </div>
-            </Link>
-          ))
-        )}
+        {(posts ?? []).map((p) => (
+          <Link
+            to={`/news/${p.id}`}
+            key={p.id}
+            className="rounded-md shadow-md hover:shadow-lg transition bg-white flex flex-col p-4 md:p-6"
+          >
+            <img
+              src={p.pictureUrl ?? ""}
+              alt={p.title}
+              className="w-full h-48 md:h-56 lg:h-48 object-cover rounded-t-md"
+            />
+            <div className="p-4 flex-1">
+              <h3 className="text-xl font-semibold mb-2 truncate">
+                {p.title}
+              </h3>
+              <p
+                className="text-gray-700 overflow-hidden"
+                style={{
+                  display: "-webkit-box",
+                  WebkitLineClamp: 2,
+                  WebkitBoxOrient: "vertical",
+                }}
+              >
+                {p.description}
+              </p>
+            </div>
+          </Link>
+        ))
+        }
       </div>
 
       {!loading && (posts ?? []).length === 0 && !notFound && empty && (

@@ -21,7 +21,6 @@ export const Profile = () => {
   const navigate = useNavigate();
   const isEditRoute = location.pathname.endsWith("/edit");
   const { setError: setGlobalError, clearError: clearGlobalError } = useError();
-
   const [saving, setSaving] = useState(false);
   const [pictureFile, setPictureFile] = useState<File | null>(null);
   const [lodges, setLodges] = useState<Lodge[]>([]);

@@ -19,11 +19,12 @@ export const LodgesPage = () => {
     });
   }, [run]);
 
+  if (loading) return <div className="flex justify-center items-center min-h-screen"><Spinner /></div>;
+
   return (
     <div className="flex flex-col items-center min-h-screen">
       <div className="max-w-3xl w-full mx-auto p-6">
         <h2 className="text-2xl font-bold mb-4">Loger</h2>
-        {loading && <Spinner />}
         {Array.isArray(lodges) && (
           <div className="grid gap-4">
             {lodges.map((lodge: Lodge) => (

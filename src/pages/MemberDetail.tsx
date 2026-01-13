@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams, Link, useLocation, useNavigate } from "react-router-dom";
-import { Spinner, NotFound } from "../components";
+import { Spinner } from "../components";
 import useFetch from "../hooks/useFetch";
 import { useError, useAuth } from "../context";
 import type { PublicUser, Achievement, Lodge, Role } from "../types";
@@ -29,14 +29,13 @@ export const MemberDetail = () => {
     run,
     loading,
     data: member,
-    notFound,
   } = useFetch<PublicUser | null>();
   const { setError: setGlobalError, clearError: clearGlobalError } = useError();
   const { user } = useAuth();
   const { user: currentUser } = useAuth();
   const canAward = Boolean(
     currentUser &&
-      (currentUser.roles ?? []).some((r) => ["Admin", "Editor"].includes(r))
+    (currentUser.roles ?? []).some((r) => ["Admin", "Editor"].includes(r))
   );
   const [selectedAid, setSelectedAid] = useState<number | null>(null);
   const [awardDate, setAwardDate] = useState<string>("");
@@ -112,7 +111,7 @@ export const MemberDetail = () => {
         }
       }
       return userObj;
-    }).catch(() => {});
+    }).catch(() => { });
     (async () => {
       try {
         const list = await achievementsService.listAchievements();
@@ -169,9 +168,9 @@ export const MemberDetail = () => {
           typeof rn === "string"
             ? rn
             : ((): string => {
-                const rec = rn as Record<string, unknown>;
-                return String(rec["name"] ?? rec["role"] ?? rec["id"] ?? "");
-              })();
+              const rec = rn as Record<string, unknown>;
+              return String(rec["name"] ?? rec["role"] ?? rec["id"] ?? "");
+            })();
         return rolesList.find((r) => r.name === rnName)?.id;
       })
       .filter((v: unknown): v is number => Boolean(v));
@@ -208,6 +207,8 @@ export const MemberDetail = () => {
     };
   }, [pictureFile]);
 
+  if (loading) return <div className="flex justify-center items-center min-h-screen"><Spinner /></div>;
+
   return (
     <div className="flex flex-col items-center min-h-screen">
       <div className="max-w-3xl w-full mx-auto p-6">
@@ -225,11 +226,7 @@ export const MemberDetail = () => {
           )}
         </div>
         <h2 className="text-2xl font-bold mt-4 mb-4">Medlem</h2>
-
-        {loading && <Spinner />}
-        {notFound ? (
-          <NotFound />
-        ) : (
+        {
           member && (
             <form
               onSubmit={handleSubmit(async (values) => {
@@ -478,7 +475,7 @@ export const MemberDetail = () => {
               ) : null}
             </form>
           )
-        )}
+        }
       </div>
     </div>
   );
