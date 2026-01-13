@@ -131,11 +131,11 @@ export const MembersPage = () => {
                   alt={`${member.firstname} ${member.lastname}`}
                   className="w-16 h-16 rounded-full flex-shrink-0"
                 />
-                <div>
-                  <div className="font-semibold">
+                <div className="min-w-0">
+                  <div className="font-semibold truncate">
                     {member.firstname} {member.lastname}
                   </div>
-                  <div className="text-sm text-gray-500">{member.email}</div>
+                  <div className="text-sm text-gray-500 truncate">{member.email}</div>
                 </div>
               </Link>
             ))}

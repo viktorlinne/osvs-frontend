@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import axios from "axios";
 import { NavLink, useNavigate } from "react-router-dom";
 import { useAuth, useError } from "../../context";
@@ -29,6 +29,19 @@ export const Navbar: React.FC = () => {
   const { setError, clearError } = useError();
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    const onDocClick = (e: MouseEvent) => {
+      if (!menuRef.current) return;
+      if (e.target instanceof Node && !menuRef.current.contains(e.target)) {
+        setMenuOpen(false);
+      }
+    };
+    document.addEventListener("click", onDocClick);
+    return () => document.removeEventListener("click", onDocClick);
+  }, []);
 
   const handleLogout = async () => {
     try {
@@ -48,8 +61,6 @@ export const Navbar: React.FC = () => {
     }
   };
 
-
-
   return (
     <header className="bg-white shadow-sm">
       <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8" aria-label="Top">
@@ -58,36 +69,63 @@ export const Navbar: React.FC = () => {
             <NavLink to="/" className="text-2xl font-bold text-green-700">
               OSVS
             </NavLink>
-            <div className="hidden md:flex items-center space-x-2">
-              <NavButton to="/" onClick={() => setOpen(false)}>
-                Hem
-              </NavButton>
-              <NavButton to="/about" onClick={() => setOpen(false)}>
-                Om VS
-              </NavButton>
-              <NavButton to="/gdpr" onClick={() => setOpen(false)}>
-                GDPR
-              </NavButton>
-              <NavButton to="/contact" onClick={() => setOpen(false)}>
-                Kontakt
-              </NavButton>
-              {user ? (
-                <>
-                  <NavButton to="/news" onClick={() => setOpen(false)}>
-                    Nyheter
-                  </NavButton>
-                  <NavButton to="/events" onClick={() => setOpen(false)}>
-                    Möten
-                  </NavButton>
-                  <NavButton to="/members" onClick={() => setOpen(false)}>
-                    Medlemmar
-                  </NavButton>
-                  <NavButton to="/lodges" onClick={() => setOpen(false)}>
-                    Loger
-                  </NavButton>
-                </>
-              ) : null}
+            <div className="hidden md:flex items-center">
+              <div className="relative" ref={menuRef}>
+                <button
+                  type="button"
+                  onClick={() => setMenuOpen((s) => !s)}
+                  className="inline-flex items-center px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-100 transition"
+                  aria-expanded={menuOpen}
+                >
+                  Publika sidor
+                  <svg
+                    className="ml-2 h-4 w-4"
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 20 20"
+                    fill="currentColor"
+                    aria-hidden="true"
+                  >
+                    <path fillRule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.06 1.06l-4.24 4.24a.75.75 0 01-1.06 0L5.21 8.29a.75.75 0 01.02-1.08z" clipRule="evenodd" />
+                  </svg>
+                </button>
+
+                {menuOpen && (
+                  <div className="absolute left-0 w-48 bg-white border rounded-md shadow-lg z-30">
+                    <div>
+                      <NavButton to="/" onClick={() => { setOpen(false); setMenuOpen(false); }}>
+                        Hem
+                      </NavButton>
+                      <NavButton to="/about" onClick={() => { setOpen(false); setMenuOpen(false); }}>
+                        Om VS
+                      </NavButton>
+                      <NavButton to="/gdpr" onClick={() => { setOpen(false); setMenuOpen(false); }}>
+                        GDPR
+                      </NavButton>
+                      <NavButton to="/contact" onClick={() => { setOpen(false); setMenuOpen(false); }}>
+                        Kontakt
+                      </NavButton>
+                      {/* only the four public links in this dropdown */}
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
+            {user && (
+              <div className="hidden md:flex items-center space-x-2">
+                <NavButton to="/news" onClick={() => setOpen(false)}>
+                  Nyheter
+                </NavButton>
+                <NavButton to="/events" onClick={() => setOpen(false)}>
+                  Möten
+                </NavButton>
+                <NavButton to="/members" onClick={() => setOpen(false)}>
+                  Medlemmar
+                </NavButton>
+                <NavButton to="/lodges" onClick={() => setOpen(false)}>
+                  Loger
+                </NavButton>
+              </div>
+            )}
           </div>
 
           <div className="flex items-center gap-3">
