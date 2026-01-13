@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams, Link, useLocation, useNavigate } from "react-router-dom";
-import { Spinner, NotFound } from "../components";
+import { Spinner } from "../components";
 import useFetch from "../hooks/useFetch";
 import { useError, useAuth } from "../context";
 import type { Event as EventRecord, Lodge } from "../types";
@@ -45,7 +45,6 @@ export const EventDetail = () => {
     run,
     loading,
     data: event,
-    notFound,
   } = useFetch<EventRecord | null>();
   const { setError: setGlobalError, clearError: clearGlobalError } = useError();
   const { user } = useAuth();
@@ -109,8 +108,8 @@ export const EventDetail = () => {
         setLodges(Array.isArray(all) ? all : []);
         const linkedIds = Array.isArray(linked)
           ? linked
-              .map((l: Lodge) => Number(l.id))
-              .filter((n: number) => Number.isFinite(n))
+            .map((l: Lodge) => Number(l.id))
+            .filter((n: number) => Number.isFinite(n))
           : [];
         setOriginalLinkedIds(linkedIds);
       } catch {
@@ -150,8 +149,7 @@ export const EventDetail = () => {
     }
   }
 
-  if (loading) return <Spinner />;
-  if (notFound) return <NotFound />;
+  if (loading) return <div className="flex justify-center items-center min-h-screen"><Spinner /></div>;
 
   return (
     <div className="max-w-3xl w-full mx-auto p-6 min-h-screen">

@@ -6,6 +6,7 @@ import type { Event as EventRecord, ApiError } from "../types";
 import axios from "axios";
 import { isApiError } from "../types/api";
 import { Link } from "react-router-dom";
+import { Spinner } from "../components";
 
 // Start week on Monday
 const WEEK_DAYS = ["Mån", "Tis", "Ons", "Tor", "Fre", "Lör", "Sön"];
@@ -143,6 +144,8 @@ export const EventsPage = () => {
     setViewDate(new Date(today.getFullYear(), today.getMonth(), 1));
   }
 
+  if (loading) return <div className="flex justify-center items-center min-h-screen"><Spinner /></div>;
+
   return (
     <div className="p-6 w-full xl:max-w-[1100px] mx-auto min-h-screen">
       <div className="flex flex-col sm:flex-row gap-y-2 sm:gap-y-0 sm:gap-x-4 py-2 mb-4">
@@ -188,7 +191,57 @@ export const EventsPage = () => {
           {formatMonthNameSv(viewDate)} {year}
         </p>
       </div>
-      <div className="grid grid-cols-7 gap-1 border rounded-md-lg overflow-hidden">
+      {/* Mobile: weekday rows */}
+      <div className="block sm:hidden border rounded-md overflow-hidden">
+        {WEEK_DAYS.map((wd, wi) => {
+          // collect all dates in the month that fall on weekday `wi`
+          const datesForWd: Array<Date | null> = [];
+          for (const week of monthMatrix) {
+            datesForWd.push(week[wi] ?? null);
+          }
+
+          return (
+            <div key={wd} className="flex items-stretch border-b last:border-b-0">
+              <div className="w-24 min-w-[6rem] p-3 bg-gray-50 border-r text-sm font-medium">
+                {wd}
+              </div>
+              <div className="flex-1 p-3 text-sm">
+                <div className="flex flex-col gap-2">
+                  {datesForWd.map((date, idx) => {
+                    if (!date) return null;
+                    const key = formatDateKey(date);
+                    const evs = eventsByDate[key] ?? [];
+                    return (
+                      <div key={idx} className="flex items-start gap-3">
+                        <div className="w-8 text-xs text-gray-500">{date.getDate()}</div>
+                        <div className="flex-1">
+                          {evs.length === 0 ? (
+                            <div className="text-xs text-gray-300">Ingen</div>
+                          ) : (
+                            evs.slice(0, 2).map((e) => (
+                              <Link
+                                key={e.id}
+                                to={`/events/${e.id}`}
+                                className="block truncate text-xs bg-green-50 text-green-800 px-1 py-0.5 rounded-md"
+                                title={e.title}
+                              >
+                                {e.title}
+                              </Link>
+                            ))
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Desktop / tablet: month grid */}
+      <div className="hidden sm:grid grid-cols-7 gap-1 border rounded-md-lg overflow-hidden">
         {WEEK_DAYS.map((wd) => (
           <div
             key={wd}
@@ -203,8 +256,8 @@ export const EventsPage = () => {
             {week.map((date, di) => {
               const isToday = date
                 ? date.getFullYear() === today.getFullYear() &&
-                  date.getMonth() === today.getMonth() &&
-                  date.getDate() === today.getDate()
+                date.getMonth() === today.getMonth() &&
+                date.getDate() === today.getDate()
                 : false;
 
               const inMonth = date ? date.getMonth() === month : false;
@@ -212,16 +265,14 @@ export const EventsPage = () => {
               return (
                 <div
                   key={di}
-                  className={`min-h-[80px] md:min-h-[100px] lg:min-h-[120px] px-4 py-2 text-sm border-t border-l bg-white min-w-0 ${
-                    inMonth ? "" : "bg-gray-50 text-gray-400"
-                  }`}
+                  className={`min-h-[80px] md:min-h-[100px] lg:min-h-[120px] px-4 py-2 text-sm border-t border-l bg-white min-w-0 ${inMonth ? "" : "bg-gray-50 text-gray-400"
+                    }`}
                   style={{ display: "flex", flexDirection: "column" }}
                 >
                   <div className="flex items-start justify-between">
                     <div
-                      className={`w-6 h-6 flex items-center justify-center rounded-full ${
-                        isToday ? "bg-green-600 text-white" : "text-gray-700"
-                      }`}
+                      className={`w-6 h-6 flex items-center justify-center rounded-full ${isToday ? "bg-green-600 text-white" : "text-gray-700"
+                        }`}
                     >
                       {date ? date.getDate() : ""}
                     </div>
