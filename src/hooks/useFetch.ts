@@ -37,9 +37,6 @@ export default function useFetch<T>() {
             ) {
               navigate("/login", { replace: true });
             }
-            // set a helpful message (optional)
-            setError("Inloggning utgången. Vänligen logga in igen.");
-            throw e;
           }
 
           const raw = e.response.data as ApiError | undefined;
