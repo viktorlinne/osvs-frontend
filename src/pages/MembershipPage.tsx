@@ -36,7 +36,7 @@ export const MembershipPage = () => {
       .catch(() => {
         /* useFetch handles global error */
       });
-  }, [run, payments, setPayments]);
+  }, [run, setPayments]);
 
   // Poll while there are pending payments so webhook-updated status becomes visible
   useEffect(() => {
