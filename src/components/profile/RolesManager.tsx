@@ -21,16 +21,20 @@ export const RolesManager = ({
 
   return (
     <div className="mb-4 w-full flex flex-col items-center">
-      <div className="text-center mb-1">
-        <label className="block font-medium">Roller</label>
+      <fieldset className="text-center mb-1">
+        <legend className="block font-medium">Roller</legend>
         <div className="flex flex-col md:flex-row gap-2 py-2">
           {rolesList.map((r) => (
             <label
               key={r.id}
+              htmlFor={`role-${r.id}`}
               className="inline-flex items-center gap-2 border rounded-md px-3 py-2"
             >
               <input
+                id={`role-${r.id}`}
+                name="roles"
                 type="checkbox"
+                value={r.id}
                 checked={selectedRoleIds.includes(r.id)}
                 onChange={(e) => {
                   const next = e.target.checked
@@ -44,7 +48,7 @@ export const RolesManager = ({
           ))}
           {/* Role save is handled by parent consolidated save */}
         </div>
-      </div>
+      </fieldset>
     </div>
   );
 };

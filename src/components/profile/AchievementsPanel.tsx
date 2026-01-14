@@ -50,18 +50,19 @@ export const AchievementsPanel = ({
           </div>
         </div>
 
-        <div className="text-center mb-1 w-full">
-          <label className="block font-medium">Loge</label>
+        <fieldset className="text-center mb-1 w-full">
+          <legend className="block font-medium">Loge</legend>
           {isEditRoute && lodges && setSelectedLid ? (
             <div className="flex flex-col md:flex-row items-center justify-center gap-2 py-2">
               <select
+                id="lodge"
+                name="lodge"
                 value={selectedLid ?? ""}
                 onChange={(e) =>
                   setSelectedLid(e.target.value ? Number(e.target.value) : null)
                 }
                 className="border rounded-md px-3 py-2 w-full md:w-auto"
               >
-                <option value="">Ingen loge</option>
                 {lodges.map((l) => (
                   <option key={l.id} value={l.id}>
                     {l.name}
@@ -74,12 +75,12 @@ export const AchievementsPanel = ({
               {lodge?.name ?? "Ingen loge"}
             </div>
           )}
-        </div>
+        </fieldset>
 
         <div className="text-center mb-1">
-          <label className="block font-medium">Utmärkelser</label>
+          <label htmlFor="achievementsList" className="block font-medium">Utmärkelser</label>
           {achievements && achievements.length > 0 ? (
-            <select className="w-auto border rounded-md px-4 py-2 mb-4">
+            <select id="achievementsList" name="achievementsList" className="w-auto border rounded-md px-4 py-2 mb-4">
               {achievements.map((a) => (
                 <option key={a.id} value={a.id}>
                   {a.title} —{" "}
@@ -96,9 +97,11 @@ export const AchievementsPanel = ({
 
         {isEditRoute && canAward ? (
           <div className="text-center mb-1">
-            <label className="block font-medium">Tilldela ny utmärkelse</label>
+            <label htmlFor="awardSelect" className="block font-medium">Tilldela ny utmärkelse</label>
             <div className="flex flex-col md:flex-row gap-2">
               <select
+                id="awardSelect"
+                name="award"
                 value={selectedAid ?? ""}
                 onChange={(e) =>
                   setSelectedAid(e.target.value ? Number(e.target.value) : null)
@@ -113,6 +116,8 @@ export const AchievementsPanel = ({
                 ))}
               </select>
               <input
+                id="awardDate"
+                name="awardDate"
                 type="date"
                 value={awardDate}
                 onChange={(e) => setAwardDate(e.target.value)}

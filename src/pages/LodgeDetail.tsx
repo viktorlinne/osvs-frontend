@@ -9,6 +9,7 @@ import { getLodge, updateLodge } from "../services/lodges";
 export const LodgeDetail = () => {
   const { id } = useParams<{ id: string }>();
   const { run, loading, data: lodge } = useFetch<Lodge | null>();
+  const { run: runAction, loading: saving } = useFetch<unknown>();
   const { setError: setGlobalError, clearError: clearGlobalError } = useError();
   const { user } = useAuth();
   const location = useLocation();
@@ -18,7 +19,6 @@ export const LodgeDetail = () => {
     user && (user.roles ?? []).some((r) => ["Admin", "Editor"].includes(r))
   );
 
-  const [saving, setSaving] = useState(false);
   const [form, setForm] = useState({ name: "", description: "", address: "" });
 
   useEffect(() => {
@@ -32,25 +32,26 @@ export const LodgeDetail = () => {
 
   useEffect(() => {
     if (!lodge) return;
-    setForm({
-      name: lodge.name ?? "",
-      description: lodge.description ?? "",
-      address: lodge.address ?? "",
-    });
+    Promise.resolve().then(() =>
+      setForm({
+        name: lodge.name ?? "",
+        description: lodge.description ?? "",
+        address: lodge.address ?? "",
+      })
+    );
   }, [lodge, isEditRoute]);
 
   async function handleSave() {
     if (!id) return setGlobalError("Missing lodge id");
     if (!canEdit) return setGlobalError("Ingen behörighet");
     clearGlobalError();
-    setSaving(true);
     try {
       const payload = {
         name: form.name,
         description: form.description || null,
         address: form.address || undefined,
       };
-      await updateLodge(id, payload);
+      await runAction(() => updateLodge(id, payload));
       await run(async () => {
         const resp = await getLodge(id);
         const l = (resp as { lodge?: Lodge })?.lodge ?? null;
@@ -59,8 +60,6 @@ export const LodgeDetail = () => {
       navigate(`/lodges/${id}`);
     } catch {
       setGlobalError("Failed to save lodge");
-    } finally {
-      setSaving(false);
     }
   }
 
@@ -69,17 +68,17 @@ export const LodgeDetail = () => {
   return (
     <div className="max-w-3xl w-full mx-auto p-6 min-h-screen">
       <div className="flex items-center justify-between">
-        <Link to="/lodges" className="text-sm text-green-600 underline">
+        <Link to=".." relative="path" className="text-sm text-green-600 underline">
           ← Tillbaka
         </Link>
-        {/* {canEdit && !isEditRoute && (
+        {canEdit && !isEditRoute && (
           <Link
             to={`/lodges/${id}/edit`}
             className="text-sm font-medium text-white bg-green-600 hover:bg-green-700  transition px-3 py-2 rounded-md"
           >
             Redigera
           </Link>
-        )} */}
+        )}
       </div>
 
       <h2 className="text-2xl font-bold mt-4 mb-4">Loge</h2>
@@ -89,18 +88,23 @@ export const LodgeDetail = () => {
           {isEditRoute && canEdit ? (
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium mb-1">Namn</label>
+                <label htmlFor="name" className="block text-sm font-medium mb-1">Namn</label>
                 <input
+                  id="name"
+                  name="name"
+                  autoComplete="off"
                   value={form.name}
                   onChange={(e) => setForm({ ...form, name: e.target.value })}
                   className="w-full border rounded-md px-3 py-2"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1">
+                <label htmlFor="description" className="block text-sm font-medium mb-1">
                   Beskrivning
                 </label>
                 <textarea
+                  id="description"
+                  name="description"
                   value={form.description}
                   onChange={(e) =>
                     setForm({ ...form, description: e.target.value })
@@ -109,8 +113,11 @@ export const LodgeDetail = () => {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1">Adress</label>
+                <label htmlFor="address" className="block text-sm font-medium mb-1">Adress</label>
                 <input
+                  id="address"
+                  name="address"
+                  autoComplete="off"
                   value={form.address}
                   onChange={(e) =>
                     setForm({ ...form, address: e.target.value })

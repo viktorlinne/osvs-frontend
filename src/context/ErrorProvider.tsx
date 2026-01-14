@@ -27,10 +27,12 @@ export function ErrorProvider({ children }: { children: React.ReactNode }) {
 
     return (
         <ErrorContext.Provider value={{ error, setError, clearError }}>
-            <div className="relative">
+            <div
+                className="relative"
+                onClick={clearError}>
                 {error ? (
-                    <div className="fixed top-4 left-1/2 -translate-x-1/2 z-50 w-full max-w-xl px-4">
-                        <div className="bg-red-600 text-white rounded-md shadow p-3 text-center">
+                    <div className="fixed top-10 left-1/2 -translate-x-1/2 z-50 w-full max-w-xl px-4">
+                        <div className="bg-red-600 hover:bg-red-700 transition text-white rounded-md shadow p-3 text-center">
                             {error}
                         </div>
                     </div>

@@ -33,25 +33,22 @@ async function fetchMembers({
 
 export const MembersPage = () => {
   const { run, loading, data: members } = useFetch<PublicUser[]>();
+  const { run: runAchievements, data: achievements } = useFetch<
+    Array<{ id: number; title: string }>
+  >();
+  const { run: runLodges, data: lodges } = useFetch<Array<{ id: number; name: string }>>();
   const { user } = useAuth();
   const [query, setQuery] = useState("");
   const [debouncedQuery, setDebouncedQuery] = useState(query);
   const [achievementId, setAchievementId] = useState<number | null>(null);
   const [lodgeId, setLodgeId] = useState<number | null>(null);
-  const [achievements, setAchievements] = useState<
-    Array<{ id: number; title: string }>
-  >([]);
-  const [lodges, setLodges] = useState<Array<{ id: number; name: string }>>([]);
+  // static lists now provided by useFetch below
 
-  // fetch static lists
+  // fetch static lists via useFetch so errors go through `useError`
   useEffect(() => {
-    listAchievements()
-      .then((list) => setAchievements(list))
-      .catch(() => { });
-    listLodges()
-      .then((list) => setLodges(list))
-      .catch(() => { });
-  }, []);
+    runAchievements(() => listAchievements()).catch(() => { });
+    runLodges(() => listLodges()).catch(() => { });
+  }, [runAchievements, runLodges]);
 
   const doFetch = useCallback(
     () =>
@@ -79,6 +76,8 @@ export const MembersPage = () => {
         <h2 className="text-2xl font-bold mb-4">Medlemmar</h2>
         <div className="flex flex-col md:flex-row gap-y-2 md:gap-y-0 md:gap-x-4 py-2 mb-4">
           <input
+            id="search"
+            name="search"
             type="search"
             placeholder="Sök förnamn eller efternamn"
             value={query}
@@ -86,6 +85,8 @@ export const MembersPage = () => {
             className="flex-1 px-4 py-2 border rounded-md"
           />
           <select
+            id="achievementFilter"
+            name="achievementFilter"
             value={achievementId ?? ""}
             onChange={(e) =>
               setAchievementId(e.target.value ? Number(e.target.value) : null)
@@ -93,13 +94,15 @@ export const MembersPage = () => {
             className="px-4 py-2 border rounded-md"
           >
             <option value="">Alla grader</option>
-            {achievements.map((a) => (
+            {(achievements ?? []).map((a) => (
               <option key={a.id} value={a.id}>
                 {a.title}
               </option>
             ))}
           </select>
           <select
+            id="lodgeFilter"
+            name="lodgeFilter"
             value={lodgeId ?? ""}
             onChange={(e) =>
               setLodgeId(e.target.value ? Number(e.target.value) : null)
@@ -107,7 +110,7 @@ export const MembersPage = () => {
             className="px-4 py-2 border rounded-md"
           >
             <option value="">Alla loger</option>
-            {lodges.map((l) => (
+            {(lodges ?? []).map((l) => (
               <option key={l.id} value={l.id}>
                 {l.name}
               </option>
@@ -124,7 +127,6 @@ export const MembersPage = () => {
             )}
         </div>
 
-        {loading && <Spinner />}
         {Array.isArray(members) && (
           <div className="w-full grid gap-4 grid-cols-1 sm:grid-cols-1 lg:grid-cols-3">
             {members.map((member: PublicUser) => (

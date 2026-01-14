@@ -1,4 +1,3 @@
 export * from "./Footer";
 export * from "./Navbar";
-export * from "./NotFound";
 export * from "./Spinner";
