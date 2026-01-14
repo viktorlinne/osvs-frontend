@@ -9,6 +9,7 @@ import { getLodge, updateLodge } from "../services/lodges";
 export const LodgeDetail = () => {
   const { id } = useParams<{ id: string }>();
   const { run, loading, data: lodge } = useFetch<Lodge | null>();
+  const { run: runAction, loading: saving } = useFetch<unknown>();
   const { setError: setGlobalError, clearError: clearGlobalError } = useError();
   const { user } = useAuth();
   const location = useLocation();
@@ -18,7 +19,6 @@ export const LodgeDetail = () => {
     user && (user.roles ?? []).some((r) => ["Admin", "Editor"].includes(r))
   );
 
-  const [saving, setSaving] = useState(false);
   const [form, setForm] = useState({ name: "", description: "", address: "" });
 
   useEffect(() => {
@@ -32,25 +32,26 @@ export const LodgeDetail = () => {
 
   useEffect(() => {
     if (!lodge) return;
-    setForm({
-      name: lodge.name ?? "",
-      description: lodge.description ?? "",
-      address: lodge.address ?? "",
-    });
+    Promise.resolve().then(() =>
+      setForm({
+        name: lodge.name ?? "",
+        description: lodge.description ?? "",
+        address: lodge.address ?? "",
+      })
+    );
   }, [lodge, isEditRoute]);
 
   async function handleSave() {
     if (!id) return setGlobalError("Missing lodge id");
     if (!canEdit) return setGlobalError("Ingen behörighet");
     clearGlobalError();
-    setSaving(true);
     try {
       const payload = {
         name: form.name,
         description: form.description || null,
         address: form.address || undefined,
       };
-      await updateLodge(id, payload);
+      await runAction(() => updateLodge(id, payload));
       await run(async () => {
         const resp = await getLodge(id);
         const l = (resp as { lodge?: Lodge })?.lodge ?? null;
@@ -59,8 +60,6 @@ export const LodgeDetail = () => {
       navigate(`/lodges/${id}`);
     } catch {
       setGlobalError("Failed to save lodge");
-    } finally {
-      setSaving(false);
     }
   }
 

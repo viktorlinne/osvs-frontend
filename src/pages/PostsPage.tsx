@@ -10,13 +10,12 @@ import { Spinner } from "../components";
 //! TODO agg pagination, search and filtering
 export const NewsPage = () => {
   const { data: posts, loading, notFound, run } = useFetch<Post[]>();
-  const { setError, clearError } = useError();
+  const { setError } = useError();
   const [empty, setEmpty] = useState(false);
   const { user } = useAuth();
 
   useEffect(() => {
     let mounted = true;
-    clearError();
     run(() => listPosts())
       .then((res) => {
         if (!mounted) return;
@@ -34,7 +33,7 @@ export const NewsPage = () => {
     return () => {
       mounted = false;
     };
-  }, [run, setError, clearError]);
+  }, [run, setError]);
 
   if (loading) return <div className="flex justify-center items-center min-h-screen"><Spinner /></div>;
 

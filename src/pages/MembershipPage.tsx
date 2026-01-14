@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useError } from "../context";
 import { getMyMemberships, createMembershipPayment } from "../services/stripe";
+import useFetch from "../hooks/useFetch";
 import { loadStripe } from "@stripe/stripe-js";
 import { Elements } from "@stripe/react-stripe-js";
 import StripeForm from "../components/StripeForm";
@@ -9,8 +10,8 @@ import { Link } from "react-router-dom";
 import { Spinner } from "../components";
 
 export const MembershipPage = () => {
-  const [payments, setPayments] = useState<MembershipPayment[] | null>(null);
-  const [loading, setLoading] = useState(false);
+  const { run, loading, data: payments, setData: setPayments } = useFetch<MembershipPayment[]>();
+  const { run: runAction } = useFetch<unknown>();
   const { setError } = useError();
   // removed unused `refreshing` state (we use `loading` and `checkoutLoading`)
   const [showCheckout, setShowCheckout] = useState(false);
@@ -24,37 +25,37 @@ export const MembershipPage = () => {
       : null;
 
   useEffect(() => {
-    let mounted = true;
-    setLoading(true);
-    getMyMemberships()
+    void run(() => getMyMemberships())
       .then((res) => {
-        if (!mounted) return;
-        setPayments(res as MembershipPayment[]);
+        try {
+          setPayments(Array.isArray(res) ? (res as MembershipPayment[]) : []);
+        } catch {
+          setPayments([]);
+        }
       })
-      .catch((err) => {
-        if (!mounted) return;
-        setError(String(err?.message ?? err));
-      })
-      .finally(() => {
-        if (!mounted) return;
-        setLoading(false);
+      .catch(() => {
+        /* useFetch handles global error */
       });
-    return () => {
-      mounted = false;
-    };
-  }, [setError]);
+  }, [run, payments, setPayments]);
 
   // Poll while there are pending payments so webhook-updated status becomes visible
   useEffect(() => {
     if (!payments) return;
-    const hasPending = payments.some((p) => p.status === "Pending");
+    const hasPending = Array.isArray(payments) && payments.some((p) => p.status === "Pending");
     if (!hasPending) return;
 
     let mounted = true;
     const id = setInterval(() => {
       if (!mounted) return;
-      getMyMemberships()
-        .then((res) => setPayments(res as MembershipPayment[]))
+      void run(() => getMyMemberships())
+        .then((res) => {
+          if (!mounted) return;
+          try {
+            setPayments(Array.isArray(res) ? (res as MembershipPayment[]) : []);
+          } catch {
+            setPayments([]);
+          }
+        })
         .catch(() => { });
     }, 8000);
 
@@ -62,7 +63,7 @@ export const MembershipPage = () => {
       mounted = false;
       clearInterval(id);
     };
-  }, [payments]);
+  }, [payments, setPayments, run]);
 
   // explicit refresh handler removed — not used in current UI
 
@@ -70,11 +71,8 @@ export const MembershipPage = () => {
     if (checkoutLoading || showCheckout) return;
     setCheckoutLoading(true);
     try {
-      const resp = await createMembershipPayment({ year: payment.year });
-      const cs =
-        ((resp as Record<string, unknown>)["client_secret"] as
-          | string
-          | undefined) ?? null;
+      const resp = await runAction(() => createMembershipPayment({ year: payment.year }));
+      const cs = ((resp as Record<string, unknown>)["client_secret"] as string | undefined) ?? null;
       if (!cs) throw new Error("Missing client_secret from server");
       setClientSecret(cs);
       setShowCheckout(true);
@@ -150,8 +148,8 @@ export const MembershipPage = () => {
                 setClientSecret(null);
                 // refresh payments
                 try {
-                  const res = await getMyMemberships();
-                  setPayments(res as MembershipPayment[]);
+                  const res = await run(() => getMyMemberships());
+                  setPayments(Array.isArray(res) ? (res as MembershipPayment[]) : []);
                 } catch {
                   /* ignore */
                 }

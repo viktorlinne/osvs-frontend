@@ -46,6 +46,9 @@ export const EventDetail = () => {
     loading,
     data: event,
   } = useFetch<EventRecord | null>();
+  const { run: runAction, loading: saving } = useFetch<unknown>();
+  const { run: runLodges, data: lodges } = useFetch<Lodge[]>();
+  const { run: runLinked, data: linkedLodges } = useFetch<Lodge[]>();
   const { setError: setGlobalError, clearError: clearGlobalError } = useError();
   const { user } = useAuth();
   const location = useLocation();
@@ -55,8 +58,6 @@ export const EventDetail = () => {
     user && (user.roles ?? []).some((r) => ["Admin", "Editor"].includes(r))
   );
 
-  const [saving, setSaving] = useState(false);
-
   const [form, setForm] = useState({
     title: "",
     description: "",
@@ -65,7 +66,6 @@ export const EventDetail = () => {
     price: "",
     lodgeMeeting: false,
   });
-  const [lodges, setLodges] = useState<Array<{ id: number; name: string }>>([]);
   const [originalLinkedIds, setOriginalLinkedIds] = useState<number[]>([]);
 
   useEffect(() => {
@@ -83,48 +83,46 @@ export const EventDetail = () => {
   // initialize form whenever the event changes or when entering edit mode
   useEffect(() => {
     if (!event) return;
-    setForm({
-      title: event.title ?? "",
-      description: event.description ?? "",
-      startDate: toDateInputValue(event.startDate),
-      endDate: toDateInputValue(event.endDate),
-      price: event.price != null ? String(event.price) : "",
-      lodgeMeeting: Boolean(event.lodgeMeeting),
-    });
+    Promise.resolve().then(() =>
+      setForm({
+        title: event.title ?? "",
+        description: event.description ?? "",
+        startDate: toDateInputValue(event.startDate),
+        endDate: toDateInputValue(event.endDate),
+        price: event.price != null ? String(event.price) : "",
+        lodgeMeeting: Boolean(event.lodgeMeeting),
+      })
+    );
   }, [event, isEditRoute]);
 
   // load lodges and which are linked to this event when editing
   useEffect(() => {
     if (!event) return;
-    let mounted = true;
-    (async () => {
-      try {
-        const all = await listLodges();
+    void Promise.all([
+      runLodges(() => listLodges()).catch(() => {
+        /* swallow; useFetch handles errors */
+      }),
+      runLinked(async () => {
         const linkedResp = await listEventLodges(event.id as unknown as number);
-        // no payment checks in frontend EventDetail (Stripe flow removed)
-        const linked =
-          (linkedResp as { lodges?: Lodge[] })?.lodges ?? linkedResp ?? [];
-        if (!mounted) return;
-        setLodges(Array.isArray(all) ? all : []);
-        const linkedIds = Array.isArray(linked)
-          ? linked
-            .map((l: Lodge) => Number(l.id))
-            .filter((n: number) => Number.isFinite(n))
-          : [];
-        setOriginalLinkedIds(linkedIds);
-      } catch {
-        // ignore
-      }
-    })();
-    return () => {
-      mounted = false;
-    };
-  }, [event, user]);
+        const linked = (linkedResp as { lodges?: Lodge[] })?.lodges ?? linkedResp ?? [];
+        return Array.isArray(linked) ? linked : [];
+      }).catch(() => {
+        /* swallow */
+      }),
+    ]);
+  }, [event, runLodges, runLinked]);
+
+  useEffect(() => {
+    const linked = Array.isArray(linkedLodges) ? linkedLodges : [];
+    const linkedIds = linked
+      .map((l: Lodge) => Number(l.id))
+      .filter((n: number) => Number.isFinite(n));
+    Promise.resolve().then(() => setOriginalLinkedIds(linkedIds));
+  }, [linkedLodges]);
 
   async function handleSave() {
     if (!id) return setGlobalError("Missing event id");
     clearGlobalError();
-    setSaving(true);
     try {
       const payload: Record<string, unknown> = {
         title: form.title,
@@ -134,7 +132,7 @@ export const EventDetail = () => {
         price: form.price ? Number(form.price) : undefined,
         lodgeMeeting: form.lodgeMeeting,
       };
-      await updateEvent(id, payload);
+      await runAction(() => updateEvent(id, payload));
       // Lodges are no longer edited here; only update event data
       // re-fetch and navigate back to view
       await run(async () => {
@@ -144,8 +142,6 @@ export const EventDetail = () => {
       navigate(`/events/${id}`);
     } catch {
       setGlobalError("Failed to save event");
-    } finally {
-      setSaving(false);
     }
   }
 

@@ -3,6 +3,7 @@ import { useNavigate } from "react-router";
 import api, { fetchData } from "../services/api";
 import { listLodges } from "../services/lodges";
 import type { RegisterForm, Lodge } from "../types";
+import useFetch from "../hooks/useFetch";
 
 import { useForm } from "react-hook-form";
 import type { FieldError } from "react-hook-form";
@@ -13,7 +14,8 @@ export const CreateUser = () => {
   const [loading, setLoading] = useState(false);
   const [picture, setPicture] = useState<File | null>(null);
   const [lodges, setLodges] = useState<Lodge[]>([]);
-  const [lodgesLoading, setLodgesLoading] = useState(true);
+  const { run: runLodges, loading: lodgesLoading } = useFetch<Lodge[]>();
+  const { run: runSubmit } = useFetch<unknown>();
 
   const { setError } = useError();
 
@@ -74,7 +76,7 @@ export const CreateUser = () => {
       fd.append("notes", String(values.notes ?? "").trim());
       if (picture) fd.append("picture", picture);
 
-      await fetchData(api.post("/auth/register", fd));
+      await runSubmit(() => fetchData(api.post("/auth/register", fd)));
       navigate("/members");
     } catch (e: unknown) {
       const err = e as { status?: number; details?: unknown };
@@ -109,25 +111,18 @@ export const CreateUser = () => {
 
   // Load lodges on mount
   useEffect(() => {
-    (async () => {
-      try {
-        setLodgesLoading(true);
-        const data = await listLodges();
-        if (Array.isArray(data)) {
-          setLodges(data as Lodge[]);
-        } else if (data && typeof data === "object") {
+    runLodges(() => listLodges())
+      .then((data) => {
+        if (Array.isArray(data)) setLodges(data as Lodge[]);
+        else if (data && typeof data === "object") {
           const lodgesField = (data as Record<string, unknown>)["lodges"];
-          if (Array.isArray(lodgesField)) {
-            setLodges(lodgesField as Lodge[]);
-          }
+          if (Array.isArray(lodgesField)) setLodges(lodgesField as Lodge[]);
         }
-      } catch {
+      })
+      .catch(() => {
         // ignore; validation will catch missing lodge
-      } finally {
-        setLodgesLoading(false);
-      }
-    })();
-  }, []);
+      });
+  }, [runLodges]);
 
   // error display handled by global ErrorProvider
   return (

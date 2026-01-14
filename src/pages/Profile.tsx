@@ -8,6 +8,7 @@ import { updateMe, uploadMyPicture } from "../services";
 import { useForm } from "react-hook-form";
 import type { UpdateUserForm } from "../types";
 import { useProfile } from "../hooks";
+import useFetch from "../hooks/useFetch";
 import {
   ProfileHeader,
   AchievementsPanel,
@@ -24,6 +25,8 @@ export const Profile = () => {
   const [saving, setSaving] = useState(false);
   const [pictureFile, setPictureFile] = useState<File | null>(null);
   const [lodges, setLodges] = useState<Lodge[]>([]);
+  const { run } = useFetch<unknown>();
+  const { run: runLodges } = useFetch<Lodge[]>();
   const [selectedLid, setSelectedLid] = useState<number | null>(null);
   const {
     achievements,
@@ -84,18 +87,17 @@ export const Profile = () => {
 
   useEffect(() => {
     let mounted = true;
-    (async () => {
-      try {
-        const list = await lodgesService.listLodges();
+    runLodges(() => lodgesService.listLodges())
+      .then((list) => {
         if (mounted) setLodges(Array.isArray(list) ? list : []);
-      } catch {
-        // ignore
-      }
-    })();
+      })
+      .catch(() => {
+        /* ignore */
+      });
     return () => {
       mounted = false;
     };
-  }, []);
+  }, [runLodges]);
 
   useEffect(() => {
     setSelectedLid(lodge?.id ? Number(lodge.id) : null);
@@ -105,7 +107,7 @@ export const Profile = () => {
     clearGlobalError();
     setSaving(true);
     try {
-      await updateMe({
+      await run(() => updateMe({
         firstname: String(values.firstname ?? "").trim(),
         lastname: String(values.lastname ?? "").trim(),
         mobile: String(values.mobile ?? "").trim(),
@@ -115,16 +117,16 @@ export const Profile = () => {
         zipcode: values.zipcode ? String(values.zipcode) : null,
         official: values.official ?? null,
         notes: values.notes ?? null,
-      });
+      }));
       if (pictureFile) {
-        await uploadMyPicture(pictureFile);
+        await run(() => uploadMyPicture(pictureFile));
       }
       // save roles, lodge and achievements as part of consolidated save
       const uid = user?.id;
       if (uid) {
         try {
           if (Array.isArray(selectedRoleIds) && selectedRoleIds.length > 0) {
-            await saveRoles(uid, selectedRoleIds);
+            await run(() => saveRoles(uid, selectedRoleIds));
           }
         } catch {
           setGlobalError("Misslyckades att uppdatera roller");
@@ -132,7 +134,7 @@ export const Profile = () => {
 
         try {
           if (selectedAid) {
-            await assignAchievement(uid, selectedAid, awardDate || undefined);
+            await run(() => assignAchievement(uid, selectedAid, awardDate || undefined));
             setSelectedAid(null);
             setAwardDate("");
           }
@@ -141,9 +143,11 @@ export const Profile = () => {
         }
 
         try {
-          await setUserLodge(
-            String(uid),
-            selectedLid === null ? null : Number(selectedLid)
+          await run(() =>
+            setUserLodge(
+              String(uid),
+              selectedLid === null ? null : Number(selectedLid)
+            )
           );
         } catch {
           setGlobalError("Misslyckades att uppdatera loge");

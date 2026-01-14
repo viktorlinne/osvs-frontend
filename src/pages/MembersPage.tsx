@@ -33,25 +33,22 @@ async function fetchMembers({
 
 export const MembersPage = () => {
   const { run, loading, data: members } = useFetch<PublicUser[]>();
+  const { run: runAchievements, data: achievements } = useFetch<
+    Array<{ id: number; title: string }>
+  >();
+  const { run: runLodges, data: lodges } = useFetch<Array<{ id: number; name: string }>>();
   const { user } = useAuth();
   const [query, setQuery] = useState("");
   const [debouncedQuery, setDebouncedQuery] = useState(query);
   const [achievementId, setAchievementId] = useState<number | null>(null);
   const [lodgeId, setLodgeId] = useState<number | null>(null);
-  const [achievements, setAchievements] = useState<
-    Array<{ id: number; title: string }>
-  >([]);
-  const [lodges, setLodges] = useState<Array<{ id: number; name: string }>>([]);
+  // static lists now provided by useFetch below
 
-  // fetch static lists
+  // fetch static lists via useFetch so errors go through `useError`
   useEffect(() => {
-    listAchievements()
-      .then((list) => setAchievements(list))
-      .catch(() => { });
-    listLodges()
-      .then((list) => setLodges(list))
-      .catch(() => { });
-  }, []);
+    runAchievements(() => listAchievements()).catch(() => { });
+    runLodges(() => listLodges()).catch(() => { });
+  }, [runAchievements, runLodges]);
 
   const doFetch = useCallback(
     () =>
@@ -97,7 +94,7 @@ export const MembersPage = () => {
             className="px-4 py-2 border rounded-md"
           >
             <option value="">Alla grader</option>
-            {achievements.map((a) => (
+            {(achievements ?? []).map((a) => (
               <option key={a.id} value={a.id}>
                 {a.title}
               </option>
@@ -113,7 +110,7 @@ export const MembersPage = () => {
             className="px-4 py-2 border rounded-md"
           >
             <option value="">Alla loger</option>
-            {lodges.map((l) => (
+            {(lodges ?? []).map((l) => (
               <option key={l.id} value={l.id}>
                 {l.name}
               </option>

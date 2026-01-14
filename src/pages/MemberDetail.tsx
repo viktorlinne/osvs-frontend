@@ -11,6 +11,7 @@ import {
   adminUpdateUser,
   uploadUserPicture,
 } from "../services/users";
+import type { UserLodgeResponse } from "../services/users";
 import achievementsService from "../services/achievements";
 import lodgesService from "../services/lodges";
 import { listRoles } from "../services/admin";
@@ -30,6 +31,11 @@ export const MemberDetail = () => {
     loading,
     data: member,
   } = useFetch<PublicUser | null>();
+  const { run: runAvailable } = useFetch<Achievement[]>();
+  const { run: runLodges } = useFetch<Lodge[]>();
+  const { run: runRoles } = useFetch<unknown>();
+  const { run: runUserLodge } = useFetch<UserLodgeResponse>();
+  const { run: runAction } = useFetch<unknown>();
   const { setError: setGlobalError, clearError: clearGlobalError } = useError();
   const { user } = useAuth();
   const { user: currentUser } = useAuth();
@@ -112,34 +118,24 @@ export const MemberDetail = () => {
       }
       return userObj;
     }).catch(() => { });
-    (async () => {
-      try {
-        const list = await achievementsService.listAchievements();
-        setAvailable(list);
-      } catch {
-        // ignore
-      }
-    })();
-    // fetch lodges list and current user's lodge
-    (async () => {
-      try {
-        const l = await lodgesService.listLodges();
-        setLodges(Array.isArray(l) ? l : []);
-      } catch {
-        // ignore
-      }
+    runAvailable(() => achievementsService.listAchievements())
+      .then((list) => setAvailable(list))
+      .catch(() => { });
 
-      // Only fetch role list if current user can edit (Admin or Editor).
-      // This avoids 403 Forbidden requests for ordinary or anonymous users.
-      if (canEdit) {
-        try {
-          const r = await listRoles();
-          // accept either an array or { roles: [...] }
+    // fetch lodges list and current user's lodge
+    runLodges(() => lodgesService.listLodges())
+      .then((l) => setLodges(Array.isArray(l) ? l : []))
+      .catch(() => { });
+
+    // Only fetch role list if current user can edit (Admin or Editor).
+    // This avoids 403 Forbidden requests for ordinary or anonymous users.
+    if (canEdit) {
+      runRoles(() => listRoles())
+        .then((r) => {
           const raw = r as Record<string, unknown> | undefined;
           let items: Array<Record<string, unknown>> = [];
           if (Array.isArray(r)) items = r as Array<Record<string, unknown>>;
-          else if (raw && Array.isArray(raw.roles))
-            items = raw.roles as Array<Record<string, unknown>>;
+          else if (raw && Array.isArray(raw.roles)) items = raw.roles as Array<Record<string, unknown>>;
           if (items.length > 0) {
             const rolesArray = items.map((item) => ({
               id: Number(item.id),
@@ -147,27 +143,21 @@ export const MemberDetail = () => {
             }));
             setRolesList(rolesArray);
           }
-        } catch {
-          // ignore
-        }
-      }
+        })
+        .catch(() => { });
+    }
 
-      try {
-        const cur = await getUserLodge(id as string);
-        setSelectedLid(cur?.lodge ? Number(cur.lodge.id) : null);
-      } catch {
-        // ignore
-      }
-    })();
-  }, [id, run, setGlobalError, canEdit]);
+    runUserLodge(() => getUserLodge(id as string))
+      .then((cur) => setSelectedLid(cur?.lodge ? Number(cur.lodge.id) : null))
+      .catch(() => { });
+
+    // when member and rolesList available, set selectedRoleIds
+  }, [id, run, setGlobalError, canEdit, runAvailable, runLodges, runRoles, runUserLodge]);
 
   useEffect(() => {
-    // when member and rolesList available, set selectedRoleIds
     if (!member) return;
     if (!rolesList || rolesList.length === 0) return;
-    const memberRoles = (member as unknown as Record<string, unknown>)[
-      "roles"
-    ] as Array<unknown> | undefined;
+    const memberRoles = (member as unknown as Record<string, unknown>)["roles"] as Array<unknown> | undefined;
     const ids = (memberRoles ?? [])
       .map((rn: unknown) => {
         const rnName =
@@ -241,7 +231,7 @@ export const MemberDetail = () => {
                 try {
                   if (!id) throw new Error("Missing id");
                   const uid = id as string;
-                  await adminUpdateUser(uid, {
+                  await runAction(() => adminUpdateUser(uid, {
                     firstname: String(values.firstname ?? "").trim(),
                     lastname: String(values.lastname ?? "").trim(),
                     mobile: String(values.mobile ?? "").trim(),
@@ -253,15 +243,15 @@ export const MemberDetail = () => {
                     zipcode: values.zipcode ? String(values.zipcode) : null,
                     official: values.official ?? null,
                     notes: values.notes ?? null,
-                  });
+                  }));
                   if (pictureFile) {
-                    await uploadUserPicture(uid, pictureFile);
+                    await runAction(() => uploadUserPicture(uid, pictureFile));
                   }
 
                   // save roles
                   try {
                     console.debug("Saving roles for", uid, selectedRoleIds);
-                    await setRoles(uid, selectedRoleIds);
+                    await runAction(() => setRoles(uid, selectedRoleIds));
                     // signal success briefly
                     setGlobalError("");
                   } catch (err) {
@@ -272,10 +262,10 @@ export const MemberDetail = () => {
                   // assign achievement if selected
                   try {
                     if (selectedAid) {
-                      await postAchievement(uid, {
+                      await runAction(() => postAchievement(uid, {
                         achievementId: selectedAid,
                         awardedAt: awardDate || undefined,
-                      });
+                      }));
                       setSelectedAid(null);
                       setAwardDate("");
                     }
@@ -285,10 +275,10 @@ export const MemberDetail = () => {
 
                   // update lodge
                   try {
-                    await setUserLodge(
+                    await runAction(() => setUserLodge(
                       uid,
                       selectedLid === null ? null : Number(selectedLid)
-                    );
+                    ));
                   } catch {
                     setGlobalError("Misslyckades att uppdatera loge");
                   }
@@ -356,10 +346,10 @@ export const MemberDetail = () => {
                   clearGlobalError();
                   setSaving(true);
                   try {
-                    await setUserLodge(
+                    await runAction(() => setUserLodge(
                       String(targetUserId),
                       lodgeId === null ? null : Number(lodgeId)
-                    );
+                    ));
                     await run(async () => {
                       const resp = await fetch(
                         `${import.meta.env.VITE_BACKEND_URL}/api/users/${id}`,
@@ -396,10 +386,10 @@ export const MemberDetail = () => {
                   clearGlobalError();
                   setSaving(true);
                   try {
-                    await postAchievement(String(targetUserId), {
+                    await runAction(() => postAchievement(String(targetUserId), {
                       achievementId,
                       awardedAt,
-                    });
+                    }));
                     await run(async () => {
                       const resp = await fetch(
                         `${import.meta.env.VITE_BACKEND_URL}/api/users/${id}`,
@@ -433,7 +423,7 @@ export const MemberDetail = () => {
                   clearGlobalError();
                   setSaving(true);
                   try {
-                    await setRoles(String(targetUserId), ids);
+                    await runAction(() => setRoles(String(targetUserId), ids));
                     await run(async () => {
                       const resp = await fetch(
                         `${import.meta.env.VITE_BACKEND_URL}/api/users/${id}`,

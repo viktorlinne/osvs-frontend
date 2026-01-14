@@ -55,7 +55,7 @@ export default function useFetch<T>() {
         setLoading(false);
       }
     },
-    [clearError, setError]
+    [clearError, setError, logout, navigate]
   );
 
   const reset = useCallback(() => {
