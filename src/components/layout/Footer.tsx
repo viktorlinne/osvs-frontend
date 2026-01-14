@@ -46,7 +46,7 @@ export const Footer: React.FC = () => {
               {user ? (
                 <>
                   <NavLink
-                    to="/news"
+                    to="/posts"
                     className="px-3 py-1 text-sm rounded-md hover:bg-gray-100"
                   >
                     Nyheter
@@ -83,7 +83,7 @@ export const Footer: React.FC = () => {
             </a>
             <a
               href="http://www.osvs.se"
-              className="block text-sm hover:underline"
+              className="block text-sm hover:underline mt-2"
             >
               osvs.se
             </a>

@@ -9,7 +9,7 @@ import useFetch from "../hooks/useFetch";
 import { useForm } from "react-hook-form";
 import type { UpdatePostForm } from "../types";
 
-export const NewsDetail = () => {
+export const PostDetail = () => {
   const { user } = useAuth();
   const { id } = useParams<{ id: string }>();
   const {
@@ -90,7 +90,7 @@ export const NewsDetail = () => {
       } catch {
         /* ignore - view will reload fallback */
       }
-      navigate(`/news/${id}`);
+      navigate(`/posts/${id}`);
     } catch (err: unknown) {
       // map server validation details to form fields when available
       const maybe = err as { details?: unknown } | undefined;
@@ -112,7 +112,6 @@ export const NewsDetail = () => {
           });
         }
       }
-      // other errors handled by useFetch -> useError
     }
   }
 
@@ -123,12 +122,10 @@ export const NewsDetail = () => {
     <div className="flex flex-col items-center min-h-screen">
       <div className="max-w-3xl w-full mx-auto p-6">
         <div className="flex items-center justify-between">
-          <Link to="/news" className="text-sm text-green-600 underline">
-            ← Tillbaka
-          </Link>
+          <Link to=".." relative="path" className="text-sm text-green-600 underline mb-2">← Tillbaka</Link>
           {canEdit && post && !isEditRoute && (
             <Link
-              to={`/news/${post.id}/edit`}
+              to={`/posts/${post.id}/edit`}
               className="text-sm font-medium text-white bg-green-600 hover:bg-green-700 transition px-3 py-2 rounded-md"
             >
               Redigera
@@ -139,7 +136,7 @@ export const NewsDetail = () => {
           <div className="mt-4 grid gap-4 md:grid-cols-3">
             <div className="md:col-span-1">
               <img
-                src={post.pictureUrl ?? ""}
+                src={post.pictureUrl ?? "https://kmxmlfhkojdbuoktavul.supabase.co/storage/v1/object/public/posts/postPlaceholder.png"}
                 alt={post.title}
                 className="w-full h-64 md:h-full object-cover rounded"
               />
@@ -159,21 +156,18 @@ export const NewsDetail = () => {
             className="bg-white p-4 rounded shadow"
           >
             <div className="mb-4">
-              <label className="block font-medium mb-1">Titel</label>
+              <label htmlFor="title" className="block font-medium mb-1">Titel</label>
               <input
+                id="title"
                 {...register("title")}
                 className="w-full border rounded px-3 py-2"
               />
-              {errors.title && (
-                <p className="text-red-500 text-sm mt-1">
-                  {errors.title.message}
-                </p>
-              )}
             </div>
 
             <div className="mb-4">
-              <label className="block font-medium mb-1">Beskrivning</label>
+              <label htmlFor="description" className="block font-medium mb-1">Beskrivning</label>
               <textarea
+                id="description"
                 {...register("description")}
                 rows={6}
                 className="w-full border rounded px-3 py-2"
@@ -186,8 +180,10 @@ export const NewsDetail = () => {
             </div>
 
             <div className="mb-4">
-              <label className="block font-medium mb-1">Bild (valfritt)</label>
+              <label htmlFor="picture" className="block font-medium mb-1">Bild (valfritt)</label>
               <input
+                id="picture"
+                name="picture"
                 type="file"
                 accept="image/*"
                 onChange={(e) =>

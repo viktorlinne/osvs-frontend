@@ -34,8 +34,8 @@ export const CreatePost = () => {
         createPost(fd as unknown as Record<string, unknown>)
       );
       const id = res?.id ?? null;
-      if (id) navigate(`/news/${id}`);
-      else navigate("/news");
+      if (id) navigate(`/posts/${id}`);
+      else navigate("/posts");
     } catch (e: unknown) {
       // map server-side validation errors to fields when possible
       const err = e as { status?: number; details?: unknown };
@@ -65,7 +65,7 @@ export const CreatePost = () => {
   return (
     <div className="flex flex-col items-center min-h-screen">
       <div className="max-w-3xl w-full mx-auto p-6">
-        <Link to="/news" className="text-sm text-green-600 underline">
+        <Link to="/posts" className="text-sm text-green-600 underline">
           ← Tillbaka
         </Link>
         <h2 className="text-2xl font-bold mt-4 mb-4">Skapa inlägg</h2>
@@ -74,8 +74,9 @@ export const CreatePost = () => {
           className="bg-white p-4 rounded-md shadow"
         >
           <div className="mb-4">
-            <label className="block font-medium mb-1">Titel</label>
+            <label htmlFor="title" className="block font-medium mb-1">Titel</label>
             <input
+              id="title"
               {...register("title")}
               className="w-full border rounded-md px-3 py-2"
             />
@@ -85,8 +86,9 @@ export const CreatePost = () => {
           </div>
 
           <div className="mb-4">
-            <label className="block font-medium mb-1">Beskrivning</label>
+            <label htmlFor="description" className="block font-medium mb-1">Beskrivning</label>
             <textarea
+              id="description"
               {...register("description")}
               rows={6}
               className="w-full border rounded-md px-3 py-2"
@@ -99,8 +101,9 @@ export const CreatePost = () => {
           </div>
 
           <div className="mb-4">
-            <label className="block font-medium mb-1">Bild (valfritt)</label>
+            <label htmlFor="picture" className="block font-medium mb-1">Bild (valfritt)</label>
             <input
+              id="picture"
               type="file"
               accept="image/*"
               onChange={(e) =>

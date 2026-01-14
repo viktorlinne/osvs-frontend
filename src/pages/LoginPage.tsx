@@ -20,7 +20,7 @@ export const LoginPage = () => {
     setLoading(true);
     try {
       const user = await run(() => login(email, password));
-      if (user) navigate("/news");
+      if (user) navigate("/posts");
       else setError("Login failed");
     } catch {
       // useFetch already sets friendly messages via global error
@@ -39,23 +39,29 @@ export const LoginPage = () => {
       >
         <h2 className="text-2xl font-bold mb-4">Logga in</h2>
         {/* top-level errors shown by ErrorProvider */}
-        <label className="block mb-2">
+        <label htmlFor="email" className="block mb-2">
           <div className="text-sm">Email</div>
           <input
+            id="email"
+            name="email"
             className="border px-4 py-2 w-full"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             type="email"
+            autoComplete="email"
             required
           />
         </label>
-        <label className="block mb-4">
+        <label htmlFor="password" className="block mb-4">
           <div className="text-sm">Lösenord</div>
           <input
+            id="password"
+            name="password"
             className="border px-4 py-2 w-full"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             type="password"
+            autoComplete="current-password"
             required
           />
         </label>

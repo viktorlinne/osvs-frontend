@@ -19,32 +19,38 @@ export const ProfileForm = ({
     <>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
         <div className="mb-4">
-          <label className="block text-sm font-medium mb-1">Användarnamn</label>
+          <label htmlFor="username" className="block text-sm font-medium mb-1">Användarnamn</label>
           <input
+            id="username"
+            name="username"
+            autoComplete="off"
             value={user?.username ?? ""}
-            readOnly
             className="w-full border rounded-md px-3 py-2 bg-gray-100"
+            readOnly
           />
         </div>
         <div className="mb-4">
-          <label className="block text-sm font-medium mb-1">E-post</label>
+          <label htmlFor="email" className="block text-sm font-medium mb-1">E-post</label>
           <input
+            id="email"
+            name="email"
+            autoComplete="off"
             value={user?.email ?? ""}
-            readOnly
             className="w-full border rounded-md px-3 py-2 bg-gray-100"
+            readOnly
           />
         </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
         <div className="mb-4">
-          <label className="block text-sm font-medium mb-1">Förnamn</label>
+          <label htmlFor="firstname" className="block text-sm font-medium mb-1">Förnamn</label>
           <input
+            id="firstname"
             {...register("firstname")}
             readOnly={!isEditRoute}
-            className={`${
-              isEditRoute ? "" : "bg-gray-100"
-            } w-full border rounded-md px-3 py-2`}
+            className={`${isEditRoute ? "" : "bg-gray-100"
+              } w-full border rounded-md px-3 py-2`}
           />
           {errors.firstname && (
             <p className="text-red-500 text-sm  ">
@@ -53,13 +59,13 @@ export const ProfileForm = ({
           )}
         </div>
         <div className="mb-4">
-          <label className="block text-sm font-medium mb-1">Efternamn</label>
+          <label htmlFor="lastname" className="block text-sm font-medium mb-1">Efternamn</label>
           <input
+            id="lastname"
             {...register("lastname")}
             readOnly={!isEditRoute}
-            className={`${
-              isEditRoute ? "" : "bg-gray-100"
-            } w-full border rounded-md px-3 py-2`}
+            className={`${isEditRoute ? "" : "bg-gray-100"
+              } w-full border rounded-md px-3 py-2`}
           />
           {errors.lastname && (
             <p className="text-red-500 text-sm  ">{errors.lastname?.message}</p>
@@ -69,14 +75,14 @@ export const ProfileForm = ({
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
         <div className="mb-4">
-          <label className="block text-sm font-medium mb-1">Födelsedatum</label>
+          <label htmlFor="dateOfBirth" className="block text-sm font-medium mb-1">Födelsedatum</label>
           <input
+            id="dateOfBirth"
             type="date"
             {...register("dateOfBirth")}
             readOnly={!isEditRoute}
-            className={`${
-              isEditRoute ? "" : "bg-gray-100"
-            } w-full border rounded-md px-3 py-2`}
+            className={`${isEditRoute ? "" : "bg-gray-100"
+              } w-full border rounded-md px-3 py-2`}
           />
           {errors.dateOfBirth && (
             <p className="text-red-500 text-sm  ">
@@ -85,8 +91,10 @@ export const ProfileForm = ({
           )}
         </div>
         <div className="mb-4">
-          <label className="block text-sm font-medium mb-1">Registrerad</label>
+          <label htmlFor="createdAt" className="block text-sm font-medium mb-1">Registrerad</label>
           <input
+            id="createdAt"
+            name="createdAt"
             value={
               user?.createdAt
                 ? new Date(user.createdAt).toLocaleDateString()
@@ -100,68 +108,69 @@ export const ProfileForm = ({
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
         <div className="mb-4">
-          <label className="block text-sm font-medium mb-1">Mobilnummer</label>
+          <label htmlFor="mobile" className="block text-sm font-medium mb-1">Mobilnummer</label>
           <input
+            id="mobile"
             type="number"
             {...register("mobile")}
             readOnly={!isEditRoute}
-            className={`${
-              isEditRoute ? "" : "bg-gray-100"
-            } w-full border rounded-md px-3 py-2`}
+            className={`${isEditRoute ? "" : "bg-gray-100"
+              } w-full border rounded-md px-3 py-2`}
           />
           {errors.mobile && (
             <p className="text-red-500 text-sm  ">{errors.mobile?.message}</p>
           )}
         </div>
         <div className="mb-4">
-          <label className="block text-sm font-medium mb-1">Hemnummer</label>
+          <label htmlFor="homeNumber" className="block text-sm font-medium mb-1">Hemnummer</label>
           <input
+            id="homeNumber"
             type="number"
             {...register("homeNumber")}
             readOnly={!isEditRoute}
-            className={`${
-              isEditRoute ? "" : "bg-gray-100"
-            } w-full border rounded-md px-3 py-2`}
+            className={`${isEditRoute ? "" : "bg-gray-100"
+              } w-full border rounded-md px-3 py-2`}
           />
         </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
         <div className="mb-4">
-          <label className="block text-sm font-medium mb-1">Adress</label>
+          <label htmlFor="address" className="block text-sm font-medium mb-1">Adress</label>
           <input
+            id="address"
             {...register("address")}
+            autoComplete="off"
             readOnly={!isEditRoute}
-            className={`${
-              isEditRoute ? "" : "bg-gray-100"
-            } w-full border rounded-md px-3 py-2`}
+            className={`${isEditRoute ? "" : "bg-gray-100"
+              } w-full border rounded-md px-3 py-2`}
           />
           {errors.address && (
             <p className="text-red-500 text-sm  ">{errors.address?.message}</p>
           )}
         </div>
         <div className="mb-4">
-          <label className="block text-sm font-medium mb-1">Postnummer</label>
+          <label htmlFor="zipcode" className="block text-sm font-medium mb-1">Postnummer</label>
           <input
+            id="zipcode"
             type="number"
             {...register("zipcode")}
             readOnly={!isEditRoute}
-            className={`${
-              isEditRoute ? "" : "bg-gray-100"
-            } w-full border rounded-md px-3 py-2`}
+            className={`${isEditRoute ? "" : "bg-gray-100"
+              } w-full border rounded-md px-3 py-2`}
           />
           {errors.zipcode && (
             <p className="text-red-500 text-sm  ">{errors.zipcode?.message}</p>
           )}
         </div>
         <div className="mb-4">
-          <label className="block text-sm font-medium mb-1">Stad</label>
+          <label htmlFor="city" className="block text-sm font-medium mb-1">Stad</label>
           <input
+            id="city"
             {...register("city")}
             readOnly={!isEditRoute}
-            className={`${
-              isEditRoute ? "" : "bg-gray-100"
-            } w-full border rounded-md px-3 py-2`}
+            className={`${isEditRoute ? "" : "bg-gray-100"
+              } w-full border rounded-md px-3 py-2`}
           />
           {errors.city && (
             <p className="text-red-500 text-sm  ">{errors.city?.message}</p>
@@ -170,14 +179,14 @@ export const ProfileForm = ({
       </div>
 
       <div className="mb-4">
-        <label className="block text-sm font-medium mb-1">Tjänst</label>
+        <label htmlFor="official" className="block text-sm font-medium mb-1">Tjänst</label>
         <input
+          id="official"
           type="text"
           {...register("official")}
           readOnly={!isEditRoute}
-          className={`${
-            isEditRoute ? "" : "bg-gray-100"
-          } w-full border rounded-md px-3 py-2`}
+          className={`${isEditRoute ? "" : "bg-gray-100"
+            } w-full border rounded-md px-3 py-2`}
         />
         {errors.official && (
           <p className="text-red-500 text-sm  ">{errors.official?.message}</p>
@@ -185,14 +194,14 @@ export const ProfileForm = ({
       </div>
 
       <div className="mb-4">
-        <label className="block text-sm font-medium mb-1">Noteringar</label>
+        <label htmlFor="notes" className="block text-sm font-medium mb-1">Noteringar</label>
         <input
+          id="notes"
           type="text"
           {...register("notes")}
           readOnly={!isEditRoute}
-          className={`${
-            isEditRoute ? "" : "bg-gray-100"
-          } w-full border rounded-md px-3 py-2`}
+          className={`${isEditRoute ? "" : "bg-gray-100"
+            } w-full border rounded-md px-3 py-2`}
         />
         {errors.notes && (
           <p className="text-red-500 text-sm  ">{errors.notes?.message}</p>
@@ -201,10 +210,12 @@ export const ProfileForm = ({
 
       {isEditRoute ? (
         <div className="mb-4">
-          <label className="block text-sm font-medium mb-1">
+          <label htmlFor="profilePicture" className="block text-sm font-medium mb-1">
             Uppdatera Profilbild
           </label>
           <input
+            id="profilePicture"
+            name="profilePicture"
             type="file"
             accept="image/*"
             onChange={(e) =>

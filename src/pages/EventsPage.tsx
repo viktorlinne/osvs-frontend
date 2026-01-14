@@ -1,12 +1,10 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { listMyEvents, listEvents } from "../services";
 import { useAuth } from "../context";
-import { useError } from "../context";
-import type { Event as EventRecord, ApiError } from "../types";
-import axios from "axios";
-import { isApiError } from "../types/api";
+import type { Event as EventRecord } from "../types";
 import { Link } from "react-router-dom";
 import { Spinner } from "../components";
+import useFetch from "../hooks/useFetch";
 
 // Start week on Monday
 const WEEK_DAYS = ["Mån", "Tis", "Ons", "Tor", "Fre", "Lör", "Sön"];
@@ -74,11 +72,8 @@ export const EventsPage = () => {
   const [viewDate, setViewDate] = useState(
     () => new Date(today.getFullYear(), today.getMonth(), 1)
   );
-  const [eventsByDate, setEventsByDate] = useState<
-    Record<string, EventRecord[]>
-  >({});
-  const [loading, setLoading] = useState<boolean>(false);
-  const { setError, clearError } = useError();
+  const [eventsByDate, setEventsByDate] = useState<Record<string, EventRecord[]>>({});
+  const { run, loading } = useFetch<{ events?: EventRecord[] }>();
 
   const year = viewDate.getFullYear();
   const month = viewDate.getMonth();
@@ -89,16 +84,10 @@ export const EventsPage = () => {
 
   useEffect(() => {
     let mounted = true;
-    async function fetchEvents() {
-      setLoading(true);
-      clearError();
-      try {
-        const isAdmin = Boolean(
-          user && Array.isArray(user.roles) && user.roles.includes("Admin")
-        );
-        const res: unknown = await (isAdmin ? listEvents() : listMyEvents());
+    void run(() => (user && Array.isArray(user.roles) && user.roles.includes("Admin") ? listEvents() : listMyEvents()))
+      .then((res: { events?: EventRecord[] } | undefined) => {
         if (!mounted) return;
-        const payload = res as { events?: EventRecord[] } | undefined;
+        const payload = res;
         const arr = payload?.events ?? [];
         const map: Record<string, EventRecord[]> = {};
         for (const ev of arr) {
@@ -108,29 +97,16 @@ export const EventsPage = () => {
           map[key].push(ev);
         }
         setEventsByDate(map);
-      } catch (err: unknown) {
-        if (!mounted) return;
-        if (axios.isAxiosError(err) && err.response) {
-          const raw = err.response.data as ApiError | undefined;
-          setError(raw?.message ?? String(err));
-        } else if (isApiError(err)) {
-          setError(err.message ?? String(err));
-        } else if (err instanceof Error) {
-          setError(err.message ?? String(err));
-        } else {
-          setError(String(err ?? "Request failed"));
-        }
-      } finally {
-        if (mounted) setLoading(false);
-      }
-    }
+      })
+      .catch(() => {
+        /* useFetch sets global error */
+      });
 
-    void fetchEvents();
 
     return () => {
       mounted = false;
     };
-  }, [user, setError, clearError]);
+  }, [user, run]);
 
   function prevMonth() {
     setViewDate((d) => new Date(d.getFullYear(), d.getMonth() - 1, 1));
@@ -272,8 +248,7 @@ export const EventsPage = () => {
                     </div>
                   </div>
 
-                  <div className="mt-2 text-xs text-gray-600 min-w-0 overflow-hidden">
-                    {loading && <div className="text-gray-400">Laddar…</div>}
+                  <div className="mt-4 text-xs text-gray-600 min-w-0 overflow-hidden">
                     {!loading &&
                       date &&
                       (() => {
@@ -293,11 +268,6 @@ export const EventsPage = () => {
                                 {e.title}
                               </Link>
                             ))}
-                            {evs.length > 3 && (
-                              <div className="text-xs text-gray-500">
-                                +{evs.length - 3} fler...
-                              </div>
-                            )}
                           </div>
                         );
                       })()}

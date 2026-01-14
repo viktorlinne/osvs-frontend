@@ -112,7 +112,7 @@ export const Navbar: React.FC = () => {
             </div>
             {user && (
               <div className="hidden md:flex items-center space-x-2">
-                <NavButton to="/news" onClick={() => setOpen(false)}>
+                <NavButton to="/posts" onClick={() => setOpen(false)}>
                   Nyheter
                 </NavButton>
                 <NavButton to="/events" onClick={() => setOpen(false)}>
@@ -202,7 +202,7 @@ export const Navbar: React.FC = () => {
               </NavButton>
               {user ? (
                 <>
-                  <NavButton to="/news" onClick={() => setOpen(false)}>
+                  <NavButton to="/posts" onClick={() => setOpen(false)}>
                     Nyheter
                   </NavButton>
                   <NavButton to="/events" onClick={() => setOpen(false)}>
