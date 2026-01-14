@@ -7,7 +7,7 @@ import {
   ContactPage,
   LoginPage,
   NewsPage,
-  NewsDetail,
+  PostDetail,
   CreatePost,
   Profile,
   MembersPage,
@@ -50,7 +50,7 @@ const routes = [
       },
       // Protected routes
       {
-        path: "news",
+        path: "posts",
         element: (
           <AuthGuard>
             <NewsPage />
@@ -122,18 +122,18 @@ const routes = [
         ),
       },
       {
-        path: "news/:id/edit",
+        path: "posts/:id/edit",
         element: (
           <AuthGuard roles={["Admin", "Editor"]}>
-            <NewsDetail />
+            <PostDetail />
           </AuthGuard>
         ),
       },
       {
-        path: "news/:id",
+        path: "posts/:id",
         element: (
           <AuthGuard>
-            <NewsDetail />
+            <PostDetail />
           </AuthGuard>
         ),
       },
@@ -153,14 +153,14 @@ const routes = [
           </AuthGuard>
         ),
       },
-      // {
-      //   path: "lodges/:id/edit",
-      //   element: (
-      //     <AuthGuard roles={["Admin", "Editor"]}>
-      //       <LodgeDetail />
-      //     </AuthGuard>
-      //   ),
-      // },
+      {
+        path: "lodges/:id/edit",
+        element: (
+          <AuthGuard roles={["Admin", "Editor"]}>
+            <LodgeDetail />
+          </AuthGuard>
+        ),
+      },
       {
         path: "events",
         element: (
@@ -177,14 +177,14 @@ const routes = [
           </AuthGuard>
         ),
       },
-      // {
-      //   path: "events/:id/edit",
-      //   element: (
-      //     <AuthGuard roles={["Admin", "Editor"]}>
-      //       <EventDetail />
-      //     </AuthGuard>
-      //   ),
-      // },
+      {
+        path: "events/:id/edit",
+        element: (
+          <AuthGuard roles={["Admin", "Editor"]}>
+            <EventDetail />
+          </AuthGuard>
+        ),
+      },
       {
         path: "events/create",
         element: (
@@ -193,7 +193,7 @@ const routes = [
           </AuthGuard>
         ),
       },
-      // 404 route
+      //*! Not Found Route *!//
       {
         path: "*",
         element: <NotFound />,

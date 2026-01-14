@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components */
 export * from "./NotFound";
 export * from "./HomePage";
 export * from "./GdprPage";
@@ -5,7 +6,7 @@ export * from "./AboutPage";
 export * from "./ContactPage";
 export * from "./LoginPage";
 export * from "./NewsPage";
-export * from "./NewsDetail";
+export * from "./PostDetail";
 export * from "./LodgesPage";
 export * from "./LodgeDetail";
 export * from "./EventsPage";

@@ -272,8 +272,7 @@ export const EventsPage = () => {
                     </div>
                   </div>
 
-                  <div className="mt-2 text-xs text-gray-600 min-w-0 overflow-hidden">
-                    {loading && <div className="text-gray-400">Laddar…</div>}
+                  <div className="mt-4 text-xs text-gray-600 min-w-0 overflow-hidden">
                     {!loading &&
                       date &&
                       (() => {
@@ -293,11 +292,6 @@ export const EventsPage = () => {
                                 {e.title}
                               </Link>
                             ))}
-                            {evs.length > 3 && (
-                              <div className="text-xs text-gray-500">
-                                +{evs.length - 3} fler...
-                              </div>
-                            )}
                           </div>
                         );
                       })()}

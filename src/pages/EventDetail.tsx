@@ -154,17 +154,17 @@ export const EventDetail = () => {
   return (
     <div className="max-w-3xl w-full mx-auto p-6 min-h-screen">
       <div className="flex items-center justify-between">
-        <Link to="/events" className="text-sm text-green-600 underline">
+        <Link to=".." relative="path" className="text-sm text-green-600 underline">
           ← Tillbaka
         </Link>
-        {/* {canEdit && !isEditRoute && (
+        {canEdit && !isEditRoute && (
           <Link
             to={`/events/${id}/edit`}
             className="text-sm font-medium text-white bg-green-600 hover:bg-green-700 transition px-3 py-2 rounded-md"
           >
             Redigera
           </Link>
-        )} */}
+        )}
       </div>
 
       <h2 className="text-2xl font-bold mt-4 mb-4">Möte</h2>

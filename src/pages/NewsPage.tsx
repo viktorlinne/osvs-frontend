@@ -55,7 +55,7 @@ export const NewsPage = () => {
       <div className="w-full max-w-3xl grid gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-3 mx-auto">
         {(posts ?? []).map((p) => (
           <Link
-            to={`/news/${p.id}`}
+            to={`/posts/${p.id}`}
             key={p.id}
             className="rounded-md shadow-md hover:shadow-lg transition bg-white flex flex-col p-4 md:p-6"
           >

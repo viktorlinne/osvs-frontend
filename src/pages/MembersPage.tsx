@@ -79,6 +79,8 @@ export const MembersPage = () => {
         <h2 className="text-2xl font-bold mb-4">Medlemmar</h2>
         <div className="flex flex-col md:flex-row gap-y-2 md:gap-y-0 md:gap-x-4 py-2 mb-4">
           <input
+            id="search"
+            name="search"
             type="search"
             placeholder="Sök förnamn eller efternamn"
             value={query}
@@ -86,6 +88,8 @@ export const MembersPage = () => {
             className="flex-1 px-4 py-2 border rounded-md"
           />
           <select
+            id="achievementFilter"
+            name="achievementFilter"
             value={achievementId ?? ""}
             onChange={(e) =>
               setAchievementId(e.target.value ? Number(e.target.value) : null)
@@ -100,6 +104,8 @@ export const MembersPage = () => {
             ))}
           </select>
           <select
+            id="lodgeFilter"
+            name="lodgeFilter"
             value={lodgeId ?? ""}
             onChange={(e) =>
               setLodgeId(e.target.value ? Number(e.target.value) : null)
@@ -124,7 +130,6 @@ export const MembersPage = () => {
             )}
         </div>
 
-        {loading && <Spinner />}
         {Array.isArray(members) && (
           <div className="w-full grid gap-4 grid-cols-1 sm:grid-cols-1 lg:grid-cols-3">
             {members.map((member: PublicUser) => (

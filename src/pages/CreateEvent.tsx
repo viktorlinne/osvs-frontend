@@ -11,7 +11,7 @@ export const CreateEvent = () => {
   const { user } = useAuth();
   const canCreate = Boolean(
     user &&
-      (user.roles ?? []).some((r: string) => ["Admin", "Editor"].includes(r))
+    (user.roles ?? []).some((r: string) => ["Admin", "Editor"].includes(r))
   );
 
   const [saving, setSaving] = useState(false);
@@ -105,52 +105,62 @@ export const CreateEvent = () => {
         className="bg-white p-4 rounded-md shadow space-y-4"
       >
         <div>
-          <label className="block text-sm font-medium mb-1">Titel</label>
+          <label htmlFor="title" className="block text-sm font-medium mb-1">Titel</label>
           <input
-            required
+            id="title"
+            name="title"
             value={form.title}
             onChange={(e) => setForm({ ...form, title: e.target.value })}
             className="w-full border rounded-md px-3 py-2"
+            required
           />
         </div>
 
         <div>
-          <label className="block text-sm font-medium mb-1">Beskrivning</label>
+          <label htmlFor="description" className="block text-sm font-medium mb-1">Beskrivning</label>
           <textarea
-            required
+            id="description"
+            name="description"
             value={form.description}
             onChange={(e) => setForm({ ...form, description: e.target.value })}
             className="w-full border rounded-md px-3 py-2"
+            required
           />
         </div>
 
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium mb-1">Startdatum</label>
+            <label htmlFor="startDate" className="block text-sm font-medium mb-1">Startdatum</label>
             <input
-              required
+              id="startDate"
+              name="startDate"
               type="date"
               value={form.startDate}
               onChange={(e) => setForm({ ...form, startDate: e.target.value })}
               className="w-full border rounded-md px-3 py-2"
+              required
             />
           </div>
           <div>
-            <label className="block text-sm font-medium mb-1">Slutdatum</label>
+            <label htmlFor="endDate" className="block text-sm font-medium mb-1">Slutdatum</label>
             <input
-              required
+              id="endDate"
+              name="endDate"
               type="date"
               value={form.endDate}
               onChange={(e) => setForm({ ...form, endDate: e.target.value })}
               className="w-full border rounded-md px-3 py-2"
+              required
             />
           </div>
         </div>
 
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium mb-1">Pris</label>
+            <label htmlFor="price" className="block text-sm font-medium mb-1">Pris</label>
             <input
+              id="price"
+              name="price"
               value={form.price}
               onChange={(e) => setForm({ ...form, price: e.target.value })}
               className="w-full border rounded-md px-3 py-2"
@@ -172,13 +182,15 @@ export const CreateEvent = () => {
         </div>
 
         <div>
-          <label className="block text-sm font-medium mb-1">
+          <label htmlFor="associateLodges" className="block text-sm font-medium mb-1">
             Associera loger
           </label>
           <div className="grid grid-cols-2 gap-x-4 max-h-40 overflow-auto px-4 py-2 border rounded-md bg-gray-50">
             {lodges.map((l) => (
               <label key={l.id} className="flex items-center gap-x-4 py-2">
                 <input
+                  id={`lodge-${l.id}`}
+                  name="associateLodges"
                   type="checkbox"
                   checked={selectedLodgeIds.includes(l.id)}
                   onChange={(e) => {
