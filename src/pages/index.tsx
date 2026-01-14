@@ -5,7 +5,7 @@ export * from "./GdprPage";
 export * from "./AboutPage";
 export * from "./ContactPage";
 export * from "./LoginPage";
-export * from "./NewsPage";
+export * from "./PostsPage";
 export * from "./PostDetail";
 export * from "./LodgesPage";
 export * from "./LodgeDetail";

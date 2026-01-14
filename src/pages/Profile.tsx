@@ -183,7 +183,9 @@ export const Profile = () => {
   return (
     <div className="flex flex-col items-center min-h-screen">
       <div className="max-w-3xl w-full mx-auto p-6">
-        <ProfileHeader user={user} isEditRoute={isEditRoute} />
+        <ProfileHeader
+          user={user}
+          isEditRoute={isEditRoute} />
         <h2 className="text-2xl font-bold mt-4 mb-4">Din profil</h2>
         <form
           onSubmit={handleSubmit(onSave)}
