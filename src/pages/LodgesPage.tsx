@@ -39,8 +39,8 @@ export const LodgesPage = () => {
                     {lodge.description}
                   </div>
                 )}
-                {lodge.address && (
-                  <div className="text-sm text-gray-500">{lodge.address}</div>
+                {lodge.email && (
+                  <div className="text-sm text-gray-500">{lodge.email}</div>
                 )}
               </Link>
             ))}

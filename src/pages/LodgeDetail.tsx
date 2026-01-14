@@ -19,7 +19,7 @@ export const LodgeDetail = () => {
     user && (user.roles ?? []).some((r) => ["Admin", "Editor"].includes(r))
   );
 
-  const [form, setForm] = useState({ name: "", description: "", address: "" });
+  const [form, setForm] = useState({ name: "", description: "", email: "" });
 
   useEffect(() => {
     if (!id) return setGlobalError("Missing lodge id");
@@ -36,7 +36,7 @@ export const LodgeDetail = () => {
       setForm({
         name: lodge.name ?? "",
         description: lodge.description ?? "",
-        address: lodge.address ?? "",
+        email: lodge.email ?? "",
       })
     );
   }, [lodge, isEditRoute]);
@@ -49,7 +49,7 @@ export const LodgeDetail = () => {
       const payload = {
         name: form.name,
         description: form.description || null,
-        address: form.address || undefined,
+        email: form.email || undefined,
       };
       await runAction(() => updateLodge(id, payload));
       await run(async () => {
@@ -113,14 +113,14 @@ export const LodgeDetail = () => {
                 />
               </div>
               <div>
-                <label htmlFor="address" className="block text-sm font-medium mb-1">Adress</label>
+                <label htmlFor="email" className="block text-sm font-medium mb-1">E-post</label>
                 <input
-                  id="address"
-                  name="address"
+                  id="email"
+                  name="email"
                   autoComplete="off"
-                  value={form.address}
+                  value={form.email}
                   onChange={(e) =>
-                    setForm({ ...form, address: e.target.value })
+                    setForm({ ...form, email: e.target.value })
                   }
                   className="w-full border rounded-md px-3 py-2"
                 />
@@ -150,7 +150,7 @@ export const LodgeDetail = () => {
                 <strong>Beskrivning:</strong> {lodge.description ?? ""}
               </div>
               <div className="mb-2">
-                <strong>Adress:</strong> {lodge.address ?? ""}
+                <strong>E-post:</strong> {lodge.email ?? ""}
               </div>
             </div>
           )}
