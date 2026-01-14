@@ -13,13 +13,6 @@ export type Lodge = {
   address?: string | null;
 };
 
-export type Establishment = {
-  id: number;
-  name: string;
-  description: string;
-  address: string;
-};
-
 export type User = {
   id: number;
   username: string;
@@ -177,7 +170,6 @@ export type CreateEventBody = {
 };
 export type UpdateEventBody = Partial<CreateEventBody>;
 export type LinkLodgeBody = { lodgeId?: number | string | undefined };
-export type LinkEstablishmentBody = { esId?: number | string | undefined };
 export type RSVPBody = { status?: string };
 
 export type RsvpApiStatus = string;
@@ -188,17 +180,6 @@ export type ListPostsQuery = {
 };
 export type CreatePostBody = { title?: string; description?: string };
 export type UpdatePostBody = Partial<CreatePostBody>;
-
-export type ListEstablishmentsQuery = {
-  limit?: string | number;
-  offset?: string | number;
-};
-export type CreateEstablishmentBody = {
-  name?: string;
-  description?: string | null;
-  address?: string;
-};
-export type UpdateEstablishmentBody = Partial<CreateEstablishmentBody>;
 
 export type CreateMailBody = { lid?: number; title?: string; content?: string };
 
