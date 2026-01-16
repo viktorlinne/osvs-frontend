@@ -243,7 +243,7 @@ export const Profile = () => {
             setGlobalError={setGlobalError}
             setSaving={setSaving}
           />
-          <OfficialsManager />
+          <OfficialsManager user={user} isEditRoute={isEditRoute} />
           <ProfileForm
             user={user}
             register={register}

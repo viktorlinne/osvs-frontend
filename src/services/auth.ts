@@ -36,6 +36,19 @@ function mergeAuthResponse(res: unknown): AuthUser | null {
       }))
       .filter((a) => Number.isFinite(a.id));
   }
+  // Attach officials if provided either at top-level or on the user object
+  const rawOfficials = Array.isArray(rec.officials)
+    ? rec.officials
+    : Array.isArray(rawUser.officials)
+    ? (rawUser.officials as unknown[])
+    : undefined;
+  if (result && Array.isArray(rawOfficials)) {
+    (result as any).officials = rawOfficials
+      .map((o) =>
+        typeof o === "object" ? Number((o as any).id ?? (o as any)) : Number(o)
+      )
+      .filter((n) => Number.isFinite(n));
+  }
   return result;
 }
 
