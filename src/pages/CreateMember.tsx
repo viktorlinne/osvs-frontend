@@ -9,7 +9,7 @@ import { useForm } from "react-hook-form";
 import type { FieldError } from "react-hook-form";
 import useError from "../context/useError";
 
-export const CreateUser = () => {
+export const CreateMember = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [picture, setPicture] = useState<File | null>(null);
@@ -32,7 +32,7 @@ export const CreateUser = () => {
       firstname: "",
       lastname: "",
       dateOfBirth: "",
-      official: "",
+      work: "",
       notes: "",
       mobile: "",
       homeNumber: "",
@@ -46,7 +46,7 @@ export const CreateUser = () => {
   function validatePicture(): string | null {
     if (!picture) return "Profilbild är obligatorisk";
     if (picture.size > 5 * 1024 * 1024)
-      return "Profilbilden måste vara högst 5MB";
+      return "Profilbilden får vara högst 5MB";
     const allowed = ["image/jpeg", "image/png", "image/gif", "image/webp"];
     if (!allowed.includes(picture.type))
       return "Profilbilden måste vara JPEG, PNG, GIF eller WebP";
@@ -66,7 +66,7 @@ export const CreateUser = () => {
       fd.append("firstname", String(values.firstname ?? "").trim());
       fd.append("lastname", String(values.lastname ?? "").trim());
       fd.append("dateOfBirth", String(values.dateOfBirth ?? ""));
-      if (values.official) fd.append("official", String(values.official));
+      if (values.work) fd.append("work", String(values.work));
       if (values.homeNumber) fd.append("homeNumber", String(values.homeNumber));
       fd.append("mobile", String(values.mobile ?? "").trim());
       fd.append("city", String(values.city ?? "").trim());
@@ -148,34 +148,34 @@ export const CreateUser = () => {
           {...register("username")}
           className="w-full px-4 py-2 border"
         />
-        {/* field errors shown centrally above */}
+        
         <input
           placeholder="Email"
           {...register("email")}
           className="w-full px-4 py-2 border"
         />
-        {/* field errors shown centrally above */}
+        
         <input
           placeholder="Lösenord"
           type="password"
           {...register("password")}
           className="w-full px-4 py-2 border"
         />
-        {/* field errors shown centrally above */}
+        
         <input
           placeholder="Förnamn"
           type="text"
           {...register("firstname")}
           className="w-full px-4 py-2 border"
         />
-        {/* field errors shown centrally above */}
+        
         <input
           placeholder="Efternamn"
           type="text"
           {...register("lastname")}
           className="w-full px-4 py-2 border"
         />
-        {/* field errors shown centrally above */}
+        
         <label className="block">
           <div className="text-sm text-gray-600">Födelsedatum</div>
           <input
@@ -183,57 +183,57 @@ export const CreateUser = () => {
             {...register("dateOfBirth")}
             className="w-full px-4 py-2 border"
           />
-          {/* field errors shown centrally above */}
+          
         </label>
         <input
-          placeholder="Tjänst"
+          placeholder="Jobb"
           type="text"
-          {...register("official")}
+          {...register("work")}
           className="w-full px-4 py-2 border"
         />
-        {/* field errors shown centrally above */}
+        
         <input
           placeholder="Mobilnummer"
           type="text"
           {...register("mobile")}
           className="w-full px-4 py-2 border"
         />
-        {/* field errors shown centrally above */}
+        
         <input
           placeholder="Hemnummer"
           type="text"
           {...register("homeNumber")}
           className="w-full px-4 py-2 border"
         />
-        {/* field errors shown centrally above */}
+        
         <input
           placeholder="Stad"
           type="text"
           {...register("city")}
           className="w-full px-4 py-2 border"
         />
-        {/* field errors shown centrally above */}
+        
         <input
           placeholder="Adress"
           type="text"
           {...register("address")}
           className="w-full px-4 py-2 border"
         />
-        {/* field errors shown centrally above */}
+        
         <input
           placeholder="Postnummer"
           type="text"
           {...register("zipcode")}
           className="w-full px-4 py-2 border"
         />
-        {/* field errors shown centrally above */}
+        
         <input
           placeholder="Noteringar "
           type="text"
           {...register("notes")}
           className="w-full px-4 py-2 border"
         />
-        {/* field errors shown centrally above */}
+        
         <label className="block">
           {lodgesLoading ? (
             <div className="px-4 py-2">Laddar loger…</div>
@@ -250,7 +250,7 @@ export const CreateUser = () => {
               ))}
             </select>
           )}
-          {/* field errors shown centrally above */}
+          
         </label>
         <label className="block border">
           <input

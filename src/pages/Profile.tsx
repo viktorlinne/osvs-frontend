@@ -14,7 +14,8 @@ import {
   AchievementsPanel,
   RolesManager,
   ProfileForm,
-} from "../components/profile";
+  OfficialsManager,
+} from "../components";
 
 export const Profile = () => {
   const { user, refresh } = useAuth();
@@ -57,7 +58,7 @@ export const Profile = () => {
       firstname: user?.firstname ?? "",
       lastname: user?.lastname ?? "",
       dateOfBirth: user?.dateOfBirth ? user.dateOfBirth.slice(0, 10) : "",
-      official: user?.official ?? undefined,
+      work: user?.work ?? undefined,
       notes: user?.notes ?? undefined,
       mobile: user?.mobile ?? "",
       homeNumber: user?.homeNumber ?? "",
@@ -75,7 +76,7 @@ export const Profile = () => {
       firstname: user?.firstname ?? "",
       lastname: user?.lastname ?? "",
       dateOfBirth: user?.dateOfBirth ? user.dateOfBirth.slice(0, 10) : "",
-      official: user?.official ?? undefined,
+      work: user?.work ?? undefined,
       notes: user?.notes ?? undefined,
       mobile: user?.mobile ?? "",
       homeNumber: user?.homeNumber ?? "",
@@ -107,17 +108,19 @@ export const Profile = () => {
     clearGlobalError();
     setSaving(true);
     try {
-      await run(() => updateMe({
-        firstname: String(values.firstname ?? "").trim(),
-        lastname: String(values.lastname ?? "").trim(),
-        mobile: String(values.mobile ?? "").trim(),
-        city: String(values.city ?? "").trim(),
-        dateOfBirth: values.dateOfBirth ? String(values.dateOfBirth) : null,
-        address: values.address ? String(values.address) : null,
-        zipcode: values.zipcode ? String(values.zipcode) : null,
-        official: values.official ?? null,
-        notes: values.notes ?? null,
-      }));
+      await run(() =>
+        updateMe({
+          firstname: String(values.firstname ?? "").trim(),
+          lastname: String(values.lastname ?? "").trim(),
+          mobile: String(values.mobile ?? "").trim(),
+          city: String(values.city ?? "").trim(),
+          dateOfBirth: values.dateOfBirth ? String(values.dateOfBirth) : null,
+          address: values.address ? String(values.address) : null,
+          zipcode: values.zipcode ? String(values.zipcode) : null,
+          work: values.work ?? null,
+          notes: values.notes ?? null,
+        })
+      );
       if (pictureFile) {
         await run(() => uploadMyPicture(pictureFile));
       }
@@ -134,7 +137,9 @@ export const Profile = () => {
 
         try {
           if (selectedAid) {
-            await run(() => assignAchievement(uid, selectedAid, awardDate || undefined));
+            await run(() =>
+              assignAchievement(uid, selectedAid, awardDate || undefined)
+            );
             setSelectedAid(null);
             setAwardDate("");
           }
@@ -187,9 +192,7 @@ export const Profile = () => {
   return (
     <div className="flex flex-col items-center min-h-screen">
       <div className="max-w-3xl w-full mx-auto p-6">
-        <ProfileHeader
-          user={user}
-          isEditRoute={isEditRoute} />
+        <ProfileHeader user={user} isEditRoute={isEditRoute} />
         <h2 className="text-2xl font-bold mt-4 mb-4">Din profil</h2>
         <form
           onSubmit={handleSubmit(onSave)}
@@ -240,6 +243,7 @@ export const Profile = () => {
             setGlobalError={setGlobalError}
             setSaving={setSaving}
           />
+          <OfficialsManager />
           <ProfileForm
             user={user}
             register={register}

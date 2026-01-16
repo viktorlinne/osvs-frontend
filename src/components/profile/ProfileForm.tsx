@@ -179,17 +179,17 @@ export const ProfileForm = ({
       </div>
 
       <div className="mb-4">
-        <label htmlFor="official" className="block text-sm font-medium mb-1">Tjänst</label>
+        <label htmlFor="work" className="block text-sm font-medium mb-1">Jobb</label>
         <input
-          id="official"
+          id="work"
           type="text"
-          {...register("official")}
+          {...register("work")}
           readOnly={!isEditRoute}
           className={`${isEditRoute ? "" : "bg-gray-100"
             } w-full border rounded-md px-3 py-2`}
         />
-        {errors.official && (
-          <p className="text-red-500 text-sm  ">{errors.official?.message}</p>
+        {errors.work && (
+          <p className="text-red-500 text-sm  ">{errors.work?.message}</p>
         )}
       </div>
 

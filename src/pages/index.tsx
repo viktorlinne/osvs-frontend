@@ -17,4 +17,4 @@ export * from "./CreatePost";
 export * from "./Profile";
 export * from "./MembersPage";
 export * from "./MemberDetail";
-export * from "./CreateUser";
+export * from "./CreateMember";

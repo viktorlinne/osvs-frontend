@@ -12,7 +12,7 @@ import {
   Profile,
   MembersPage,
   MemberDetail,
-  CreateUser,
+  CreateMember,
   LodgesPage,
   LodgeDetail,
   EventDetail,
@@ -77,7 +77,7 @@ const routes = [
         path: "members/create",
         element: (
           <AuthGuard roles={["Admin", "Editor"]}>
-            <CreateUser />
+            <CreateMember />
           </AuthGuard>
         ),
       },

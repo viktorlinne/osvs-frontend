@@ -73,7 +73,7 @@ export const MemberDetail = () => {
       firstname: "",
       lastname: "",
       dateOfBirth: "",
-      official: undefined,
+      work: undefined,
       notes: undefined,
       mobile: "",
       homeNumber: "",
@@ -181,7 +181,7 @@ export const MemberDetail = () => {
       dateOfBirth: member.dateOfBirth
         ? String(member.dateOfBirth).slice(0, 10)
         : "",
-      official: member.official ?? undefined,
+      work: member.work ?? undefined,
       notes: member.notes ?? undefined,
       mobile: member.mobile ?? "",
       homeNumber: member.homeNumber ?? "",
@@ -241,7 +241,7 @@ export const MemberDetail = () => {
                       : null,
                     address: values.address ? String(values.address) : null,
                     zipcode: values.zipcode ? String(values.zipcode) : null,
-                    official: values.official ?? null,
+                    work: values.work ?? null,
                     notes: values.notes ?? null,
                   }));
                   if (pictureFile) {

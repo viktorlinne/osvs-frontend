@@ -26,7 +26,7 @@ export type User = {
   firstname: string;
   lastname: string;
   dateOfBirth: string;
-  official?: string | null;
+  work?: string | null;
   revokedAt?: string | null;
   mobile: string;
   homeNumber?: string | null;
@@ -62,6 +62,17 @@ export type Achievement = {
   awardedAt?: string | null;
 };
 
+export type Official = {
+  id: number;
+  title: string;
+};
+
+export type UserOfficial = {
+  id: number;
+  uid: number;
+  oid: number;
+};
+
 export type UserAchievement = {
   id: number;
   uid: number;
@@ -69,7 +80,11 @@ export type UserAchievement = {
   awardedAt: string;
 };
 
-export type EventsAttendance = { uid: number; eid: number; rsvp: boolean };
+export type EventsAttendance = {
+  uid: number;
+  eid: number;
+  rsvp: boolean;
+};
 
 export type UsersMail = {
   uid: number;
@@ -134,7 +149,7 @@ export type UpdateUserProfileBody = Partial<{
   firstname: string;
   lastname: string;
   dateOfBirth: string;
-  official?: string | null;
+  work?: string | null;
   mobile?: string;
   city?: string;
   address?: string;
@@ -203,7 +218,7 @@ export type RegisterBody = {
   firstname?: string;
   lastname?: string;
   dateOfBirth?: string;
-  official?: string;
+  work?: string;
   mobile?: string;
   city?: string;
   address?: string;
@@ -235,7 +250,7 @@ export type UpdateUserForm = {
   firstname?: string;
   lastname?: string;
   dateOfBirth?: string;
-  official?: string | null;
+  work?: string | null;
   notes?: string | null;
   mobile?: string;
   homeNumber?: string | null;
@@ -257,7 +272,7 @@ export type RegisterForm = {
   city?: string;
   address?: string;
   zipcode?: string;
-  official?: string | null;
+  work?: string | null;
   homeNumber?: string | null;
   lodgeId?: string | number | null;
   notes?: string | null;
