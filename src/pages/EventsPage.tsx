@@ -181,7 +181,7 @@ export const EventsPage = () => {
 
             rows.push(
               <div key={key} className="flex items-start border-b last:border-b-0 p-3 gap-3">
-                <div className="w-20 min-w-[5rem] bg-gray-50 p-2 rounded text-sm font-medium text-center">
+                <div className="w-20 min-w-[5rem] bg-gray-50 p-2 rounded-md text-sm font-medium text-center">
                   <div className="text-xs text-gray-500">{weekday}</div>
                   <div className="text-sm font-semibold">{d}</div>
                 </div>

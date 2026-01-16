@@ -16,7 +16,8 @@ const NavButton: React.FC<NavButtonProps> = ({ to, children, onClick }) => (
     to={to}
     onClick={onClick}
     className={({ isActive }) =>
-      `block px-3 py-2 rounded-md text-sm font-medium transition ${isActive ? "bg-green-600 text-white" : "text-gray-700 hover:bg-gray-100"
+      `block px-3 py-2 rounded-md text-sm font-medium transition ${
+        isActive ? "bg-green-600 text-white" : "text-gray-700 hover:bg-gray-100"
       }`
     }
   >
@@ -66,14 +67,18 @@ export const Navbar: React.FC = () => {
       <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8" aria-label="Top">
         <div className="w-full py-3 flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <NavLink to="/" className="text-2xl font-bold text-green-700">
+            <NavLink to="/" className="text-2xl font-bold text-green-600">
               OSVS
             </NavLink>
             <div className="hidden md:flex items-center">
-              <div className="relative" ref={menuRef}>
+              <div
+                className="relative"
+                ref={menuRef}
+                onMouseLeave={() => setMenuOpen(false)}
+              >
                 <button
                   type="button"
-                  onClick={() => setMenuOpen((s) => !s)}
+                  onMouseEnter={() => setMenuOpen(true)}
                   className="inline-flex items-center px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-100 transition"
                   aria-expanded={menuOpen}
                 >
@@ -85,23 +90,51 @@ export const Navbar: React.FC = () => {
                     fill="currentColor"
                     aria-hidden="true"
                   >
-                    <path fillRule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.06 1.06l-4.24 4.24a.75.75 0 01-1.06 0L5.21 8.29a.75.75 0 01.02-1.08z" clipRule="evenodd" />
+                    <path
+                      fillRule="evenodd"
+                      d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.06 1.06l-4.24 4.24a.75.75 0 01-1.06 0L5.21 8.29a.75.75 0 01.02-1.08z"
+                      clipRule="evenodd"
+                    />
                   </svg>
                 </button>
 
                 {menuOpen && (
                   <div className="absolute left-0 w-48 bg-white border rounded-md shadow-lg z-30">
                     <div>
-                      <NavButton to="/" onClick={() => { setOpen(false); setMenuOpen(false); }}>
+                      <NavButton
+                        to="/"
+                        onClick={() => {
+                          setOpen(false);
+                          setMenuOpen(false);
+                        }}
+                      >
                         Hem
                       </NavButton>
-                      <NavButton to="/about" onClick={() => { setOpen(false); setMenuOpen(false); }}>
+                      <NavButton
+                        to="/about"
+                        onClick={() => {
+                          setOpen(false);
+                          setMenuOpen(false);
+                        }}
+                      >
                         Om VS
                       </NavButton>
-                      <NavButton to="/gdpr" onClick={() => { setOpen(false); setMenuOpen(false); }}>
+                      <NavButton
+                        to="/gdpr"
+                        onClick={() => {
+                          setOpen(false);
+                          setMenuOpen(false);
+                        }}
+                      >
                         GDPR
                       </NavButton>
-                      <NavButton to="/contact" onClick={() => { setOpen(false); setMenuOpen(false); }}>
+                      <NavButton
+                        to="/contact"
+                        onClick={() => {
+                          setOpen(false);
+                          setMenuOpen(false);
+                        }}
+                      >
                         Kontakt
                       </NavButton>
                       {/* only the four public links in this dropdown */}

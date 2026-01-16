@@ -9,7 +9,7 @@ export const Footer: React.FC = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-start text-gray-700">
           <div className="text-center md:text-left">
-            <NavLink to="/" className="text-lg font-bold text-green-700">
+            <NavLink to="/" className="text-lg font-bold text-green-600">
               OSVS
             </NavLink>
             <p className="text-sm mt-2">
@@ -21,25 +21,25 @@ export const Footer: React.FC = () => {
             <div className="flex flex-wrap justify-center gap-2">
               <NavLink
                 to="/"
-                className="px-3 py-1 text-sm rounded-md hover:bg-gray-100"
+                className="px-3 py-1 text-sm rounded-md hover:bg-gray-100 transition"
               >
                 Hem
               </NavLink>
               <NavLink
                 to="/about"
-                className="px-3 py-1 text-sm rounded-md hover:bg-gray-100"
+                className="px-3 py-1 text-sm rounded-md hover:bg-gray-100 transition"
               >
                 Om VS
               </NavLink>
               <NavLink
                 to="/gdpr"
-                className="px-3 py-1 text-sm rounded-md hover:bg-gray-100"
+                className="px-3 py-1 text-sm rounded-md hover:bg-gray-100 transition"
               >
                 GDPR
               </NavLink>
               <NavLink
                 to="/contact"
-                className="px-3 py-1 text-sm rounded-md hover:bg-gray-100"
+                className="px-3 py-1 text-sm rounded-md hover:bg-gray-100 transition"
               >
                 Kontakt
               </NavLink>
@@ -47,25 +47,25 @@ export const Footer: React.FC = () => {
                 <>
                   <NavLink
                     to="/posts"
-                    className="px-3 py-1 text-sm rounded-md hover:bg-gray-100"
+                    className="px-3 py-1 text-sm rounded-md hover:bg-gray-100 transition"
                   >
                     Nyheter
                   </NavLink>
                   <NavLink
                     to="/events"
-                    className="px-3 py-1 text-sm rounded-md hover:bg-gray-100"
+                    className="px-3 py-1 text-sm rounded-md hover:bg-gray-100 transition"
                   >
                     Möten
                   </NavLink>
                   <NavLink
                     to="/members"
-                    className="px-3 py-1 text-sm rounded-md hover:bg-gray-100"
+                    className="px-3 py-1 text-sm rounded-md hover:bg-gray-100 transition"
                   >
                     Medlemmar
                   </NavLink>
                   <NavLink
                     to="/lodges"
-                    className="px-3 py-1 text-sm rounded-md hover:bg-gray-100"
+                    className="px-3 py-1 text-sm rounded-md hover:bg-gray-100 transition"
                   >
                     Lodger
                   </NavLink>

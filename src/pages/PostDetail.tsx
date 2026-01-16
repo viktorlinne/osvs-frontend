@@ -153,14 +153,14 @@ export const PostDetail = () => {
         {post && isEditRoute && canEdit && (
           <form
             onSubmit={handleSubmit(onSubmit)}
-            className="bg-white p-4 rounded shadow"
+            className="bg-white p-4 rounded-md shadow"
           >
             <div className="mb-4">
               <label htmlFor="title" className="block font-medium mb-1">Titel</label>
               <input
                 id="title"
                 {...register("title")}
-                className="w-full border rounded px-3 py-2"
+                className="w-full border rounded-md px-3 py-2"
               />
             </div>
 
@@ -170,7 +170,7 @@ export const PostDetail = () => {
                 id="description"
                 {...register("description")}
                 rows={6}
-                className="w-full border rounded px-3 py-2"
+                className="w-full border rounded-md px-3 py-2"
               />
               {errors.description && (
                 <p className="text-red-500 text-sm mt-1">
@@ -195,7 +195,7 @@ export const PostDetail = () => {
             <div className="flex items-center gap-x-4 py-2">
               <button
                 type="submit"
-                className="bg-green-600 hover:bg-green-700 text-sm font-medium transition text-white px-4 py-2 rounded disabled:opacity-60"
+                className="bg-green-600 hover:bg-green-700 text-sm font-medium transition text-white px-4 py-2 rounded-md disabled:opacity-60"
                 disabled={submitting}
               >
                 {submitting ? "Sparar..." : "Spara"}
