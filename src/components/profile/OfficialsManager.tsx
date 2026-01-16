@@ -15,10 +15,23 @@ export const OfficialsManager = ({
   setSelectedIds?: (ids: number[] | null) => void;
 }) => {
   const [officials, setOfficials] = useState<Official[]>([]);
-  const [localSelected, setLocalSelected] = useState<number[] | null>(
-    selectedIds ??
-      (user && (user as any).officials ? (user as any).officials : null)
-  );
+  const [localSelected, setLocalSelected] = useState<number[] | null>(null);
+
+  // Normalize various shapes of `user.officials` into an array of numeric ids
+  function normalizeOfficialsField(field: unknown): number[] | null {
+    if (!field) return null;
+    if (!Array.isArray(field)) return null;
+    if (field.length === 0) return null;
+    const first = field[0];
+    if (typeof first === "object") {
+      return (field as any[])
+        .map((o) => Number((o && (o as any).id) ?? o))
+        .filter((n) => Number.isFinite(n));
+    }
+    return (field as any[])
+      .map((v) => Number(v))
+      .filter((n) => Number.isFinite(n));
+  }
 
   useEffect(() => {
     let mounted = true;
@@ -59,6 +72,14 @@ export const OfficialsManager = ({
     if (typeof selectedIds !== "undefined")
       setLocalSelected(selectedIds ?? null);
   }, [selectedIds]);
+
+  useEffect(() => {
+    // If parent controls `selectedIds`, don't override from `user`.
+    if (typeof selectedIds !== "undefined") return;
+    const u = user as any;
+    const ids = normalizeOfficialsField(u?.officials);
+    setLocalSelected(ids);
+  }, [user, selectedIds]);
 
   function onChange(e: React.ChangeEvent<HTMLSelectElement>) {
     const opts = Array.from(e.target.selectedOptions).map((o) =>

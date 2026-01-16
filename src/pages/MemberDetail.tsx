@@ -22,6 +22,7 @@ import {
   AchievementsPanel,
   RolesManager,
   ProfileForm,
+  OfficialsManager,
 } from "../components/profile/";
 
 export const MemberDetail = () => {
@@ -51,6 +52,9 @@ export const MemberDetail = () => {
   const [achievements, setAchievements] = useState<Achievement[]>([]);
   const [rolesList, setRolesList] = useState<Role[]>([]);
   const [selectedRoleIds, setSelectedRoleIds] = useState<number[]>([]);
+  const [selectedOfficialIds, setSelectedOfficialIds] = useState<number[] | null>(
+    null
+  );
 
   const canEdit = Boolean(
     user && (user.roles ?? []).some((r) => ["Admin", "Editor"].includes(r))
@@ -259,6 +263,17 @@ export const MemberDetail = () => {
                     setGlobalError("Misslyckades att uppdatera roller");
                   }
 
+                  // save officials selection
+                  try {
+                    if (Array.isArray(selectedOfficialIds)) {
+                      const officialsSvc = await import("../services/officials");
+                      await runAction(() => officialsSvc.setMemberOfficials(uid, selectedOfficialIds));
+                    }
+                  } catch (err) {
+                    console.error("Failed to save officials", err);
+                    setGlobalError("Misslyckades att uppdatera tjänster");
+                  }
+
                   // assign achievement if selected
                   try {
                     if (selectedAid) {
@@ -445,6 +460,13 @@ export const MemberDetail = () => {
                 }}
                 setGlobalError={setGlobalError}
                 setSaving={setSaving}
+              />
+
+              <OfficialsManager
+                user={member}
+                isEditRoute={isEditRoute}
+                selectedIds={selectedOfficialIds ?? undefined}
+                setSelectedIds={setSelectedOfficialIds}
               />
 
               <ProfileForm

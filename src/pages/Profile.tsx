@@ -45,6 +45,9 @@ export const Profile = () => {
     assignAchievement,
     saveRoles,
   } = useProfile();
+  const [selectedOfficialIds, setSelectedOfficialIds] = useState<number[] | null>(
+    null
+  );
 
   const {
     register,
@@ -134,6 +137,16 @@ export const Profile = () => {
         } catch {
           setGlobalError("Misslyckades att uppdatera roller");
         }
+
+          try {
+            // save officials selection (if controlled)
+            if (Array.isArray(selectedOfficialIds)) {
+              const officialsSvc = await import("../services/officials");
+              await run(() => officialsSvc.setMemberOfficials(uid, selectedOfficialIds));
+            }
+          } catch {
+            setGlobalError("Misslyckades att uppdatera tjänster");
+          }
 
         try {
           if (selectedAid) {
@@ -243,7 +256,12 @@ export const Profile = () => {
             setGlobalError={setGlobalError}
             setSaving={setSaving}
           />
-          <OfficialsManager user={user} isEditRoute={isEditRoute} />
+          <OfficialsManager
+            user={user}
+            isEditRoute={isEditRoute}
+            selectedIds={selectedOfficialIds ?? undefined}
+            setSelectedIds={setSelectedOfficialIds}
+          />
           <ProfileForm
             user={user}
             register={register}
