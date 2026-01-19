@@ -9,6 +9,9 @@ import {
   updateEvent,
   listEventLodges,
   listLodges,
+  getRsvp,
+  setRsvp,
+  getEventStats,
 } from "../services";
 
 function formatDisplayDate(s?: string) {
@@ -16,7 +19,9 @@ function formatDisplayDate(s?: string) {
   const d = new Date(s);
   if (Number.isNaN(d.getTime())) return String(s);
   const parts = new Intl.DateTimeFormat("sv-SE", {
-    day: "numeric",
+    minute: "2-digit",
+    hour: "2-digit",
+    day: "2-digit",
     month: "long",
     year: "numeric",
   }).formatToParts(d);
@@ -33,10 +38,12 @@ function toDateInputValue(s?: string) {
   if (!s) return "";
   const d = new Date(s);
   if (Number.isNaN(d.getTime())) return String(s).slice(0, 10);
-  const y = d.getFullYear();
-  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const minute = String(d.getMinutes()).padStart(2, "0");
+  const hour = String(d.getHours()).padStart(2, "0");
   const day = String(d.getDate()).padStart(2, "0");
-  return `${y}-${m}-${day}`;
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const y = d.getFullYear();
+  return `${y}-${m}-${day}-${hour}:${minute}`;
 }
 
 export const EventDetail = () => {
@@ -49,6 +56,10 @@ export const EventDetail = () => {
   const { run: runAction, loading: saving } = useFetch<unknown>();
   const { run: runLodges, data: lodges } = useFetch<Lodge[]>();
   const { run: runLinked, data: linkedLodges } = useFetch<Lodge[]>();
+  const { run: runRsvpFetch, data: rsvpData, loading: rsvpLoading } = useFetch<{ rsvp: string | null }>();
+  const { run: runStats, data: statsData, loading: statsLoading } = useFetch<{
+    stats: { invited: number; answered: number; going: number };
+  }>();
   const { setError: setGlobalError, clearError: clearGlobalError } = useError();
   const { user } = useAuth();
   const location = useLocation();
@@ -57,6 +68,7 @@ export const EventDetail = () => {
   const canEdit = Boolean(
     user && (user.roles ?? []).some((r) => ["Admin", "Editor"].includes(r))
   );
+  const isAdmin = Boolean(user && (user.roles ?? []).some((r) => r === "Admin"));
 
   const [form, setForm] = useState({
     title: "",
@@ -67,6 +79,16 @@ export const EventDetail = () => {
     lodgeMeeting: false,
   });
   const [originalLinkedIds, setOriginalLinkedIds] = useState<number[]>([]);
+  const [linkedIds, setLinkedIds] = useState<number[]>([]);
+  const [rsvpStatus, setRsvpStatus] = useState<string | null>(null);
+
+  const canRsvp = (() => {
+    if (!event || !event.startDate) return false;
+    const start = new Date(event.startDate);
+    if (Number.isNaN(start.getTime())) return false;
+    const twoDaysMs = 2 * 24 * 60 * 60 * 1000;
+    return start.getTime() - Date.now() > twoDaysMs;
+  })();
 
   useEffect(() => {
     if (!id) return setGlobalError("Missing event id");
@@ -109,16 +131,34 @@ export const EventDetail = () => {
       }).catch(() => {
         /* swallow */
       }),
+      // fetch current user's RSVP for this event
+      runRsvpFetch(async () => {
+        const resp = await getRsvp(event.id as unknown as number);
+        return resp as { rsvp: string | null };
+      }).catch(() => { }),
+      // fetch event stats for admins
+      runStats(async () => {
+        const resp = await getEventStats(event.id as unknown as number);
+        return resp as { stats: { invited: number; answered: number; going: number } };
+      }).catch(() => { }),
     ]);
-  }, [event, runLodges, runLinked]);
+
+    // computed at component scope
+  }, [event, runLodges, runLinked, runRsvpFetch, runStats, user]);
 
   useEffect(() => {
     const linked = Array.isArray(linkedLodges) ? linkedLodges : [];
     const linkedIds = linked
       .map((l: Lodge) => Number(l.id))
       .filter((n: number) => Number.isFinite(n));
-    Promise.resolve().then(() => setOriginalLinkedIds(linkedIds));
-  }, [linkedLodges]);
+    Promise.resolve().then(() => {
+      setOriginalLinkedIds(linkedIds);
+      setLinkedIds(linkedIds);
+    });
+    if (rsvpData && typeof rsvpData === "object") {
+      setRsvpStatus((rsvpData as { rsvp?: string | null })?.rsvp ?? null);
+    }
+  }, [linkedLodges, rsvpData]);
 
   async function handleSave() {
     if (!id) return setGlobalError("Missing event id");
@@ -133,6 +173,17 @@ export const EventDetail = () => {
         lodgeMeeting: form.lodgeMeeting,
       };
       await runAction(() => updateEvent(id, payload));
+      // Update lodge links: add new ones, remove unchecked ones
+      const toAdd = linkedIds.filter((lid) => !originalLinkedIds.includes(lid));
+      const toRemove = originalLinkedIds.filter((lid) => !linkedIds.includes(lid));
+      if (toAdd.length > 0 || toRemove.length > 0) {
+        await runAction(async () => {
+          const promises: Promise<unknown>[] = [];
+          for (const lid of toAdd) promises.push((await import("../services")).linkLodgeEvent(id as unknown as number, lid));
+          for (const lid of toRemove) promises.push((await import("../services")).unlinkLodgeEvent(id as unknown as number, lid));
+          await Promise.all(promises);
+        });
+      }
       // Lodges are no longer edited here; only update event data
       // re-fetch and navigate back to view
       await run(async () => {
@@ -142,6 +193,16 @@ export const EventDetail = () => {
       navigate(`/events/${id}`);
     } catch {
       setGlobalError("Failed to save event");
+    }
+  }
+
+  async function handleRsvp(status: "going" | "not-going") {
+    if (!event) return;
+    try {
+      await runAction(() => setRsvp(event.id as unknown as number, status));
+      setRsvpStatus(status);
+    } catch {
+      setGlobalError("Failed to set RSVP");
     }
   }
 
@@ -170,18 +231,47 @@ export const EventDetail = () => {
           {isEditRoute && canEdit ? (
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium mb-1">Titel</label>
+                <label htmlFor="title" className="block text-sm font-medium mb-1">Titel</label>
                 <input
+                  id="title"
+                  name="title"
                   value={form.title}
                   onChange={(e) => setForm({ ...form, title: e.target.value })}
                   className="w-full border rounded-md px-3 py-2"
                 />
               </div>
+
               <div>
-                <label className="block text-sm font-medium mb-1">
+                <label className="block text-sm font-medium mb-1">Kopplade loger</label>
+                <div className="grid grid-cols-2 gap-2 max-h-40 overflow-auto border rounded-md p-2">
+                  {Array.isArray(lodges) && lodges.length > 0 ? (
+                    lodges.map((l) => (
+                      <label key={l.id} className="flex items-center gap-x-2">
+                        <input
+                          type="checkbox"
+                          checked={linkedIds.includes(l.id)}
+                          onChange={(e) => {
+                            const checked = e.target.checked;
+                            setLinkedIds((prev) =>
+                              checked ? Array.from(new Set([...prev, l.id])) : prev.filter((x) => x !== l.id)
+                            );
+                          }}
+                        />
+                        <span className="text-sm">{l.name}</span>
+                      </label>
+                    ))
+                  ) : (
+                    <div className="text-sm text-gray-500">Inga loger att välja</div>
+                  )}
+                </div>
+              </div>
+              <div>
+                <label htmlFor="description" className="block text-sm font-medium mb-1">
                   Beskrivning
                 </label>
                 <textarea
+                  id="description"
+                  name="description"
                   value={form.description}
                   onChange={(e) =>
                     setForm({ ...form, description: e.target.value })
@@ -191,11 +281,13 @@ export const EventDetail = () => {
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium mb-1">
+                  <label htmlFor="startDate" className="block text-sm font-medium mb-1">
                     Startdatum
                   </label>
                   <input
-                    type="date"
+                    type="datetime-local"
+                    id="startDate"
+                    name="startDate"
                     value={form.startDate}
                     onChange={(e) =>
                       setForm({ ...form, startDate: e.target.value })
@@ -204,11 +296,13 @@ export const EventDetail = () => {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium mb-1">
+                  <label htmlFor="endDate" className="block text-sm font-medium mb-1">
                     Slutdatum
                   </label>
                   <input
-                    type="date"
+                    type="datetime-local"
+                    id="endDate"
+                    name="endDate"
                     value={form.endDate}
                     onChange={(e) =>
                       setForm({ ...form, endDate: e.target.value })
@@ -219,8 +313,10 @@ export const EventDetail = () => {
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium mb-1">Pris</label>
+                  <label htmlFor="price" className="block text-sm font-medium mb-1">Pris</label>
                   <input
+                    id="price"
+                    name="price"
                     value={form.price}
                     onChange={(e) =>
                       setForm({ ...form, price: e.target.value })
@@ -261,6 +357,26 @@ export const EventDetail = () => {
             </div>
           ) : (
             <div>
+              {user && canRsvp && (
+                <div className="mb-4">
+                  <div className="flex items-center gap-x-4 mb-2">
+                    <button
+                      className={`px-3 py-2 rounded-md text-white ${rsvpStatus === "going" ? "bg-green-600" : "bg-gray-400"}`}
+                      onClick={() => handleRsvp("going")}
+                      disabled={saving || rsvpLoading}
+                    >
+                      Kommer
+                    </button>
+                    <button
+                      className={`px-3 py-2 rounded-md text-white ${rsvpStatus === "not-going" ? "bg-red-600" : "bg-gray-400"}`}
+                      onClick={() => handleRsvp("not-going")}
+                      disabled={saving || rsvpLoading}
+                    >
+                      Kommer inte
+                    </button>
+                  </div>
+                </div>
+              )}
               <div className="mb-2">
                 <strong>Titel:</strong> {event.title}
               </div>
@@ -273,6 +389,9 @@ export const EventDetail = () => {
               </div>
               <div className="mb-2">
                 <strong>Slutdatum:</strong> {formatDisplayDate(event.endDate)}
+              </div>
+              <div className="mb-2">
+                <strong>Pris:</strong> {event.price} kr
               </div>
               <div className="mb-2">
                 <strong>Logemöte:</strong> {event.lodgeMeeting ? "Ja" : "Nej"}
@@ -299,6 +418,22 @@ export const EventDetail = () => {
                   </div>
                 )}
               </div>
+              {isAdmin && (
+                <div className="mb-2">
+                  <strong>Statistik:</strong>
+                  {statsLoading ? (
+                    <div className="text-sm text-gray-500 mt-1">Läser statistik…</div>
+                  ) : statsData && statsData.stats ? (
+                    <div className="mt-1 text-sm text-gray-700">
+                      <div>Inbjudna: {statsData.stats.invited}</div>
+                      <div>Besvarat: {statsData.stats.answered}</div>
+                      <div>Kommer: {statsData.stats.going}</div>
+                    </div>
+                  ) : (
+                    <div className="text-sm text-gray-500 mt-1">Ingen statistik tillgänglig</div>
+                  )}
+                </div>
+              )}
             </div>
           )}
         </div>

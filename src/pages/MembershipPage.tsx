@@ -45,7 +45,7 @@ export const MembershipPage = () => {
       {!loading && payments && payments.length === 0 && (
         <div>Inga medlemskapsbetalningar hittades.</div>
       )}
-      
+
       {!loading && payments && payments.length > 0 && (
         <ul className="w-full max-w-2xl space-y-2">
           {payments.map((p) => (
@@ -65,13 +65,21 @@ export const MembershipPage = () => {
                   {formatDate(p.createdAt)}
                 </div>
                 {p.status === "Pending" && (
-                  <button
-                    className="bg-green-600 hover:bg-green-700 transition text-sm font-medium text-white px-3 py-2 rounded-md"
-                  >
-                    Betala
-                  </button>
+                  <>
+                    <button
+                      className="bg-green-600 hover:bg-green-700 transition text-sm font-medium text-white px-3 py-2 rounded-md"
+                    >
+                      Betala
+                    </button>
+                    <span className="relative flex size-3">
+                      <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-green-600 opacity-75"></span>
+                      <span className="relative inline-flex size-3 rounded-full bg-green-600"></span>
+                    </span>
+                  </>
                 )}
+
               </div>
+
             </li>
           ))}
         </ul>
