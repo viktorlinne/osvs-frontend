@@ -120,10 +120,14 @@ export const EventDetail = () => {
   // load lodges and which are linked to this event when editing
   useEffect(() => {
     if (!event) return;
-    void Promise.all([
+    // Only fetch stats for admins to avoid 403 global errors for regular users
+    const promises: Promise<unknown>[] = [];
+    promises.push(
       runLodges(() => listLodges()).catch(() => {
         /* swallow; useFetch handles errors */
       }),
+    );
+    promises.push(
       runLinked(async () => {
         const linkedResp = await listEventLodges(event.id as unknown as number);
         const linked = (linkedResp as { lodges?: Lodge[] })?.lodges ?? linkedResp ?? [];
@@ -131,17 +135,25 @@ export const EventDetail = () => {
       }).catch(() => {
         /* swallow */
       }),
-      // fetch current user's RSVP for this event
+    );
+    // fetch current user's RSVP for this event
+    promises.push(
       runRsvpFetch(async () => {
         const resp = await getRsvp(event.id as unknown as number);
         return resp as { rsvp: string | null };
       }).catch(() => { }),
-      // fetch event stats for admins
-      runStats(async () => {
-        const resp = await getEventStats(event.id as unknown as number);
-        return resp as { stats: { invited: number; answered: number; going: number } };
-      }).catch(() => { }),
-    ]);
+    );
+    // fetch event stats only if user is admin
+    if (isAdmin) {
+      promises.push(
+        runStats(async () => {
+          const resp = await getEventStats(event.id as unknown as number);
+          return resp as { stats: { invited: number; answered: number; going: number } };
+        }).catch(() => { }),
+      );
+    }
+
+    void Promise.all(promises);
 
     // computed at component scope
   }, [event, runLodges, runLinked, runRsvpFetch, runStats, user]);
