@@ -11,8 +11,6 @@
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
-    "@stripe/react-stripe-js": "^5.4.1",
-    "@stripe/stripe-js": "^8.6.0",
     "axios": "^1.13.2",
     "dotenv": "^17.2.3",
     "react": "^19.2.0",

@@ -5,6 +5,5 @@ export * from "./events";
 export * from "./lodges";
 export * from "./mails";
 export * from "./posts";
-export * from "./stripe";
-export * from "./swish";
+export * from "./payments";
 export * from "./users";

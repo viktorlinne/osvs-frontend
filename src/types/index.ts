@@ -137,7 +137,7 @@ export type ListLodgesQuery = {
 };
 export type CreateLodgeBody = {
   name?: string;
-  city?: string;  
+  city?: string;
   description?: string | null;
   email?: string;
 };
@@ -208,8 +208,6 @@ export type CreateCheckoutBody = {
 export type SessionStatusQuery = { session_id?: string };
 export type CreateMembershipBody = { year?: number; amount?: number };
 export type CreateEventPaymentBody = Record<string, unknown>;
-
-export type SwishCreateMembershipBody = CreateMembershipBody;
 
 export type LoginBody = { email?: string; password?: string };
 export type ForgotPasswordBody = { email?: string };
