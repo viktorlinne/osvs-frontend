@@ -68,6 +68,7 @@ export const Profile = () => {
       city: user?.city ?? "",
       address: user?.address ?? "",
       zipcode: user?.zipcode ?? "",
+      accommodationAvailable: user?.accommodationAvailable ?? null,
     },
   });
 
@@ -86,6 +87,7 @@ export const Profile = () => {
       city: user?.city ?? "",
       address: user?.address ?? "",
       zipcode: user?.zipcode ?? "",
+      accommodationAvailable: user?.accommodationAvailable ?? null,
     });
   }, [user, reset]);
 
@@ -122,6 +124,10 @@ export const Profile = () => {
           zipcode: values.zipcode ? String(values.zipcode) : null,
           work: values.work ?? null,
           notes: values.notes ?? null,
+          accommodationAvailable:
+            typeof values.accommodationAvailable === "boolean"
+              ? values.accommodationAvailable
+              : null,
         })
       );
       if (pictureFile) {
@@ -138,15 +144,15 @@ export const Profile = () => {
           setGlobalError("Misslyckades att uppdatera roller");
         }
 
-          try {
-            // save officials selection (if controlled)
-            if (Array.isArray(selectedOfficialIds)) {
-              const officialsSvc = await import("../services/officials");
-              await run(() => officialsSvc.setMemberOfficials(uid, selectedOfficialIds));
-            }
-          } catch {
-            setGlobalError("Misslyckades att uppdatera tjänster");
+        try {
+          // save officials selection (if controlled)
+          if (Array.isArray(selectedOfficialIds)) {
+            const officialsSvc = await import("../services/officials");
+            await run(() => officialsSvc.setMemberOfficials(uid, selectedOfficialIds));
           }
+        } catch {
+          setGlobalError("Misslyckades att uppdatera tjänster");
+        }
 
         try {
           if (selectedAid) {

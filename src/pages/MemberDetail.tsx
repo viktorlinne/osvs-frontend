@@ -84,6 +84,7 @@ export const MemberDetail = () => {
       city: "",
       address: "",
       zipcode: "",
+      accommodationAvailable: null,
     },
   });
 
@@ -192,6 +193,7 @@ export const MemberDetail = () => {
       city: member.city ?? "",
       address: member.address ?? "",
       zipcode: member.zipcode ?? "",
+      accommodationAvailable: (member as any).accommodationAvailable ?? null,
     });
     setPictureFile(null);
   }, [member, reset]);
@@ -247,6 +249,10 @@ export const MemberDetail = () => {
                     zipcode: values.zipcode ? String(values.zipcode) : null,
                     work: values.work ?? null,
                     notes: values.notes ?? null,
+                    accommodationAvailable:
+                      typeof values.accommodationAvailable === "boolean"
+                        ? values.accommodationAvailable
+                        : null,
                   }));
                   if (pictureFile) {
                     await runAction(() => uploadUserPicture(uid, pictureFile));

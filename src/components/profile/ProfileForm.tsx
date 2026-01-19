@@ -208,6 +208,21 @@ export const ProfileForm = ({
         )}
       </div>
 
+      <div className="mb-4">
+        <label htmlFor="accommodationAvailable" className="block text-sm font-medium mb-1">Tillgängligt boende</label>
+        <input
+          id="accommodationAvailable"
+          type="checkbox"
+          {...register("accommodationAvailable")}
+          disabled={!isEditRoute}
+          className={`${isEditRoute ? "" : "bg-gray-100"
+            } border rounded-md px-3 py-2`}
+        />
+        {errors.accommodationAvailable && (
+          <p className="text-red-500 text-sm  ">{errors.accommodationAvailable?.message}</p>
+        )}
+      </div>
+
       {isEditRoute ? (
         <div className="mb-4">
           <label htmlFor="profilePicture" className="block text-sm font-medium mb-1">

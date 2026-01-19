@@ -29,6 +29,7 @@ export type User = {
   dateOfBirth: string;
   work?: string | null;
   revokedAt?: string | null;
+  accommodationAvailable?: boolean | null;
   mobile: string;
   homeNumber?: string | null;
   city: string;
@@ -258,6 +259,7 @@ export type UpdateUserForm = {
   city?: string;
   address?: string;
   zipcode?: string;
+  accommodationAvailable?: boolean | null;
 };
 
 export type CreatePostForm = { title: string; description?: string };
