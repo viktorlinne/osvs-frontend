@@ -9,6 +9,7 @@ export type Role = {
 export type Lodge = {
   id: number;
   name: string;
+  city: string;
   description: string;
   email?: string | null;
 };
@@ -136,11 +137,13 @@ export type ListLodgesQuery = {
 };
 export type CreateLodgeBody = {
   name?: string;
+  city?: string;  
   description?: string | null;
   email?: string;
 };
 export type UpdateLodgeBody = {
   name?: string;
+  city?: string;
   description?: string | null;
   email?: string | null;
 };

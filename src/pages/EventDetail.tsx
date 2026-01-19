@@ -150,7 +150,7 @@ export const EventDetail = () => {
   return (
     <div className="max-w-3xl w-full mx-auto p-6 min-h-screen">
       <div className="flex items-center justify-between">
-        <Link to=".." relative="path" className="text-sm text-green-600 underline">
+        <Link to=".." relative="path" className="text-sm text-green-600 hover:text-green-700 hover:underline">
           ← Tillbaka
         </Link>
         {canEdit && !isEditRoute && (

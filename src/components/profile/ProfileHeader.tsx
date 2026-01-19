@@ -9,7 +9,7 @@ export const ProfileHeader = ({
   isEditRoute: boolean;
 }) => (
   <div className="w-full flex flex-row items-center md:items-start justify-between gap-2">
-    <Link to=".." relative="path" className="text-sm text-green-600 underline">
+    <Link to=".." relative="path" className="text-sm text-green-600 hover:text-green-700 hover:underline">
       ← Tillbaka
     </Link>
     <div className="flex flex-col md:flex-row items-center gap-2">

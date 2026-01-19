@@ -19,7 +19,7 @@ export const LodgeDetail = () => {
     user && (user.roles ?? []).some((r) => ["Admin", "Editor"].includes(r))
   );
 
-  const [form, setForm] = useState({ name: "", description: "", email: "" });
+  const [form, setForm] = useState({ name: "", city: "", description: "", email: "" });
 
   useEffect(() => {
     if (!id) return setGlobalError("Missing lodge id");
@@ -35,6 +35,7 @@ export const LodgeDetail = () => {
     Promise.resolve().then(() =>
       setForm({
         name: lodge.name ?? "",
+        city: lodge.city ?? "",
         description: lodge.description ?? "",
         email: lodge.email ?? "",
       })
@@ -48,6 +49,7 @@ export const LodgeDetail = () => {
     try {
       const payload = {
         name: form.name,
+        city: form.city,
         description: form.description || null,
         email: form.email || undefined,
       };
@@ -68,20 +70,18 @@ export const LodgeDetail = () => {
   return (
     <div className="max-w-3xl w-full mx-auto p-6 min-h-screen">
       <div className="flex items-center justify-between">
-        <Link to=".." relative="path" className="text-sm text-green-600 underline">
+        <Link to=".." relative="path" className="text-sm text-green-600 hover:text-green-700 hover:underline">
           ← Tillbaka
         </Link>
         {canEdit && !isEditRoute && (
           <Link
             to={`/lodges/${id}/edit`}
-            className="text-sm font-medium text-white bg-green-600 hover:bg-green-700  transition px-3 py-2 rounded-md"
+            className="text-sm font-medium text-white bg-green-600 hover:bg-green-700 transition px-3 py-2 rounded-md"
           >
             Redigera
           </Link>
         )}
       </div>
-
-      <h2 className="text-2xl font-bold mt-4 mb-4">Loge</h2>
 
       {lodge ? (
         <div className="bg-white p-4 rounded-md shadow">
@@ -95,6 +95,17 @@ export const LodgeDetail = () => {
                   autoComplete="off"
                   value={form.name}
                   onChange={(e) => setForm({ ...form, name: e.target.value })}
+                  className="w-full border rounded-md px-3 py-2"
+                />
+              </div>
+              <div>
+                <label htmlFor="city" className="block text-sm font-medium mb-1">Stad</label>
+                <input
+                  id="city"
+                  name="city"
+                  autoComplete="off"
+                  value={form.city}
+                  onChange={(e) => setForm({ ...form, city: e.target.value })}
                   className="w-full border rounded-md px-3 py-2"
                 />
               </div>
@@ -144,13 +155,13 @@ export const LodgeDetail = () => {
           ) : (
             <div>
               <div className="mb-2">
-                <strong>Namn:</strong> {lodge.name}
+                <strong>Stad:</strong> {lodge.city}
               </div>
               <div className="mb-2">
-                <strong>Beskrivning:</strong> {lodge.description ?? ""}
+                <strong>Historia:</strong> {lodge.description}
               </div>
               <div className="mb-2">
-                <strong>E-post:</strong> {lodge.email ?? ""}
+                <strong>Kontakt:</strong> <a className="text-green-600 hover:text-green-700 hover:underline" href={`mailto:${lodge.email}`}>{lodge.email}</a>
               </div>
             </div>
           )}

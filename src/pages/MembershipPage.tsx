@@ -97,7 +97,7 @@ export const MembershipPage = () => {
 
   return (
     <div className="max-w-3xl w-full mx-auto p-6 min-h-screen flex flex-col items-center">
-      <Link to=".." relative="path" className="w-full flex justify-start mb-4 text-sm text-green-600 underline">
+      <Link to=".." relative="path" className="w-full flex justify-start mb-4 text-sm text-green-600 hover:text-green-700 hover:underline">
         ← Tillbaka
       </Link>
       <h2 className="text-2xl font-bold mb-4">Medlemskaps Betalningar</h2>

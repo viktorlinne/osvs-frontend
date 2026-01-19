@@ -65,7 +65,7 @@ export const CreatePost = () => {
   return (
     <div className="flex flex-col items-center min-h-screen">
       <div className="max-w-3xl w-full mx-auto p-6">
-        <Link to="/posts" className="text-sm text-green-600 underline">
+        <Link to="/posts" className="text-sm text-green-600 hover:text-green-700 hover:underline">
           ← Tillbaka
         </Link>
         <h2 className="text-2xl font-bold mt-4 mb-4">Skapa inlägg</h2>

@@ -1,10 +1,8 @@
-import { Banner } from "../components";
 import { BannerCarousel } from "../components/";
 
 export const HomePage = () => {
   return (
     <div className="min-h-screen" >
-      <Banner />
       <BannerCarousel />
       <div className="flex items-start justify-center py-12 px-6 ">
         <div className="w-full max-w-6xl grid grid-cols-1 lg:grid-cols-3 gap-8">

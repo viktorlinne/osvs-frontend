@@ -34,11 +34,6 @@ export const LodgesPage = () => {
                 className="block p-3 bg-white rounded-md shadow-md hover:shadow-lg transition"
               >
                 <div className="font-semibold">{lodge.name}</div>
-                {lodge.description && (
-                  <div className="text-sm text-gray-500">
-                    {lodge.description}
-                  </div>
-                )}
                 {lodge.email && (
                   <div className="text-sm text-gray-500">{lodge.email}</div>
                 )}

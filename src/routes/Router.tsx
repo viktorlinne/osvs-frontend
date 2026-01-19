@@ -48,6 +48,14 @@ const routes = [
         path: "login",
         element: <LoginPage />,
       },
+      {
+        path: "lodges",
+        element: <LodgesPage />
+      },
+      {
+        path: "lodges/:id",
+        element: <LodgeDetail />
+      },
       // Protected routes
       {
         path: "posts",
@@ -134,22 +142,6 @@ const routes = [
         element: (
           <AuthGuard>
             <PostDetail />
-          </AuthGuard>
-        ),
-      },
-      {
-        path: "lodges",
-        element: (
-          <AuthGuard>
-            <LodgesPage />
-          </AuthGuard>
-        ),
-      },
-      {
-        path: "lodges/:id",
-        element: (
-          <AuthGuard>
-            <LodgeDetail />
           </AuthGuard>
         ),
       },

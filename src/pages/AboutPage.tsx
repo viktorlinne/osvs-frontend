@@ -1,9 +1,7 @@
-import { Banner } from "../components";
 
 export const AboutPage = () => {
   return (
     <>
-      <Banner />
       <div className="min-h-screen flex items-start justify-center py-12 px-6 ">
         <div className="w-full max-w-6xl grid grid-cols-1 lg:grid-cols-3 gap-8">
           <section className="space-y-4">

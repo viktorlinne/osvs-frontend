@@ -132,7 +132,7 @@ export const CreateMember = () => {
           <Link
             to=".."
             relative="path"
-            className="text-sm text-green-600 underline"
+            className="text-sm text-green-600 hover:text-green-700 hover:underline"
           >
             ← Tillbaka
           </Link>
