@@ -116,6 +116,7 @@ export const LodgeDetail = () => {
                 <textarea
                   id="description"
                   name="description"
+                  rows={8}
                   value={form.description}
                   onChange={(e) =>
                     setForm({ ...form, description: e.target.value })
@@ -145,7 +146,7 @@ export const LodgeDetail = () => {
                   {saving ? "Sparar…" : "Spara"}
                 </button>
                 <Link
-                  to={`/lodges/${id}`}
+                  to=".." relative="path"
                   className="bg-gray-100 hover:bg-gray-200 transition px-4 py-2 rounded-md border"
                 >
                   Avbryt
@@ -153,7 +154,18 @@ export const LodgeDetail = () => {
               </div>
             </div>
           ) : (
+
             <div>
+              <div>
+                <img
+                  className="rounded-full w-28 h-28 md:w-40 md:h-40 object-cover mb-1"
+                  src={lodge?.picture}
+                  alt={`${lodge?.city}s vapensköld`}
+                />
+              </div>
+              <div>
+                <h1 className="text-2xl font-bold mb-4">{lodge.name}</h1>
+              </div>
               <div className="mb-2">
                 <strong>Stad:</strong> {lodge.city}
               </div>

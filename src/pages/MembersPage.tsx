@@ -128,7 +128,7 @@ export const MembersPage = () => {
         </div>
 
         {Array.isArray(members) && (
-          <div className="w-full grid gap-4 grid-cols-1 sm:grid-cols-1 lg:grid-cols-3">
+          <div className="w-full grid gap-4 grid-cols-1 lg:grid-cols-3">
             {members.map((member: PublicUser) => (
               <Link
                 to={`/members/${member.id}`}

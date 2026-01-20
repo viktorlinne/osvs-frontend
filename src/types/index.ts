@@ -12,6 +12,7 @@ export type Lodge = {
   city: string;
   description: string;
   email?: string | null;
+  picture?: string | null;
 };
 
 export type User = {
@@ -141,12 +142,14 @@ export type CreateLodgeBody = {
   city?: string;
   description?: string | null;
   email?: string;
+  picture?: string | null;
 };
 export type UpdateLodgeBody = {
   name?: string;
   city?: string;
   description?: string | null;
   email?: string | null;
+  picture?: string | null;
 };
 
 export type UpdateUserProfileBody = Partial<{
