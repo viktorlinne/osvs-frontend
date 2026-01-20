@@ -122,7 +122,7 @@ export const CreateEvent = () => {
             <input
               id="startDate"
               name="startDate"
-              type="date"
+              type="datetime-local"
               value={form.startDate}
               onChange={(e) => setForm({ ...form, startDate: e.target.value })}
               className="w-full border rounded-md px-3 py-2"
@@ -134,7 +134,7 @@ export const CreateEvent = () => {
             <input
               id="endDate"
               name="endDate"
-              type="date"
+              type="datetime-local"
               value={form.endDate}
               onChange={(e) => setForm({ ...form, endDate: e.target.value })}
               className="w-full border rounded-md px-3 py-2"
