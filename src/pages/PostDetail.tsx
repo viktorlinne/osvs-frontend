@@ -1,9 +1,12 @@
 import { useEffect, useState } from "react";
 import { useParams, Link, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../context";
-import { getPost, updatePost } from "../services";
+import { getPost, updatePost, listLodges } from "../services";
 import { Spinner } from "../components";
-import type { Post } from "../types";
+import type { Post, Lodge } from "../types";
+import LodgeSelection, {
+  normalizeLodgeIds,
+} from "../components/LodgeSelection";
 import { useError } from "../context";
 import useFetch from "../hooks/useFetch";
 import { useForm } from "react-hook-form";
@@ -12,10 +15,7 @@ import type { UpdatePostForm } from "../types";
 export const PostDetail = () => {
   const { user } = useAuth();
   const { id } = useParams<{ id: string }>();
-  const {
-    setError: setGlobalError,
-    clearError: clearGlobalError,
-  } = useError();
+  const { setError: setGlobalError, clearError: clearGlobalError } = useError();
   const { data: post, loading, run } = useFetch<Post | null>();
   const { run: runSubmit, loading: submitting } = useFetch<{
     success: boolean;
@@ -24,21 +24,50 @@ export const PostDetail = () => {
   const location = useLocation();
 
   const canEdit = Boolean(
-    user && (user.roles ?? []).some((r) => ["Admin", "Editor"].includes(r))
+    user && (user.roles ?? []).some((r) => ["Admin", "Editor"].includes(r)),
   );
   const isEditRoute = location.pathname.endsWith("/edit");
 
   const [picture, setPicture] = useState<File | null>(null);
+  const [lodges, setLodges] = useState<Lodge[]>([]);
+  const [lodgesLoading, setLodgesLoading] = useState(true);
 
   const {
     register,
     handleSubmit,
     setError: setFieldError,
     reset,
+    setValue,
+    watch,
     formState: { errors },
   } = useForm<UpdatePostForm>({
-    defaultValues: { title: "", description: "" },
+    defaultValues: { title: "", description: "", lodgeIds: [] },
   });
+  const watchedLodges = watch("lodgeIds") ?? [];
+
+  useEffect(() => {
+    register("lodgeIds");
+  }, [register]);
+
+  useEffect(() => {
+    let mounted = true;
+    listLodges()
+      .then((res) => {
+        if (!mounted) return;
+        if (Array.isArray(res)) {
+          setLodges(res);
+        }
+      })
+      .catch(() => {
+        if (mounted) setGlobalError("Misslyckades att hämta loger");
+      })
+      .finally(() => {
+        if (mounted) setLodgesLoading(false);
+      });
+    return () => {
+      mounted = false;
+    };
+  }, [setGlobalError]);
 
   useEffect(() => {
     let mounted = true;
@@ -58,6 +87,7 @@ export const PostDetail = () => {
           reset({
             title: normalized.title ?? "",
             description: normalized.description ?? "",
+            lodgeIds: (normalized.lodges ?? []).map((l) => String(l.id)),
           });
         }
       } catch {
@@ -79,10 +109,16 @@ export const PostDetail = () => {
     if (values.description && String(values.description).trim())
       fd.append("description", String(values.description).trim());
     if (picture) fd.append("picture", picture);
+    const selectedLodges = normalizeLodgeIds(values.lodgeIds);
+    if (selectedLodges.length === 0) {
+      fd.append("lodgeIds", "");
+    } else {
+      selectedLodges.forEach((idValue) => fd.append("lodgeIds", idValue));
+    }
 
     try {
       await runSubmit(() =>
-        updatePost(id as string, fd as unknown as Record<string, unknown>)
+        updatePost(id as string, fd as unknown as Record<string, unknown>),
       );
       // refresh the post data so view mode shows updated content
       try {
@@ -115,14 +151,24 @@ export const PostDetail = () => {
     }
   }
 
-
-  if (loading) return <div className="flex justify-center items-center min-h-screen"><Spinner /></div>;
+  if (loading)
+    return (
+      <div className="flex justify-center items-center min-h-screen">
+        <Spinner />
+      </div>
+    );
 
   return (
     <div className="flex flex-col items-center min-h-screen">
       <div className="max-w-3xl w-full mx-auto p-6">
         <div className="flex items-center justify-between">
-          <Link to=".." relative="path" className="text-sm text-green-600 hover:text-green-700 hover:underline mb-2">← Tillbaka</Link>
+          <Link
+            to=".."
+            relative="path"
+            className="text-sm text-green-600 hover:text-green-700 hover:underline mb-2"
+          >
+            ← Tillbaka
+          </Link>
           {canEdit && post && !isEditRoute && (
             <Link
               to={`/posts/${post.id}/edit`}
@@ -136,7 +182,10 @@ export const PostDetail = () => {
           <div className="mt-4 grid gap-4 md:grid-cols-3">
             <div className="md:col-span-1">
               <img
-                src={post.pictureUrl ?? "https://kmxmlfhkojdbuoktavul.supabase.co/storage/v1/object/public/posts/postPlaceholder.png"}
+                src={
+                  post.pictureUrl ??
+                  "https://kmxmlfhkojdbuoktavul.supabase.co/storage/v1/object/public/posts/postPlaceholder.png"
+                }
                 alt={post.title}
                 className="w-full h-64 md:h-full object-cover rounded"
               />
@@ -156,7 +205,9 @@ export const PostDetail = () => {
             className="bg-white p-4 rounded-md shadow"
           >
             <div className="mb-4">
-              <label htmlFor="title" className="block font-medium mb-1">Titel</label>
+              <label htmlFor="title" className="block font-medium mb-1">
+                Titel
+              </label>
               <input
                 id="title"
                 {...register("title")}
@@ -165,7 +216,9 @@ export const PostDetail = () => {
             </div>
 
             <div className="mb-4">
-              <label htmlFor="description" className="block font-medium mb-1">Beskrivning</label>
+              <label htmlFor="description" className="block font-medium mb-1">
+                Beskrivning
+              </label>
               <textarea
                 id="description"
                 {...register("description")}
@@ -180,7 +233,9 @@ export const PostDetail = () => {
             </div>
 
             <div className="mb-4">
-              <label htmlFor="picture" className="block font-medium mb-1">Bild (valfritt)</label>
+              <label htmlFor="picture" className="block font-medium mb-1">
+                Bild
+              </label>
               <input
                 id="picture"
                 name="picture"
@@ -191,6 +246,18 @@ export const PostDetail = () => {
                 }
               />
             </div>
+
+            <LodgeSelection
+              lodges={lodges}
+              selectedIds={watchedLodges}
+              onChange={(ids) =>
+                setValue("lodgeIds", ids, { shouldDirty: true })
+              }
+              disabled={submitting || lodgesLoading}
+              loading={lodgesLoading}
+              label="Koppla loger"
+              name="edit-lodge-selection"
+            />
 
             <div className="flex items-center gap-x-4 py-2">
               <button

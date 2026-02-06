@@ -1,20 +1,50 @@
 import api, { fetchData } from "./api";
 import type { Post } from "../types";
 
+type ListPostsParams = {
+  limit?: number | string;
+  offset?: number | string;
+  lodgeIds?: Array<number | string>;
+};
+
 function normalizePost(raw: Post): Post | null {
   const id = Number(raw?.id);
   const title = String(raw?.title ?? "").trim();
   if (!Number.isFinite(id) || title.length === 0) return null;
+  const lodges = Array.isArray(raw?.lodges)
+    ? (raw?.lodges ?? [])
+        .map((lodge) => ({
+          id: Number(lodge?.id),
+          name: String(lodge?.name ?? "").trim(),
+        }))
+        .filter((lodge) => Number.isFinite(lodge.id) && lodge.name.length > 0)
+    : [];
   return {
     id,
     title,
     description: raw?.description ?? "",
     pictureUrl: raw?.pictureUrl ?? "",
+    lodges,
   };
 }
 
-export async function listPosts(): Promise<Post[]> {
-  const res = await fetchData(api.get("/posts"));
+export async function listPosts(params?: ListPostsParams): Promise<Post[]> {
+  const search = new URLSearchParams();
+  if (params?.limit != null) {
+    search.append("limit", String(params.limit));
+  }
+  if (params?.offset != null) {
+    search.append("offset", String(params.offset));
+  }
+  if (Array.isArray(params?.lodgeIds)) {
+    for (const value of params.lodgeIds) {
+      if (value === null || value === undefined || value === "") continue;
+      search.append("lodgeId", String(value));
+    }
+  }
+  const query = search.toString();
+  const url = query ? `/posts?${query}` : "/posts";
+  const res = await fetchData(api.get(url));
   const raw = (res as { posts: Post[] })?.posts;
   if (!Array.isArray(raw)) return [];
   const normalized = raw.map(normalizePost).filter(Boolean) as Post[];

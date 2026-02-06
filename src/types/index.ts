@@ -45,6 +45,7 @@ export type Post = {
   description: string;
   picture?: string | null;
   pictureUrl?: string | null;
+  lodges?: Array<Pick<Lodge, "id" | "name">>;
 };
 
 export type Event = {
@@ -199,8 +200,13 @@ export type RsvpApiStatus = string;
 export type ListPostsQuery = {
   limit?: string | number;
   offset?: string | number;
+  lodgeId?: string | number | Array<string | number>;
 };
-export type CreatePostBody = { title?: string; description?: string };
+export type CreatePostBody = {
+  title?: string;
+  description?: string;
+  lodgeIds?: Array<number | string>;
+};
 export type UpdatePostBody = Partial<CreatePostBody>;
 
 export type CreateMailBody = { lid?: number; title?: string; content?: string };
@@ -265,7 +271,11 @@ export type UpdateUserForm = {
   accommodationAvailable?: boolean | null;
 };
 
-export type CreatePostForm = { title: string; description?: string };
+export type CreatePostForm = {
+  title: string;
+  description?: string;
+  lodgeIds?: string[];
+};
 export type UpdatePostForm = CreatePostForm;
 export type RegisterForm = {
   username?: string;

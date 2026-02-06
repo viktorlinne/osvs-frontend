@@ -1,9 +1,8 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { useAuth } from "../context";
-import { listPosts } from "../services";
-import type { Post } from "../types";
-import { useError } from "../context";
+import { useAuth, useError } from "../context";
+import { listPosts, listLodges } from "../services";
+import type { Post, Lodge } from "../types";
 import useFetch from "../hooks/useFetch";
 import { Spinner } from "../components";
 
@@ -12,11 +11,31 @@ export const NewsPage = () => {
   const { data: posts, loading, notFound, run } = useFetch<Post[]>();
   const { setError } = useError();
   const [empty, setEmpty] = useState(false);
+  const [lodges, setLodges] = useState<Lodge[]>([]);
+  const [selectedLodge, setSelectedLodge] = useState<string>("");
   const { user } = useAuth();
 
   useEffect(() => {
     let mounted = true;
-    run(() => listPosts())
+    listLodges()
+      .then((data) => {
+        if (!mounted) return;
+        if (Array.isArray(data)) {
+          setLodges(data);
+        }
+      })
+      .catch(() => {
+        setError("Misslyckades att hämta loger");
+      });
+    return () => {
+      mounted = false;
+    };
+  }, [setError]);
+
+  useEffect(() => {
+    let mounted = true;
+    const lodgeFilter = selectedLodge ? [selectedLodge] : undefined;
+    run(() => listPosts(lodgeFilter ? { lodgeIds: lodgeFilter } : undefined))
       .then((res) => {
         if (!mounted) return;
         if (!Array.isArray(res)) {
@@ -33,14 +52,14 @@ export const NewsPage = () => {
     return () => {
       mounted = false;
     };
-  }, [run, setError]);
+  }, [run, setError, selectedLodge]);
 
   if (loading) return <div className="flex justify-center items-center min-h-screen"><Spinner /></div>;
 
   return (
     <div className="flex flex-col items-center min-h-screen p-6">
-      <div className="w-full max-w-3xl flex items-center justify-between mb-4">
-        <h2 className="text-2xl font-bold mb-4">Nyheter</h2>
+      <div className="w-full max-w-3xl flex flex-wrap items-center justify-between gap-3 mb-4">
+        <h2 className="text-2xl font-bold">Nyheter</h2>
         {user &&
           (user.roles ?? []).some((r) => ["Admin", "Editor"].includes(r)) && (
             <Link
@@ -50,6 +69,24 @@ export const NewsPage = () => {
               Skapa Inlägg
             </Link>
           )}
+      </div>
+      <div className="w-full max-w-3xl flex flex-col sm:flex-row sm:items-end gap-3 mb-6">
+        <label className="flex flex-col text-sm font-medium text-gray-700" htmlFor="lodgeFilter">
+          Filtrera på loge
+          <select
+            id="lodgeFilter"
+            value={selectedLodge}
+            onChange={(e) => setSelectedLodge(e.target.value)}
+            className="mt-1 rounded-md border border-gray-300 bg-white px-3 py-2 text-base text-gray-900 shadow-sm focus:border-green-600 focus:outline-none focus:ring-2 focus:ring-green-200"
+          >
+            <option value="">Alla loger</option>
+            {lodges.map((lodge) => (
+              <option key={lodge.id} value={String(lodge.id)}>
+                {lodge.name}
+              </option>
+            ))}
+          </select>
+        </label>
       </div>
       <div className="w-full max-w-3xl grid gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-3 mx-auto">
         {(posts ?? []).map((p) => (
