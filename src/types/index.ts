@@ -135,8 +135,6 @@ export type PasswordReset = {
 
 // DTOs (frontend request/response shapes)
 export type ListLodgesQuery = {
-  limit?: string | number;
-  offset?: string | number;
 };
 export type CreateLodgeBody = {
   name?: string;
@@ -173,16 +171,12 @@ export type AddAchievementBody = {
 export type SetRolesBody = { roleIds?: number[] };
 export type SetLodgeBody = { lodgeId?: number | string | null };
 export type ListUsersQuery = {
-  limit?: string | number;
-  offset?: string | number;
   name?: string;
   achievementId?: string | number;
   lodgeId?: string | number;
 };
 
 export type ListEventsQuery = {
-  limit?: string | number;
-  offset?: string | number;
   lodgeId?: string | number;
 };
 export type CreateEventBody = {
@@ -201,8 +195,6 @@ export type RSVPBody = { status?: string };
 export type RsvpApiStatus = string;
 
 export type ListPostsQuery = {
-  limit?: string | number;
-  offset?: string | number;
   lodgeId?: string | number | Array<string | number>;
 };
 export type CreatePostBody = {

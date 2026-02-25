@@ -6,7 +6,7 @@ import type { Post, Lodge } from "../types";
 import useFetch from "../hooks/useFetch";
 import { Spinner } from "../components";
 
-//! TODO agg pagination, search and filtering
+//! TODO add search and filtering
 export const NewsPage = () => {
   const { data: posts, loading, notFound, run } = useFetch<Post[]>();
   const { setError } = useError();

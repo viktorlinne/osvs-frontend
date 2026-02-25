@@ -2,8 +2,6 @@ import api, { fetchData } from "./api";
 import type { Post } from "../types";
 
 type ListPostsParams = {
-  limit?: number | string;
-  offset?: number | string;
   lodgeIds?: Array<number | string>;
 };
 
@@ -30,12 +28,6 @@ function normalizePost(raw: Post): Post | null {
 
 export async function listPosts(params?: ListPostsParams): Promise<Post[]> {
   const search = new URLSearchParams();
-  if (params?.limit != null) {
-    search.append("limit", String(params.limit));
-  }
-  if (params?.offset != null) {
-    search.append("offset", String(params.offset));
-  }
   if (Array.isArray(params?.lodgeIds)) {
     for (const value of params.lodgeIds) {
       if (value === null || value === undefined || value === "") continue;
