@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react";
 import { Outlet, useLocation, useNavigate } from "react-router";
-import { useAuth } from "../context";
+import { useAuth, useError } from "../context";
 import { Navbar, Footer } from "../components";
 import {
   registerUnauthorizedHandler,
@@ -9,6 +9,7 @@ import {
 
 export function AppLayout() {
   const { clearUser } = useAuth();
+  const { setError } = useError();
   const navigate = useNavigate();
   const location = useLocation();
   const redirectingRef = useRef(false);
@@ -21,6 +22,7 @@ export function AppLayout() {
 
   useEffect(() => {
     registerUnauthorizedHandler(() => {
+      setError("Vänligen logga in");
       clearUser();
       if (location.pathname === "/login") return;
       if (redirectingRef.current) return;
@@ -38,6 +40,7 @@ export function AppLayout() {
     });
     return () => unregisterUnauthorizedHandler();
   }, [
+    setError,
     clearUser,
     navigate,
     location.pathname,

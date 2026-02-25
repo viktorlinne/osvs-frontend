@@ -42,10 +42,13 @@ api.interceptors.response.use(
     if (status === 401 && !originalConfig._retry) {
       originalConfig._retry = true;
       try {
-        const resp = await fetch(`${BASE_URL.replace(/\/$/, "")}/auth/refresh`, {
-          method: "POST",
-          credentials: "include",
-        });
+        const resp = await fetch(
+          `${BASE_URL.replace(/\/$/, "")}/auth/refresh`,
+          {
+            method: "POST",
+            credentials: "include",
+          },
+        );
         if (resp.ok) {
           return api.request(originalConfig);
         }
@@ -68,12 +71,12 @@ api.interceptors.response.use(
     }
 
     return Promise.reject(err);
-  }
+  },
 );
 
 // Small helper to unwrap `response.data` and normalize errors.
 export async function fetchData<T = unknown>(
-  req: Promise<AxiosResponse<T>>
+  req: Promise<AxiosResponse<T>>,
 ): Promise<T> {
   try {
     const response = await req;
@@ -87,10 +90,10 @@ export async function fetchData<T = unknown>(
         typeof rec.error === "string"
           ? rec.error
           : Array.isArray(rec.error)
-          ? rec.error
-              .filter((part): part is string => typeof part === "string")
-              .join(", ")
-          : undefined;
+            ? rec.error
+                .filter((part): part is string => typeof part === "string")
+                .join(", ")
+            : undefined;
 
       if (maybeError && maybeError.length > 0) {
         const status = typeof rec.status === "number" ? rec.status : 400;

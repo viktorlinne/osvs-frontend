@@ -21,7 +21,7 @@ export async function updateMe(payload: Record<string, unknown>) {
 
 export async function adminUpdateUser(
   id: number | string,
-  payload: Record<string, unknown>
+  payload: Record<string, unknown>,
 ) {
   return fetchData(api.put(`/users/${id}`, payload));
 }
@@ -39,7 +39,7 @@ export async function uploadUserPicture(id: number | string, file: File) {
 }
 
 export async function listUsers(
-  filters?: ListUsersFilters
+  filters?: ListUsersFilters,
 ): Promise<PublicUser[]> {
   const search = new URLSearchParams();
   if (filters?.name) search.set("name", filters.name);
@@ -56,7 +56,7 @@ export async function listUsers(
 }
 
 export async function getPublicUserById(
-  id: number | string
+  id: number | string,
 ): Promise<PublicUserDetailResponse> {
   const res = await fetchData(api.get(`/users/${id}`));
   const payload = res as {
@@ -81,14 +81,14 @@ export async function getUserRoles(id: number | string): Promise<string[]> {
 }
 
 export async function getUserLodge(
-  id: number | string
+  id: number | string,
 ): Promise<UserLodgeResponse> {
   return fetchData<UserLodgeResponse>(api.get(`/users/${id}/lodges`));
 }
 
 export async function setUserLodge(
   id: number | string,
-  lodgeId: number | null
+  lodgeId: number | null,
 ) {
   return fetchData(api.post(`/users/${id}/lodges`, { lodgeId }));
 }
@@ -99,7 +99,7 @@ export async function setRoles(id: number | string, roleIds: number[]) {
 
 export async function postAchievement(
   id: number | string,
-  payload: { achievementId: number; awardedAt?: string }
+  payload: { achievementId: number; awardedAt?: string },
 ) {
   return fetchData(api.post(`/users/${id}/achievements`, payload));
 }

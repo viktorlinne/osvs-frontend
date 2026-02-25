@@ -95,9 +95,9 @@ export const OfficialsManager = ({
         <div className="text-sm text-gray-700 mb-4">
           {localSelected && localSelected.length > 0
             ? localSelected
-                .map((id) => officials.find((o) => o.id === id)?.title ?? "")
-                .filter(Boolean)
-                .join(", ")
+              .map((id) => officials.find((o) => o.id === id)?.title ?? "")
+              .filter(Boolean)
+              .join(", ")
             : "Ingen tjänst"}
         </div>
       )}
