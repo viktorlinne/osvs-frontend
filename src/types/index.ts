@@ -134,8 +134,6 @@ export type PasswordReset = {
 };
 
 // DTOs (frontend request/response shapes)
-export type ListLodgesQuery = {
-};
 export type CreateLodgeBody = {
   name?: string;
   city?: string;
