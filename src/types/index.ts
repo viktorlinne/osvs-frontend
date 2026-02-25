@@ -142,12 +142,12 @@ export type CreateLodgeBody = {
   name?: string;
   city?: string;
   description?: string | null;
-  email?: string;
+  email?: string | null;
   picture?: string | null;
 };
 export type UpdateLodgeBody = {
-  name?: string;
-  city?: string;
+  name?: string | null;
+  city?: string | null;
   description?: string | null;
   email?: string | null;
   picture?: string | null;
@@ -162,6 +162,8 @@ export type UpdateUserProfileBody = Partial<{
   city?: string;
   address?: string;
   zipcode?: string;
+  notes?: string | null;
+  accommodationAvailable?: boolean | null;
 }>;
 
 export type AddAchievementBody = {
@@ -169,7 +171,7 @@ export type AddAchievementBody = {
   awardedAt?: string | null;
 };
 export type SetRolesBody = { roleIds?: number[] };
-export type SetLodgeBody = { lodgeId?: number | null };
+export type SetLodgeBody = { lodgeId?: number | string | null };
 export type ListUsersQuery = {
   limit?: string | number;
   offset?: string | number;
@@ -181,6 +183,7 @@ export type ListUsersQuery = {
 export type ListEventsQuery = {
   limit?: string | number;
   offset?: string | number;
+  lodgeId?: string | number;
 };
 export type CreateEventBody = {
   title?: string;
@@ -189,7 +192,7 @@ export type CreateEventBody = {
   price?: number;
   startDate?: string | null;
   endDate?: string | null;
-  lodgeIds?: number[];
+  lodgeIds?: Array<number | string>;
 };
 export type UpdateEventBody = Partial<CreateEventBody>;
 export type LinkLodgeBody = { lodgeId?: number | string | undefined };
@@ -209,7 +212,11 @@ export type CreatePostBody = {
 };
 export type UpdatePostBody = Partial<CreatePostBody>;
 
-export type CreateMailBody = { lid?: number; title?: string; content?: string };
+export type CreateMailBody = {
+  lid?: number | string;
+  title?: string;
+  content?: string;
+};
 
 export type CreateCheckoutBody = {
   price_id?: string;
@@ -231,6 +238,7 @@ export type RegisterBody = {
   dateOfBirth?: string;
   work?: string;
   mobile?: string;
+  homeNumber?: string;
   city?: string;
   address?: string;
   zipcode?: string;

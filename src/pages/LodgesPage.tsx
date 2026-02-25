@@ -33,7 +33,7 @@ export const LodgesPage = () => {
                 key={lodge.id}
                 className="block p-3 bg-white rounded-md shadow-md hover:shadow-lg transition"
               >
-                <img src={lodge?.picture} alt={lodge.name} className="w-16 h-16 rounded-full flex-shrink-0" />
+                <img src={lodge?.picture ?? undefined} alt={lodge.name} className="w-16 h-16 rounded-full flex-shrink-0" />
                 <div className="font-semibold truncate">{lodge.name}</div>
                 {lodge.email && (
                   <div className="text-sm text-gray-500 truncate">{lodge.email}</div>

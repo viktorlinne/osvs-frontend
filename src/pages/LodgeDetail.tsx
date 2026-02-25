@@ -159,7 +159,7 @@ export const LodgeDetail = () => {
               <div>
                 <img
                   className="rounded-full w-28 h-28 md:w-40 md:h-40 object-cover mb-1"
-                  src={lodge?.picture}
+                  src={lodge?.picture ?? undefined}
                   alt={`${lodge?.city}s vapensköld`}
                 />
               </div>
