@@ -4,6 +4,7 @@ import axios, {
   type AxiosResponse,
 } from "axios";
 import { reportGlobalError } from "./globalError";
+import { reportUnauthorized } from "./globalAuth";
 import type { ApiError } from "../types";
 
 const BASE_URL = import.meta.env.DEV
@@ -18,34 +19,52 @@ export const api = axios.create({
   timeout: 10000,
 });
 
+type RetriableRequestConfig = AxiosRequestConfig & {
+  _retry?: boolean;
+  _unauthorizedNotified?: boolean;
+};
+
+function isAuthFlowRequest(config?: AxiosRequestConfig): boolean {
+  const url = String(config?.url ?? "");
+  return /\/auth\/(login|refresh|forgot-password|reset-password)\b/.test(url);
+}
+
 // Minimal refresh strategy: on first 401 we POST to `/auth/refresh`
 // using the browser `fetch` API (to avoid axios interceptor recursion).
 // If the refresh succeeds we retry the original request once.
 api.interceptors.response.use(
   (r) => r,
   async (err: AxiosError) => {
-    const originalConfig = err.config as AxiosRequestConfig & {
-      _retry?: boolean;
-    };
+    const originalConfig = err.config as RetriableRequestConfig;
     if (!originalConfig) return Promise.reject(err);
 
     const status = err.response?.status;
     if (status === 401 && !originalConfig._retry) {
       originalConfig._retry = true;
       try {
-        const resp = await fetch(
-          `${BASE_URL.replace(/\/$/, "")}/auth/refresh`,
-          {
-            method: "POST",
-            credentials: "include",
-          }
-        );
+        const resp = await fetch(`${BASE_URL.replace(/\/$/, "")}/auth/refresh`, {
+          method: "POST",
+          credentials: "include",
+        });
         if (resp.ok) {
           return api.request(originalConfig);
         }
       } catch {
         // fallthrough to reject with original error
       }
+    }
+
+    if (
+      status === 401 &&
+      !isAuthFlowRequest(originalConfig) &&
+      !originalConfig._unauthorizedNotified
+    ) {
+      originalConfig._unauthorizedNotified = true;
+      reportUnauthorized({
+        status,
+        url: String(originalConfig.url ?? ""),
+        source: "axios-interceptor",
+      });
     }
 
     return Promise.reject(err);
@@ -57,28 +76,52 @@ export async function fetchData<T = unknown>(
   req: Promise<AxiosResponse<T>>
 ): Promise<T> {
   try {
-    const { data } = await req;
+    const response = await req;
+    const { data, config } = response;
 
-    // Defensive: some deployments may return a 200 with an error payload
-    // (e.g. { error: 'Vänligen logga in', status: 401 }). Treat that as an error.
+    // Defensive: some deployments may return a 2xx with an explicit
+    // error payload shape.
     if (data && typeof data === "object") {
       const rec = data as Record<string, unknown>;
       const maybeError =
-        (typeof rec.error === "string" && rec.error) ||
-        (typeof rec.message === "string" && rec.message);
-      if (maybeError) {
-        const status = typeof rec.status === "number" ? rec.status : 401;
+        typeof rec.error === "string"
+          ? rec.error
+          : Array.isArray(rec.error)
+          ? rec.error
+              .filter((part): part is string => typeof part === "string")
+              .join(", ")
+          : undefined;
+
+      if (maybeError && maybeError.length > 0) {
+        const status = typeof rec.status === "number" ? rec.status : 400;
         const apiErr: ApiError = {
           status,
-          code: typeof rec.code === "string" ? (rec.code as string) : undefined,
-          message: String(maybeError),
+          code: typeof rec.code === "string" ? rec.code : undefined,
+          message: maybeError,
           details: rec.details,
         };
-        try {
-          reportGlobalError(apiErr.message ?? "Ett fel uppstod");
-        } catch {
-          /* ignore */
+
+        if (status === 401) {
+          const requestConfig = config as RetriableRequestConfig;
+          if (
+            !isAuthFlowRequest(requestConfig) &&
+            !requestConfig._unauthorizedNotified
+          ) {
+            requestConfig._unauthorizedNotified = true;
+            reportUnauthorized({
+              status,
+              url: String(requestConfig.url ?? ""),
+              source: "fetchData-payload",
+            });
+          }
+        } else {
+          try {
+            reportGlobalError(apiErr.message ?? "Ett fel uppstod");
+          } catch {
+            // ignore
+          }
         }
+
         throw apiErr;
       }
     }
@@ -89,6 +132,7 @@ export async function fetchData<T = unknown>(
     if (err && err.response) {
       const status = err.response.status ?? 0;
       const raw = err.response.data as unknown;
+      const requestConfig = err.config as RetriableRequestConfig | undefined;
       let serverMsg: string | undefined;
       let code: string | undefined;
       if (typeof raw === "object" && raw !== null) {
@@ -105,8 +149,8 @@ export async function fetchData<T = unknown>(
         401: "Vänligen logga in",
         403: "Åtkomst nekad",
         404: "Hittades inte",
-        429: "För många förfrågningar — försök igen senare",
-        500: "Serverfel — försök igen senare",
+        429: "För många förfrågningar - försök igen senare",
+        500: "Serverfel - försök igen senare",
       };
 
       const message =
@@ -119,12 +163,27 @@ export async function fetchData<T = unknown>(
         message,
         details: (raw as Record<string, unknown>)?.details,
       };
-      // Report to global error banner (if registered)
-      try {
-        reportGlobalError(message);
-      } catch {
-        // ignore
+
+      if (status === 401) {
+        if (
+          !isAuthFlowRequest(requestConfig) &&
+          !requestConfig?._unauthorizedNotified
+        ) {
+          if (requestConfig) requestConfig._unauthorizedNotified = true;
+          reportUnauthorized({
+            status,
+            url: String(requestConfig?.url ?? ""),
+            source: "fetchData-catch",
+          });
+        }
+      } else {
+        try {
+          reportGlobalError(message);
+        } catch {
+          // ignore
+        }
       }
+
       throw apiErr;
     }
     throw e;

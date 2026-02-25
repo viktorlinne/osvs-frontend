@@ -7,6 +7,7 @@ export type AuthContextValue = {
   login: (email: string, password: string) => Promise<AuthUser | null>;
   logout: () => Promise<void>;
   refresh: () => Promise<AuthUser | null>;
+  clearUser: () => void;
 };
 
 export const AuthContext = createContext<AuthContextValue | undefined>(

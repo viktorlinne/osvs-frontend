@@ -2,6 +2,7 @@ export * from "./admin";
 export * from "./api";
 export * from "./auth";
 export * from "./events";
+export * from "./globalAuth";
 export * from "./lodges";
 export * from "./mails";
 export * from "./posts";

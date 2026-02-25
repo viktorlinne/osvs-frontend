@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import type { PublicUser } from "../../types";
+import { listOfficials } from "../../services/officials";
 
 type Official = { id: number; title: string };
 
@@ -37,28 +38,8 @@ export const OfficialsManager = ({
     let mounted = true;
     (async () => {
       try {
-        const resp = await fetch(
-          `${import.meta.env.VITE_BACKEND_URL}/api/officials`,
-          {
-            credentials: "include",
-          }
-        );
-        if (!resp.ok) return;
-        const json = await resp.json();
-        let items: any[] = [];
-        if (Array.isArray(json)) items = json;
-        else if (json && Array.isArray((json as any).officials)) items = (json as any).officials;
-        else if (json && (json as any).officials && typeof (json as any).officials === "object")
-          items = Object.values((json as any).officials);
-        else if (json && typeof json === "object")
-          items = Object.values(json).filter((v) => v && typeof v === "object");
-        if (mounted)
-          setOfficials(
-            items.map((i: any) => ({
-              id: Number(i.id),
-              title: String(i.title ?? ""),
-            }))
-          );
+        const items = await listOfficials();
+        if (mounted) setOfficials(items);
       } catch {
         /* ignore */
       }

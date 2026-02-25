@@ -6,69 +6,62 @@ import useFetch from "../hooks/useFetch";
 import type { PublicUser } from "../types";
 import { listAchievements } from "../services/achievements";
 import { listLodges } from "../services/lodges";
-
-async function fetchMembers({
-  name,
-  achievementId,
-  lodgeId,
-}: {
-  name?: string;
-  achievementId?: number | null;
-  lodgeId?: number | null;
-}): Promise<PublicUser[]> {
-  const params = new URLSearchParams();
-  if (name) params.set("name", name);
-  if (typeof achievementId !== "undefined" && achievementId !== null)
-    params.set("achievementId", String(achievementId));
-  if (typeof lodgeId !== "undefined" && lodgeId !== null)
-    params.set("lodgeId", String(lodgeId));
-  const url =
-    `${import.meta.env.VITE_BACKEND_URL}/api/users` +
-    (params.toString() ? `?${params.toString()}` : "");
-  const resp = await fetch(url, { credentials: "include" });
-  if (!resp.ok) throw new Error("Misslyckades att hämta medlemmar");
-  const json = await resp.json();
-  return (json.users ?? []) as PublicUser[];
-}
+import { listUsers as listUsersService } from "../services/users";
 
 export const MembersPage = () => {
   const { run, loading, data: members } = useFetch<PublicUser[]>();
   const { run: runAchievements, data: achievements } = useFetch<
     Array<{ id: number; title: string }>
   >();
-  const { run: runLodges, data: lodges } = useFetch<Array<{ id: number; name: string }>>();
+  const { run: runLodges, data: lodges } = useFetch<
+    Array<{ id: number; name: string }>
+  >();
   const { user } = useAuth();
   const [query, setQuery] = useState("");
   const [debouncedQuery, setDebouncedQuery] = useState(query);
   const [achievementId, setAchievementId] = useState<number | null>(null);
   const [lodgeId, setLodgeId] = useState<number | null>(null);
-  // static lists now provided by useFetch below
 
-  // fetch static lists via useFetch so errors go through `useError`
+  // Fetch static lists via useFetch so errors go through `useError`.
   useEffect(() => {
-    runAchievements(() => listAchievements()).catch(() => { });
-    runLodges(() => listLodges()).catch(() => { });
+    runAchievements(() => listAchievements()).catch(() => {
+      // handled by useFetch
+    });
+    runLodges(() => listLodges()).catch(() => {
+      // handled by useFetch
+    });
   }, [runAchievements, runLodges]);
 
   const doFetch = useCallback(
     () =>
       run(() =>
-        fetchMembers({ name: debouncedQuery || undefined, achievementId, lodgeId })
+        listUsersService({
+          name: debouncedQuery || undefined,
+          achievementId,
+          lodgeId,
+        })
       ),
     [run, debouncedQuery, achievementId, lodgeId]
   );
 
   useEffect(() => {
-    doFetch().catch(() => { });
+    doFetch().catch(() => {
+      // handled by useFetch
+    });
   }, [doFetch]);
 
-  // debounce query to avoid fetching on every keystroke
+  // Debounce query to avoid fetching on every keystroke.
   useEffect(() => {
     const t = setTimeout(() => setDebouncedQuery(query), 1000);
     return () => clearTimeout(t);
   }, [query]);
 
-  if (loading) return <div className="flex justify-center items-center min-h-screen"><Spinner /></div>;
+  if (loading)
+    return (
+      <div className="flex justify-center items-center min-h-screen">
+        <Spinner />
+      </div>
+    );
 
   return (
     <div className="flex flex-col items-center min-h-screen p-6">
@@ -144,7 +137,9 @@ export const MembersPage = () => {
                   <div className="font-semibold truncate">
                     {member.firstname} {member.lastname}
                   </div>
-                  <div className="text-sm text-gray-500 truncate">{member.email}</div>
+                  <div className="text-sm text-gray-500 truncate">
+                    {member.email}
+                  </div>
                 </div>
               </Link>
             ))}

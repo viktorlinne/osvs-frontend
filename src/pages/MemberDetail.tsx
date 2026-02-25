@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useParams, Link, useLocation, useNavigate } from "react-router-dom";
 import { Spinner } from "../components";
 import useFetch from "../hooks/useFetch";
@@ -10,6 +10,8 @@ import {
   setUserLodge,
   adminUpdateUser,
   uploadUserPicture,
+  getPublicUserById,
+  getUserRoles,
 } from "../services/users";
 import type { UserLodgeResponse } from "../services/users";
 import achievementsService from "../services/achievements";
@@ -90,39 +92,35 @@ export const MemberDetail = () => {
 
   const navigate = useNavigate();
 
+  const loadMember = useCallback(async () => {
+    if (!id) throw new Error("Missing id");
+    const detail = await getPublicUserById(id);
+    setAchievements(
+      Array.isArray(detail.achievements) ? detail.achievements : []
+    );
+
+    let userObj = (detail.user ?? null) as PublicUser | null;
+    if (
+      userObj &&
+      !Array.isArray((userObj as unknown as { roles?: unknown }).roles)
+    ) {
+      try {
+        const roles = await getUserRoles(id);
+        userObj = {
+          ...(userObj as unknown as Record<string, unknown>),
+          roles,
+        } as unknown as PublicUser;
+      } catch {
+        // ignore - fallback to user payload without roles
+      }
+    }
+
+    return userObj;
+  }, [id]);
+
   useEffect(() => {
     if (!id) return setGlobalError("Saknar medlems-id");
-    run(async () => {
-      const resp = await fetch(
-        `${import.meta.env.VITE_BACKEND_URL}/api/users/${id}`,
-        { credentials: "include" }
-      );
-      if (!resp.ok) throw new Error("Misslyckades att hämta medlem");
-      const json = await resp.json();
-      setAchievements(
-        Array.isArray(json.achievements) ? json.achievements : []
-      );
-      // Ensure returned user includes `roles`. Older responses may omit it.
-      let userObj = (json.user ?? null) as unknown as PublicUser | null;
-      if (userObj && !Array.isArray((userObj as unknown as { roles?: unknown }).roles)) {
-        try {
-          const rresp = await fetch(
-            `${import.meta.env.VITE_BACKEND_URL}/api/users/${id}/roles`,
-            { credentials: "include" }
-          );
-          if (rresp.ok) {
-            const rjson = await rresp.json();
-            userObj = {
-              ...(userObj as unknown as Record<string, unknown>),
-              roles: Array.isArray(rjson.roles) ? rjson.roles : [],
-            } as unknown as PublicUser;
-          }
-        } catch {
-          // ignore - fallback to whatever `userObj` contained
-        }
-      }
-      return userObj;
-    }).catch(() => { });
+    run(loadMember).catch(() => { });
     runAvailable(() => achievementsService.listAchievements())
       .then((list) => setAvailable(list))
       .catch(() => { });
@@ -157,7 +155,7 @@ export const MemberDetail = () => {
       .catch(() => { });
 
     // when member and rolesList available, set selectedRoleIds
-  }, [id, run, setGlobalError, canEdit, runAvailable, runLodges, runRoles, runUserLodge]);
+  }, [id, run, loadMember, setGlobalError, canEdit, runAvailable, runLodges, runRoles, runUserLodge]);
 
   useEffect(() => {
     if (!member) return;
@@ -305,19 +303,7 @@ export const MemberDetail = () => {
                   }
 
                   // refresh member data then navigate back to view
-                  await run(async () => {
-                    const resp = await fetch(
-                      `${import.meta.env.VITE_BACKEND_URL}/api/users/${id}`,
-                      { credentials: "include" }
-                    );
-                    if (!resp.ok)
-                      throw new Error("Misslyckades att hämta medlem");
-                    const json = await resp.json();
-                    setAchievements(
-                      Array.isArray(json.achievements) ? json.achievements : []
-                    );
-                    return (json.user ?? null) as unknown as PublicUser | null;
-                  });
+                  await run(loadMember);
 
                   navigate(`/members/${id}`, { replace: true });
                 } catch (e: unknown) {
@@ -371,21 +357,7 @@ export const MemberDetail = () => {
                       String(targetUserId),
                       lodgeId === null ? null : Number(lodgeId)
                     ));
-                    await run(async () => {
-                      const resp = await fetch(
-                        `${import.meta.env.VITE_BACKEND_URL}/api/users/${id}`,
-                        { credentials: "include" }
-                      );
-                      if (!resp.ok)
-                        throw new Error("Misslyckades att hämta medlem");
-                      const json = await resp.json();
-                      setAchievements(
-                        Array.isArray(json.achievements)
-                          ? json.achievements
-                          : []
-                      );
-                      return (json.user ?? null) as unknown as PublicUser | null;
-                    });
+                    await run(loadMember);
                   } catch {
                     setGlobalError("Misslyckades att uppdatera loge");
                   } finally {
@@ -411,21 +383,7 @@ export const MemberDetail = () => {
                       achievementId,
                       awardedAt,
                     }));
-                    await run(async () => {
-                      const resp = await fetch(
-                        `${import.meta.env.VITE_BACKEND_URL}/api/users/${id}`,
-                        { credentials: "include" }
-                      );
-                      if (!resp.ok)
-                        throw new Error("Misslyckades att hämta medlem");
-                      const json = await resp.json();
-                      setAchievements(
-                        Array.isArray(json.achievements)
-                          ? json.achievements
-                          : []
-                      );
-                      return (json.user ?? null) as unknown as PublicUser | null;
-                    });
+                    await run(loadMember);
                   } finally {
                     setSaving(false);
                   }
@@ -445,21 +403,7 @@ export const MemberDetail = () => {
                   setSaving(true);
                   try {
                     await runAction(() => setRoles(String(targetUserId), ids));
-                    await run(async () => {
-                      const resp = await fetch(
-                        `${import.meta.env.VITE_BACKEND_URL}/api/users/${id}`,
-                        { credentials: "include" }
-                      );
-                      if (!resp.ok)
-                        throw new Error("Misslyckades att hämta medlem");
-                      const json = await resp.json();
-                      setAchievements(
-                        Array.isArray(json.achievements)
-                          ? json.achievements
-                          : []
-                      );
-                      return (json.user ?? null) as unknown as PublicUser | null;
-                    });
+                    await run(loadMember);
                   } finally {
                     setSaving(false);
                   }
@@ -502,3 +446,4 @@ export const MemberDetail = () => {
     </div>
   );
 };
+

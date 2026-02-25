@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/useAuth";
 import { useError } from "../context";
 import useFetch from "../hooks/useFetch";
@@ -8,11 +8,22 @@ import { Spinner } from "../components";
 export const LoginPage = () => {
   const { login } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const { setError, clearError } = useError();
   const { run } = useFetch();
+  const from = (
+    location.state as
+      | {
+          from?: { pathname?: string; search?: string; hash?: string };
+        }
+      | undefined
+  )?.from;
+  const redirectTo = from?.pathname
+    ? `${from.pathname}${from.search ?? ""}${from.hash ?? ""}`
+    : "/posts";
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -20,7 +31,7 @@ export const LoginPage = () => {
     setLoading(true);
     try {
       const user = await run(() => login(email, password));
-      if (user) navigate("/posts");
+      if (user) navigate(redirectTo, { replace: true });
       else setError("Login failed");
     } catch {
       // useFetch already sets friendly messages via global error
