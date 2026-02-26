@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useAuth, useError } from "../context";
-import { getUserLodge, postAchievement } from "../services";
+import { getUserLodge, postAchievement, setRoles } from "../services/users";
 import { listRoles } from "../services/admin";
 import achievementsService from "../services/achievements";
 import type { Achievement, Lodge, Role, PublicUser } from "../types";
@@ -105,7 +105,6 @@ export const useProfile = () => {
 
   async function saveRoles(targetUserId: number, ids: number[]) {
     try {
-      const { setRoles } = await import("../services");
       await setRoles(targetUserId, ids);
       await refresh();
     } catch {

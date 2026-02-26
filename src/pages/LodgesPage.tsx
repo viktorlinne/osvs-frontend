@@ -1,5 +1,4 @@
 import { useEffect } from "react";
-import { Spinner } from "../components";
 import useFetch from "../hooks/useFetch";
 import type { Lodge } from "../types";
 import { listLodges } from "../services";
@@ -11,15 +10,13 @@ export const LodgesPage = () => {
     return Array.isArray(data) ? (data as Lodge[]) : [];
   }
 
-  const { run, loading, data: lodges } = useFetch<Lodge[]>();
+  const { run, data: lodges } = useFetch<Lodge[]>();
 
   useEffect(() => {
     run(fetchLodges).catch(() => {
       /* swallow; useFetch handles errors */
     });
   }, [run]);
-
-  if (loading) return <div className="flex justify-center items-center min-h-screen"><Spinner /></div>;
 
   return (
     <div className="flex flex-col items-center min-h-screen">

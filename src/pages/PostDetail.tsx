@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import { useParams, Link, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../context";
 import { getPost, updatePost, listLodges } from "../services";
-import { Spinner } from "../components";
 import type { Post, Lodge } from "../types";
 import LodgeSelection, {
   normalizeLodgeIds,
@@ -16,7 +15,7 @@ export const PostDetail = () => {
   const { user } = useAuth();
   const { id } = useParams<{ id: string }>();
   const { setError: setGlobalError, clearError: clearGlobalError } = useError();
-  const { data: post, loading, run } = useFetch<Post | null>();
+  const { data: post, run } = useFetch<Post | null>();
   const { run: runSubmit, loading: submitting } = useFetch<{
     success: boolean;
   }>();
@@ -150,13 +149,6 @@ export const PostDetail = () => {
       }
     }
   }
-
-  if (loading)
-    return (
-      <div className="flex justify-center items-center min-h-screen">
-        <Spinner />
-      </div>
-    );
 
   return (
     <div className="flex flex-col items-center min-h-screen">

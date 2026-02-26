@@ -1,34 +1,43 @@
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import lodgesService from "../services/lodges";
-import { setUserLodge } from "../services/users";
-import type { Lodge } from "../types";
-import { useAuth, useError } from "../context";
-import { updateMe, uploadMyPicture } from "../services";
 import { useForm } from "react-hook-form";
-import type { UpdateUserForm } from "../types";
+import {
+  AchievementsPanel,
+  OfficialsManager,
+  ProfileForm,
+  ProfileHeader,
+  RolesManager,
+} from "../components";
+import { useAuth, useError } from "../context";
 import { useProfile } from "../hooks";
 import useFetch from "../hooks/useFetch";
+import { setMemberOfficials } from "../services/officials";
+import lodgesService from "../services/lodges";
+import { setUserLodge, updateMe, uploadMyPicture } from "../services/users";
+import type { Lodge, UpdateUserForm } from "../types";
 import {
-  ProfileHeader,
-  AchievementsPanel,
-  RolesManager,
-  ProfileForm,
-  OfficialsManager,
-} from "../components";
+  extractMissingFields,
+  toUserProfileUpdatePayload,
+} from "../utils/userProfileForm";
 
 export const Profile = () => {
   const { user, refresh } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
   const isEditRoute = location.pathname.endsWith("/edit");
+
   const { setError: setGlobalError, clearError: clearGlobalError } = useError();
+  const { run } = useFetch<unknown>();
+  const { run: runLodges } = useFetch<Lodge[]>();
+
   const [saving, setSaving] = useState(false);
   const [pictureFile, setPictureFile] = useState<File | null>(null);
   const [lodges, setLodges] = useState<Lodge[]>([]);
-  const { run } = useFetch<unknown>();
-  const { run: runLodges } = useFetch<Lodge[]>();
   const [selectedLid, setSelectedLid] = useState<number | null>(null);
+  const [selectedOfficialIds, setSelectedOfficialIds] = useState<number[] | null>(
+    null,
+  );
+
   const {
     achievements,
     available,
@@ -45,9 +54,6 @@ export const Profile = () => {
     assignAchievement,
     saveRoles,
   } = useProfile();
-  const [selectedOfficialIds, setSelectedOfficialIds] = useState<number[] | null>(
-    null
-  );
 
   const {
     register,
@@ -56,7 +62,6 @@ export const Profile = () => {
     setError: setFieldError,
     formState: { errors },
   } = useForm<UpdateUserForm>({
-    // runtime validation removed; relying on TypeScript types and controller-side checks
     defaultValues: {
       firstname: user?.firstname ?? "",
       lastname: user?.lastname ?? "",
@@ -72,10 +77,7 @@ export const Profile = () => {
     },
   });
 
-  // data-fetching and role/achievement state handled by `useProfile`
-
   useEffect(() => {
-    // keep form in sync when `user` changes
     reset({
       firstname: user?.firstname ?? "",
       lastname: user?.lastname ?? "",
@@ -89,17 +91,21 @@ export const Profile = () => {
       zipcode: user?.zipcode ?? "",
       accommodationAvailable: user?.accommodationAvailable ?? null,
     });
-  }, [user, reset]);
+  }, [reset, user]);
 
   useEffect(() => {
     let mounted = true;
+
     runLodges(() => lodgesService.listLodges())
       .then((list) => {
-        if (mounted) setLodges(Array.isArray(list) ? list : []);
+        if (mounted) {
+          setLodges(Array.isArray(list) ? list : []);
+        }
       })
       .catch(() => {
-        /* ignore */
+        // useFetch handles global error state
       });
+
     return () => {
       mounted = false;
     };
@@ -109,46 +115,30 @@ export const Profile = () => {
     setSelectedLid(lodge?.id ? Number(lodge.id) : null);
   }, [lodge]);
 
-  async function onSave(values: Record<string, unknown>) {
+  const handleProfileSave = handleSubmit(async (values) => {
     clearGlobalError();
     setSaving(true);
+
     try {
-      await run(() =>
-        updateMe({
-          firstname: String(values.firstname ?? "").trim(),
-          lastname: String(values.lastname ?? "").trim(),
-          mobile: String(values.mobile ?? "").trim(),
-          city: String(values.city ?? "").trim(),
-          dateOfBirth: values.dateOfBirth ? String(values.dateOfBirth) : null,
-          address: values.address ? String(values.address) : null,
-          zipcode: values.zipcode ? String(values.zipcode) : null,
-          work: values.work ?? null,
-          notes: values.notes ?? null,
-          accommodationAvailable:
-            typeof values.accommodationAvailable === "boolean"
-              ? values.accommodationAvailable
-              : null,
-        })
-      );
+      await run(() => updateMe(toUserProfileUpdatePayload(values)));
+
       if (pictureFile) {
         await run(() => uploadMyPicture(pictureFile));
       }
-      // save roles, lodge and achievements as part of consolidated save
-      const uid = user?.id;
-      if (uid) {
+
+      const userId = user?.id;
+      if (userId) {
         try {
           if (Array.isArray(selectedRoleIds) && selectedRoleIds.length > 0) {
-            await run(() => saveRoles(uid, selectedRoleIds));
+            await run(() => saveRoles(userId, selectedRoleIds));
           }
         } catch {
           setGlobalError("Misslyckades att uppdatera roller");
         }
 
         try {
-          // save officials selection (if controlled)
           if (Array.isArray(selectedOfficialIds)) {
-            const officialsSvc = await import("../services/officials");
-            await run(() => officialsSvc.setMemberOfficials(uid, selectedOfficialIds));
+            await run(() => setMemberOfficials(userId, selectedOfficialIds));
           }
         } catch {
           setGlobalError("Misslyckades att uppdatera tjänster");
@@ -157,7 +147,7 @@ export const Profile = () => {
         try {
           if (selectedAid) {
             await run(() =>
-              assignAchievement(uid, selectedAid, awardDate || undefined)
+              assignAchievement(userId, selectedAid, awardDate || undefined),
             );
             setSelectedAid(null);
             setAwardDate("");
@@ -169,9 +159,9 @@ export const Profile = () => {
         try {
           await run(() =>
             setUserLodge(
-              String(uid),
-              selectedLid === null ? null : Number(selectedLid)
-            )
+              String(userId),
+              selectedLid === null ? null : Number(selectedLid),
+            ),
           );
         } catch {
           setGlobalError("Misslyckades att uppdatera loge");
@@ -179,44 +169,32 @@ export const Profile = () => {
       }
 
       await refresh();
-      // navigate back to profile view after successful save
       navigate("/profile", { replace: true });
-    } catch (e: unknown) {
-      const err = e as { status?: number; details?: unknown };
-      if (
-        err?.status === 400 &&
-        err.details &&
-        typeof err.details === "object"
-      ) {
-        const rec = err.details as Record<string, unknown>;
-        const missing = Array.isArray(rec.missing) ? rec.missing : undefined;
-        if (missing) {
-          missing.forEach((p: unknown) => {
-            if (typeof p === "string")
-              setFieldError(p as keyof UpdateUserForm, {
-                type: "server",
-                message: "Ogiltigt värde",
-              });
+    } catch (error: unknown) {
+      const missing = extractMissingFields(error);
+      if (missing) {
+        missing.forEach((field) => {
+          setFieldError(field as keyof UpdateUserForm, {
+            type: "server",
+            message: "Ogiltigt värde",
           });
-          setSaving(false);
-          return;
-        }
+        });
+        return;
       }
+
       setGlobalError("Misslyckades att uppdatera profilen");
     } finally {
       setSaving(false);
     }
-  }
+  });
 
   return (
     <div className="flex flex-col items-center min-h-screen">
       <div className="max-w-3xl w-full mx-auto p-6">
         <ProfileHeader user={user} isEditRoute={isEditRoute} />
         <h2 className="text-2xl font-bold mt-4 mb-4">Din profil</h2>
-        <form
-          onSubmit={handleSubmit(onSave)}
-          className="bg-white p-4 rounded-md shadow"
-        >
+
+        <form onSubmit={handleProfileSave} className="bg-white p-4 rounded-md shadow">
           <AchievementsPanel
             user={user}
             achievements={achievements}
@@ -225,20 +203,18 @@ export const Profile = () => {
             lodges={lodges}
             selectedLid={selectedLid}
             setSelectedLid={setSelectedLid}
-            onSaveLodge={async (
-              targetUserId: number,
-              lodgeId: number | null
-            ) => {
+            onSaveLodge={async (targetUserId: number, lodgeId: number | null) => {
               if (!targetUserId) throw new Error("Invalid target");
+
               setSaving(true);
               try {
                 await setUserLodge(
                   String(targetUserId),
-                  lodgeId === null ? null : Number(lodgeId)
+                  lodgeId === null ? null : Number(lodgeId),
                 );
                 await refresh();
               } catch {
-                // signal handled by useProfile refresh fallback
+                // state refresh is handled in useProfile fallback
               } finally {
                 setSaving(false);
               }
@@ -251,6 +227,7 @@ export const Profile = () => {
             canAward={canAward}
             assignAchievement={assignAchievement}
           />
+
           <RolesManager
             userId={user?.id}
             rolesList={rolesList}
@@ -262,12 +239,14 @@ export const Profile = () => {
             setGlobalError={setGlobalError}
             setSaving={setSaving}
           />
+
           <OfficialsManager
             user={user}
             isEditRoute={isEditRoute}
             selectedIds={selectedOfficialIds ?? undefined}
             setSelectedIds={setSelectedOfficialIds}
           />
+
           <ProfileForm
             user={user}
             register={register}
@@ -276,6 +255,7 @@ export const Profile = () => {
             setPictureFile={setPictureFile}
             saving={saving}
           />
+
           {isEditRoute ? (
             <div className="flex items-center gap-x-4 py-4">
               <button

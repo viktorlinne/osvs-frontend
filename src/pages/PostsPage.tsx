@@ -4,7 +4,6 @@ import { useAuth, useError } from "../context";
 import { listPosts, listLodges } from "../services";
 import type { Post, Lodge } from "../types";
 import useFetch from "../hooks/useFetch";
-import { Spinner } from "../components";
 
 //! TODO add search and filtering
 export const NewsPage = () => {
@@ -53,8 +52,6 @@ export const NewsPage = () => {
       mounted = false;
     };
   }, [run, setError, selectedLodge]);
-
-  if (loading) return <div className="flex justify-center items-center min-h-screen"><Spinner /></div>;
 
   return (
     <div className="flex flex-col items-center min-h-screen p-6">

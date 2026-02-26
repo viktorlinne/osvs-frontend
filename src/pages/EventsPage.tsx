@@ -3,7 +3,6 @@ import { listMyEvents, listEvents } from "../services";
 import { useAuth } from "../context";
 import type { Event as EventRecord } from "../types";
 import { Link } from "react-router-dom";
-import { Spinner } from "../components";
 import useFetch from "../hooks/useFetch";
 
 // Start week on Monday
@@ -119,8 +118,6 @@ export const EventsPage = () => {
   function jumpToToday() {
     setViewDate(new Date(today.getFullYear(), today.getMonth(), 1));
   }
-
-  if (loading) return <div className="flex justify-center items-center min-h-screen"><Spinner /></div>;
 
   return (
     <div className="p-6 w-full xl:max-w-[1100px] mx-auto min-h-screen">

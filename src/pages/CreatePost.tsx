@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { createPost, listLodges } from "../services";
 import useFetch from "../hooks/useFetch";
-import { Spinner } from "../components";
 import LodgeSelection, {
   normalizeLodgeIds,
 } from "../components/LodgeSelection";
@@ -179,7 +178,6 @@ export const CreatePost = () => {
             >
               Skapa
             </button>
-            {loading && <Spinner />}
           </div>
         </form>
       </div>

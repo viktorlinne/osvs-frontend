@@ -1,37 +1,72 @@
 import { useCallback, useEffect, useState } from "react";
-import { useParams, Link, useLocation, useNavigate } from "react-router-dom";
-import { Spinner } from "../components";
+import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
 import useFetch from "../hooks/useFetch";
-import { useError, useAuth } from "../context";
-import type { PublicUser, Achievement, Lodge, Role } from "../types";
+import { useAuth, useError } from "../context";
+import type { Achievement, Lodge, PublicUser, Role, UpdateUserForm } from "../types";
 import {
-  postAchievement,
-  getUserLodge,
-  setUserLodge,
   adminUpdateUser,
-  uploadUserPicture,
   getPublicUserById,
+  getUserLodge,
   getUserRoles,
+  postAchievement,
+  setRoles,
+  setUserLodge,
+  uploadUserPicture,
 } from "../services/users";
 import type { UserLodgeResponse } from "../services/users";
 import achievementsService from "../services/achievements";
 import lodgesService from "../services/lodges";
+import { setMemberOfficials } from "../services/officials";
 import { listRoles } from "../services/admin";
-import { setRoles } from "../services";
 import { useForm } from "react-hook-form";
-import type { UpdateUserForm } from "../types";
 import {
   AchievementsPanel,
-  RolesManager,
-  ProfileForm,
   OfficialsManager,
+  ProfileForm,
+  RolesManager,
 } from "../components/profile/";
+import {
+  extractMissingFields,
+  toUserProfileUpdatePayload,
+} from "../utils/userProfileForm";
+
+function mapRolesResponseToList(value: unknown): Role[] {
+  const raw = value as { roles?: unknown } | null | undefined;
+  const items = Array.isArray(value)
+    ? value
+    : Array.isArray(raw?.roles)
+      ? raw.roles
+      : [];
+
+  return items
+    .map((item) => {
+      const record = item as Record<string, unknown>;
+      const id = Number(record.id);
+      const name = String(record.name ?? record.role ?? record.roleName ?? "");
+      return Number.isFinite(id) && name ? { id, name } : null;
+    })
+    .filter((role): role is { id: number; name: string } => Boolean(role));
+}
+
+function mapMemberRoleNames(member: PublicUser | null): string[] {
+  if (!member) return [];
+  const roles = (member as { roles?: unknown }).roles;
+  if (!Array.isArray(roles)) return [];
+
+  return roles
+    .map((roleItem) => {
+      if (typeof roleItem === "string") return roleItem;
+      if (!roleItem || typeof roleItem !== "object") return "";
+      const role = roleItem as Record<string, unknown>;
+      return String(role.name ?? role.role ?? role.id ?? "");
+    })
+    .filter((name): name is string => Boolean(name));
+}
 
 export const MemberDetail = () => {
   const { id } = useParams<{ id: string }>();
   const {
     run,
-    loading,
     data: member,
   } = useFetch<PublicUser | null>();
   const { run: runAvailable } = useFetch<Achievement[]>();
@@ -39,15 +74,24 @@ export const MemberDetail = () => {
   const { run: runRoles } = useFetch<unknown>();
   const { run: runUserLodge } = useFetch<UserLodgeResponse>();
   const { run: runAction } = useFetch<unknown>();
+
   const { setError: setGlobalError, clearError: clearGlobalError } = useError();
-  const { user } = useAuth();
-  const { user: currentUser } = useAuth();
+  const { user: authUser } = useAuth();
+  const location = useLocation();
+  const navigate = useNavigate();
+
   const canAward = Boolean(
-    currentUser &&
-    (currentUser.roles ?? []).some((r) => ["Admin", "Editor"].includes(r))
+    authUser && (authUser.roles ?? []).some((r) => ["Admin", "Editor"].includes(r))
   );
+  const canEdit = Boolean(
+    authUser && (authUser.roles ?? []).some((r) => ["Admin", "Editor"].includes(r))
+  );
+  const isEditRoute = location.pathname.endsWith("/edit");
+
+  const [saving, setSaving] = useState(false);
+  const [pictureFile, setPictureFile] = useState<File | null>(null);
   const [selectedAid, setSelectedAid] = useState<number | null>(null);
-  const [awardDate, setAwardDate] = useState<string>("");
+  const [awardDate, setAwardDate] = useState("");
   const [selectedLid, setSelectedLid] = useState<number | null>(null);
   const [available, setAvailable] = useState<Achievement[]>([]);
   const [lodges, setLodges] = useState<Lodge[]>([]);
@@ -55,24 +99,14 @@ export const MemberDetail = () => {
   const [rolesList, setRolesList] = useState<Role[]>([]);
   const [selectedRoleIds, setSelectedRoleIds] = useState<number[]>([]);
   const [selectedOfficialIds, setSelectedOfficialIds] = useState<number[] | null>(
-    null
+    null,
   );
-
-  const canEdit = Boolean(
-    user && (user.roles ?? []).some((r) => ["Admin", "Editor"].includes(r))
-  );
-  const location = useLocation();
-  const isEditRoute = location.pathname.endsWith("/edit");
-
-  const [saving, setSaving] = useState(false);
-  const [pictureFile, setPictureFile] = useState<File | null>(null);
-  // removed duplicate useError destructure; use `setGlobalError` / `clearGlobalError`
 
   const {
     register,
     handleSubmit,
     reset,
-    setError,
+    setError: setFieldError,
     formState: { errors },
   } = useForm<UpdateUserForm>({
     defaultValues: {
@@ -90,28 +124,24 @@ export const MemberDetail = () => {
     },
   });
 
-  const navigate = useNavigate();
-
   const loadMember = useCallback(async () => {
     if (!id) throw new Error("Missing id");
-    const detail = await getPublicUserById(id);
-    setAchievements(
-      Array.isArray(detail.achievements) ? detail.achievements : []
-    );
 
-    let userObj = (detail.user ?? null) as PublicUser | null;
-    if (
-      userObj &&
-      !Array.isArray((userObj as unknown as { roles?: unknown }).roles)
-    ) {
+    const detail = await getPublicUserById(id);
+    setAchievements(Array.isArray(detail.achievements) ? detail.achievements : []);
+
+    let userObj: PublicUser | null = detail.user
+      ? (detail.user as PublicUser)
+      : null;
+    if (userObj && !Array.isArray((userObj as { roles?: unknown }).roles)) {
       try {
         const roles = await getUserRoles(id);
         userObj = {
-          ...(userObj as unknown as Record<string, unknown>),
+          ...(userObj as Record<string, unknown>),
           roles,
         } as unknown as PublicUser;
       } catch {
-        // ignore - fallback to user payload without roles
+        // Fallback to payload user without explicit roles.
       }
     }
 
@@ -119,71 +149,70 @@ export const MemberDetail = () => {
   }, [id]);
 
   useEffect(() => {
-    if (!id) return setGlobalError("Saknar medlems-id");
-    run(loadMember).catch(() => { });
-    runAvailable(() => achievementsService.listAchievements())
-      .then((list) => setAvailable(list))
-      .catch(() => { });
-
-    // fetch lodges list and current user's lodge
-    runLodges(() => lodgesService.listLodges())
-      .then((l) => setLodges(Array.isArray(l) ? l : []))
-      .catch(() => { });
-
-    // Only fetch role list if current user can edit (Admin or Editor).
-    // This avoids 403 Forbidden requests for ordinary or anonymous users.
-    if (canEdit) {
-      runRoles(() => listRoles())
-        .then((r) => {
-          const raw = r as Record<string, unknown> | undefined;
-          let items: Array<Record<string, unknown>> = [];
-          if (Array.isArray(r)) items = r as Array<Record<string, unknown>>;
-          else if (raw && Array.isArray(raw.roles)) items = raw.roles as Array<Record<string, unknown>>;
-          if (items.length > 0) {
-            const rolesArray = items.map((item) => ({
-              id: Number(item.id),
-              name: String(item.name ?? item.role ?? item.roleName ?? ""),
-            }));
-            setRolesList(rolesArray);
-          }
-        })
-        .catch(() => { });
+    if (!id) {
+      setGlobalError("Saknar medlems-id");
+      return;
     }
 
-    runUserLodge(() => getUserLodge(id as string))
-      .then((cur) => setSelectedLid(cur?.lodge ? Number(cur.lodge.id) : null))
-      .catch(() => { });
+    run(loadMember).catch(() => {
+      // useFetch handles global error
+    });
 
-    // when member and rolesList available, set selectedRoleIds
-  }, [id, run, loadMember, setGlobalError, canEdit, runAvailable, runLodges, runRoles, runUserLodge]);
+    runAvailable(() => achievementsService.listAchievements())
+      .then((list) => setAvailable(Array.isArray(list) ? list : []))
+      .catch(() => {
+        // useFetch handles global error
+      });
+
+    runLodges(() => lodgesService.listLodges())
+      .then((list) => setLodges(Array.isArray(list) ? list : []))
+      .catch(() => {
+        // useFetch handles global error
+      });
+
+    if (canEdit) {
+      runRoles(() => listRoles())
+        .then((response) => setRolesList(mapRolesResponseToList(response)))
+        .catch(() => {
+          // useFetch handles global error
+        });
+    }
+
+    runUserLodge(() => getUserLodge(id))
+      .then((current) => setSelectedLid(current?.lodge ? Number(current.lodge.id) : null))
+      .catch(() => {
+        // useFetch handles global error
+      });
+  }, [
+    canEdit,
+    id,
+    loadMember,
+    run,
+    runAvailable,
+    runLodges,
+    runRoles,
+    runUserLodge,
+    setGlobalError,
+  ]);
 
   useEffect(() => {
-    if (!member) return;
-    if (!rolesList || rolesList.length === 0) return;
-    const memberRoles = (member as unknown as Record<string, unknown>)["roles"] as Array<unknown> | undefined;
-    const ids = (memberRoles ?? [])
-      .map((rn: unknown) => {
-        const rnName =
-          typeof rn === "string"
-            ? rn
-            : ((): string => {
-              const rec = rn as Record<string, unknown>;
-              return String(rec["name"] ?? rec["role"] ?? rec["id"] ?? "");
-            })();
-        return rolesList.find((r) => r.name === rnName)?.id;
-      })
-      .filter((v: unknown): v is number => Boolean(v));
+    if (!member || rolesList.length === 0) return;
+
+    const memberRoles = mapMemberRoleNames(member);
+    const ids = memberRoles
+      .map((roleName) => rolesList.find((role) => role.name === roleName)?.id)
+      .filter((value): value is number => typeof value === "number");
+
     setSelectedRoleIds(ids);
   }, [member, rolesList]);
 
   useEffect(() => {
     if (!member) return;
+
     reset({
       firstname: member.firstname ?? "",
       lastname: member.lastname ?? "",
-      dateOfBirth: member.dateOfBirth
-        ? String(member.dateOfBirth).slice(0, 10)
-        : "",
+      dateOfBirth: member.dateOfBirth ? String(member.dateOfBirth).slice(0, 10) : "",
       work: member.work ?? undefined,
       notes: member.notes ?? undefined,
       mobile: member.mobile ?? "",
@@ -191,29 +220,100 @@ export const MemberDetail = () => {
       city: member.city ?? "",
       address: member.address ?? "",
       zipcode: member.zipcode ?? "",
-      accommodationAvailable: (member as any).accommodationAvailable ?? null,
+      accommodationAvailable: member.accommodationAvailable ?? null,
     });
     setPictureFile(null);
   }, [member, reset]);
 
   useEffect(() => {
-    if (!pictureFile) {
-      return;
-    }
-    const url = URL.createObjectURL(pictureFile);
+    if (!pictureFile) return;
 
+    const url = URL.createObjectURL(pictureFile);
     return () => {
       URL.revokeObjectURL(url);
     };
   }, [pictureFile]);
 
-  if (loading) return <div className="flex justify-center items-center min-h-screen"><Spinner /></div>;
+  const handleMemberSave = handleSubmit(async (values) => {
+    clearGlobalError();
+    setSaving(true);
+
+    try {
+      if (!id) throw new Error("Missing id");
+      const userId = id;
+
+      await runAction(() => adminUpdateUser(userId, toUserProfileUpdatePayload(values)));
+
+      if (pictureFile) {
+        await runAction(() => uploadUserPicture(userId, pictureFile));
+      }
+
+      try {
+        await runAction(() => setRoles(userId, selectedRoleIds));
+      } catch {
+        setGlobalError("Misslyckades att uppdatera roller");
+      }
+
+      try {
+        if (Array.isArray(selectedOfficialIds)) {
+          await runAction(() => setMemberOfficials(userId, selectedOfficialIds));
+        }
+      } catch {
+        setGlobalError("Misslyckades att uppdatera tjänster");
+      }
+
+      try {
+        if (selectedAid) {
+          await runAction(() =>
+            postAchievement(userId, {
+              achievementId: selectedAid,
+              awardedAt: awardDate || undefined,
+            }),
+          );
+          setSelectedAid(null);
+          setAwardDate("");
+        }
+      } catch {
+        setGlobalError("Misslyckades att tilldela utmärkelse");
+      }
+
+      try {
+        await runAction(() =>
+          setUserLodge(userId, selectedLid === null ? null : Number(selectedLid)),
+        );
+      } catch {
+        setGlobalError("Misslyckades att uppdatera loge");
+      }
+
+      await run(loadMember);
+      navigate(`/members/${id}`, { replace: true });
+    } catch (error: unknown) {
+      const missing = extractMissingFields(error);
+      if (missing) {
+        missing.forEach((field) => {
+          setFieldError(field as keyof UpdateUserForm, {
+            type: "server",
+            message: "Ogiltigt värde",
+          });
+        });
+        return;
+      }
+
+      setGlobalError("Misslyckades att uppdatera medlem");
+    } finally {
+      setSaving(false);
+    }
+  });
 
   return (
     <div className="flex flex-col items-center min-h-screen">
       <div className="max-w-3xl w-full mx-auto p-6">
         <div className="flex items-center justify-between">
-          <Link to=".." relative="path" className="text-sm text-green-600 hover:text-green-700 hover:underline">
+          <Link
+            to=".."
+            relative="path"
+            className="text-sm text-green-600 hover:text-green-700 hover:underline"
+          >
             ← Tillbaka
           </Link>
           {canEdit && !isEditRoute && (
@@ -225,225 +325,117 @@ export const MemberDetail = () => {
             </Link>
           )}
         </div>
+
         <h2 className="text-2xl font-bold mt-4 mb-4">Medlem</h2>
-        {
-          member && (
-            <form
-              onSubmit={handleSubmit(async (values) => {
+
+        {member && (
+          <form onSubmit={handleMemberSave} className="bg-white p-4 rounded-md shadow">
+            <AchievementsPanel
+              user={member}
+              achievements={achievements}
+              available={available}
+              lodge={lodges.find((lodge) => lodge.id === selectedLid) ?? null}
+              lodges={lodges}
+              selectedLid={selectedLid}
+              setSelectedLid={setSelectedLid}
+              onSaveLodge={async (targetUserId: number, lodgeId: number | null) => {
+                if (!targetUserId) throw new Error("Invalid target");
                 clearGlobalError();
                 setSaving(true);
                 try {
-                  if (!id) throw new Error("Missing id");
-                  const uid = id as string;
-                  await runAction(() => adminUpdateUser(uid, {
-                    firstname: String(values.firstname ?? "").trim(),
-                    lastname: String(values.lastname ?? "").trim(),
-                    mobile: String(values.mobile ?? "").trim(),
-                    city: String(values.city ?? "").trim(),
-                    dateOfBirth: values.dateOfBirth
-                      ? String(values.dateOfBirth)
-                      : null,
-                    address: values.address ? String(values.address) : null,
-                    zipcode: values.zipcode ? String(values.zipcode) : null,
-                    work: values.work ?? null,
-                    notes: values.notes ?? null,
-                    accommodationAvailable:
-                      typeof values.accommodationAvailable === "boolean"
-                        ? values.accommodationAvailable
-                        : null,
-                  }));
-                  if (pictureFile) {
-                    await runAction(() => uploadUserPicture(uid, pictureFile));
-                  }
-
-                  // save roles
-                  try {
-                    console.debug("Saving roles for", uid, selectedRoleIds);
-                    await runAction(() => setRoles(uid, selectedRoleIds));
-                    // signal success briefly
-                    setGlobalError("");
-                  } catch (err) {
-                    console.error("Failed to save roles", err);
-                    setGlobalError("Misslyckades att uppdatera roller");
-                  }
-
-                  // save officials selection
-                  try {
-                    if (Array.isArray(selectedOfficialIds)) {
-                      const officialsSvc = await import("../services/officials");
-                      await runAction(() => officialsSvc.setMemberOfficials(uid, selectedOfficialIds));
-                    }
-                  } catch (err) {
-                    console.error("Failed to save officials", err);
-                    setGlobalError("Misslyckades att uppdatera tjänster");
-                  }
-
-                  // assign achievement if selected
-                  try {
-                    if (selectedAid) {
-                      await runAction(() => postAchievement(uid, {
-                        achievementId: selectedAid,
-                        awardedAt: awardDate || undefined,
-                      }));
-                      setSelectedAid(null);
-                      setAwardDate("");
-                    }
-                  } catch {
-                    setGlobalError("Misslyckades att tilldela utmärkelse");
-                  }
-
-                  // update lodge
-                  try {
-                    await runAction(() => setUserLodge(
-                      uid,
-                      selectedLid === null ? null : Number(selectedLid)
-                    ));
-                  } catch {
-                    setGlobalError("Misslyckades att uppdatera loge");
-                  }
-
-                  // refresh member data then navigate back to view
+                  await runAction(() =>
+                    setUserLodge(
+                      String(targetUserId),
+                      lodgeId === null ? null : Number(lodgeId),
+                    ),
+                  );
                   await run(loadMember);
-
-                  navigate(`/members/${id}`, { replace: true });
-                } catch (e: unknown) {
-                  const err = e as { status?: number; details?: unknown };
-                  if (
-                    err?.status === 400 &&
-                    err.details &&
-                    typeof err.details === "object"
-                  ) {
-                    const rec = err.details as Record<string, unknown>;
-                    const missing = Array.isArray(rec.missing)
-                      ? rec.missing
-                      : undefined;
-                    if (missing) {
-                      missing.forEach((p: unknown) => {
-                        if (typeof p === "string")
-                          setError(p as keyof UpdateUserForm, {
-                            type: "server",
-                            message: "Ogiltigt värde",
-                          });
-                      });
-                      setSaving(false);
-                      return;
-                    }
-                  }
-                  setGlobalError("Misslyckades att uppdatera medlem");
+                } catch {
+                  setGlobalError("Misslyckades att uppdatera loge");
                 } finally {
                   setSaving(false);
                 }
-              })}
-              className="bg-white p-4 rounded-md shadow"
-            >
-              {/* Compose shared profile components to match `Profile` structure */}
-              <AchievementsPanel
-                user={member}
-                achievements={achievements}
-                available={available}
-                lodge={lodges.find((l) => l.id === selectedLid) ?? null}
-                lodges={lodges}
-                selectedLid={selectedLid}
-                setSelectedLid={setSelectedLid}
-                onSaveLodge={async (
-                  targetUserId: number,
-                  lodgeId: number | null
-                ) => {
-                  if (!targetUserId) throw new Error("Invalid target");
-                  clearGlobalError();
-                  setSaving(true);
-                  try {
-                    await runAction(() => setUserLodge(
-                      String(targetUserId),
-                      lodgeId === null ? null : Number(lodgeId)
-                    ));
-                    await run(loadMember);
-                  } catch {
-                    setGlobalError("Misslyckades att uppdatera loge");
-                  } finally {
-                    setSaving(false);
-                  }
-                }}
-                isEditRoute={isEditRoute}
-                selectedAid={selectedAid}
-                setSelectedAid={setSelectedAid}
-                awardDate={awardDate}
-                setAwardDate={setAwardDate}
-                canAward={canAward}
-                assignAchievement={async (
-                  targetUserId: number,
-                  achievementId: number,
-                  awardedAt?: string
-                ) => {
-                  if (!targetUserId) throw new Error("Invalid target");
-                  clearGlobalError();
-                  setSaving(true);
-                  try {
-                    await runAction(() => postAchievement(String(targetUserId), {
+              }}
+              isEditRoute={isEditRoute}
+              selectedAid={selectedAid}
+              setSelectedAid={setSelectedAid}
+              awardDate={awardDate}
+              setAwardDate={setAwardDate}
+              canAward={canAward}
+              assignAchievement={async (
+                targetUserId: number,
+                achievementId: number,
+                awardedAt?: string,
+              ) => {
+                if (!targetUserId) throw new Error("Invalid target");
+                clearGlobalError();
+                setSaving(true);
+                try {
+                  await runAction(() =>
+                    postAchievement(String(targetUserId), {
                       achievementId,
                       awardedAt,
-                    }));
-                    await run(loadMember);
-                  } finally {
-                    setSaving(false);
-                  }
-                }}
-              />
+                    }),
+                  );
+                  await run(loadMember);
+                } finally {
+                  setSaving(false);
+                }
+              }}
+            />
 
-              <RolesManager
-                userId={member?.id}
-                rolesList={rolesList}
-                selectedRoleIds={selectedRoleIds}
-                setSelectedRoleIds={setSelectedRoleIds}
-                canEditRoles={canEdit}
-                isEditRoute={isEditRoute}
-                saveRoles={async (targetUserId: number, ids: number[]) => {
-                  if (!targetUserId) throw new Error("Invalid target");
-                  clearGlobalError();
-                  setSaving(true);
-                  try {
-                    await runAction(() => setRoles(String(targetUserId), ids));
-                    await run(loadMember);
-                  } finally {
-                    setSaving(false);
-                  }
-                }}
-                setGlobalError={setGlobalError}
-                setSaving={setSaving}
-              />
+            <RolesManager
+              userId={member?.id}
+              rolesList={rolesList}
+              selectedRoleIds={selectedRoleIds}
+              setSelectedRoleIds={setSelectedRoleIds}
+              canEditRoles={canEdit}
+              isEditRoute={isEditRoute}
+              saveRoles={async (targetUserId: number, roleIds: number[]) => {
+                if (!targetUserId) throw new Error("Invalid target");
+                clearGlobalError();
+                setSaving(true);
+                try {
+                  await runAction(() => setRoles(String(targetUserId), roleIds));
+                  await run(loadMember);
+                } finally {
+                  setSaving(false);
+                }
+              }}
+              setGlobalError={setGlobalError}
+              setSaving={setSaving}
+            />
 
-              <OfficialsManager
-                user={member}
-                isEditRoute={isEditRoute}
-                selectedIds={selectedOfficialIds ?? undefined}
-                setSelectedIds={setSelectedOfficialIds}
-              />
+            <OfficialsManager
+              user={member}
+              isEditRoute={isEditRoute}
+              selectedIds={selectedOfficialIds ?? undefined}
+              setSelectedIds={setSelectedOfficialIds}
+            />
 
-              <ProfileForm
-                user={member}
-                register={register}
-                errors={errors}
-                isEditRoute={isEditRoute}
-                setPictureFile={setPictureFile}
-                saving={saving}
-              />
-              {isEditRoute ? (
-                <div className="flex items-center gap-x-4 py-4">
-                  <button
-                    type="submit"
-                    className="bg-green-600 hover:bg-green-700 text-sm font-medium transition text-white px-4 py-2 rounded-md"
-                    disabled={saving}
-                  >
-                    {saving ? "Sparar..." : "Spara"}
-                  </button>
-                  {saving && <Spinner />}
-                </div>
-              ) : null}
-            </form>
-          )
-        }
+            <ProfileForm
+              user={member}
+              register={register}
+              errors={errors}
+              isEditRoute={isEditRoute}
+              setPictureFile={setPictureFile}
+              saving={saving}
+            />
+
+            {isEditRoute ? (
+              <div className="flex items-center gap-x-4 py-4">
+                <button
+                  type="submit"
+                  className="bg-green-600 hover:bg-green-700 text-sm font-medium transition text-white px-4 py-2 rounded-md"
+                  disabled={saving}
+                >
+                  {saving ? "Sparar..." : "Spara"}
+                </button>
+              </div>
+            ) : null}
+          </form>
+        )}
       </div>
     </div>
   );
 };
-

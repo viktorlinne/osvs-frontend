@@ -1,6 +1,5 @@
 import { useEffect, useState, useCallback } from "react";
 import { Link } from "react-router-dom";
-import { Spinner } from "../components";
 import { useAuth } from "../context";
 import useFetch from "../hooks/useFetch";
 import type { PublicUser } from "../types";
@@ -9,7 +8,7 @@ import { listLodges } from "../services/lodges";
 import { listUsers as listUsersService } from "../services/users";
 
 export const MembersPage = () => {
-  const { run, loading, data: members } = useFetch<PublicUser[]>();
+  const { run, data: members } = useFetch<PublicUser[]>();
   const { run: runAchievements, data: achievements } = useFetch<
     Array<{ id: number; title: string }>
   >();
@@ -55,13 +54,6 @@ export const MembersPage = () => {
     const t = setTimeout(() => setDebouncedQuery(query), 1000);
     return () => clearTimeout(t);
   }, [query]);
-
-  if (loading)
-    return (
-      <div className="flex justify-center items-center min-h-screen">
-        <Spinner />
-      </div>
-    );
 
   return (
     <div className="flex flex-col items-center min-h-screen p-6">

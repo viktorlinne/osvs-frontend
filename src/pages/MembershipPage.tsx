@@ -3,7 +3,6 @@ import { getMyMemberships } from "../services/";
 import useFetch from "../hooks/useFetch";
 import type { MembershipPayment } from "../types";
 import { Link } from "react-router-dom";
-import { Spinner } from "../components";
 
 export const MembershipPage = () => {
   const { run, loading, data: payments, setData: setPayments } = useFetch<MembershipPayment[]>();
@@ -32,8 +31,6 @@ export const MembershipPage = () => {
     const day = String(dt.getDate()).padStart(2, "0");
     return `${y}-${m}-${day}`;
   }
-
-  if (loading) return <div className="flex justify-center items-center min-h-screen"><Spinner /></div>;
 
   return (
     <div className="max-w-3xl w-full mx-auto p-6 min-h-screen flex flex-col items-center">

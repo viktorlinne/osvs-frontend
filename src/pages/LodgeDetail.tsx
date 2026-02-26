@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { useParams, Link, useLocation, useNavigate } from "react-router-dom";
-import { Spinner } from "../components";
 import useFetch from "../hooks/useFetch";
 import { useError, useAuth } from "../context";
 import type { Lodge } from "../types";
@@ -8,7 +7,7 @@ import { getLodge, updateLodge } from "../services/lodges";
 
 export const LodgeDetail = () => {
   const { id } = useParams<{ id: string }>();
-  const { run, loading, data: lodge } = useFetch<Lodge | null>();
+  const { run, data: lodge } = useFetch<Lodge | null>();
   const { run: runAction, loading: saving } = useFetch<unknown>();
   const { setError: setGlobalError, clearError: clearGlobalError } = useError();
   const { user } = useAuth();
@@ -64,8 +63,6 @@ export const LodgeDetail = () => {
       setGlobalError("Failed to save lodge");
     }
   }
-
-  if (loading) return <div className="flex justify-center items-center min-h-screen"><Spinner /></div>;
 
   return (
     <div className="max-w-3xl w-full mx-auto p-6 min-h-screen">

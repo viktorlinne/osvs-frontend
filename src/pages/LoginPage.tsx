@@ -3,7 +3,6 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/useAuth";
 import { useError } from "../context";
 import useFetch from "../hooks/useFetch";
-import { Spinner } from "../components";
 
 export const LoginPage = () => {
   const { login } = useAuth();
@@ -39,8 +38,6 @@ export const LoginPage = () => {
       setLoading(false);
     }
   };
-
-  if (loading) return <div className="flex justify-center items-center min-h-screen"><Spinner /></div>;
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen">
