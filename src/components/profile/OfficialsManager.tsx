@@ -51,14 +51,15 @@ export const OfficialsManager = ({
   const userOfficials = normalizeOfficialsField(
     (user as UserWithOfficials | undefined)?.officials,
   );
-  const effectiveSelected = selectedIds ?? localSelected ?? userOfficials;
+  const effectiveSelected =
+    selectedIds !== undefined ? selectedIds : localSelected ?? userOfficials;
 
   function toggleOfficial(officialId: number, checked: boolean) {
     const current = effectiveSelected ?? [];
     const next = checked
       ? Array.from(new Set([...current, officialId]))
       : current.filter((id) => id !== officialId);
-    const ids = next.length > 0 ? next : null;
+    const ids = next;
     setLocalSelected(ids);
     if (setSelectedIds) setSelectedIds(ids);
   }
