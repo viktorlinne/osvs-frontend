@@ -5,13 +5,14 @@ import { listPosts, listLodges } from "../services";
 import type { Post, Lodge } from "../types";
 import useFetch from "../hooks/useFetch";
 
-//! TODO add search and filtering
 export const NewsPage = () => {
   const { data: posts, loading, notFound, run } = useFetch<Post[]>();
   const { setError } = useError();
   const [empty, setEmpty] = useState(false);
   const [lodges, setLodges] = useState<Lodge[]>([]);
   const [selectedLodge, setSelectedLodge] = useState<string>("");
+  const [titleQuery, setTitleQuery] = useState("");
+  const [debouncedTitleQuery, setDebouncedTitleQuery] = useState("");
   const { user } = useAuth();
 
   useEffect(() => {
@@ -32,9 +33,24 @@ export const NewsPage = () => {
   }, [setError]);
 
   useEffect(() => {
+    const t = setTimeout(() => setDebouncedTitleQuery(titleQuery), 350);
+    return () => clearTimeout(t);
+  }, [titleQuery]);
+
+  useEffect(() => {
     let mounted = true;
     const lodgeFilter = selectedLodge ? [selectedLodge] : undefined;
-    run(() => listPosts(lodgeFilter ? { lodgeIds: lodgeFilter } : undefined))
+    const hasTitleFilter = debouncedTitleQuery.trim().length > 0;
+    run(() =>
+      listPosts(
+        lodgeFilter || hasTitleFilter
+          ? {
+              lodgeIds: lodgeFilter,
+              title: hasTitleFilter ? debouncedTitleQuery : undefined,
+            }
+          : undefined,
+      ),
+    )
       .then((res) => {
         if (!mounted) return;
         if (!Array.isArray(res)) {
@@ -51,7 +67,7 @@ export const NewsPage = () => {
     return () => {
       mounted = false;
     };
-  }, [run, setError, selectedLodge]);
+  }, [run, setError, selectedLodge, debouncedTitleQuery]);
 
   return (
     <div className="flex flex-col items-center min-h-screen p-6">
@@ -68,6 +84,18 @@ export const NewsPage = () => {
           )}
       </div>
       <div className="w-full max-w-3xl flex flex-col sm:flex-row sm:items-end gap-3 mb-6">
+        <label className="flex flex-col text-sm font-medium text-gray-700" htmlFor="titleSearch">
+          Sök på titel
+          <input
+            id="titleSearch"
+            name="titleSearch"
+            type="search"
+            value={titleQuery}
+            onChange={(e) => setTitleQuery(e.target.value)}
+            placeholder="Sök inläggstitel"
+            className="mt-1 rounded-md border border-gray-300 bg-white px-3 py-2 text-base text-gray-900 shadow-sm focus:border-green-600 focus:outline-none focus:ring-2 focus:ring-green-200"
+          />
+        </label>
         <label className="flex flex-col text-sm font-medium text-gray-700" htmlFor="lodgeFilter">
           Filtrera på loge
           <select

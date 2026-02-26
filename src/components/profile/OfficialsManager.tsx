@@ -108,7 +108,7 @@ export const OfficialsManager = ({
   return (
     <div className="mb-4 w-full flex flex-col items-center">
       <fieldset className="text-center mb-1 w-full">
-        <legend className="block font-medium">Tjänster</legend>
+        <legend className="block font-medium">Aktiva Tjänster</legend>
         {isEditRoute ? (
           <div className="flex flex-col items-center gap-2 py-2 w-full">
             {officials.length > 0 ? (

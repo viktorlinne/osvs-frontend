@@ -3,6 +3,7 @@ import type { Post } from "../types";
 
 type ListPostsParams = {
   lodgeIds?: Array<number | string>;
+  title?: string;
 };
 
 function normalizePost(raw: Post): Post | null {
@@ -33,6 +34,9 @@ export async function listPosts(params?: ListPostsParams): Promise<Post[]> {
       if (value === null || value === undefined || value === "") continue;
       search.append("lodgeId", String(value));
     }
+  }
+  if (typeof params?.title === "string" && params.title.trim().length > 0) {
+    search.set("title", params.title.trim());
   }
   const query = search.toString();
   const url = query ? `/posts?${query}` : "/posts";
