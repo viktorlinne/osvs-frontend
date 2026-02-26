@@ -8,20 +8,21 @@ import { formatEventDisplayDate, toEventDateInputValue } from "./events/dateUtil
 import { getCurrentTimestampMs } from "../utils/time";
 import {
   getEvent,
-  getEventStats,
+  getFood,
   getRsvp,
   linkLodgeEvent,
+  listEventAttendances,
   listEventLodges,
+  patchEventAttendance,
+  setFood,
   setRsvp,
   unlinkLodgeEvent,
   updateEvent,
 } from "../services/events";
 import { listLodges } from "../services/lodges";
-import type { Event as EventRecord, Lodge } from "../types";
+import type { Event as EventRecord, EventAttendanceRow, Lodge } from "../types";
 
-type EventStatsData = {
-  stats: { invited: number; answered: number; going: number };
-};
+type AttendanceField = "rsvp" | "bookFood" | "attended" | "paymentPaid";
 
 export const EventDetail = () => {
   const { id } = useParams<{ id: string }>();
@@ -35,8 +36,15 @@ export const EventDetail = () => {
   const { run: runRsvpFetch, loading: rsvpLoading } = useFetch<{
     rsvp: string | null;
   }>();
-  const { run: runStats, data: statsData, loading: statsLoading } =
-    useFetch<EventStatsData>();
+  const { run: runFoodFetch, loading: foodLoading } = useFetch<{
+    bookFood: boolean | null;
+  }>();
+  const {
+    run: runAttendances,
+    data: attendances,
+    setData: setAttendancesData,
+    loading: attendancesLoading,
+  } = useFetch<EventAttendanceRow[]>();
 
   const { setError: setGlobalError, clearError: clearGlobalError } = useError();
   const { user } = useAuth();
@@ -45,7 +53,7 @@ export const EventDetail = () => {
 
   const isEditRoute = location.pathname.endsWith("/edit");
   const canEdit = Boolean(
-    user && (user.roles ?? []).some((r) => ["Admin", "Editor"].includes(r))
+    user && (user.roles ?? []).some((r) => ["Admin", "Editor"].includes(r)),
   );
   const isAdmin = Boolean(user && (user.roles ?? []).some((r) => r === "Admin"));
 
@@ -60,6 +68,8 @@ export const EventDetail = () => {
   const [originalLinkedIds, setOriginalLinkedIds] = useState<number[]>([]);
   const [linkedIds, setLinkedIds] = useState<number[]>([]);
   const [rsvpStatus, setRsvpStatus] = useState<string | null>(null);
+  const [bookFoodStatus, setBookFoodStatus] = useState<boolean | null>(null);
+  const [attendanceSavingUid, setAttendanceSavingUid] = useState<number | null>(null);
 
   const canRsvp = (() => {
     if (!event?.startDate) return false;
@@ -67,6 +77,13 @@ export const EventDetail = () => {
     if (Number.isNaN(start.getTime())) return false;
     const twoDaysMs = 2 * 24 * 60 * 60 * 1000;
     return start.getTime() - getCurrentTimestampMs() > twoDaysMs;
+  })();
+
+  const canBookFood = (() => {
+    if (!event?.food || !event?.startDate || rsvpStatus !== "going") return false;
+    const start = new Date(event.startDate);
+    if (Number.isNaN(start.getTime())) return false;
+    return start.getTime() > getCurrentTimestampMs();
   })();
 
   useEffect(() => {
@@ -127,21 +144,33 @@ export const EventDetail = () => {
       }).catch(() => {
         // useFetch handles global error presentation
       }),
+      runAttendances(async () => {
+        const response = await listEventAttendances(eventId);
+        const rows =
+          (response as { attendances?: EventAttendanceRow[] })?.attendances ?? [];
+        return Array.isArray(rows) ? rows : [];
+      }).catch(() => {
+        // useFetch handles global error presentation
+      }),
     ];
 
-    if (isAdmin) {
+    if (event.food) {
       requests.push(
-        runStats(async () => {
-          const response = await getEventStats(eventId);
-          return response as EventStatsData;
+        runFoodFetch(async () => {
+          const response = await getFood(eventId);
+          const payload = response as { bookFood: boolean | null };
+          setBookFoodStatus(payload.bookFood ?? null);
+          return payload;
         }).catch(() => {
           // useFetch handles global error presentation
         }),
       );
+    } else {
+      setBookFoodStatus(null);
     }
 
     void Promise.all(requests);
-  }, [event, isAdmin, runLinked, runLodges, runRsvpFetch, runStats]);
+  }, [event, runAttendances, runFoodFetch, runLinked, runLodges, runRsvpFetch]);
 
   async function handleSave() {
     if (!id) {
@@ -215,11 +244,95 @@ export const EventDetail = () => {
     try {
       await runAction(() => setRsvp(eventId, status));
       setRsvpStatus(status);
+      if (status !== "going") setBookFoodStatus(false);
+      await runAttendances(async () => {
+        const response = await listEventAttendances(eventId);
+        const rows =
+          (response as { attendances?: EventAttendanceRow[] })?.attendances ?? [];
+        return Array.isArray(rows) ? rows : [];
+      });
     } catch {
       setGlobalError("Failed to set RSVP");
     }
   }
 
+  async function handleBookFood(value: boolean) {
+    if (!event) return;
+    const eventId = Number(event.id);
+    if (!Number.isFinite(eventId)) return;
+
+    try {
+      const response = await runAction(() => setFood(eventId, value));
+      const payload = response as { bookFood?: boolean };
+      setBookFoodStatus(typeof payload.bookFood === "boolean" ? payload.bookFood : value);
+      await runAttendances(async () => {
+        const rowsResp = await listEventAttendances(eventId);
+        const rows =
+          (rowsResp as { attendances?: EventAttendanceRow[] })?.attendances ?? [];
+        return Array.isArray(rows) ? rows : [];
+      });
+    } catch {
+      setGlobalError("Failed to set food booking");
+    }
+  }
+
+  async function handleAttendanceToggle(
+    uid: number,
+    field: AttendanceField,
+    value: boolean,
+  ) {
+    if (!event || !isAdmin) return;
+
+    const eventId = Number(event.id);
+    if (!Number.isFinite(eventId)) return;
+
+    setAttendanceSavingUid(uid);
+    setAttendancesData((prev) => {
+      if (!Array.isArray(prev)) return prev;
+      return prev.map((row) => {
+        if (row.uid !== uid) return row;
+        const next = { ...row, [field]: value } as EventAttendanceRow;
+        if (field === "rsvp" && !value) next.bookFood = false;
+        if (field === "paymentPaid") {
+          next.paymentStatus = value ? "Paid" : "Pending";
+        }
+        return next;
+      });
+    });
+
+    try {
+      const payload = { [field]: value } as { [K in AttendanceField]?: boolean };
+      const response = await runAction(() =>
+        patchEventAttendance(eventId, uid, payload),
+      );
+      const row = (response as { row?: EventAttendanceRow })?.row;
+      if (row) {
+        setAttendancesData((prev) => {
+          if (!Array.isArray(prev)) return prev;
+          return prev.map((item) => (item.uid === uid ? row : item));
+        });
+      } else {
+        await runAttendances(async () => {
+          const rowsResp = await listEventAttendances(eventId);
+          const rows =
+            (rowsResp as { attendances?: EventAttendanceRow[] })?.attendances ?? [];
+          return Array.isArray(rows) ? rows : [];
+        });
+      }
+    } catch {
+      setGlobalError("Failed to update attendance");
+      await runAttendances(async () => {
+        const rowsResp = await listEventAttendances(eventId);
+        const rows =
+          (rowsResp as { attendances?: EventAttendanceRow[] })?.attendances ?? [];
+        return Array.isArray(rows) ? rows : [];
+      }).catch(() => {
+        // useFetch handles global error presentation
+      });
+    } finally {
+      setAttendanceSavingUid(null);
+    }
+  }
 
   return (
     <div className="max-w-3xl w-full mx-auto p-6 min-h-screen">
@@ -229,7 +342,7 @@ export const EventDetail = () => {
           relative="path"
           className="text-sm text-green-600 hover:text-green-700 hover:underline"
         >
-          ← Tillbaka
+          {"<- Tillbaka"}
         </Link>
         {canEdit && !isEditRoute && (
           <Link
@@ -241,7 +354,7 @@ export const EventDetail = () => {
         )}
       </div>
 
-      <h2 className="text-2xl font-bold mt-4 mb-4">Möte</h2>
+      <h2 className="text-2xl font-bold mt-4 mb-4">Mote</h2>
 
       {event ? (
         <div className="bg-white p-4 rounded-md shadow">
@@ -261,20 +374,26 @@ export const EventDetail = () => {
               event={event}
               userCanRsvp={Boolean(user && canRsvp)}
               onRsvp={handleRsvp}
+              userCanBookFood={Boolean(user && canBookFood)}
+              onBookFood={handleBookFood}
               saving={saving}
               rsvpLoading={rsvpLoading}
               rsvpStatus={rsvpStatus}
+              foodLoading={foodLoading}
+              bookFoodStatus={bookFoodStatus}
               formatDisplayDate={formatEventDisplayDate}
               lodges={lodges}
               originalLinkedIds={originalLinkedIds}
               isAdmin={isAdmin}
-              statsLoading={statsLoading}
-              statsData={statsData}
+              attendancesLoading={attendancesLoading}
+              attendances={attendances}
+              attendanceSavingUid={attendanceSavingUid}
+              onAttendanceToggle={handleAttendanceToggle}
             />
           )}
         </div>
       ) : (
-        <div className="text-gray-500">Ingen mötesdata</div>
+        <div className="text-gray-500">Ingen motesdata</div>
       )}
     </div>
   );

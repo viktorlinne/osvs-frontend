@@ -58,6 +58,13 @@ export type UpdateEventBody = Partial<CreateEventBody>;
 export type LinkLodgeBody = { lodgeId?: number | string | undefined };
 export type RSVPBody = { status?: string };
 export type RsvpApiStatus = string;
+export type FoodBookingBody = { bookFood?: boolean };
+export type PatchEventAttendanceBody = Partial<{
+  rsvp: boolean;
+  bookFood: boolean;
+  attended: boolean;
+  paymentPaid: boolean;
+}>;
 
 export type ListPostsQuery = {
   lodgeId?: string | number | Array<string | number>;

@@ -1,38 +1,53 @@
 import { Link } from "react-router-dom";
-import type { Event as EventRecord, Lodge } from "../../types";
+import type { Event as EventRecord, EventAttendanceRow, Lodge } from "../../types";
+import { AdminAttendances } from "./AdminAttendances";
 
-type EventStats = {
-  stats: { invited: number; answered: number; going: number };
-};
+type AttendanceField = "rsvp" | "bookFood" | "attended" | "paymentPaid";
 
 type Props = {
   event: EventRecord;
   userCanRsvp: boolean;
   onRsvp: (status: "going" | "not-going") => void | Promise<void>;
+  userCanBookFood: boolean;
+  onBookFood: (bookFood: boolean) => void | Promise<void>;
   saving: boolean;
   rsvpLoading: boolean;
   rsvpStatus: string | null;
+  foodLoading: boolean;
+  bookFoodStatus: boolean | null;
   formatDisplayDate: (value?: string) => string;
   lodges: Lodge[] | null | undefined;
   originalLinkedIds: number[];
   isAdmin: boolean;
-  statsLoading: boolean;
-  statsData: EventStats | null | undefined;
+  attendancesLoading: boolean;
+  attendances: EventAttendanceRow[] | null | undefined;
+  attendanceSavingUid: number | null;
+  onAttendanceToggle: (
+    uid: number,
+    field: AttendanceField,
+    value: boolean,
+  ) => void | Promise<void>;
 };
 
 export function EventDetailView({
   event,
   userCanRsvp,
   onRsvp,
+  userCanBookFood,
+  onBookFood,
   saving,
   rsvpLoading,
   rsvpStatus,
+  foodLoading,
+  bookFoodStatus,
   formatDisplayDate,
   lodges,
   originalLinkedIds,
   isAdmin,
-  statsLoading,
-  statsData,
+  attendancesLoading,
+  attendances,
+  attendanceSavingUid,
+  onAttendanceToggle,
 }: Props) {
   return (
     <div>
@@ -57,6 +72,27 @@ export function EventDetailView({
         </div>
       )}
 
+      {event.food && userCanBookFood && (
+        <div className="mb-4">
+          <div className="flex items-center gap-x-4 mb-2">
+            <button
+              className={`px-3 py-2 rounded-md text-white ${bookFoodStatus ? "bg-green-600" : "bg-gray-400"}`}
+              onClick={() => onBookFood(true)}
+              disabled={saving || foodLoading}
+            >
+              Boka mat
+            </button>
+            <button
+              className={`px-3 py-2 rounded-md text-white ${bookFoodStatus === false ? "bg-red-600" : "bg-gray-400"}`}
+              onClick={() => onBookFood(false)}
+              disabled={saving || foodLoading}
+            >
+              Boka inte mat
+            </button>
+          </div>
+        </div>
+      )}
+
       <div className="mb-2">
         <strong>Titel:</strong> {event.title}
       </div>
@@ -73,7 +109,10 @@ export function EventDetailView({
         <strong>Pris:</strong> {event.price} kr
       </div>
       <div className="mb-2">
-        <strong>Logemöte:</strong> {event.lodgeMeeting ? "Ja" : "Nej"}
+        <strong>Mat:</strong> {event.food ? "Ja" : "Nej"}
+      </div>
+      <div className="mb-2">
+        <strong>Logemote:</strong> {event.lodgeMeeting ? "Ja" : "Nej"}
       </div>
 
       <div className="mb-2">
@@ -97,27 +136,15 @@ export function EventDetailView({
         )}
       </div>
 
-      {isAdmin && (
-        <div className="mb-2">
-          <strong>Statistik:</strong>
-          {statsLoading ? (
-            <div className="text-sm text-gray-500 mt-1">Läser statistik…</div>
-          ) : statsData && statsData.stats ? (
-            <div className="mt-1 text-sm text-gray-700">
-              <div>Inbjudna: {statsData.stats.invited}</div>
-              <div>Besvarat: {statsData.stats.answered}</div>
-              <div>Kommer: {statsData.stats.going}</div>
-            </div>
-          ) : (
-            <div className="text-sm text-gray-500 mt-1">
-              Ingen statistik tillgänglig
-            </div>
-          )}
-        </div>
-      )}
+      <AdminAttendances
+        rows={attendances}
+        loading={attendancesLoading}
+        isAdmin={isAdmin}
+        savingUid={attendanceSavingUid}
+        onToggle={onAttendanceToggle}
+      />
     </div>
   );
 }
 
 export default EventDetailView;
-

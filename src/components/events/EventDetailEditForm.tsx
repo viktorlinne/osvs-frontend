@@ -31,6 +31,9 @@ export function EventDetailEditForm({
   saving,
   cancelTo,
 }: Props) {
+  const foodPreview =
+    Number.isFinite(Number(form.price)) && Number(form.price) > 0 ? 1 : 0;
+
   return (
     <div className="space-y-4">
       <div>
@@ -115,7 +118,7 @@ export function EventDetailEditForm({
         </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div>
           <label htmlFor="price" className="block text-sm font-medium mb-1">
             Pris
@@ -126,6 +129,18 @@ export function EventDetailEditForm({
             value={form.price}
             onChange={(e) => setForm({ ...form, price: e.target.value })}
             className="w-full border rounded-md px-3 py-2"
+          />
+        </div>
+        <div>
+          <label htmlFor="foodPreview" className="block text-sm font-medium mb-1">
+            Mat (auto)
+          </label>
+          <input
+            id="foodPreview"
+            name="foodPreview"
+            value={String(foodPreview)}
+            className="w-full border rounded-md px-3 py-2 bg-gray-100"
+            readOnly
           />
         </div>
         <div className="flex items-center gap-x-4 py-2">
@@ -161,4 +176,3 @@ export function EventDetailEditForm({
 }
 
 export default EventDetailEditForm;
-
