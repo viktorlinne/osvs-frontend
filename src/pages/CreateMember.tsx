@@ -190,7 +190,7 @@ export const CreateMember = () => {
           </label>
 
           <input
-            placeholder="Jobb"
+            placeholder="Jobb eller tidigare sysselsättning"
             type="text"
             {...register("work")}
             className="w-full px-4 py-2 border"

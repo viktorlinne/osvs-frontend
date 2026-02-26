@@ -53,43 +53,61 @@ export const OfficialsManager = ({
   );
   const effectiveSelected = selectedIds ?? localSelected ?? userOfficials;
 
-  function onChange(e: React.ChangeEvent<HTMLSelectElement>) {
-    const opts = Array.from(e.target.selectedOptions).map((o) => Number(o.value));
-    const ids = opts.length > 0 ? opts : null;
+  function toggleOfficial(officialId: number, checked: boolean) {
+    const current = effectiveSelected ?? [];
+    const next = checked
+      ? Array.from(new Set([...current, officialId]))
+      : current.filter((id) => id !== officialId);
+    const ids = next.length > 0 ? next : null;
     setLocalSelected(ids);
     if (setSelectedIds) setSelectedIds(ids);
   }
 
   return (
-    <fieldset className="text-center mb-1 w-full">
-      <legend className="block font-medium">Tjänster</legend>
-      {isEditRoute ? (
-        <div className="flex flex-col md:flex-row items-center justify-center gap-2 py-2 w-full">
-          <select
-            id="officials"
-            name="officials"
-            multiple
-            value={effectiveSelected ? effectiveSelected.map(String) : []}
-            onChange={onChange}
-            className="border rounded-md px-3 py-2 w-full md:w-auto"
-          >
-            {officials.map((o) => (
-              <option key={o.id} value={o.id}>
-                {o.title}
-              </option>
-            ))}
-          </select>
-        </div>
-      ) : (
-        <div className="text-sm text-gray-700 mb-4">
-          {effectiveSelected && effectiveSelected.length > 0
-            ? effectiveSelected
-              .map((id) => officials.find((o) => o.id === id)?.title ?? "")
-              .filter(Boolean)
-              .join(", ")
-            : "Ingen tjänst"}
-        </div>
-      )}
-    </fieldset>
+    <div className="mb-4 w-full flex flex-col items-center">
+      <fieldset className="text-center mb-1 w-full">
+        <legend className="block font-medium">Tjänster</legend>
+        {isEditRoute ? (
+          <div className="flex flex-col items-center gap-2 py-2 w-full">
+            {officials.length > 0 ? (
+              <div className="border rounded-md px-3 py-2 w-full md:w-[28rem] max-h-48 overflow-y-auto bg-white">
+                <div className="flex flex-col gap-2">
+                  {officials.map((o) => (
+                    <label
+                      key={o.id}
+                      htmlFor={`official-${o.id}`}
+                      className="inline-flex items-center gap-2"
+                    >
+                      <input
+                        id={`official-${o.id}`}
+                        name="officials"
+                        type="checkbox"
+                        value={o.id}
+                        checked={effectiveSelected?.includes(o.id) ?? false}
+                        onChange={(event) =>
+                          toggleOfficial(o.id, event.target.checked)
+                        }
+                      />
+                      <span className="text-sm text-gray-700">{o.title}</span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+            ) : (
+              <div className="text-sm text-gray-500 py-2">Inga tjänster</div>
+            )}
+          </div>
+        ) : (
+          <div className="text-sm text-gray-700 mb-4 py-2">
+            {effectiveSelected && effectiveSelected.length > 0
+              ? effectiveSelected
+                  .map((id) => officials.find((o) => o.id === id)?.title ?? "")
+                  .filter(Boolean)
+                  .join(", ")
+              : "Ingen tjänst"}
+          </div>
+        )}
+      </fieldset>
+    </div>
   );
 };

@@ -42,38 +42,51 @@ export function LodgeSelection({
   }
 
   const hasLodges = Array.isArray(lodges) && lodges.length > 0;
+  const rootClassName = ["mb-4 w-full flex flex-col items-center", className]
+    .filter(Boolean)
+    .join(" ");
 
   return (
-    <div className={`flex flex-col gap-2 ${className}`}>
-      <label className="block text-sm font-medium" htmlFor={name}>
-        {label}
-      </label>
-      <div
-        id={name}
-        className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 max-h-48 overflow-auto px-4 py-2 border rounded-md bg-gray-50"
-      >
-        {hasLodges &&
-          lodges!.map((lodge) => {
-            const value = String(lodge.id);
-            return (
-              <label key={lodge.id} className="flex items-center gap-x-3 py-2">
-                <input
-                  type="checkbox"
-                  name={name}
-                  value={value}
-                  checked={normalizedSelected.includes(value)}
-                  disabled={disabled}
-                  onChange={(event) => toggle(lodge.id, event.target.checked)}
-                />
-                <span className="text-sm">{lodge.name}</span>
-              </label>
-            );
-          })}
-        {!hasLodges && !loading && (
-          <div className="text-sm text-gray-500">{emptyLabel}</div>
-        )}
-        {loading && <div className="text-sm text-gray-500">Laddar loger…</div>}
-      </div>
+    <div className={rootClassName}>
+      <fieldset className="text-center mb-1 w-full">
+        <legend className="block font-medium">{label}</legend>
+        <div
+          id={name}
+          className="flex flex-col md:flex-row md:flex-wrap gap-2 py-2 w-full"
+        >
+          {hasLodges &&
+            lodges!.map((lodge) => {
+              const value = String(lodge.id);
+              const inputId = `${name}-${lodge.id}`;
+              return (
+                <label
+                  key={lodge.id}
+                  htmlFor={inputId}
+                  className={`inline-flex items-center gap-2 border rounded-md px-3 py-2 ${
+                    disabled ? "opacity-60" : ""
+                  }`}
+                >
+                  <input
+                    id={inputId}
+                    type="checkbox"
+                    name={name}
+                    value={value}
+                    checked={normalizedSelected.includes(value)}
+                    disabled={disabled}
+                    onChange={(event) => toggle(lodge.id, event.target.checked)}
+                  />
+                  <span className="text-sm text-gray-700">{lodge.name}</span>
+                </label>
+              );
+            })}
+          {!hasLodges && !loading && (
+            <div className="text-sm text-gray-500 py-2">{emptyLabel}</div>
+          )}
+          {loading && (
+            <div className="text-sm text-gray-500 py-2">Laddar loger...</div>
+          )}
+        </div>
+      </fieldset>
     </div>
   );
 }
