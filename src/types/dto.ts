@@ -71,12 +71,6 @@ export type CreatePostBody = {
 
 export type UpdatePostBody = Partial<CreatePostBody>;
 
-export type CreateMailBody = {
-  lid?: number | string;
-  title?: string;
-  content?: string;
-};
-
 export type CreateCheckoutBody = {
   price_id?: string;
   quantity?: number | string;
@@ -86,10 +80,7 @@ export type CreateMembershipBody = { year?: number; amount?: number };
 export type CreateEventPaymentBody = Record<string, unknown>;
 
 export type LoginBody = { email?: string; password?: string };
-export type ForgotPasswordBody = { email?: string };
-export type ResetPasswordBody = { token?: string; password?: string };
 export type RegisterBody = {
-  username?: string;
   email?: string;
   password?: string;
   firstname?: string;
@@ -104,4 +95,3 @@ export type RegisterBody = {
   notes?: string | null;
   lodgeId?: string | number | null;
 };
-

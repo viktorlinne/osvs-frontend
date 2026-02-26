@@ -25,9 +25,7 @@ export const CreateMember = () => {
     setError: setFieldError,
     formState: { errors },
   } = useForm<RegisterForm>({
-    defaultValues: {
-      username: "",
-      email: "",
+    defaultValues: {      email: "",
       password: "",
       firstname: "",
       lastname: "",
@@ -60,7 +58,6 @@ export const CreateMember = () => {
     setLoading(true);
     try {
       const fd = new FormData();
-      fd.append("username", String(values.username ?? "").trim());
       fd.append("email", String(values.email ?? "").trim());
       fd.append("password", String(values.password ?? ""));
       fd.append("firstname", String(values.firstname ?? "").trim());
@@ -155,12 +152,6 @@ export const CreateMember = () => {
         )}
 
         <form className="bg-white p-4 rounded-md shadow space-y-3">
-          <input
-            placeholder="Användarnamn"
-            {...register("username")}
-            className="w-full px-4 py-2 border"
-          />
-
           <input
             placeholder="Email"
             {...register("email")}
@@ -289,3 +280,4 @@ export const CreateMember = () => {
     </div>
   );
 };
+

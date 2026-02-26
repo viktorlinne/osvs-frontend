@@ -5,6 +5,7 @@ import type { EventFormState } from "../components/events/EventDetailEditForm";
 import { useAuth, useError } from "../context";
 import useFetch from "../hooks/useFetch";
 import { formatEventDisplayDate, toEventDateInputValue } from "./events/dateUtils";
+import { getCurrentTimestampMs } from "../utils/time";
 import {
   getEvent,
   getEventStats,
@@ -30,9 +31,10 @@ export const EventDetail = () => {
   } = useFetch<EventRecord | null>();
   const { run: runAction, loading: saving } = useFetch<unknown>();
   const { run: runLodges, data: lodges } = useFetch<Lodge[]>();
-  const { run: runLinked, data: linkedLodges } = useFetch<Lodge[]>();
-  const { run: runRsvpFetch, data: rsvpData, loading: rsvpLoading } =
-    useFetch<{ rsvp: string | null }>();
+  const { run: runLinked } = useFetch<Lodge[]>();
+  const { run: runRsvpFetch, loading: rsvpLoading } = useFetch<{
+    rsvp: string | null;
+  }>();
   const { run: runStats, data: statsData, loading: statsLoading } =
     useFetch<EventStatsData>();
 
@@ -64,7 +66,7 @@ export const EventDetail = () => {
     const start = new Date(event.startDate);
     if (Number.isNaN(start.getTime())) return false;
     const twoDaysMs = 2 * 24 * 60 * 60 * 1000;
-    return start.getTime() - Date.now() > twoDaysMs;
+    return start.getTime() - getCurrentTimestampMs() > twoDaysMs;
   })();
 
   useEffect(() => {
@@ -75,24 +77,23 @@ export const EventDetail = () => {
 
     run(async () => {
       const response = await getEvent(id);
-      return (response as { event?: EventRecord })?.event ?? null;
+      const fetchedEvent = (response as { event?: EventRecord })?.event ?? null;
+      if (fetchedEvent) {
+        setForm({
+          title: fetchedEvent.title ?? "",
+          description: fetchedEvent.description ?? "",
+          startDate: toEventDateInputValue(fetchedEvent.startDate),
+          endDate: toEventDateInputValue(fetchedEvent.endDate),
+          price:
+            fetchedEvent.price != null ? String(fetchedEvent.price) : "",
+          lodgeMeeting: Boolean(fetchedEvent.lodgeMeeting),
+        });
+      }
+      return fetchedEvent;
     }).catch(() => {
       // useFetch handles global error presentation
     });
   }, [id, run, setGlobalError]);
-
-  useEffect(() => {
-    if (!event) return;
-
-    setForm({
-      title: event.title ?? "",
-      description: event.description ?? "",
-      startDate: toEventDateInputValue(event.startDate),
-      endDate: toEventDateInputValue(event.endDate),
-      price: event.price != null ? String(event.price) : "",
-      lodgeMeeting: Boolean(event.lodgeMeeting),
-    });
-  }, [event, isEditRoute]);
 
   useEffect(() => {
     if (!event) return;
@@ -108,13 +109,21 @@ export const EventDetail = () => {
         const linkedResp = await listEventLodges(eventId);
         const linked =
           (linkedResp as { lodges?: Lodge[] })?.lodges ?? linkedResp ?? [];
-        return Array.isArray(linked) ? linked : [];
+        const linkedArray = Array.isArray(linked) ? linked : [];
+        const parsedIds = linkedArray
+          .map((lodge) => Number(lodge.id))
+          .filter((value) => Number.isFinite(value));
+        setOriginalLinkedIds(parsedIds);
+        setLinkedIds(parsedIds);
+        return linkedArray;
       }).catch(() => {
         // useFetch handles global error presentation
       }),
       runRsvpFetch(async () => {
         const response = await getRsvp(eventId);
-        return response as { rsvp: string | null };
+        const payload = response as { rsvp: string | null };
+        setRsvpStatus(payload.rsvp ?? null);
+        return payload;
       }).catch(() => {
         // useFetch handles global error presentation
       }),
@@ -133,20 +142,6 @@ export const EventDetail = () => {
 
     void Promise.all(requests);
   }, [event, isAdmin, runLinked, runLodges, runRsvpFetch, runStats]);
-
-  useEffect(() => {
-    const linked = Array.isArray(linkedLodges) ? linkedLodges : [];
-    const parsedIds = linked
-      .map((lodge) => Number(lodge.id))
-      .filter((value) => Number.isFinite(value));
-
-    setOriginalLinkedIds(parsedIds);
-    setLinkedIds(parsedIds);
-
-    if (rsvpData && typeof rsvpData === "object") {
-      setRsvpStatus((rsvpData as { rsvp?: string | null }).rsvp ?? null);
-    }
-  }, [linkedLodges, rsvpData]);
 
   async function handleSave() {
     if (!id) {
@@ -190,7 +185,19 @@ export const EventDetail = () => {
 
       await run(async () => {
         const response = await getEvent(id);
-        return (response as { event?: EventRecord }).event ?? null;
+        const fetchedEvent = (response as { event?: EventRecord }).event ?? null;
+        if (fetchedEvent) {
+          setForm({
+            title: fetchedEvent.title ?? "",
+            description: fetchedEvent.description ?? "",
+            startDate: toEventDateInputValue(fetchedEvent.startDate),
+            endDate: toEventDateInputValue(fetchedEvent.endDate),
+            price:
+              fetchedEvent.price != null ? String(fetchedEvent.price) : "",
+            lodgeMeeting: Boolean(fetchedEvent.lodgeMeeting),
+          });
+        }
+        return fetchedEvent;
       });
 
       navigate(`/events/${id}`);

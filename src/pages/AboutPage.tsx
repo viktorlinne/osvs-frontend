@@ -24,7 +24,7 @@ export const AboutPage = () => {
             <ul className="list-disc list-inside text-sm text-gray-600 space-y-1">
               <li>Stamlogen i Karskrona bildad 7 september 1924</li>
               <li>Logen Stella Polaris i Helsingborg 21 mars 1931</li>
-              <li>Logen Regulus i Ångelholm 15 januari 1933</li>
+              <li>Logen Regulus i Ängelholm 15 januari 1933</li>
               <li>Logen Orion i Göteborg bildad 26 februari 1943</li>
               <li>Logen Capella i Halmstad 28 november 1975</li>
             </ul>

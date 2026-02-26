@@ -90,7 +90,7 @@ const routes = [
         ),
       },
       {
-        path: "members/:id",
+        path: "members/:matrikelnummer",
         element: (
           <AuthGuard>
             <MemberDetail />
@@ -98,7 +98,7 @@ const routes = [
         ),
       },
       {
-        path: "members/:id/edit",
+        path: "members/:matrikelnummer/edit",
         element: (
           <AuthGuard roles={["Admin", "Editor"]}>
             <MemberDetail />

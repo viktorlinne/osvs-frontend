@@ -20,10 +20,10 @@ export async function updateMe(payload: Record<string, unknown>) {
 }
 
 export async function adminUpdateUser(
-  id: number | string,
+  matrikelnummer: number | string,
   payload: Record<string, unknown>,
 ) {
-  return fetchData(api.put(`/users/${id}`, payload));
+  return fetchData(api.put(`/users/${matrikelnummer}`, payload));
 }
 
 export async function uploadMyPicture(file: File) {
@@ -32,10 +32,13 @@ export async function uploadMyPicture(file: File) {
   return fetchData(api.post("/users/me/picture", fd));
 }
 
-export async function uploadUserPicture(id: number | string, file: File) {
+export async function uploadUserPicture(
+  matrikelnummer: number | string,
+  file: File,
+) {
   const fd = new FormData();
   fd.append("picture", file);
-  return fetchData(api.post(`/users/${id}/picture`, fd));
+  return fetchData(api.post(`/users/${matrikelnummer}/picture`, fd));
 }
 
 export async function listUsers(
@@ -56,9 +59,9 @@ export async function listUsers(
 }
 
 export async function getPublicUserById(
-  id: number | string,
+  matrikelnummer: number | string,
 ): Promise<PublicUserDetailResponse> {
-  const res = await fetchData(api.get(`/users/${id}`));
+  const res = await fetchData(api.get(`/users/${matrikelnummer}`));
   const payload = res as {
     user?: PublicUser | null;
     achievements?: Achievement[];
@@ -73,35 +76,40 @@ export async function getPublicUserById(
   };
 }
 
-export async function getUserRoles(id: number | string): Promise<string[]> {
-  const res = await fetchData(api.get(`/users/${id}/roles`));
+export async function getUserRoles(
+  matrikelnummer: number | string,
+): Promise<string[]> {
+  const res = await fetchData(api.get(`/users/${matrikelnummer}/roles`));
   const roles = (res as { roles?: unknown[] })?.roles;
   if (!Array.isArray(roles)) return [];
   return roles.filter((role): role is string => typeof role === "string");
 }
 
 export async function getUserLodge(
-  id: number | string,
+  matrikelnummer: number | string,
 ): Promise<UserLodgeResponse> {
-  return fetchData<UserLodgeResponse>(api.get(`/users/${id}/lodges`));
+  return fetchData<UserLodgeResponse>(api.get(`/users/${matrikelnummer}/lodges`));
 }
 
 export async function setUserLodge(
-  id: number | string,
+  matrikelnummer: number | string,
   lodgeId: number | null,
 ) {
-  return fetchData(api.post(`/users/${id}/lodges`, { lodgeId }));
+  return fetchData(api.post(`/users/${matrikelnummer}/lodges`, { lodgeId }));
 }
 
-export async function setRoles(id: number | string, roleIds: number[]) {
-  return fetchData(api.post(`/users/${id}/roles`, { roleIds }));
+export async function setRoles(
+  matrikelnummer: number | string,
+  roleIds: number[],
+) {
+  return fetchData(api.post(`/users/${matrikelnummer}/roles`, { roleIds }));
 }
 
 export async function postAchievement(
-  id: number | string,
+  matrikelnummer: number | string,
   payload: { achievementId: number; awardedAt?: string },
 ) {
-  return fetchData(api.post(`/users/${id}/achievements`, payload));
+  return fetchData(api.post(`/users/${matrikelnummer}/achievements`, payload));
 }
 
 export default {

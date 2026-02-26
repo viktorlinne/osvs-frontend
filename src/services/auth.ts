@@ -1,6 +1,8 @@
 import api, { fetchData } from "./api";
 import type { AuthUser, LoginPayload } from "../types";
 
+type OfficialPayload = { id?: unknown };
+
 function mergeAuthResponse(res: unknown): AuthUser | null {
   if (res == null) return null;
   if (typeof res !== "object") return null;
@@ -43,11 +45,14 @@ function mergeAuthResponse(res: unknown): AuthUser | null {
     ? (rawUser.officials as unknown[])
     : undefined;
   if (result && Array.isArray(rawOfficials)) {
-    (result as any).officials = rawOfficials
-      .map((o) =>
-        typeof o === "object" ? Number((o as any).id ?? (o as any)) : Number(o)
-      )
-      .filter((n) => Number.isFinite(n));
+    result.officials = rawOfficials
+      .map((o) => {
+        if (typeof o === "object" && o !== null && "id" in o) {
+          return Number((o as OfficialPayload).id);
+        }
+        return Number(o);
+      })
+      .filter((n): n is number => Number.isFinite(n));
   }
   return result;
 }

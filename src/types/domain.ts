@@ -14,8 +14,7 @@ export type Lodge = {
 };
 
 export type User = {
-  id: number;
-  username: string;
+  matrikelnummer: number;
   email: string;
   passwordHash: string;
   createdAt: string;
@@ -56,8 +55,6 @@ export type Event = {
   endDate: string;
 };
 
-export type Mail = { id: number; lid: number; title: string; content: string };
-
 export type Achievement = {
   id: number;
   title: "I:a Graden" | "II:a Graden" | "III:e Graden" | string;
@@ -88,14 +85,6 @@ export type EventsAttendance = {
   rsvp: boolean;
 };
 
-export type UsersMail = {
-  uid: number;
-  mid: number;
-  sentAt: string;
-  isRead: boolean;
-  delivered: boolean;
-};
-
 export type MembershipPayment = {
   id: number;
   uid: number;
@@ -124,10 +113,3 @@ export type RefreshToken = {
   replacedBy?: string | null;
   lastUsed?: string | null;
 };
-export type PasswordReset = {
-  token_hash: string;
-  uid: number;
-  expiresAt: string;
-  createdAt: string;
-};
-

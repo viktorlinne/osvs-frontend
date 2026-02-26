@@ -126,7 +126,7 @@ export const Profile = () => {
         await run(() => uploadMyPicture(pictureFile));
       }
 
-      const userId = user?.id;
+      const userId = user?.matrikelnummer;
       if (userId) {
         try {
           if (Array.isArray(selectedRoleIds) && selectedRoleIds.length > 0) {
@@ -229,7 +229,7 @@ export const Profile = () => {
           />
 
           <RolesManager
-            userId={user?.id}
+            userId={user?.matrikelnummer}
             rolesList={rolesList}
             selectedRoleIds={selectedRoleIds}
             setSelectedRoleIds={setSelectedRoleIds}
@@ -272,3 +272,4 @@ export const Profile = () => {
     </div>
   );
 };
+

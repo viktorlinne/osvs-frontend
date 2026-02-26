@@ -64,7 +64,7 @@ function mapMemberRoleNames(member: PublicUser | null): string[] {
 }
 
 export const MemberDetail = () => {
-  const { id } = useParams<{ id: string }>();
+  const { matrikelnummer } = useParams<{ matrikelnummer: string }>();
   const {
     run,
     data: member,
@@ -125,9 +125,9 @@ export const MemberDetail = () => {
   });
 
   const loadMember = useCallback(async () => {
-    if (!id) throw new Error("Missing id");
+    if (!matrikelnummer) throw new Error("Missing matrikelnummer");
 
-    const detail = await getPublicUserById(id);
+    const detail = await getPublicUserById(matrikelnummer);
     setAchievements(Array.isArray(detail.achievements) ? detail.achievements : []);
 
     let userObj: PublicUser | null = detail.user
@@ -135,7 +135,7 @@ export const MemberDetail = () => {
       : null;
     if (userObj && !Array.isArray((userObj as { roles?: unknown }).roles)) {
       try {
-        const roles = await getUserRoles(id);
+        const roles = await getUserRoles(matrikelnummer);
         userObj = {
           ...(userObj as Record<string, unknown>),
           roles,
@@ -146,11 +146,11 @@ export const MemberDetail = () => {
     }
 
     return userObj;
-  }, [id]);
+  }, [matrikelnummer]);
 
   useEffect(() => {
-    if (!id) {
-      setGlobalError("Saknar medlems-id");
+    if (!matrikelnummer) {
+      setGlobalError("Saknar matrikelnummer");
       return;
     }
 
@@ -178,14 +178,14 @@ export const MemberDetail = () => {
         });
     }
 
-    runUserLodge(() => getUserLodge(id))
+    runUserLodge(() => getUserLodge(matrikelnummer))
       .then((current) => setSelectedLid(current?.lodge ? Number(current.lodge.id) : null))
       .catch(() => {
         // useFetch handles global error
       });
   }, [
     canEdit,
-    id,
+    matrikelnummer,
     loadMember,
     run,
     runAvailable,
@@ -239,8 +239,8 @@ export const MemberDetail = () => {
     setSaving(true);
 
     try {
-      if (!id) throw new Error("Missing id");
-      const userId = id;
+      if (!matrikelnummer) throw new Error("Missing matrikelnummer");
+      const userId = matrikelnummer;
 
       await runAction(() => adminUpdateUser(userId, toUserProfileUpdatePayload(values)));
 
@@ -286,7 +286,7 @@ export const MemberDetail = () => {
       }
 
       await run(loadMember);
-      navigate(`/members/${id}`, { replace: true });
+      navigate(`/members/${matrikelnummer}`, { replace: true });
     } catch (error: unknown) {
       const missing = extractMissingFields(error);
       if (missing) {
@@ -318,7 +318,7 @@ export const MemberDetail = () => {
           </Link>
           {canEdit && !isEditRoute && (
             <Link
-              to={`/members/${id}/edit`}
+              to={`/members/${matrikelnummer}/edit`}
               className="text-sm font-medium text-white bg-green-600 hover:bg-green-700 transition px-3 py-2 rounded-md"
             >
               Redigera
@@ -385,7 +385,7 @@ export const MemberDetail = () => {
             />
 
             <RolesManager
-              userId={member?.id}
+              userId={member?.matrikelnummer}
               rolesList={rolesList}
               selectedRoleIds={selectedRoleIds}
               setSelectedRoleIds={setSelectedRoleIds}

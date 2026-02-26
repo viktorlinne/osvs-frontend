@@ -36,8 +36,8 @@ export const useProfile = () => {
 
     (async () => {
       try {
-        if (user?.id) {
-          const cur = await getUserLodge(user.id);
+        if (user?.matrikelnummer) {
+          const cur = await getUserLodge(user.matrikelnummer);
           if (cur && cur.lodge) setLodge(cur.lodge);
         }
 
@@ -88,7 +88,7 @@ export const useProfile = () => {
     return () => {
       mounted = false;
     };
-  }, [user?.id, user?.roles, canEditRoles]);
+  }, [user?.matrikelnummer, user?.roles, canEditRoles]);
 
   async function assignAchievement(
     targetUserId: number,

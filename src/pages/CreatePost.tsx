@@ -2,12 +2,11 @@ import { useEffect, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { createPost, listLodges } from "../services";
 import useFetch from "../hooks/useFetch";
-import LodgeSelection, {
-  normalizeLodgeIds,
-} from "../components/LodgeSelection";
+import LodgeSelection from "../components/LodgeSelection";
+import { normalizeLodgeIds } from "../components/lodgeSelectionUtils";
 import { useError } from "../context";
 import type { CreatePostForm, Lodge } from "../types";
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 
 export const CreatePost = () => {
   const { clearError: clearGlobalError, setError: setGlobalError } = useError();
@@ -23,11 +22,11 @@ export const CreatePost = () => {
     formState: { errors },
     setError: setFieldError,
     setValue,
-    watch,
+    control,
   } = useForm<CreatePostForm>({
     defaultValues: { title: "", description: "", lodgeIds: [] },
   });
-  const watchedLodges = watch("lodgeIds") ?? [];
+  const watchedLodges = useWatch({ control, name: "lodgeIds" }) ?? [];
 
   useEffect(() => {
     register("lodgeIds");

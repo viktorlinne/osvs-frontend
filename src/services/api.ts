@@ -26,7 +26,7 @@ type RetriableRequestConfig = AxiosRequestConfig & {
 
 function isAuthFlowRequest(config?: AxiosRequestConfig): boolean {
   const url = String(config?.url ?? "");
-  return /\/auth\/(login|refresh|forgot-password|reset-password)\b/.test(url);
+  return /\/auth\/(login|refresh)\b/.test(url);
 }
 
 // Minimal refresh strategy: on first 401 we POST to `/auth/refresh`

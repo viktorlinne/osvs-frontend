@@ -12,6 +12,7 @@ export type PublicUser = PublicUserBase;
 export type AuthUser = PublicUser & {
   roles?: string[];
   achievements?: Achievement[] | null;
+  officials?: number[];
 };
 
 export type LoginPayload = LoginBody;
@@ -26,4 +27,3 @@ export type ApiError = {
   status?: number;
   details?: unknown;
 };
-

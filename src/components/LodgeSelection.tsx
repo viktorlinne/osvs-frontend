@@ -1,5 +1,6 @@
 import { useMemo } from "react";
 import type { Lodge } from "../types";
+import { normalizeLodgeIds } from "./lodgeSelectionUtils";
 
 export type LodgeSelectionProps = {
   lodges?: Lodge[] | null;
@@ -74,20 +75,6 @@ export function LodgeSelection({
         {loading && <div className="text-sm text-gray-500">Laddar loger…</div>}
       </div>
     </div>
-  );
-}
-
-export function normalizeLodgeIds(
-  input?: Array<string | number> | string | number | null,
-): string[] {
-  if (input == null) return [];
-  const raw = Array.isArray(input) ? input : [input];
-  return Array.from(
-    new Set(
-      raw
-        .map((value) => String(value ?? "").trim())
-        .filter((value) => value.length > 0),
-    ),
   );
 }
 

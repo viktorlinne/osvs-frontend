@@ -3,6 +3,7 @@ import type { PublicUser } from "../../types";
 import { listOfficials } from "../../services/officials";
 
 type Official = { id: number; title: string };
+type UserWithOfficials = PublicUser & { officials?: unknown };
 
 export const OfficialsManager = ({
   user,
@@ -20,18 +21,16 @@ export const OfficialsManager = ({
 
   // Normalize various shapes of `user.officials` into an array of numeric ids
   function normalizeOfficialsField(field: unknown): number[] | null {
-    if (!field) return null;
-    if (!Array.isArray(field)) return null;
-    if (field.length === 0) return null;
-    const first = field[0];
-    if (typeof first === "object") {
-      return (field as any[])
-        .map((o) => Number((o && (o as any).id) ?? o))
-        .filter((n) => Number.isFinite(n));
-    }
-    return (field as any[])
-      .map((v) => Number(v))
-      .filter((n) => Number.isFinite(n));
+    if (!Array.isArray(field) || field.length === 0) return null;
+    const ids = field
+      .map((item) => {
+        if (typeof item === "object" && item !== null && "id" in item) {
+          return Number((item as { id?: unknown }).id);
+        }
+        return Number(item);
+      })
+      .filter((value): value is number => Number.isFinite(value));
+    return ids.length > 0 ? ids : null;
   }
 
   useEffect(() => {
@@ -49,23 +48,13 @@ export const OfficialsManager = ({
     };
   }, []);
 
-  useEffect(() => {
-    if (typeof selectedIds !== "undefined")
-      setLocalSelected(selectedIds ?? null);
-  }, [selectedIds]);
-
-  useEffect(() => {
-    // If parent controls `selectedIds`, don't override from `user`.
-    if (typeof selectedIds !== "undefined") return;
-    const u = user as any;
-    const ids = normalizeOfficialsField(u?.officials);
-    setLocalSelected(ids);
-  }, [user, selectedIds]);
+  const userOfficials = normalizeOfficialsField(
+    (user as UserWithOfficials | undefined)?.officials,
+  );
+  const effectiveSelected = selectedIds ?? localSelected ?? userOfficials;
 
   function onChange(e: React.ChangeEvent<HTMLSelectElement>) {
-    const opts = Array.from(e.target.selectedOptions).map((o) =>
-      Number(o.value)
-    );
+    const opts = Array.from(e.target.selectedOptions).map((o) => Number(o.value));
     const ids = opts.length > 0 ? opts : null;
     setLocalSelected(ids);
     if (setSelectedIds) setSelectedIds(ids);
@@ -80,7 +69,7 @@ export const OfficialsManager = ({
             id="officials"
             name="officials"
             multiple
-            value={localSelected ? localSelected.map(String) : []}
+            value={effectiveSelected ? effectiveSelected.map(String) : []}
             onChange={onChange}
             className="border rounded-md px-3 py-2 w-full md:w-auto"
           >
@@ -93,8 +82,8 @@ export const OfficialsManager = ({
         </div>
       ) : (
         <div className="text-sm text-gray-700 mb-4">
-          {localSelected && localSelected.length > 0
-            ? localSelected
+          {effectiveSelected && effectiveSelected.length > 0
+            ? effectiveSelected
               .map((id) => officials.find((o) => o.id === id)?.title ?? "")
               .filter(Boolean)
               .join(", ")

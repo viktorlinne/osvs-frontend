@@ -4,7 +4,6 @@ export * from "./auth";
 export * from "./events";
 export * from "./globalAuth";
 export * from "./lodges";
-export * from "./mails";
 export * from "./posts";
 export * from "./payments";
 export * from "./users";

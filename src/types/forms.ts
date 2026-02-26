@@ -21,7 +21,6 @@ export type CreatePostForm = {
 export type UpdatePostForm = CreatePostForm;
 
 export type RegisterForm = {
-  username?: string;
   email?: string;
   password?: string;
   firstname?: string;
@@ -36,4 +35,3 @@ export type RegisterForm = {
   lodgeId?: string | number | null;
   notes?: string | null;
 };
-

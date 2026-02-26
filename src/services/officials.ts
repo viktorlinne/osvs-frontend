@@ -6,9 +6,12 @@ export async function listOfficials() {
   return ((res as { officials?: Official[] })?.officials ?? []) as Official[];
 }
 
-export async function setMemberOfficials(id: string | number, officialIds: number[]) {
+export async function setMemberOfficials(
+  matrikelnummer: string | number,
+  officialIds: number[],
+) {
   const res = await fetchData(
-    api.put(`/officials/member/${String(id)}`, { officialIds })
+    api.put(`/officials/member/${String(matrikelnummer)}`, { officialIds }),
   );
   return (res as { officials?: Official[] })?.officials ?? [];
 }

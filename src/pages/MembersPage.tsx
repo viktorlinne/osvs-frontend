@@ -116,8 +116,8 @@ export const MembersPage = () => {
           <div className="w-full grid gap-4 grid-cols-1 lg:grid-cols-3">
             {members.map((member: PublicUser) => (
               <Link
-                to={`/members/${member.id}`}
-                key={member.id}
+                to={`/members/${member.matrikelnummer}`}
+                key={member.matrikelnummer}
                 className="p-4 bg-white rounded-md shadow-md hover:shadow-lg transition flex items-center gap-x-4"
               >
                 <img
