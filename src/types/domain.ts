@@ -21,6 +21,7 @@ export type User = {
   picture: string;
   pictureUrl?: string;
   achievements?: Achievement[] | null;
+  officialHistory?: OfficialHistoryItem[] | null;
   archive?: "Deceased" | "Retired" | "Removed" | null;
   firstname: string;
   lastname: string;
@@ -64,6 +65,13 @@ export type Achievement = {
 export type Official = {
   id: number;
   title: string;
+};
+
+export type OfficialHistoryItem = {
+  id: number;
+  title: string;
+  appointedAt: string;
+  unappointedAt: string;
 };
 
 export type UserOfficial = {

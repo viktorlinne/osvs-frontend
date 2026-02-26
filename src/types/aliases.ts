@@ -1,4 +1,8 @@
-import type { Achievement, User as PublicUserBase } from "./domain";
+import type {
+  Achievement,
+  OfficialHistoryItem,
+  User as PublicUserBase,
+} from "./domain";
 import type {
   CreateEventBody,
   CreateLodgeBody,
@@ -13,6 +17,7 @@ export type AuthUser = PublicUser & {
   roles?: string[];
   achievements?: Achievement[] | null;
   officials?: number[];
+  officialHistory?: OfficialHistoryItem[] | null;
 };
 
 export type LoginPayload = LoginBody;

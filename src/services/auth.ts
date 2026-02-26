@@ -1,7 +1,33 @@
 import api, { fetchData } from "./api";
-import type { AuthUser, LoginPayload } from "../types";
+import type { AuthUser, LoginPayload, OfficialHistoryItem } from "../types";
 
 type OfficialPayload = { id?: unknown };
+type OfficialHistoryPayload = {
+  id?: unknown;
+  title?: unknown;
+  appointedAt?: unknown;
+  unappointedAt?: unknown;
+  unAppointedAt?: unknown;
+};
+
+function parseOfficialHistory(value: unknown): OfficialHistoryItem[] {
+  if (!Array.isArray(value)) return [];
+  return value
+    .map((entry) => entry as OfficialHistoryPayload)
+    .map((entry) => ({
+      id: Number(entry.id),
+      title: String(entry.title ?? ""),
+      appointedAt: String(entry.appointedAt ?? ""),
+      unappointedAt: String(entry.unappointedAt ?? entry.unAppointedAt ?? ""),
+    }))
+    .filter(
+      (entry) =>
+        Number.isFinite(entry.id) &&
+        entry.title.length > 0 &&
+        entry.appointedAt.length > 0 &&
+        entry.unappointedAt.length > 0,
+    );
+}
 
 function mergeAuthResponse(res: unknown): AuthUser | null {
   if (res == null) return null;
@@ -53,6 +79,16 @@ function mergeAuthResponse(res: unknown): AuthUser | null {
         return Number(o);
       })
       .filter((n): n is number => Number.isFinite(n));
+  }
+
+  const rawOfficialHistory = Array.isArray(rec.officialHistory)
+    ? rec.officialHistory
+    : rawUser.officialHistory;
+  const parsedOfficialHistory = parseOfficialHistory(rawOfficialHistory);
+  if (parsedOfficialHistory.length > 0) {
+    result.officialHistory = parsedOfficialHistory;
+  } else if (Array.isArray(rawOfficialHistory)) {
+    result.officialHistory = [];
   }
   return result;
 }

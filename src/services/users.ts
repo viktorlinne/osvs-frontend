@@ -1,5 +1,11 @@
 import api, { fetchData } from "./api";
-import type { Achievement, Lodge, Official, PublicUser } from "../types";
+import type {
+  Achievement,
+  Lodge,
+  Official,
+  OfficialHistoryItem,
+  PublicUser,
+} from "../types";
 
 export type UserLodgeResponse = { lodge: Lodge | null } | null;
 
@@ -13,7 +19,35 @@ export type PublicUserDetailResponse = {
   user: PublicUser | null;
   achievements: Achievement[];
   officials: Official[];
+  officialHistory: OfficialHistoryItem[];
 };
+
+type OfficialHistoryPayload = {
+  id?: unknown;
+  title?: unknown;
+  appointedAt?: unknown;
+  unappointedAt?: unknown;
+  unAppointedAt?: unknown;
+};
+
+function parseOfficialHistory(value: unknown): OfficialHistoryItem[] {
+  if (!Array.isArray(value)) return [];
+  return value
+    .map((entry) => entry as OfficialHistoryPayload)
+    .map((entry) => ({
+      id: Number(entry.id),
+      title: String(entry.title ?? ""),
+      appointedAt: String(entry.appointedAt ?? ""),
+      unappointedAt: String(entry.unappointedAt ?? entry.unAppointedAt ?? ""),
+    }))
+    .filter(
+      (entry) =>
+        Number.isFinite(entry.id) &&
+        entry.title.length > 0 &&
+        entry.appointedAt.length > 0 &&
+        entry.unappointedAt.length > 0,
+    );
+}
 
 export async function updateMe(payload: Record<string, unknown>) {
   return fetchData(api.put("/users/me", payload));
@@ -66,13 +100,29 @@ export async function getPublicUserById(
     user?: PublicUser | null;
     achievements?: Achievement[];
     officials?: Official[];
+    officialHistory?: OfficialHistoryItem[];
   };
+  const historyFromPayload = parseOfficialHistory(payload?.officialHistory);
+  const historyFromUser = parseOfficialHistory(
+    (payload?.user as { officialHistory?: unknown } | null | undefined)
+      ?.officialHistory,
+  );
+  const officialHistory =
+    historyFromPayload.length > 0
+      ? historyFromPayload
+      : Array.isArray(payload?.officialHistory)
+        ? []
+        : historyFromUser;
+
   return {
-    user: payload?.user ?? null,
+    user: payload?.user
+      ? ({ ...payload.user, officialHistory } as PublicUser)
+      : null,
     achievements: Array.isArray(payload?.achievements)
       ? payload.achievements
       : [],
     officials: Array.isArray(payload?.officials) ? payload.officials : [],
+    officialHistory,
   };
 }
 
