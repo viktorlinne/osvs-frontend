@@ -4,16 +4,21 @@ import { useAuth } from "../context";
 
 type Props = {
   children: React.ReactElement;
-  /** Required roles — user must have at least one of these to access */
+  /** Required roles - user must have at least one of these to access */
   roles?: string | string[];
 };
 
 export default function AuthGuard({ children, roles }: Props) {
-  const { user } = useAuth();
+  const { user, loading } = useAuth();
   const location = useLocation();
 
+  if (loading) {
+    // Wait for AuthProvider bootstrap (`/auth/me`) before deciding.
+    return null;
+  }
+
   if (!user) {
-    // not authenticated — redirect to login and preserve attempted path
+    // Not authenticated: redirect to login and preserve attempted path.
     return <Navigate to="/login" replace state={{ from: location }} />;
   }
 
