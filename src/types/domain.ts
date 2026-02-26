@@ -21,6 +21,7 @@ export type User = {
   picture: string;
   pictureUrl?: string;
   achievements?: Achievement[] | null;
+  allergies?: Allergy[] | null;
   officialHistory?: OfficialHistoryItem[] | null;
   archive?: "Deceased" | "Retired" | "Removed" | null;
   firstname: string;
@@ -60,6 +61,11 @@ export type Achievement = {
   id: number;
   title: "I:a Graden" | "II:a Graden" | "III:e Graden" | string;
   awardedAt?: string | null;
+};
+
+export type Allergy = {
+  id: number;
+  title: string;
 };
 
 export type Official = {

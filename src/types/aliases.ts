@@ -1,5 +1,6 @@
 import type {
   Achievement,
+  Allergy,
   OfficialHistoryItem,
   User as PublicUserBase,
 } from "./domain";
@@ -16,6 +17,7 @@ export type PublicUser = PublicUserBase;
 export type AuthUser = PublicUser & {
   roles?: string[];
   achievements?: Achievement[] | null;
+  allergies?: Allergy[] | null;
   officials?: number[];
   officialHistory?: OfficialHistoryItem[] | null;
 };

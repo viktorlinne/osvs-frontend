@@ -1,6 +1,7 @@
 import api, { fetchData } from "./api";
 import type {
   Achievement,
+  Allergy,
   Lodge,
   Official,
   OfficialHistoryItem,
@@ -18,10 +19,12 @@ export type ListUsersFilters = {
 export type PublicUserDetailResponse = {
   user: PublicUser | null;
   achievements: Achievement[];
+  allergies: Allergy[];
   officials: Official[];
   officialHistory: OfficialHistoryItem[];
 };
 
+type AllergyPayload = { id?: unknown; title?: unknown };
 type OfficialHistoryPayload = {
   id?: unknown;
   title?: unknown;
@@ -29,6 +32,17 @@ type OfficialHistoryPayload = {
   unappointedAt?: unknown;
   unAppointedAt?: unknown;
 };
+
+function parseAllergies(value: unknown): Allergy[] {
+  if (!Array.isArray(value)) return [];
+  return value
+    .map((entry) => entry as AllergyPayload)
+    .map((entry) => ({
+      id: Number(entry.id),
+      title: String(entry.title ?? ""),
+    }))
+    .filter((entry) => Number.isFinite(entry.id) && entry.title.length > 0);
+}
 
 function parseOfficialHistory(value: unknown): OfficialHistoryItem[] {
   if (!Array.isArray(value)) return [];
@@ -99,9 +113,21 @@ export async function getPublicUserById(
   const payload = res as {
     user?: PublicUser | null;
     achievements?: Achievement[];
+    allergies?: Allergy[];
     officials?: Official[];
     officialHistory?: OfficialHistoryItem[];
   };
+  const allergiesFromPayload = parseAllergies(payload?.allergies);
+  const allergiesFromUser = parseAllergies(
+    (payload?.user as { allergies?: unknown } | null | undefined)?.allergies,
+  );
+  const allergies =
+    allergiesFromPayload.length > 0
+      ? allergiesFromPayload
+      : Array.isArray(payload?.allergies)
+      ? []
+      : allergiesFromUser;
+
   const historyFromPayload = parseOfficialHistory(payload?.officialHistory);
   const historyFromUser = parseOfficialHistory(
     (payload?.user as { officialHistory?: unknown } | null | undefined)
@@ -116,11 +142,12 @@ export async function getPublicUserById(
 
   return {
     user: payload?.user
-      ? ({ ...payload.user, officialHistory } as PublicUser)
+      ? ({ ...payload.user, allergies, officialHistory } as PublicUser)
       : null,
     achievements: Array.isArray(payload?.achievements)
       ? payload.achievements
       : [],
+    allergies,
     officials: Array.isArray(payload?.officials) ? payload.officials : [],
     officialHistory,
   };

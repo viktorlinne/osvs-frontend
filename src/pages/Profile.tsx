@@ -3,6 +3,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import {
   AchievementsPanel,
+  AllergiesManager,
   OfficialsManager,
   ProfileForm,
   ProfileHeader,
@@ -11,6 +12,7 @@ import {
 import { useAuth, useError } from "../context";
 import { useProfile } from "../hooks";
 import useFetch from "../hooks/useFetch";
+import { setMemberAllergies } from "../services/allergies";
 import { setMemberOfficials } from "../services/officials";
 import lodgesService from "../services/lodges";
 import { setUserLodge, updateMe, uploadMyPicture } from "../services/users";
@@ -35,6 +37,9 @@ export const Profile = () => {
   const [lodges, setLodges] = useState<Lodge[]>([]);
   const [selectedLid, setSelectedLid] = useState<number | null>(null);
   const [selectedOfficialIds, setSelectedOfficialIds] = useState<number[] | null>(
+    null,
+  );
+  const [selectedAllergyIds, setSelectedAllergyIds] = useState<number[] | null>(
     null,
   );
 
@@ -145,6 +150,14 @@ export const Profile = () => {
         }
 
         try {
+          if (Array.isArray(selectedAllergyIds)) {
+            await run(() => setMemberAllergies(userId, selectedAllergyIds));
+          }
+        } catch {
+          setGlobalError("Misslyckades att uppdatera allergier");
+        }
+
+        try {
           if (selectedAid) {
             await run(() =>
               assignAchievement(userId, selectedAid, awardDate || undefined),
@@ -245,6 +258,13 @@ export const Profile = () => {
             isEditRoute={isEditRoute}
             selectedIds={selectedOfficialIds ?? undefined}
             setSelectedIds={setSelectedOfficialIds}
+          />
+
+          <AllergiesManager
+            user={user}
+            isEditRoute={isEditRoute}
+            selectedIds={selectedAllergyIds ?? undefined}
+            setSelectedIds={setSelectedAllergyIds}
           />
 
           <ProfileForm

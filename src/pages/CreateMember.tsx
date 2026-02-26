@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { AllergiesManager } from "../components";
 import api, { fetchData } from "../services/api";
+import { setMemberAllergies } from "../services/allergies";
 import { listLodges } from "../services/lodges";
 import type { RegisterForm, Lodge } from "../types";
 import useFetch from "../hooks/useFetch";
@@ -9,10 +11,16 @@ import { useForm } from "react-hook-form";
 import type { FieldError } from "react-hook-form";
 import useError from "../context/useError";
 
+type RegisterResponse = {
+  user?: { matrikelnummer?: unknown };
+};
+
 export const CreateMember = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [picture, setPicture] = useState<File | null>(null);
+  const [createdUserId, setCreatedUserId] = useState<number | null>(null);
+  const [selectedAllergyIds, setSelectedAllergyIds] = useState<number[]>([]);
   const [lodges, setLodges] = useState<Lodge[]>([]);
   const { run: runLodges, loading: lodgesLoading } = useFetch<Lodge[]>();
   const { run: runSubmit } = useFetch<unknown>();
@@ -25,7 +33,8 @@ export const CreateMember = () => {
     setError: setFieldError,
     formState: { errors },
   } = useForm<RegisterForm>({
-    defaultValues: {      email: "",
+    defaultValues: {
+      email: "",
       password: "",
       firstname: "",
       lastname: "",
@@ -53,27 +62,59 @@ export const CreateMember = () => {
 
   async function onSubmit(values: RegisterForm) {
     setError(null);
-    const picErr = validatePicture();
-    if (picErr) return setError(picErr);
     setLoading(true);
     try {
-      const fd = new FormData();
-      fd.append("email", String(values.email ?? "").trim());
-      fd.append("password", String(values.password ?? ""));
-      fd.append("firstname", String(values.firstname ?? "").trim());
-      fd.append("lastname", String(values.lastname ?? "").trim());
-      fd.append("dateOfBirth", String(values.dateOfBirth ?? ""));
-      if (values.work) fd.append("work", String(values.work));
-      if (values.homeNumber) fd.append("homeNumber", String(values.homeNumber));
-      fd.append("mobile", String(values.mobile ?? "").trim());
-      fd.append("city", String(values.city ?? "").trim());
-      fd.append("address", String(values.address ?? "").trim());
-      fd.append("zipcode", String(values.zipcode ?? "").trim());
-      if (values.lodgeId) fd.append("lodgeId", String(Number(values.lodgeId)));
-      fd.append("notes", String(values.notes ?? "").trim());
-      if (picture) fd.append("picture", picture);
+      let userId = createdUserId;
+      if (userId === null) {
+        const picErr = validatePicture();
+        if (picErr) {
+          setError(picErr);
+          return;
+        }
 
-      await runSubmit(() => fetchData(api.post("/auth/register", fd)));
+        const fd = new FormData();
+        fd.append("email", String(values.email ?? "").trim());
+        fd.append("password", String(values.password ?? ""));
+        fd.append("firstname", String(values.firstname ?? "").trim());
+        fd.append("lastname", String(values.lastname ?? "").trim());
+        fd.append("dateOfBirth", String(values.dateOfBirth ?? ""));
+        if (values.work) fd.append("work", String(values.work));
+        if (values.homeNumber) fd.append("homeNumber", String(values.homeNumber));
+        fd.append("mobile", String(values.mobile ?? "").trim());
+        fd.append("city", String(values.city ?? "").trim());
+        fd.append("address", String(values.address ?? "").trim());
+        fd.append("zipcode", String(values.zipcode ?? "").trim());
+        if (values.lodgeId) fd.append("lodgeId", String(Number(values.lodgeId)));
+        fd.append("notes", String(values.notes ?? "").trim());
+        if (picture) fd.append("picture", picture);
+
+        const registerResponse = (await runSubmit(() =>
+          fetchData(api.post("/auth/register", fd)),
+        )) as RegisterResponse;
+
+        const parsedId = Number(registerResponse?.user?.matrikelnummer);
+        if (!Number.isFinite(parsedId)) {
+          navigate("/members");
+          return;
+        }
+
+        userId = parsedId;
+        setCreatedUserId(parsedId);
+      }
+
+      if (userId === null) return;
+
+      try {
+        await runSubmit(() =>
+          setMemberAllergies(userId, Array.isArray(selectedAllergyIds) ? selectedAllergyIds : []),
+        );
+      } catch {
+        setError(
+          `Anv\u00E4ndare skapad (ID ${userId}) men allergier kunde inte sparas.`,
+        );
+        return;
+      }
+
       navigate("/members");
     } catch (e: unknown) {
       const err = e as { status?: number; details?: unknown };
@@ -155,14 +196,14 @@ export const CreateMember = () => {
           <input
             placeholder="Email"
             {...register("email")}
-            className="w-full px-4 py-2 border"
+            className="w-full px-4 py-2 border rounded-md"
           />
 
           <input
             placeholder="Lösenord"
             type="password"
             {...register("password")}
-            className="w-full px-4 py-2 border"
+            className="w-full px-4 py-2 border rounded-md"
             autoComplete="off"
           />
 
@@ -170,14 +211,14 @@ export const CreateMember = () => {
             placeholder="Förnamn"
             type="text"
             {...register("firstname")}
-            className="w-full px-4 py-2 border"
+            className="w-full px-4 py-2 border rounded-md"
           />
 
           <input
             placeholder="Efternamn"
             type="text"
             {...register("lastname")}
-            className="w-full px-4 py-2 border"
+            className="w-full px-4 py-2 border rounded-md"
           />
 
           <label className="block">
@@ -185,7 +226,7 @@ export const CreateMember = () => {
             <input
               type="date"
               {...register("dateOfBirth")}
-              className="w-full px-4 py-2 border"
+              className="w-full px-4 py-2 border rounded-md"
             />
           </label>
 
@@ -193,49 +234,55 @@ export const CreateMember = () => {
             placeholder="Jobb eller tidigare sysselsättning"
             type="text"
             {...register("work")}
-            className="w-full px-4 py-2 border"
+            className="w-full px-4 py-2 border rounded-md"
           />
 
           <input
             placeholder="Mobilnummer"
             type="text"
             {...register("mobile")}
-            className="w-full px-4 py-2 border"
+            className="w-full px-4 py-2 border rounded-md"
           />
 
           <input
             placeholder="Hemnummer"
             type="text"
             {...register("homeNumber")}
-            className="w-full px-4 py-2 border"
+            className="w-full px-4 py-2 border rounded-md"
           />
 
           <input
             placeholder="Stad"
             type="text"
             {...register("city")}
-            className="w-full px-4 py-2 border"
+            className="w-full px-4 py-2 border rounded-md"
           />
 
           <input
             placeholder="Adress"
             type="text"
             {...register("address")}
-            className="w-full px-4 py-2 border"
+            className="w-full px-4 py-2 border rounded-md"
           />
 
           <input
             placeholder="Postnummer"
             type="text"
             {...register("zipcode")}
-            className="w-full px-4 py-2 border"
+            className="w-full px-4 py-2 border rounded-md"
           />
 
           <input
             placeholder="Noteringar "
             type="text"
             {...register("notes")}
-            className="w-full px-4 py-2 border"
+            className="w-full px-4 py-2 border rounded-md"
+          />
+
+          <AllergiesManager
+            isEditRoute
+            selectedIds={selectedAllergyIds}
+            setSelectedIds={(ids) => setSelectedAllergyIds(Array.isArray(ids) ? ids : [])}
           />
 
           <label className="block">
@@ -244,7 +291,7 @@ export const CreateMember = () => {
             ) : (
               <select
                 {...register("lodgeId")}
-                className="w-full px-4 py-2 border"
+                className="w-full px-4 py-2 border rounded-md"
               >
                 <option value="">Välj loge...</option>
                 {lodges.map((l) => (
@@ -261,7 +308,7 @@ export const CreateMember = () => {
               type="file"
               accept="image/*"
               onChange={(e) => setPicture(e.target.files?.[0] ?? null)}
-              className="w-full px-4 py-2"
+              className="w-full px-4 py-2 rounded-md"
             />
           </label>
 
@@ -272,7 +319,13 @@ export const CreateMember = () => {
               disabled={loading}
               className="bg-green-600 hover:bg-green-700 text-sm font-medium transition text-white px-4 py-2 rounded-md"
             >
-              {loading ? "Skapar..." : "Skapa användare"}
+                            {loading
+                ? createdUserId !== null
+                  ? "Sparar..."
+                  : "Skapar..."
+                : createdUserId !== null
+                ? "Spara allergier"
+                : "Skapa anv\u00E4ndare"}
             </button>
           </div>
         </form>
@@ -280,4 +333,5 @@ export const CreateMember = () => {
     </div>
   );
 };
+
 

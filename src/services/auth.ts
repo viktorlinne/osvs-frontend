@@ -1,5 +1,10 @@
 import api, { fetchData } from "./api";
-import type { AuthUser, LoginPayload, OfficialHistoryItem } from "../types";
+import type {
+  Allergy,
+  AuthUser,
+  LoginPayload,
+  OfficialHistoryItem,
+} from "../types";
 
 type OfficialPayload = { id?: unknown };
 type OfficialHistoryPayload = {
@@ -9,6 +14,7 @@ type OfficialHistoryPayload = {
   unappointedAt?: unknown;
   unAppointedAt?: unknown;
 };
+type AllergyPayload = { id?: unknown; title?: unknown };
 
 function parseOfficialHistory(value: unknown): OfficialHistoryItem[] {
   if (!Array.isArray(value)) return [];
@@ -27,6 +33,17 @@ function parseOfficialHistory(value: unknown): OfficialHistoryItem[] {
         entry.appointedAt.length > 0 &&
         entry.unappointedAt.length > 0,
     );
+}
+
+function parseAllergies(value: unknown): Allergy[] {
+  if (!Array.isArray(value)) return [];
+  return value
+    .map((entry) => entry as AllergyPayload)
+    .map((entry) => ({
+      id: Number(entry.id),
+      title: String(entry.title ?? ""),
+    }))
+    .filter((entry) => Number.isFinite(entry.id) && entry.title.length > 0);
 }
 
 function mergeAuthResponse(res: unknown): AuthUser | null {
@@ -64,6 +81,19 @@ function mergeAuthResponse(res: unknown): AuthUser | null {
       }))
       .filter((a) => Number.isFinite(a.id));
   }
+
+  const rawAllergies = Array.isArray(rec.allergies)
+    ? rec.allergies
+    : Array.isArray(rawUser.allergies)
+    ? (rawUser.allergies as unknown[])
+    : undefined;
+  const parsedAllergies = parseAllergies(rawAllergies);
+  if (parsedAllergies.length > 0) {
+    result.allergies = parsedAllergies;
+  } else if (Array.isArray(rawAllergies)) {
+    result.allergies = [];
+  }
+
   // Attach officials if provided either at top-level or on the user object
   const rawOfficials = Array.isArray(rec.officials)
     ? rec.officials

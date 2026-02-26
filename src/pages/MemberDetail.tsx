@@ -15,12 +15,14 @@ import {
 } from "../services/users";
 import type { UserLodgeResponse } from "../services/users";
 import achievementsService from "../services/achievements";
+import { setMemberAllergies } from "../services/allergies";
 import lodgesService from "../services/lodges";
 import { setMemberOfficials } from "../services/officials";
 import { listRoles } from "../services/admin";
 import { useForm } from "react-hook-form";
 import {
   AchievementsPanel,
+  AllergiesManager,
   OfficialsManager,
   ProfileForm,
   RolesManager,
@@ -99,6 +101,9 @@ export const MemberDetail = () => {
   const [rolesList, setRolesList] = useState<Role[]>([]);
   const [selectedRoleIds, setSelectedRoleIds] = useState<number[]>([]);
   const [selectedOfficialIds, setSelectedOfficialIds] = useState<number[] | null>(
+    null,
+  );
+  const [selectedAllergyIds, setSelectedAllergyIds] = useState<number[] | null>(
     null,
   );
 
@@ -263,6 +268,14 @@ export const MemberDetail = () => {
       }
 
       try {
+        if (Array.isArray(selectedAllergyIds)) {
+          await runAction(() => setMemberAllergies(userId, selectedAllergyIds));
+        }
+      } catch {
+        setGlobalError("Misslyckades att uppdatera allergier");
+      }
+
+      try {
         if (selectedAid) {
           await runAction(() =>
             postAchievement(userId, {
@@ -411,6 +424,13 @@ export const MemberDetail = () => {
               isEditRoute={isEditRoute}
               selectedIds={selectedOfficialIds ?? undefined}
               setSelectedIds={setSelectedOfficialIds}
+            />
+
+            <AllergiesManager
+              user={member}
+              isEditRoute={isEditRoute}
+              selectedIds={selectedAllergyIds ?? undefined}
+              setSelectedIds={setSelectedAllergyIds}
             />
 
             <ProfileForm
