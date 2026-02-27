@@ -53,7 +53,7 @@ export const MembershipPage = () => {
               <div>
                 <div className="font-semibold">År: {p.year}</div>
                 <div>
-                  Belopp: {p.amount} {p.currency}
+                  Belopp: {p.amount} SEK
                 </div>
                 <div>Status: {p.status}</div>
               </div>

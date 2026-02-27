@@ -107,7 +107,7 @@ export type EventAttendanceRow = {
   rsvp: boolean;
   bookFood: boolean;
   attended: boolean;
-  paymentStatus: "Pending" | "Paid" | "Failed" | "Refunded" | null;
+  paymentStatus: "Pending" | "Paid" | null;
   paymentPaid: boolean;
 };
 
@@ -116,13 +116,7 @@ export type MembershipPayment = {
   uid: number;
   amount: number;
   year: number;
-  status: "Pending" | "Paid" | "Failed" | "Refunded";
-  provider?: string | null;
-  provider_ref?: string | null;
-  currency: string;
-  invoice_token?: string | null;
-  expiresAt?: string | null;
-  metadata?: Record<string, unknown> | null;
+  status: "Pending" | "Paid";
   createdAt: string;
   updatedAt: string;
 };
