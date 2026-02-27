@@ -2,6 +2,8 @@ import api, { fetchData } from "./api";
 import type {
   Achievement,
   Allergy,
+  AttendedEvent,
+  AttendedEventsResponse,
   Lodge,
   Official,
   OfficialHistoryItem,
@@ -32,6 +34,12 @@ type OfficialHistoryPayload = {
   unappointedAt?: unknown;
   unAppointedAt?: unknown;
 };
+type AttendedEventPayload = {
+  id?: unknown;
+  title?: unknown;
+  startDate?: unknown;
+  endDate?: unknown;
+};
 
 function parseAllergies(value: unknown): Allergy[] {
   if (!Array.isArray(value)) return [];
@@ -61,6 +69,40 @@ function parseOfficialHistory(value: unknown): OfficialHistoryItem[] {
         entry.appointedAt.length > 0 &&
         entry.unappointedAt.length > 0,
     );
+}
+
+function parseAttendedEvents(value: unknown): AttendedEvent[] {
+  if (!Array.isArray(value)) return [];
+  return value
+    .map((entry) => entry as AttendedEventPayload)
+    .map((entry) => ({
+      id: Number(entry.id),
+      title: String(entry.title ?? ""),
+      startDate: String(entry.startDate ?? ""),
+      endDate: String(entry.endDate ?? ""),
+    }))
+    .filter((entry) => Number.isFinite(entry.id));
+}
+
+function parseAttendedEventsResponse(value: unknown): AttendedEventsResponse {
+  const payload = value as {
+    events?: unknown;
+    sinceLastAchievementCount?: unknown;
+    lastAchievementAt?: unknown;
+  };
+  return {
+    events: parseAttendedEvents(payload?.events),
+    sinceLastAchievementCount: Number.isFinite(
+      Number(payload?.sinceLastAchievementCount),
+    )
+      ? Number(payload?.sinceLastAchievementCount)
+      : 0,
+    lastAchievementAt:
+      typeof payload?.lastAchievementAt === "string" &&
+      payload.lastAchievementAt.length > 0
+        ? payload.lastAchievementAt
+        : null,
+  };
 }
 
 export async function updateMe(payload: Record<string, unknown>) {
@@ -189,6 +231,18 @@ export async function postAchievement(
   return fetchData(api.post(`/users/${matrikelnummer}/achievements`, payload));
 }
 
+export async function getMyAttendedEvents(): Promise<AttendedEventsResponse> {
+  const res = await fetchData(api.get("/users/me/attended"));
+  return parseAttendedEventsResponse(res);
+}
+
+export async function getUserAttendedEvents(
+  matrikelnummer: number | string,
+): Promise<AttendedEventsResponse> {
+  const res = await fetchData(api.get(`/users/${matrikelnummer}/attended`));
+  return parseAttendedEventsResponse(res);
+}
+
 export default {
   updateMe,
   adminUpdateUser,
@@ -201,4 +255,6 @@ export default {
   setUserLodge,
   setRoles,
   postAchievement,
+  getMyAttendedEvents,
+  getUserAttendedEvents,
 };

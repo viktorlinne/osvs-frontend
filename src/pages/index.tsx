@@ -15,6 +15,8 @@ export * from "./MembershipPage";
 export * from "./EventDetail";
 export * from "./CreatePost";
 export * from "./Profile";
+export * from "./ProfileAttended";
 export * from "./MembersPage";
 export * from "./MemberDetail";
+export * from "./MemberAttended";
 export * from "./CreateMember";

@@ -38,11 +38,11 @@ export function AdminAttendances({
             <thead className="sticky top-0 bg-white">
               <tr className="text-left border-b">
                 <th className="py-2 pr-3 font-medium">Namn</th>
-                <th className="py-2 pr-3 font-medium">Allergier</th>
                 <th className="py-2 pr-3 font-medium">RSVP</th>
                 <th className="py-2 pr-3 font-medium">Boka mat</th>
-                <th className="py-2 pr-3 font-medium">Attended</th>
-                <th className="py-2 pr-3 font-medium">Payment</th>
+                <th className="py-2 pr-3 font-medium">Allergier</th>
+                <th className="py-2 pr-3 font-medium">Deltagande</th>
+                <th className="py-2 pr-3 font-medium">Betalning</th>
               </tr>
             </thead>
             <tbody>
@@ -56,11 +56,6 @@ export function AdminAttendances({
                   <tr key={row.uid} className="border-b last:border-b-0">
                     <td className="py-2 pr-3">
                       {row.firstname} {row.lastname}
-                    </td>
-                    <td className="py-2 pr-3">
-                      {Array.isArray(row.allergies) && row.allergies.length > 0
-                        ? row.allergies.join(", ")
-                        : "-"}
                     </td>
                     <td className="py-2 pr-3">
                       <input
@@ -81,6 +76,11 @@ export function AdminAttendances({
                           onToggle?.(row.uid, "bookFood", event.target.checked)
                         }
                       />
+                    </td>
+                    <td className="py-2 pr-3">
+                      {Array.isArray(row.allergies) && row.allergies.length > 0
+                        ? row.allergies.join(", ")
+                        : "-"}
                     </td>
                     <td className="py-2 pr-3">
                       <input
@@ -112,7 +112,9 @@ export function AdminAttendances({
             </tbody>
           </table>
         ) : (
-          <div className="text-sm text-gray-500 py-2">Inga inbjudna deltagare</div>
+          <div className="text-sm text-gray-500 py-2">
+            Inga inbjudna deltagare
+          </div>
         )}
       </div>
     </div>

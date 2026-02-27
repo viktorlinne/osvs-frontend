@@ -357,7 +357,7 @@ export const EventDetail = () => {
           relative="path"
           className="text-sm text-green-600 hover:text-green-700 hover:underline"
         >
-          {"← Tillbaka"}
+          ← Tillbaka
         </Link>
         {canEdit && !isEditRoute && (
           <Link

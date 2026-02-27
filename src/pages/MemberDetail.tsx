@@ -329,13 +329,23 @@ export const MemberDetail = () => {
           >
             ← Tillbaka
           </Link>
-          {canEdit && !isEditRoute && (
-            <Link
-              to={`/members/${matrikelnummer}/edit`}
-              className="text-sm font-medium text-white bg-green-600 hover:bg-green-700 transition px-3 py-2 rounded-md"
-            >
-              Redigera
-            </Link>
+          {!isEditRoute && (
+            <div className="flex items-center gap-2">
+              <Link
+                to={`/members/${matrikelnummer}/attended`}
+                className="text-sm font-medium text-white bg-green-600 hover:bg-green-700 transition px-3 py-2 rounded-md"
+              >
+                Närvaro
+              </Link>
+              {canEdit && (
+                <Link
+                  to={`/members/${matrikelnummer}/edit`}
+                  className="text-sm font-medium text-white bg-green-600 hover:bg-green-700 transition px-3 py-2 rounded-md"
+                >
+                  Redigera
+                </Link>
+              )}
+            </div>
           )}
         </div>
 
@@ -459,3 +469,4 @@ export const MemberDetail = () => {
     </div>
   );
 };
+

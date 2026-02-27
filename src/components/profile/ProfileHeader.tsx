@@ -21,6 +21,14 @@ export const ProfileHeader = ({
           Redigera
         </Link>
       )}
+      {user && (
+        <Link
+          to="/profile/attended"
+          className="w-full text-sm font-medium text-white text-center bg-green-600 hover:bg-green-700 transition px-3 py-2 rounded-md"
+        >
+          Närvaro
+        </Link>
+      )}
       <Link
         to="/profile/memberships"
         className="w-full text-sm font-medium text-white bg-green-600 hover:bg-green-700 transition px-3 py-2 rounded-md"

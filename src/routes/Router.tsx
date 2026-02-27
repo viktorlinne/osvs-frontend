@@ -10,8 +10,10 @@ import {
   PostDetail,
   CreatePost,
   Profile,
+  ProfileAttended,
   MembersPage,
   MemberDetail,
+  MemberAttended,
   CreateMember,
   LodgesPage,
   LodgeDetail,
@@ -106,6 +108,14 @@ const routes = [
         ),
       },
       {
+        path: "members/:matrikelnummer/attended",
+        element: (
+          <AuthGuard>
+            <MemberAttended />
+          </AuthGuard>
+        ),
+      },
+      {
         path: "profile",
         element: (
           <AuthGuard>
@@ -126,6 +136,14 @@ const routes = [
         element: (
           <AuthGuard>
             <MembershipPage />
+          </AuthGuard>
+        ),
+      },
+      {
+        path: "profile/attended",
+        element: (
+          <AuthGuard>
+            <ProfileAttended />
           </AuthGuard>
         ),
       },

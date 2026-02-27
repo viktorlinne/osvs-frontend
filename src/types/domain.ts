@@ -58,6 +58,19 @@ export type Event = {
   endDate: string;
 };
 
+export type AttendedEvent = {
+  id: number;
+  title: string;
+  startDate: string;
+  endDate: string;
+};
+
+export type AttendedEventsResponse = {
+  events: AttendedEvent[];
+  sinceLastAchievementCount: number;
+  lastAchievementAt: string | null;
+};
+
 export type Achievement = {
   id: number;
   title: "I:a Graden" | "II:a Graden" | "III:e Graden" | string;
