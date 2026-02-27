@@ -58,7 +58,7 @@ export const Profile = () => {
     canEditRoles,
     assignAchievement,
     saveRoles,
-  } = useProfile();
+  } = useProfile({ isEditRoute });
 
   const {
     register,

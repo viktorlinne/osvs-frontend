@@ -5,7 +5,7 @@ import { listRoles } from "../services/admin";
 import achievementsService from "../services/achievements";
 import type { Achievement, Lodge, Role, PublicUser } from "../types";
 
-export const useProfile = () => {
+export const useProfile = ({ isEditRoute }: { isEditRoute: boolean }) => {
   const { user, refresh } = useAuth();
   const { setError: setGlobalError } = useError();
 
@@ -21,6 +21,7 @@ export const useProfile = () => {
     user && (user.roles ?? []).some((r) => ["Admin", "Editor"].includes(r))
   );
   const canEditRoles = canAward;
+  const shouldLoadRoleData = canEditRoles && isEditRoute;
 
   useEffect(() => {
     let mounted = true;
@@ -41,44 +42,43 @@ export const useProfile = () => {
           if (cur && cur.lodge) setLodge(cur.lodge);
         }
 
-        // Only fetch role definitions if the current user is allowed to edit roles
-        // (Admin or Editor). This avoids unnecessary 403 Forbidden responses for
-        // ordinary or anonymous users.
-        if (canEditRoles) {
-          try {
-            const r = await listRoles();
-            let items: Array<Record<string, unknown>> = [];
-            const raw = r as Record<string, unknown> | undefined;
-            if (Array.isArray(r)) items = r as Array<Record<string, unknown>>;
-            else if (raw && Array.isArray(raw.roles))
-              items = raw.roles as Array<Record<string, unknown>>;
-
-            if (items.length > 0) {
-              const rolesArray = items.map((item) => ({
-                id: Number(item.id),
-                name: String(item.name ?? item.role ?? item.roleName ?? ""),
-              }));
-              if (mounted) setRolesList(rolesArray);
-
-              const ids = (user?.roles ?? [])
-                .map((rn) => {
-                  const rnName =
-                    typeof rn === "string"
-                      ? rn
-                      : ((): string => {
-                          const rec = rn as Record<string, unknown>;
-                          return String(
-                            rec["name"] ?? rec["role"] ?? rec["id"] ?? ""
-                          );
-                        })();
-                  return rolesArray.find((x) => x.name === rnName)?.id;
-                })
-                .filter((v): v is number => Boolean(v));
-              if (mounted) setSelectedRoleIds(ids);
-            }
-          } catch {
-            // ignore
+        if (!shouldLoadRoleData) {
+          if (mounted) {
+            setRolesList([]);
+            setSelectedRoleIds([]);
           }
+          return;
+        }
+
+        try {
+          const r = await listRoles();
+          let items: Array<Record<string, unknown>> = [];
+          const raw = r as Record<string, unknown> | undefined;
+          if (Array.isArray(r)) items = r as Array<Record<string, unknown>>;
+          else if (raw && Array.isArray(raw.roles))
+            items = raw.roles as Array<Record<string, unknown>>;
+
+          const rolesArray = items.map((item) => ({
+            id: Number(item.id),
+            name: String(item.name ?? item.role ?? item.roleName ?? ""),
+          }));
+          if (mounted) setRolesList(rolesArray);
+
+          const ids = (user?.roles ?? [])
+            .map((rn) => {
+              const rnName =
+                typeof rn === "string"
+                  ? rn
+                  : ((): string => {
+                      const rec = rn as Record<string, unknown>;
+                      return String(rec["name"] ?? rec["role"] ?? rec["id"] ?? "");
+                    })();
+              return rolesArray.find((x) => x.name === rnName)?.id;
+            })
+            .filter((v): v is number => Boolean(v));
+          if (mounted) setSelectedRoleIds(ids);
+        } catch {
+          // ignore
         }
       } catch {
         // ignore
@@ -88,7 +88,7 @@ export const useProfile = () => {
     return () => {
       mounted = false;
     };
-  }, [user?.matrikelnummer, user?.roles, canEditRoles]);
+  }, [user?.matrikelnummer, user?.roles, shouldLoadRoleData]);
 
   async function assignAchievement(
     targetUserId: number,

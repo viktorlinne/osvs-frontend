@@ -89,6 +89,7 @@ export const MemberDetail = () => {
     authUser && (authUser.roles ?? []).some((r) => ["Admin", "Editor"].includes(r))
   );
   const isEditRoute = location.pathname.endsWith("/edit");
+  const shouldLoadRoleData = isEditRoute && canEdit;
 
   const [saving, setSaving] = useState(false);
   const [pictureFile, setPictureFile] = useState<File | null>(null);
@@ -138,7 +139,11 @@ export const MemberDetail = () => {
     let userObj: PublicUser | null = detail.user
       ? (detail.user as PublicUser)
       : null;
-    if (userObj && !Array.isArray((userObj as { roles?: unknown }).roles)) {
+    if (
+      shouldLoadRoleData &&
+      userObj &&
+      !Array.isArray((userObj as { roles?: unknown }).roles)
+    ) {
       try {
         const roles = await getUserRoles(matrikelnummer);
         userObj = {
@@ -151,7 +156,7 @@ export const MemberDetail = () => {
     }
 
     return userObj;
-  }, [matrikelnummer]);
+  }, [matrikelnummer, shouldLoadRoleData]);
 
   useEffect(() => {
     if (!matrikelnummer) {
@@ -175,7 +180,7 @@ export const MemberDetail = () => {
         // useFetch handles global error
       });
 
-    if (canEdit) {
+    if (shouldLoadRoleData) {
       runRoles(() => listRoles())
         .then((response) => setRolesList(mapRolesResponseToList(response)))
         .catch(() => {
@@ -189,7 +194,6 @@ export const MemberDetail = () => {
         // useFetch handles global error
       });
   }, [
-    canEdit,
     matrikelnummer,
     loadMember,
     run,
@@ -198,6 +202,7 @@ export const MemberDetail = () => {
     runRoles,
     runUserLodge,
     setGlobalError,
+    shouldLoadRoleData,
   ]);
 
   useEffect(() => {
