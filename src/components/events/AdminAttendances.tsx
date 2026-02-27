@@ -7,6 +7,8 @@ type Props = {
   loading?: boolean;
   isAdmin?: boolean;
   savingUid?: number | null;
+  canEditRsvpAndBookFood?: boolean;
+  canEditAttended?: boolean;
   onToggle?: (
     uid: number,
     field: AttendanceField,
@@ -19,6 +21,8 @@ export function AdminAttendances({
   loading = false,
   isAdmin = false,
   savingUid = null,
+  canEditRsvpAndBookFood = true,
+  canEditAttended = true,
   onToggle,
 }: Props) {
   const canEdit = isAdmin && typeof onToggle === "function";
@@ -34,6 +38,7 @@ export function AdminAttendances({
             <thead className="sticky top-0 bg-white">
               <tr className="text-left border-b">
                 <th className="py-2 pr-3 font-medium">Namn</th>
+                <th className="py-2 pr-3 font-medium">Allergier</th>
                 <th className="py-2 pr-3 font-medium">RSVP</th>
                 <th className="py-2 pr-3 font-medium">Boka mat</th>
                 <th className="py-2 pr-3 font-medium">Attended</th>
@@ -44,17 +49,24 @@ export function AdminAttendances({
               {rows.map((row) => {
                 const rowSaving = savingUid === row.uid;
                 const disableBase = !canEdit || rowSaving;
-                const disableBookFood = disableBase || !row.rsvp;
+                const disableRsvp = disableBase || !canEditRsvpAndBookFood;
+                const disableBookFood =
+                  disableBase || !row.rsvp || !canEditRsvpAndBookFood;
                 return (
                   <tr key={row.uid} className="border-b last:border-b-0">
                     <td className="py-2 pr-3">
                       {row.firstname} {row.lastname}
                     </td>
                     <td className="py-2 pr-3">
+                      {Array.isArray(row.allergies) && row.allergies.length > 0
+                        ? row.allergies.join(", ")
+                        : "-"}
+                    </td>
+                    <td className="py-2 pr-3">
                       <input
                         type="checkbox"
                         checked={row.rsvp}
-                        disabled={disableBase}
+                        disabled={disableRsvp}
                         onChange={(event) =>
                           onToggle?.(row.uid, "rsvp", event.target.checked)
                         }
@@ -74,14 +86,13 @@ export function AdminAttendances({
                       <input
                         type="checkbox"
                         checked={row.attended}
-                        disabled={disableBase}
+                        disabled={disableBase || !canEditAttended}
                         onChange={(event) =>
                           onToggle?.(row.uid, "attended", event.target.checked)
                         }
                       />
                     </td>
-                    <td className="py-2 pr-3 whitespace-nowrap">
-                      <span className="mr-2">{row.paymentStatus ?? "None"}</span>
+                    <td className="py-2 pr-3">
                       <input
                         type="checkbox"
                         checked={row.paymentPaid}

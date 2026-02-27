@@ -49,6 +49,15 @@ export function EventDetailView({
   attendanceSavingUid,
   onAttendanceToggle,
 }: Props) {
+  const hasStarted = (() => {
+    if (!event?.startDate) return false;
+    const start = new Date(event.startDate);
+    if (Number.isNaN(start.getTime())) return false;
+    return start.getTime() <= Date.now();
+  })();
+  const canEditRsvpAndBookFood = !hasStarted;
+  const canEditAttended = hasStarted;
+
   return (
     <div>
       {userCanRsvp && (
@@ -141,6 +150,8 @@ export function EventDetailView({
         loading={attendancesLoading}
         isAdmin={isAdmin}
         savingUid={attendanceSavingUid}
+        canEditRsvpAndBookFood={canEditRsvpAndBookFood}
+        canEditAttended={canEditAttended}
         onToggle={onAttendanceToggle}
       />
     </div>

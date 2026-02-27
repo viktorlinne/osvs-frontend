@@ -4,7 +4,10 @@ import { EventDetailEditForm, EventDetailView } from "../components/events";
 import type { EventFormState } from "../components/events/EventDetailEditForm";
 import { useAuth, useError } from "../context";
 import useFetch from "../hooks/useFetch";
-import { formatEventDisplayDate, toEventDateInputValue } from "./events/dateUtils";
+import {
+  formatEventDisplayDate,
+  toEventDateInputValue,
+} from "./events/dateUtils";
 import { getCurrentTimestampMs } from "../utils/time";
 import {
   getEvent,
@@ -26,10 +29,7 @@ type AttendanceField = "rsvp" | "bookFood" | "attended" | "paymentPaid";
 
 export const EventDetail = () => {
   const { id } = useParams<{ id: string }>();
-  const {
-    run,
-    data: event,
-  } = useFetch<EventRecord | null>();
+  const { run, data: event } = useFetch<EventRecord | null>();
   const { run: runAction, loading: saving } = useFetch<unknown>();
   const { run: runLodges, data: lodges } = useFetch<Lodge[]>();
   const { run: runLinked } = useFetch<Lodge[]>();
@@ -55,7 +55,9 @@ export const EventDetail = () => {
   const canEdit = Boolean(
     user && (user.roles ?? []).some((r) => ["Admin", "Editor"].includes(r)),
   );
-  const isAdmin = Boolean(user && (user.roles ?? []).some((r) => r === "Admin"));
+  const isAdmin = Boolean(
+    user && (user.roles ?? []).some((r) => r === "Admin"),
+  );
 
   const [form, setForm] = useState<EventFormState>({
     title: "",
@@ -69,7 +71,9 @@ export const EventDetail = () => {
   const [linkedIds, setLinkedIds] = useState<number[]>([]);
   const [rsvpStatus, setRsvpStatus] = useState<string | null>(null);
   const [bookFoodStatus, setBookFoodStatus] = useState<boolean | null>(null);
-  const [attendanceSavingUid, setAttendanceSavingUid] = useState<number | null>(null);
+  const [attendanceSavingUid, setAttendanceSavingUid] = useState<number | null>(
+    null,
+  );
 
   const canRsvp = (() => {
     if (!event?.startDate) return false;
@@ -80,7 +84,8 @@ export const EventDetail = () => {
   })();
 
   const canBookFood = (() => {
-    if (!event?.food || !event?.startDate || rsvpStatus !== "going") return false;
+    if (!event?.food || !event?.startDate || rsvpStatus !== "going")
+      return false;
     const start = new Date(event.startDate);
     if (Number.isNaN(start.getTime())) return false;
     return start.getTime() > getCurrentTimestampMs();
@@ -101,8 +106,7 @@ export const EventDetail = () => {
           description: fetchedEvent.description ?? "",
           startDate: toEventDateInputValue(fetchedEvent.startDate),
           endDate: toEventDateInputValue(fetchedEvent.endDate),
-          price:
-            fetchedEvent.price != null ? String(fetchedEvent.price) : "",
+          price: fetchedEvent.price != null ? String(fetchedEvent.price) : "",
           lodgeMeeting: Boolean(fetchedEvent.lodgeMeeting),
         });
       }
@@ -147,7 +151,8 @@ export const EventDetail = () => {
       runAttendances(async () => {
         const response = await listEventAttendances(eventId);
         const rows =
-          (response as { attendances?: EventAttendanceRow[] })?.attendances ?? [];
+          (response as { attendances?: EventAttendanceRow[] })?.attendances ??
+          [];
         return Array.isArray(rows) ? rows : [];
       }).catch(() => {
         // useFetch handles global error presentation
@@ -198,7 +203,9 @@ export const EventDetail = () => {
 
       await runAction(() => updateEvent(id, payload));
 
-      const toAdd = linkedIds.filter((lodgeId) => !originalLinkedIds.includes(lodgeId));
+      const toAdd = linkedIds.filter(
+        (lodgeId) => !originalLinkedIds.includes(lodgeId),
+      );
       const toRemove = originalLinkedIds.filter(
         (lodgeId) => !linkedIds.includes(lodgeId),
       );
@@ -214,15 +221,15 @@ export const EventDetail = () => {
 
       await run(async () => {
         const response = await getEvent(id);
-        const fetchedEvent = (response as { event?: EventRecord }).event ?? null;
+        const fetchedEvent =
+          (response as { event?: EventRecord }).event ?? null;
         if (fetchedEvent) {
           setForm({
             title: fetchedEvent.title ?? "",
             description: fetchedEvent.description ?? "",
             startDate: toEventDateInputValue(fetchedEvent.startDate),
             endDate: toEventDateInputValue(fetchedEvent.endDate),
-            price:
-              fetchedEvent.price != null ? String(fetchedEvent.price) : "",
+            price: fetchedEvent.price != null ? String(fetchedEvent.price) : "",
             lodgeMeeting: Boolean(fetchedEvent.lodgeMeeting),
           });
         }
@@ -248,7 +255,8 @@ export const EventDetail = () => {
       await runAttendances(async () => {
         const response = await listEventAttendances(eventId);
         const rows =
-          (response as { attendances?: EventAttendanceRow[] })?.attendances ?? [];
+          (response as { attendances?: EventAttendanceRow[] })?.attendances ??
+          [];
         return Array.isArray(rows) ? rows : [];
       });
     } catch {
@@ -264,11 +272,14 @@ export const EventDetail = () => {
     try {
       const response = await runAction(() => setFood(eventId, value));
       const payload = response as { bookFood?: boolean };
-      setBookFoodStatus(typeof payload.bookFood === "boolean" ? payload.bookFood : value);
+      setBookFoodStatus(
+        typeof payload.bookFood === "boolean" ? payload.bookFood : value,
+      );
       await runAttendances(async () => {
         const rowsResp = await listEventAttendances(eventId);
         const rows =
-          (rowsResp as { attendances?: EventAttendanceRow[] })?.attendances ?? [];
+          (rowsResp as { attendances?: EventAttendanceRow[] })?.attendances ??
+          [];
         return Array.isArray(rows) ? rows : [];
       });
     } catch {
@@ -301,7 +312,9 @@ export const EventDetail = () => {
     });
 
     try {
-      const payload = { [field]: value } as { [K in AttendanceField]?: boolean };
+      const payload = { [field]: value } as {
+        [K in AttendanceField]?: boolean;
+      };
       const response = await runAction(() =>
         patchEventAttendance(eventId, uid, payload),
       );
@@ -315,7 +328,8 @@ export const EventDetail = () => {
         await runAttendances(async () => {
           const rowsResp = await listEventAttendances(eventId);
           const rows =
-            (rowsResp as { attendances?: EventAttendanceRow[] })?.attendances ?? [];
+            (rowsResp as { attendances?: EventAttendanceRow[] })?.attendances ??
+            [];
           return Array.isArray(rows) ? rows : [];
         });
       }
@@ -324,7 +338,8 @@ export const EventDetail = () => {
       await runAttendances(async () => {
         const rowsResp = await listEventAttendances(eventId);
         const rows =
-          (rowsResp as { attendances?: EventAttendanceRow[] })?.attendances ?? [];
+          (rowsResp as { attendances?: EventAttendanceRow[] })?.attendances ??
+          [];
         return Array.isArray(rows) ? rows : [];
       }).catch(() => {
         // useFetch handles global error presentation
@@ -342,7 +357,7 @@ export const EventDetail = () => {
           relative="path"
           className="text-sm text-green-600 hover:text-green-700 hover:underline"
         >
-          {"<- Tillbaka"}
+          {"← Tillbaka"}
         </Link>
         {canEdit && !isEditRoute && (
           <Link
@@ -393,7 +408,7 @@ export const EventDetail = () => {
           )}
         </div>
       ) : (
-        <div className="text-gray-500">Ingen motesdata</div>
+        <div className="text-gray-500">Ingen mötesdata</div>
       )}
     </div>
   );
