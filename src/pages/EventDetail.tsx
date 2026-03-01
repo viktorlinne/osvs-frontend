@@ -10,6 +10,7 @@ import {
 } from "./events/dateUtils";
 import { getCurrentTimestampMs } from "../utils/time";
 import {
+  deleteEvent,
   getEvent,
   getFood,
   getRsvp,
@@ -242,6 +243,28 @@ export const EventDetail = () => {
     }
   }
 
+  async function handleDeleteEvent() {
+    if (!id || !isAdmin) return;
+
+    const eventId = Number(id);
+    if (!Number.isFinite(eventId)) {
+      setGlobalError("Missing event id");
+      return;
+    }
+
+    const confirmed = window.confirm(
+      "Är du säker på att du vill radera mötet?",
+    );
+    if (!confirmed) return;
+
+    try {
+      await runAction(() => deleteEvent(eventId));
+      navigate("/events");
+    } catch {
+      setGlobalError("Misslyckades att radera mötet");
+    }
+  }
+
   async function handleRsvp(status: "going" | "not-going") {
     if (!event) return;
 
@@ -381,6 +404,8 @@ export const EventDetail = () => {
               linkedIds={linkedIds}
               setLinkedIds={setLinkedIds}
               onSave={handleSave}
+              onDelete={handleDeleteEvent}
+              isAdmin={isAdmin}
               saving={saving}
               cancelTo={`/events/${id}`}
             />

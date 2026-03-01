@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams, Link, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../context";
-import { getPost, updatePost, listLodges } from "../services";
+import { getPost, updatePost, deletePost, listLodges } from "../services";
 import type { Post, Lodge } from "../types";
 import LodgeSelection from "../components/LodgeSelection";
 import { normalizeLodgeIds } from "../components/lodgeSelectionUtils";
@@ -15,14 +15,15 @@ export const PostDetail = () => {
   const { id } = useParams<{ id: string }>();
   const { setError: setGlobalError, clearError: clearGlobalError } = useError();
   const { data: post, run } = useFetch<Post | null>();
-  const { run: runSubmit, loading: submitting } = useFetch<{
-    success: boolean;
-  }>();
+  const { run: runSubmit, loading: submitting } = useFetch<unknown>();
   const navigate = useNavigate();
   const location = useLocation();
 
   const canEdit = Boolean(
     user && (user.roles ?? []).some((r) => ["Admin", "Editor"].includes(r)),
+  );
+  const isAdmin = Boolean(
+    user && (user.roles ?? []).some((r) => r === "Admin"),
   );
   const isEditRoute = location.pathname.endsWith("/edit");
 
@@ -149,6 +150,22 @@ export const PostDetail = () => {
     }
   }
 
+  async function handleDeletePost() {
+    if (!id || !isAdmin) return;
+
+    const confirmed = window.confirm(
+      "Är du säker på att du vill radera inlägget?",
+    );
+    if (!confirmed) return;
+
+    try {
+      await runSubmit(() => deletePost(id));
+      navigate("/posts");
+    } catch {
+      setGlobalError("Misslyckades att radera inlägget");
+    }
+  }
+
   return (
     <div className="flex flex-col items-center min-h-screen">
       <div className="max-w-3xl w-full mx-auto p-6">
@@ -258,6 +275,16 @@ export const PostDetail = () => {
               >
                 {submitting ? "Sparar..." : "Spara"}
               </button>
+              {isAdmin && (
+                <button
+                  type="button"
+                  className="bg-red-600 hover:bg-red-700 text-sm font-medium transition text-white px-4 py-2 rounded-md disabled:opacity-60"
+                  onClick={handleDeletePost}
+                  disabled={submitting}
+                >
+                  Radera
+                </button>
+              )}
             </div>
           </form>
         )}

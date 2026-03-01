@@ -65,4 +65,10 @@ export async function updatePost(
   return fetchData(api.put(`/posts/${id}`, payload));
 }
 
-export default { listPosts, getPost, createPost, updatePost };
+export async function deletePost(
+  id: number | string,
+): Promise<{ success?: boolean } | unknown> {
+  return fetchData<{ success?: boolean }>(api.delete(`/posts/${id}`));
+}
+
+export default { listPosts, getPost, createPost, updatePost, deletePost };

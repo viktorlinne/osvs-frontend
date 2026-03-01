@@ -17,6 +17,8 @@ type Props = {
   linkedIds: number[];
   setLinkedIds: React.Dispatch<React.SetStateAction<number[]>>;
   onSave: () => void | Promise<void>;
+  onDelete?: () => void | Promise<void>;
+  isAdmin: boolean;
   saving: boolean;
   cancelTo: string;
 };
@@ -28,6 +30,8 @@ export function EventDetailEditForm({
   linkedIds,
   setLinkedIds,
   onSave,
+  onDelete,
+  isAdmin,
   saving,
   cancelTo,
 }: Props) {
@@ -158,12 +162,23 @@ export function EventDetailEditForm({
 
       <div className="flex gap-x-4 py-2">
         <button
+          type="button"
           className="bg-green-600 hover:bg-green-700 text-sm font-medium transition text-white px-4 py-2 rounded-md"
           onClick={onSave}
           disabled={saving}
         >
           {saving ? "Sparar…" : "Spara"}
         </button>
+        {isAdmin && onDelete && (
+          <button
+            type="button"
+            className="bg-red-600 hover:bg-red-700 text-sm font-medium transition text-white px-4 py-2 rounded-md disabled:opacity-60"
+            onClick={onDelete}
+            disabled={saving}
+          >
+            Radera
+          </button>
+        )}
         <Link
           to={cancelTo}
           className="bg-gray-100 hover:bg-gray-200 transition px-4 py-2 rounded-md border"
