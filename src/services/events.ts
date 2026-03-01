@@ -13,6 +13,14 @@ export async function listEvents(): Promise<{ events: EventRecord[] }> {
   return fetchData<{ events: EventRecord[] }>(api.get("/events"));
 }
 
+export async function listUpcomingEvents(
+  limit = 10,
+): Promise<{ events: EventRecord[] }> {
+  return fetchData<{ events: EventRecord[] }>(
+    api.get(`/events/upcoming?limit=${limit}`),
+  );
+}
+
 export async function getEvent(
   id: number | string,
 ): Promise<{ event?: EventRecord | null } | unknown> {
@@ -132,6 +140,7 @@ export async function patchEventAttendance(
 
 export default {
   listEvents,
+  listUpcomingEvents,
   getEvent,
   listMyEvents,
   createEvent,
