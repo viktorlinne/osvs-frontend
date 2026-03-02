@@ -39,7 +39,7 @@ export const UploadDocument = () => {
           to="/documents"
           className="text-sm text-green-600 hover:text-green-700 hover:underline"
         >
-          Tillbaka
+          ← Tillbaka
         </Link>
         <h2 className="text-2xl font-bold mt-4 mb-4">Lägg till dokument</h2>
 

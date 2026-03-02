@@ -34,7 +34,11 @@ export const UploadRevisions = () => {
     const parsedLodgeId = Number(lodgeId);
 
     if (!normalizedTitle) return setError("Titel är obligatorisk");
-    if (!Number.isInteger(parsedYear) || parsedYear < 1900 || parsedYear > 3000) {
+    if (
+      !Number.isInteger(parsedYear) ||
+      parsedYear < 1900 ||
+      parsedYear > 3000
+    ) {
       return setError("År måste vara ett giltigt år");
     }
     if (!Number.isInteger(parsedLodgeId) || parsedLodgeId <= 0) {
@@ -63,9 +67,9 @@ export const UploadRevisions = () => {
           to="/revisions"
           className="text-sm text-green-600 hover:text-green-700 hover:underline"
         >
-          Tillbaka
+          ← Tillbaka
         </Link>
-        <h2 className="text-2xl font-bold mt-4 mb-4">Lagg till revision</h2>
+        <h2 className="text-2xl font-bold mt-4 mb-4">Lägg till revision</h2>
 
         <form onSubmit={onSubmit} className="bg-white p-4 rounded-md shadow">
           <div className="mb-4">
@@ -89,7 +93,7 @@ export const UploadRevisions = () => {
               id="revision-year"
               type="number"
               inputMode="numeric"
-              min={1900}
+              min={1924}
               max={3000}
               value={year}
               onChange={(e) => setYear(e.target.value)}
@@ -107,7 +111,7 @@ export const UploadRevisions = () => {
               onChange={(e) => setLodgeId(e.target.value)}
               className="w-full border rounded-md px-3 py-2 bg-white"
             >
-              <option value="">Valj loge</option>
+              <option value="">Välj loge</option>
               {(lodges ?? []).map((lodge) => (
                 <option key={lodge.id} value={String(lodge.id)}>
                   {lodge.name}
@@ -125,7 +129,10 @@ export const UploadRevisions = () => {
               type="file"
               accept=".pdf,application/pdf"
               onChange={(e) => {
-                const nextFile = e.target.files && e.target.files[0] ? e.target.files[0] : null;
+                const nextFile =
+                  e.target.files && e.target.files[0]
+                    ? e.target.files[0]
+                    : null;
                 setFile(nextFile);
               }}
             />

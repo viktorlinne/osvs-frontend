@@ -30,7 +30,9 @@ export const RevisionsPage = () => {
     const parsedYear =
       yearFilter.trim().length > 0 ? Number(yearFilter.trim()) : undefined;
     const parsedLodgeId =
-      selectedLodge.trim().length > 0 ? Number(selectedLodge.trim()) : undefined;
+      selectedLodge.trim().length > 0
+        ? Number(selectedLodge.trim())
+        : undefined;
 
     if (
       parsedYear !== undefined &&
@@ -64,7 +66,7 @@ export const RevisionsPage = () => {
             to="/revisions/create"
             className="flex text-white bg-green-600 hover:bg-green-700 text-sm font-medium transition px-3 py-2 rounded-md"
           >
-            Lagg till revision
+            Lägg till revision
           </Link>
         )}
       </div>
@@ -74,7 +76,7 @@ export const RevisionsPage = () => {
           htmlFor="revision-year-filter"
           className="flex flex-col text-sm font-medium text-gray-700"
         >
-          Filtrera pa ar
+          Filtrera på år
           <input
             id="revision-year-filter"
             type="number"
@@ -83,7 +85,7 @@ export const RevisionsPage = () => {
             max={3000}
             value={yearFilter}
             onChange={(e) => setYearFilter(e.target.value)}
-            placeholder="t.ex. 2026"
+            placeholder="ex. 2026"
             className="mt-1 rounded-md border border-gray-300 bg-white px-3 py-2 text-base text-gray-900 shadow-sm focus:border-green-600 focus:outline-none focus:ring-2 focus:ring-green-200"
           />
         </label>
@@ -92,7 +94,7 @@ export const RevisionsPage = () => {
           htmlFor="revision-lodge-filter"
           className="flex flex-col text-sm font-medium text-gray-700"
         >
-          Filtrera pa loge
+          Filtrera på loge
           <select
             id="revision-lodge-filter"
             value={selectedLodge}

@@ -27,7 +27,7 @@ export const DocumentsPage = () => {
             to="/documents/create"
             className="flex text-white bg-green-600 hover:bg-green-700 text-sm font-medium transition px-3 py-2 rounded-md"
           >
-            Lagg till dokument
+            Lägg till dokument
           </Link>
         )}
       </div>
