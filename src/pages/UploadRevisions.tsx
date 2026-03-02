@@ -4,6 +4,11 @@ import useFetch from "../hooks/useFetch";
 import { createRevision, listLodges } from "../services";
 import { useError } from "../context";
 import type { Lodge } from "../types";
+import {
+  buildPdfFormData,
+  validatePdfFile,
+  validateRequiredTitle,
+} from "../utils/pdfUpload";
 
 export const UploadRevisions = () => {
   const navigate = useNavigate();
@@ -33,7 +38,9 @@ export const UploadRevisions = () => {
     const parsedYear = Number(year);
     const parsedLodgeId = Number(lodgeId);
 
-    if (!normalizedTitle) return setError("Titel är obligatorisk");
+    const titleError = validateRequiredTitle(normalizedTitle);
+    if (titleError) return setError(titleError);
+
     if (
       !Number.isInteger(parsedYear) ||
       parsedYear < 1900 ||
@@ -44,13 +51,19 @@ export const UploadRevisions = () => {
     if (!Number.isInteger(parsedLodgeId) || parsedLodgeId <= 0) {
       return setError("Välj en loge");
     }
-    if (!file) return setError("Välj en PDF-fil");
 
-    const formData = new FormData();
-    formData.append("title", normalizedTitle);
-    formData.append("year", String(parsedYear));
-    formData.append("lodgeId", String(parsedLodgeId));
-    formData.append("file", file);
+    const fileError = validatePdfFile(file);
+    if (fileError) return setError(fileError);
+    if (!file) return;
+
+    const formData = buildPdfFormData(
+      {
+        title: normalizedTitle,
+        year: String(parsedYear),
+        lodgeId: String(parsedLodgeId),
+      },
+      file,
+    );
 
     try {
       await run(() => createRevision(formData));

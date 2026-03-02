@@ -1,5 +1,6 @@
 import api, { fetchData } from "./api";
 import type { Allergy } from "../types";
+import { readArrayField } from "./parsers/response";
 
 export type MemberAllergiesResponse = {
   allergies: Allergy[];
@@ -7,7 +8,7 @@ export type MemberAllergiesResponse = {
 
 export async function listAllergies(): Promise<Allergy[]> {
   const res = await fetchData(api.get("/allergies"));
-  return ((res as { allergies?: Allergy[] })?.allergies ?? []) as Allergy[];
+  return readArrayField<Allergy>(res, "allergies");
 }
 
 export async function setMemberAllergies(
@@ -17,9 +18,8 @@ export async function setMemberAllergies(
   const res = await fetchData(
     api.put(`/allergies/member/${String(matrikelnummer)}`, { allergyIds }),
   );
-  const payload = res as { allergies?: Allergy[] };
   return {
-    allergies: Array.isArray(payload?.allergies) ? payload.allergies : [],
+    allergies: readArrayField<Allergy>(res, "allergies"),
   };
 }
 

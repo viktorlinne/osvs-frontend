@@ -75,6 +75,12 @@ export const EventDetail = () => {
   const [attendanceSavingUid, setAttendanceSavingUid] = useState<number | null>(
     null,
   );
+  const hasStarted = (() => {
+    if (!event?.startDate) return false;
+    const start = new Date(event.startDate);
+    if (Number.isNaN(start.getTime())) return false;
+    return start.getTime() <= getCurrentTimestampMs();
+  })();
 
   const canRsvp = (() => {
     if (!event?.startDate) return false;
@@ -429,6 +435,7 @@ export const EventDetail = () => {
               attendances={attendances}
               attendanceSavingUid={attendanceSavingUid}
               onAttendanceToggle={handleAttendanceToggle}
+              hasStarted={hasStarted}
             />
           )}
         </div>

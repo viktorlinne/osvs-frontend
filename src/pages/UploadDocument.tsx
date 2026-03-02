@@ -3,6 +3,11 @@ import { Link, useNavigate } from "react-router-dom";
 import useFetch from "../hooks/useFetch";
 import { createDocument } from "../services";
 import { useError } from "../context";
+import {
+  buildPdfFormData,
+  validatePdfFile,
+  validateRequiredTitle,
+} from "../utils/pdfUpload";
 
 export const UploadDocument = () => {
   const navigate = useNavigate();
@@ -17,12 +22,14 @@ export const UploadDocument = () => {
     clearError();
 
     const normalizedTitle = title.trim();
-    if (!normalizedTitle) return setError("Titel är obligatorisk");
-    if (!file) return setError("Välj en PDF-fil");
+    const titleError = validateRequiredTitle(normalizedTitle);
+    if (titleError) return setError(titleError);
 
-    const formData = new FormData();
-    formData.append("title", normalizedTitle);
-    formData.append("file", file);
+    const fileError = validatePdfFile(file);
+    if (fileError) return setError(fileError);
+    if (!file) return;
+
+    const formData = buildPdfFormData({ title: normalizedTitle }, file);
 
     try {
       await run(() => createDocument(formData));

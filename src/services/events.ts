@@ -93,16 +93,6 @@ export async function getRsvp(
   return fetchData<{ rsvp: string | null }>(api.get(`/events/${eventId}/rsvp`));
 }
 
-export async function getEventStats(
-  eventId: number | string,
-): Promise<
-  { stats: { invited: number; answered: number; going: number } } | unknown
-> {
-  return fetchData<{
-    stats: { invited: number; answered: number; going: number };
-  }>(api.get(`/events/${eventId}/stats`));
-}
-
 export async function getFood(
   eventId: number | string,
 ): Promise<{ bookFood: boolean | null } | unknown> {
@@ -151,7 +141,6 @@ export default {
   listEventLodges,
   setRsvp,
   getRsvp,
-  getEventStats,
   getFood,
   setFood,
   listEventAttendances,

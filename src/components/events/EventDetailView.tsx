@@ -27,6 +27,7 @@ type Props = {
     field: AttendanceField,
     value: boolean,
   ) => void | Promise<void>;
+  hasStarted: boolean;
 };
 
 export function EventDetailView({
@@ -48,13 +49,8 @@ export function EventDetailView({
   attendances,
   attendanceSavingUid,
   onAttendanceToggle,
+  hasStarted,
 }: Props) {
-  const hasStarted = (() => {
-    if (!event?.startDate) return false;
-    const start = new Date(event.startDate);
-    if (Number.isNaN(start.getTime())) return false;
-    return start.getTime() <= Date.now();
-  })();
   const canEditRsvpAndBookFood = !hasStarted;
   const canEditAttended = hasStarted;
 
