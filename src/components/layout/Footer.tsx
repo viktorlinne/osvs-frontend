@@ -32,6 +32,12 @@ export const Footer: React.FC = () => {
                 Om VS
               </NavLink>
               <NavLink
+                to="/lodges"
+                className="px-3 py-1 text-sm rounded-md hover:bg-gray-100 transition"
+              >
+                Loger
+              </NavLink>
+              <NavLink
                 to="/gdpr"
                 className="px-3 py-1 text-sm rounded-md hover:bg-gray-100 transition"
               >
@@ -43,6 +49,7 @@ export const Footer: React.FC = () => {
               >
                 Kontakt
               </NavLink>
+
               {user ? (
                 <>
                   <NavLink
@@ -64,10 +71,16 @@ export const Footer: React.FC = () => {
                     Medlemmar
                   </NavLink>
                   <NavLink
-                    to="/lodges"
+                    to="/revisions"
                     className="px-3 py-1 text-sm rounded-md hover:bg-gray-100 transition"
                   >
-                    Lodger
+                    Revisioner
+                  </NavLink>
+                  <NavLink
+                    to="/documents"
+                    className="px-3 py-1 text-sm rounded-md hover:bg-gray-100 transition"
+                  >
+                    Dokument
                   </NavLink>
                 </>
               ) : null}

@@ -138,6 +138,23 @@ export type MembershipPayment = {
 
 export type EventPayment = MembershipPayment & { eid: number };
 
+export type Revision = {
+  id: number;
+  lid: number;
+  lodgeName: string;
+  title: string;
+  year: number;
+  picture?: string | null;
+  pictureUrl?: string | null;
+};
+
+export type SiteDocument = {
+  id: number;
+  title: string;
+  picture?: string | null;
+  pictureUrl?: string | null;
+};
+
 export type RevokedToken = { jti: string; expiresAt: string };
 export type RefreshToken = {
   token_hash: string;

@@ -113,7 +113,7 @@ export const NewsPage = () => {
           </select>
         </label>
       </div>
-      <div className="w-full max-w-3xl grid gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-3 mx-auto">
+      <div className="w-full max-w-3xl grid gap-6 grid-cols-1 mx-auto">
         {(posts ?? []).map((p) => (
           <Link
             to={`/posts/${p.id}`}

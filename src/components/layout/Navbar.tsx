@@ -171,6 +171,12 @@ export const Navbar: React.FC = () => {
                   <NavButton to="/members" onClick={() => setOpen(false)}>
                     Medlemmar
                   </NavButton>
+                  <NavButton to="/revisions" onClick={() => setOpen(false)}>
+                    Revisioner
+                  </NavButton>
+                  <NavButton to="/documents" onClick={() => setOpen(false)}>
+                    Dokument
+                  </NavButton>
                 </div>
               )}
             </div>
@@ -260,6 +266,12 @@ export const Navbar: React.FC = () => {
                     </NavButton>
                     <NavButton to="/members" onClick={() => setOpen(false)}>
                       Medlemmar
+                    </NavButton>
+                    <NavButton to="/revisions" onClick={() => setOpen(false)}>
+                      Revisioner
+                    </NavButton>
+                    <NavButton to="/documents" onClick={() => setOpen(false)}>
+                      Dokument
                     </NavButton>
                   </>
                 ) : null}

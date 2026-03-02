@@ -24,6 +24,10 @@ import {
 } from "../pages";
 import { AppLayout } from "../app/AppLayout";
 import AuthGuard from "./AuthGuard";
+import { RevisionsPage } from "../pages/RevisionsPage";
+import { DocumentsPage } from "../pages/DocumentsPage";
+import { UploadRevisions } from "../pages/UploadRevisions";
+import { UploadDocument } from "../pages/UploadDocument";
 
 const routes = [
   {
@@ -52,11 +56,11 @@ const routes = [
       },
       {
         path: "lodges",
-        element: <LodgesPage />
+        element: <LodgesPage />,
       },
       {
         path: "lodges/:id",
-        element: <LodgeDetail />
+        element: <LodgeDetail />,
       },
       // Protected routes
       {
@@ -200,6 +204,38 @@ const routes = [
         element: (
           <AuthGuard roles={["Admin", "Editor"]}>
             <CreateEvent />
+          </AuthGuard>
+        ),
+      },
+      {
+        path: "revisions",
+        element: (
+          <AuthGuard>
+            <RevisionsPage />
+          </AuthGuard>
+        ),
+      },
+      {
+        path: "revisions/create",
+        element: (
+          <AuthGuard roles={["Admin", "Editor"]}>
+            <UploadRevisions />
+          </AuthGuard>
+        ),
+      },
+      {
+        path: "documents",
+        element: (
+          <AuthGuard>
+            <DocumentsPage />
+          </AuthGuard>
+        ),
+      },
+      {
+        path: "documents/create",
+        element: (
+          <AuthGuard roles={["Admin", "Editor"]}>
+            <UploadDocument />
           </AuthGuard>
         ),
       },

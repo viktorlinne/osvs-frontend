@@ -6,4 +6,6 @@ export * from "./globalAuth";
 export * from "./lodges";
 export * from "./posts";
 export * from "./payments";
+export * from "./revisions";
+export * from "./documents";
 export * from "./users";
