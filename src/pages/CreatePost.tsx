@@ -24,7 +24,7 @@ export const CreatePost = () => {
     setValue,
     control,
   } = useForm<CreatePostForm>({
-    defaultValues: { title: "", description: "", lodgeIds: [] },
+    defaultValues: { title: "", description: "", lodgeIds: [], publicum: false },
   });
   const watchedLodges = useWatch({ control, name: "lodgeIds" }) ?? [];
 
@@ -59,6 +59,7 @@ export const CreatePost = () => {
     const fd = new FormData();
     fd.append("title", values.title.trim());
     fd.append("description", String(values.description ?? "").trim());
+    fd.append("publicum", values.publicum ? "1" : "0");
     const selectedLodges = normalizeLodgeIds(values.lodgeIds);
     if (selectedLodges.length === 0) {
       fd.append("lodgeIds", "");
@@ -156,7 +157,14 @@ export const CreatePost = () => {
               onChange={(e) =>
                 setPicture(e.target.files ? e.target.files[0] : null)
               }
-            />
+              />
+          </div>
+
+          <div className="mb-4 flex items-center gap-x-3">
+            <input id="publicum" type="checkbox" {...register("publicum")} />
+            <label htmlFor="publicum" className="font-medium">
+              Publicum
+            </label>
           </div>
 
           <LodgeSelection

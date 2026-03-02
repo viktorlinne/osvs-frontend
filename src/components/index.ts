@@ -2,5 +2,7 @@ export * from "./layout";
 export * from "./profile";
 export * from "./events";
 export * from "./EventList";
+export * from "./PublicumList";
+export * from "./PublicumDisplay";
 export * from "./LodgeSelection";
 export * from "./lodgeSelectionUtils";

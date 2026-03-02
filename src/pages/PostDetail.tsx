@@ -40,7 +40,7 @@ export const PostDetail = () => {
     control,
     formState: { errors },
   } = useForm<UpdatePostForm>({
-    defaultValues: { title: "", description: "", lodgeIds: [] },
+    defaultValues: { title: "", description: "", lodgeIds: [], publicum: false },
   });
   const watchedLodges = useWatch({ control, name: "lodgeIds" }) ?? [];
 
@@ -87,6 +87,7 @@ export const PostDetail = () => {
             title: normalized.title ?? "",
             description: normalized.description ?? "",
             lodgeIds: (normalized.lodges ?? []).map((l) => String(l.id)),
+            publicum: Boolean(normalized.publicum),
           });
         }
       } catch {
@@ -107,6 +108,7 @@ export const PostDetail = () => {
       fd.append("title", String(values.title).trim());
     if (values.description && String(values.description).trim())
       fd.append("description", String(values.description).trim());
+    fd.append("publicum", values.publicum ? "1" : "0");
     if (picture) fd.append("picture", picture);
     const selectedLodges = normalizeLodgeIds(values.lodgeIds);
     if (selectedLodges.length === 0) {
@@ -253,6 +255,13 @@ export const PostDetail = () => {
                   setPicture(e.target.files ? e.target.files[0] : null)
                 }
               />
+            </div>
+
+            <div className="mb-4 flex items-center gap-x-3">
+              <input id="publicum" type="checkbox" {...register("publicum")} />
+              <label htmlFor="publicum" className="font-medium">
+                Publicum
+              </label>
             </div>
 
             <LodgeSelection

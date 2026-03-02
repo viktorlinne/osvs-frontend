@@ -1,6 +1,30 @@
-import { BannerCarousel, EventList } from "../components/";
+import { useState } from "react";
+import {
+  BannerCarousel,
+  EventList,
+  PublicumDisplay,
+  PublicumList,
+} from "../components/";
+import type { PublicumPostListItem } from "../services/posts";
+
+const DEFAULT_PUBLICUM = {
+  title: "Ordensamfundet VS",
+  imageUrl:
+    "https://kmxmlfhkojdbuoktavul.supabase.co/storage/v1/object/public/static/stamlogen.jpg",
+  description: "",
+};
 
 export const HomePage = () => {
+  const [displayedPublicum, setDisplayedPublicum] = useState(DEFAULT_PUBLICUM);
+
+  const handlePublicumSelect = (post: PublicumPostListItem) => {
+    setDisplayedPublicum({
+      title: post.title,
+      imageUrl: post.pictureUrl,
+      description: post.description,
+    });
+  };
+
   return (
     <div className="min-h-screen">
       <BannerCarousel />
@@ -12,47 +36,14 @@ export const HomePage = () => {
             </h3>
             <EventList />
           </section>
-          <section>
-            <h3 className="text-2xl font-semibold text-green-600">
-              Ordensamfundet VS
-            </h3>
-            <img
-              src="https://kmxmlfhkojdbuoktavul.supabase.co/storage/v1/object/public/static/stamlogen.jpg"
-              alt="Stamlogen"
-            />
-          </section>
+          <PublicumDisplay
+            title={displayedPublicum.title}
+            imageUrl={displayedPublicum.imageUrl}
+            description={displayedPublicum.description}
+          />
           <section>
             <h3 className="text-2xl font-semibold text-green-600">Publicum</h3>
-            <ul>
-              <li>
-                <p className="italic">2024-09-07</p>
-                Kommande möte
-              </li>
-              <li>
-                <p className="italic">2024-09-07</p>
-                Kommande möte
-              </li>
-              <li>
-                <p className="italic">2024-09-07</p>
-                Kommande möte
-              </li>
-              <li>
-                <p className="italic">2024-09-07</p>
-                Kommande möte
-              </li>
-              <li>
-                <p className="italic">2024-09-07</p>
-                Kommande möte
-              </li>
-              <li>
-                <p className="italic">2024-09-07</p>
-                Kommande möte
-              </li>
-              <li>
-                <p className="italic">2024-09-07</p>
-                Kommande möte
-              </li>
-            </ul>
+            <PublicumList onSelect={handlePublicumSelect} />
           </section>
         </div>
       </div>

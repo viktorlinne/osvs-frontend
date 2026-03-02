@@ -74,6 +74,7 @@ export type CreatePostBody = {
   title?: string;
   description?: string;
   lodgeIds?: Array<number | string>;
+  publicum?: boolean;
 };
 
 export type UpdatePostBody = Partial<CreatePostBody>;

@@ -11,7 +11,6 @@ export type LodgeSelectionProps = {
   disabled?: boolean;
   emptyLabel?: string;
   loading?: boolean;
-  className?: string;
 };
 
 export function LodgeSelection({
@@ -23,7 +22,6 @@ export function LodgeSelection({
   disabled = false,
   emptyLabel = "Inga loger",
   loading = false,
-  className = "",
 }: LodgeSelectionProps) {
   const normalizedSelected = useMemo(
     () => normalizeLodgeIds(selectedIds),
@@ -42,12 +40,9 @@ export function LodgeSelection({
   }
 
   const hasLodges = Array.isArray(lodges) && lodges.length > 0;
-  const rootClassName = ["mb-4 w-full flex flex-col items-center", className]
-    .filter(Boolean)
-    .join(" ");
 
   return (
-    <div className={rootClassName}>
+    <div className="mb-4 w-full flex flex-col items-center">
       <fieldset className="text-center mb-1 w-full">
         <legend className="block font-medium">{label}</legend>
         <div

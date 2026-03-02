@@ -44,6 +44,7 @@ export type Post = {
   description: string;
   picture?: string | null;
   pictureUrl?: string | null;
+  publicum?: boolean;
   lodges?: Array<Pick<Lodge, "id" | "name">>;
 };
 
