@@ -1,7 +1,8 @@
-import { useEffect, useState } from "react";
+﻿import { useEffect, useState } from "react";
 import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
 import { EventDetailEditForm, EventDetailView } from "../components/events";
 import type { EventFormState } from "../components/events/EventDetailEditForm";
+import { PageContainer } from "../components";
 import { useAuth, useError } from "../context";
 import useFetch from "../hooks/useFetch";
 import {
@@ -259,7 +260,7 @@ export const EventDetail = () => {
     }
 
     const confirmed = window.confirm(
-      "Är du säker på att du vill radera mötet?",
+      "Ã„r du sÃ¤ker pÃ¥ att du vill radera mÃ¶tet?",
     );
     if (!confirmed) return;
 
@@ -267,7 +268,7 @@ export const EventDetail = () => {
       await runAction(() => deleteEvent(eventId));
       navigate("/events");
     } catch {
-      setGlobalError("Misslyckades att radera mötet");
+      setGlobalError("Misslyckades att radera mÃ¶tet");
     }
   }
 
@@ -379,29 +380,29 @@ export const EventDetail = () => {
   }
 
   return (
-    <div className="max-w-3xl w-full mx-auto p-6 min-h-screen">
-      <div className="flex items-center justify-between">
+    <PageContainer size="md" className="ui-page">
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <Link
           to=".."
           relative="path"
-          className="text-sm text-green-600 hover:text-green-700 hover:underline"
+          className="ui-link"
         >
-          ← Tillbaka
+          â† Tillbaka
         </Link>
         {canEdit && !isEditRoute && (
           <Link
             to={`/events/${id}/edit`}
-            className="text-sm font-medium text-white bg-green-600 hover:bg-green-700 transition px-3 py-2 rounded-md"
+            className="ui-btn ui-btn-primary ui-btn-sm"
           >
             Redigera
           </Link>
         )}
       </div>
 
-      <h2 className="text-2xl font-bold mt-4 mb-4">Mote</h2>
+      <h2 className="ui-page-title mb-4 mt-4">Mote</h2>
 
       {event ? (
-        <div className="bg-white p-4 rounded-md shadow">
+        <div className="ui-card">
           {isEditRoute && canEdit ? (
             <EventDetailEditForm
               form={form}
@@ -440,8 +441,11 @@ export const EventDetail = () => {
           )}
         </div>
       ) : (
-        <div className="text-gray-500">Ingen mötesdata</div>
+        <div className="text-neutral-600">Ingen mÃ¶tesdata</div>
       )}
-    </div>
+    </PageContainer>
   );
 };
+
+
+

@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+﻿import { Link } from "react-router-dom";
 import type { PublicUser } from "../../types";
 
 export const ProfileHeader = ({
@@ -8,31 +8,22 @@ export const ProfileHeader = ({
   user?: PublicUser | null;
   isEditRoute: boolean;
 }) => (
-  <div className="w-full flex flex-row items-center md:items-start justify-between gap-2">
-    <Link to=".." relative="path" className="text-sm text-green-600 hover:text-green-700 hover:underline">
-      ← Tillbaka
+  <div className="flex w-full flex-col items-stretch gap-2 md:flex-row md:items-start md:justify-between">
+    <Link to=".." relative="path" className="ui-link w-fit">
+      â† Tillbaka
     </Link>
-    <div className="flex flex-col md:flex-row items-center gap-2">
+    <div className="flex flex-col gap-2 sm:flex-row">
       {user && !isEditRoute && (
-        <Link
-          to="/profile/edit"
-          className="w-full text-sm font-medium text-white text-center bg-green-600 hover:bg-green-700 transition px-3 py-2 rounded-md"
-        >
+        <Link to="/profile/edit" className="ui-btn ui-btn-primary w-full sm:w-auto">
           Redigera
         </Link>
       )}
       {user && (
-        <Link
-          to="/profile/attended"
-          className="w-full text-sm font-medium text-white text-center bg-green-600 hover:bg-green-700 transition px-3 py-2 rounded-md"
-        >
-          Närvaro
+        <Link to="/profile/attended" className="ui-btn ui-btn-primary w-full sm:w-auto">
+          NÃ¤rvaro
         </Link>
       )}
-      <Link
-        to="/profile/memberships"
-        className="w-full text-sm font-medium text-white bg-green-600 hover:bg-green-700 transition px-3 py-2 rounded-md"
-      >
+      <Link to="/profile/memberships" className="ui-btn ui-btn-primary w-full sm:w-auto">
         Medlemskap
       </Link>
     </div>

@@ -1,4 +1,4 @@
-import type { EventAttendanceRow } from "../../types";
+﻿import type { EventAttendanceRow } from "../../types";
 
 type AttendanceField = "rsvp" | "bookFood" | "attended" | "paymentPaid";
 
@@ -29,92 +29,98 @@ export function AdminAttendances({
 
   return (
     <div className="mt-4">
-      <label className="block font-medium mb-1">Admin attendances</label>
-      <div className="border rounded-md p-2 bg-white max-h-80 overflow-auto">
+      <label className="ui-label mb-2">Admin attendances</label>
+      <div className="rounded-md border border-neutral-200 bg-white p-2">
         {loading ? (
-          <div className="text-sm text-gray-500 py-2">Laser deltagare...</div>
+          <div className="py-2 text-sm text-neutral-600">Laser deltagare...</div>
         ) : Array.isArray(rows) && rows.length > 0 ? (
-          <table className="w-full text-sm">
-            <thead className="sticky top-0 bg-white">
-              <tr className="text-left border-b">
-                <th className="py-2 pr-3 font-medium">Namn</th>
-                <th className="py-2 pr-3 font-medium">RSVP</th>
-                <th className="py-2 pr-3 font-medium">Boka mat</th>
-                <th className="py-2 pr-3 font-medium">Allergier</th>
-                <th className="py-2 pr-3 font-medium">Deltagande</th>
-                <th className="py-2 pr-3 font-medium">Betalning</th>
-              </tr>
-            </thead>
-            <tbody>
-              {rows.map((row) => {
-                const rowSaving = savingUid === row.uid;
-                const disableBase = !canEdit || rowSaving;
-                const disableRsvp = disableBase || !canEditRsvpAndBookFood;
-                const disableBookFood =
-                  disableBase || !row.rsvp || !canEditRsvpAndBookFood;
-                return (
-                  <tr key={row.uid} className="border-b last:border-b-0">
-                    <td className="py-2 pr-3">
-                      {row.firstname} {row.lastname}
-                    </td>
-                    <td className="py-2 pr-3">
-                      <input
-                        type="checkbox"
-                        checked={row.rsvp}
-                        disabled={disableRsvp}
-                        onChange={(event) =>
-                          onToggle?.(row.uid, "rsvp", event.target.checked)
-                        }
-                      />
-                    </td>
-                    <td className="py-2 pr-3">
-                      <input
-                        type="checkbox"
-                        checked={row.bookFood}
-                        disabled={disableBookFood}
-                        onChange={(event) =>
-                          onToggle?.(row.uid, "bookFood", event.target.checked)
-                        }
-                      />
-                    </td>
-                    <td className="py-2 pr-3">
-                      {Array.isArray(row.allergies) && row.allergies.length > 0
-                        ? row.allergies.join(", ")
-                        : "-"}
-                    </td>
-                    <td className="py-2 pr-3">
-                      <input
-                        type="checkbox"
-                        checked={row.attended}
-                        disabled={disableBase || !canEditAttended}
-                        onChange={(event) =>
-                          onToggle?.(row.uid, "attended", event.target.checked)
-                        }
-                      />
-                    </td>
-                    <td className="py-2 pr-3">
-                      <input
-                        type="checkbox"
-                        checked={row.paymentPaid}
-                        disabled={disableBase}
-                        onChange={(event) =>
-                          onToggle?.(
-                            row.uid,
-                            "paymentPaid",
-                            event.target.checked,
-                          )
-                        }
-                      />
-                    </td>
+          <div className="max-h-80 overflow-auto">
+            <div className="overflow-x-auto">
+              <table className="min-w-[42rem] w-full text-sm">
+                <thead className="sticky top-0 bg-white">
+                  <tr className="border-b border-neutral-200 text-left text-neutral-700">
+                    <th className="py-2 pr-3 font-medium">Namn</th>
+                    <th className="py-2 pr-3 font-medium">RSVP</th>
+                    <th className="py-2 pr-3 font-medium">Boka mat</th>
+                    <th className="py-2 pr-3 font-medium">Allergier</th>
+                    <th className="py-2 pr-3 font-medium">Deltagande</th>
+                    <th className="py-2 pr-3 font-medium">Betalning</th>
                   </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        ) : (
-          <div className="text-sm text-gray-500 py-2">
-            Inga inbjudna deltagare
+                </thead>
+                <tbody>
+                  {rows.map((row) => {
+                    const rowSaving = savingUid === row.uid;
+                    const disableBase = !canEdit || rowSaving;
+                    const disableRsvp = disableBase || !canEditRsvpAndBookFood;
+                    const disableBookFood =
+                      disableBase || !row.rsvp || !canEditRsvpAndBookFood;
+                    return (
+                      <tr key={row.uid} className="border-b border-neutral-200 last:border-b-0">
+                        <td className="py-2 pr-3">
+                          {row.firstname} {row.lastname}
+                        </td>
+                        <td className="py-2 pr-3">
+                          <input
+                            type="checkbox"
+                            checked={row.rsvp}
+                            disabled={disableRsvp}
+                            className="h-4 w-4 rounded border-neutral-300 text-primary-600 focus-visible:ring-primary-600"
+                            onChange={(event) =>
+                              onToggle?.(row.uid, "rsvp", event.target.checked)
+                            }
+                          />
+                        </td>
+                        <td className="py-2 pr-3">
+                          <input
+                            type="checkbox"
+                            checked={row.bookFood}
+                            disabled={disableBookFood}
+                            className="h-4 w-4 rounded border-neutral-300 text-primary-600 focus-visible:ring-primary-600"
+                            onChange={(event) =>
+                              onToggle?.(row.uid, "bookFood", event.target.checked)
+                            }
+                          />
+                        </td>
+                        <td className="py-2 pr-3">
+                          {Array.isArray(row.allergies) && row.allergies.length > 0
+                            ? row.allergies.join(", ")
+                            : "-"}
+                        </td>
+                        <td className="py-2 pr-3">
+                          <input
+                            type="checkbox"
+                            checked={row.attended}
+                            disabled={disableBase || !canEditAttended}
+                            className="h-4 w-4 rounded border-neutral-300 text-primary-600 focus-visible:ring-primary-600"
+                            onChange={(event) =>
+                              onToggle?.(row.uid, "attended", event.target.checked)
+                            }
+                          />
+                        </td>
+                        <td className="py-2 pr-3">
+                          <input
+                            type="checkbox"
+                            checked={row.paymentPaid}
+                            disabled={disableBase}
+                            className="h-4 w-4 rounded border-neutral-300 text-primary-600 focus-visible:ring-primary-600"
+                            onChange={(event) =>
+                              onToggle?.(
+                                row.uid,
+                                "paymentPaid",
+                                event.target.checked,
+                              )
+                            }
+                          />
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
           </div>
+        ) : (
+          <div className="py-2 text-sm text-neutral-600">Inga inbjudna deltagare</div>
         )}
       </div>
     </div>

@@ -1,4 +1,4 @@
-import type { Achievement, PublicUser, Lodge } from "../../types";
+﻿import type { Achievement, Lodge, PublicUser } from "../../types";
 
 export const AchievementsPanel = ({
   user,
@@ -26,7 +26,7 @@ export const AchievementsPanel = ({
   assignAchievement: (
     targetUserId: number,
     achievementId: number,
-    awardedAt?: string
+    awardedAt?: string,
   ) => Promise<void>;
   lodge?: Lodge | null;
   lodges?: Lodge[];
@@ -36,24 +36,24 @@ export const AchievementsPanel = ({
   isEditRoute?: boolean;
 }) => {
   return (
-    <div className="w-full flex flex-col gap-4 mb-4">
+    <div className="mb-4 flex w-full flex-col gap-4">
       <div className="flex flex-col items-center">
         <img
-          className="rounded-full w-28 h-28 md:w-40 md:h-40 object-cover mb-1"
+          className="mb-1 h-28 w-28 rounded-full object-cover md:h-40 md:w-40"
           src={user?.pictureUrl}
           alt={`${user?.firstname} ${user?.lastname}`}
         />
 
-        <div className="text-left mb-4">
-          <div className="text-sm text-gray-700 italic">
+        <div className="mb-4 text-left">
+          <div className="text-sm italic text-neutral-700">
             {user?.firstname} {user?.lastname}
           </div>
         </div>
 
-        <fieldset className="text-center mb-1 w-full">
-          <legend className="block font-medium">Loge</legend>
+        <fieldset className="mb-1 w-full text-center">
+          <legend className="ui-label text-center">Loge</legend>
           {isEditRoute && lodges && setSelectedLid ? (
-            <div className="flex flex-col md:flex-row items-center justify-center gap-2 py-2">
+            <div className="flex flex-col items-center justify-center gap-2 py-2 md:flex-row">
               <select
                 id="lodge"
                 name="lodge"
@@ -61,7 +61,7 @@ export const AchievementsPanel = ({
                 onChange={(e) =>
                   setSelectedLid(e.target.value ? Number(e.target.value) : null)
                 }
-                className="border rounded-md px-3 py-2 w-full md:w-auto"
+                className="ui-select w-full md:w-auto"
               >
                 {lodges.map((l) => (
                   <option key={l.id} value={l.id}>
@@ -71,34 +71,29 @@ export const AchievementsPanel = ({
               </select>
             </div>
           ) : (
-            <div className="text-sm text-gray-700 mb-4">
-              {lodge?.name ?? "Ingen loge"}
-            </div>
+            <div className="mb-4 text-sm text-neutral-700">{lodge?.name ?? "Ingen loge"}</div>
           )}
         </fieldset>
 
-        <div className="text-center mb-1">
-          <label htmlFor="achievementsList" className="block font-medium">Utmärkelser</label>
+        <div className="mb-1 text-center">
+          <label htmlFor="achievementsList" className="ui-label text-center">UtmÃ¤rkelser</label>
           {achievements && achievements.length > 0 ? (
-            <select id="achievementsList" name="achievementsList" className="w-auto border rounded-md px-4 py-2 mb-4">
+            <select id="achievementsList" name="achievementsList" className="ui-select w-auto">
               {achievements.map((a) => (
                 <option key={a.id} value={a.id}>
-                  {a.title} —{" "}
-                  {a.awardedAt
-                    ? new Date(a.awardedAt).toLocaleDateString()
-                    : ""}
+                  {a.title} â€” {a.awardedAt ? new Date(a.awardedAt).toLocaleDateString() : ""}
                 </option>
               ))}
             </select>
           ) : (
-            <div className="text-sm text-gray-500 mb-4">Inga utmärkelser</div>
+            <div className="mb-4 text-sm text-neutral-600">Inga utmÃ¤rkelser</div>
           )}
         </div>
 
         {isEditRoute && canAward ? (
-          <div className="text-center mb-1">
-            <label htmlFor="awardSelect" className="block font-medium">Tilldela ny utmärkelse</label>
-            <div className="flex flex-col md:flex-row gap-2">
+          <div className="mb-1 text-center">
+            <label htmlFor="awardSelect" className="ui-label text-center">Tilldela ny utmÃ¤rkelse</label>
+            <div className="flex flex-col gap-2 md:flex-row">
               <select
                 id="awardSelect"
                 name="award"
@@ -106,9 +101,9 @@ export const AchievementsPanel = ({
                 onChange={(e) =>
                   setSelectedAid(e.target.value ? Number(e.target.value) : null)
                 }
-                className="border rounded-md px-3 py-2 w-full"
+                className="ui-select w-full"
               >
-                <option value="">Välj utmärkelse</option>
+                <option value="">VÃ¤lj utmÃ¤rkelse</option>
                 {available.map((opt) => (
                   <option key={opt.id} value={opt.id}>
                     {opt.title}
@@ -121,9 +116,8 @@ export const AchievementsPanel = ({
                 type="date"
                 value={awardDate}
                 onChange={(e) => setAwardDate(e.target.value)}
-                className="border rounded-md px-3 py-2 w-full"
+                className="ui-input w-full"
               />
-              {/* Assignment is handled by parent consolidated save */}
             </div>
           </div>
         ) : null}

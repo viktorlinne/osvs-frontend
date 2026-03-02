@@ -1,8 +1,14 @@
-import { useEffect, useState } from "react";
+﻿import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import {
+  PageContainer,
+  inputClass,
+  labelClass,
+  selectClass,
+} from "../components";
+import { useAuth } from "../context";
 import useFetch from "../hooks/useFetch";
 import { listLodges, listRevisions } from "../services";
-import { useAuth } from "../context";
 import type { Lodge, Revision } from "../types";
 
 export const RevisionsPage = () => {
@@ -58,25 +64,19 @@ export const RevisionsPage = () => {
   }, [run, yearFilter, selectedLodge]);
 
   return (
-    <div className="flex flex-col items-center min-h-screen p-6">
-      <div className="w-full max-w-3xl flex flex-wrap items-center justify-between gap-3 mb-4">
-        <h2 className="text-2xl font-bold">Revisioner</h2>
+    <PageContainer size="xl" className="ui-page">
+      <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+        <h2 className="ui-page-title">Revisioner</h2>
         {canCreate && (
-          <Link
-            to="/revisions/create"
-            className="flex text-white bg-green-600 hover:bg-green-700 text-sm font-medium transition px-3 py-2 rounded-md"
-          >
-            Lägg till revision
+          <Link to="/revisions/create" className="ui-btn ui-btn-primary">
+            LÃ¤gg till revision
           </Link>
         )}
       </div>
 
-      <div className="w-full max-w-3xl flex flex-col sm:flex-row sm:items-end gap-3 mb-6">
-        <label
-          htmlFor="revision-year-filter"
-          className="flex flex-col text-sm font-medium text-gray-700"
-        >
-          Filtrera på år
+      <div className="mb-6 grid grid-cols-1 gap-3 md:grid-cols-2">
+        <label htmlFor="revision-year-filter" className={labelClass}>
+          Filtrera pÃ¥ Ã¥r
           <input
             id="revision-year-filter"
             type="number"
@@ -86,20 +86,17 @@ export const RevisionsPage = () => {
             value={yearFilter}
             onChange={(e) => setYearFilter(e.target.value)}
             placeholder="ex. 2026"
-            className="mt-1 rounded-md border border-gray-300 bg-white px-3 py-2 text-base text-gray-900 shadow-sm focus:border-green-600 focus:outline-none focus:ring-2 focus:ring-green-200"
+            className={inputClass}
           />
         </label>
 
-        <label
-          htmlFor="revision-lodge-filter"
-          className="flex flex-col text-sm font-medium text-gray-700"
-        >
-          Filtrera på loge
+        <label htmlFor="revision-lodge-filter" className={labelClass}>
+          Filtrera pÃ¥ loge
           <select
             id="revision-lodge-filter"
             value={selectedLodge}
             onChange={(e) => setSelectedLodge(e.target.value)}
-            className="mt-1 rounded-md border border-gray-300 bg-white px-3 py-2 text-base text-gray-900 shadow-sm focus:border-green-600 focus:outline-none focus:ring-2 focus:ring-green-200"
+            className={selectClass}
           >
             <option value="">Alla loger</option>
             {(lodges ?? []).map((lodge) => (
@@ -111,17 +108,17 @@ export const RevisionsPage = () => {
         </label>
       </div>
 
-      <div className="w-full max-w-3xl grid gap-4">
+      <div className="grid w-full gap-4">
         {(revisions ?? []).map((revision) => (
           <a
             key={revision.id}
             href={revision.pictureUrl ?? "#"}
             target="_blank"
             rel="noreferrer"
-            className="block p-4 bg-white rounded-md shadow-md hover:shadow-lg transition"
+            className="ui-card ui-card-hover block"
           >
-            <div className="text-lg font-semibold">{revision.title}</div>
-            <div className="text-sm text-gray-600">
+            <div className="text-lg font-semibold text-neutral-900">{revision.title}</div>
+            <div className="text-sm text-neutral-600">
               {revision.lodgeName} - {revision.year}
             </div>
           </a>
@@ -129,8 +126,8 @@ export const RevisionsPage = () => {
       </div>
 
       {!loading && (revisions ?? []).length === 0 && (
-        <p className="mt-6 text-gray-600">Inga revisioner hittades.</p>
+        <p className="mt-6 text-neutral-600">Inga revisioner hittades.</p>
       )}
-    </div>
+    </PageContainer>
   );
 };

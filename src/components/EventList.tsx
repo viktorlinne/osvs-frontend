@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+﻿import { useEffect, useState } from "react";
 import { listUpcomingEvents } from "../services/events";
 import type { Event as EventRecord } from "../types";
 
@@ -43,22 +43,22 @@ export function EventList() {
     };
   }, []);
 
-  if (loading) return <p className="text-sm text-gray-500">Laddar möten...</p>;
+  if (loading) return <p className="text-sm text-neutral-600">Laddar mÃ¶ten...</p>;
   if (failed) {
-    return <p className="text-sm text-red-600">Kunde inte hämta kommande möten</p>;
+    return <p className="text-sm text-danger-600">Kunde inte hÃ¤mta kommande mÃ¶ten</p>;
   }
   if (!events.length) {
-    return <p className="text-sm text-gray-500">Inga kommande möten</p>;
+    return <p className="text-sm text-neutral-600">Inga kommande mÃ¶ten</p>;
   }
 
   return (
     <ul className="space-y-2">
       {events.map((event) => (
-        <li key={event.id} className="border-b pb-2">
-          <p className="italic text-sm text-gray-600">
+        <li key={event.id} className="border-b border-neutral-200 pb-2">
+          <p className="text-sm italic text-neutral-600">
             {formatDateTimeSv(event.startDate)}
           </p>
-          <p>{event.title}</p>
+          <p className="text-neutral-900">{event.title}</p>
         </li>
       ))}
     </ul>

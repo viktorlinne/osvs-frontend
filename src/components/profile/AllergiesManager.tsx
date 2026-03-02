@@ -1,6 +1,6 @@
-import { useEffect, useState } from "react";
-import type { PublicUser } from "../../types";
+﻿import { useEffect, useState } from "react";
 import { listAllergies } from "../../services/allergies";
+import type { PublicUser } from "../../types";
 
 type Allergy = { id: number; title: string };
 type UserWithAllergies = PublicUser & {
@@ -66,13 +66,13 @@ export const AllergiesManager = ({
   }
 
   return (
-    <div className="mb-4 w-full flex flex-col items-center">
-      <fieldset className="text-center mb-1 w-full">
-        <legend className="block font-medium">Allergier</legend>
+    <div className="mb-4 w-full">
+      <fieldset className="w-full">
+        <legend className="ui-label text-center">Allergier</legend>
         {isEditRoute ? (
-          <div className="flex flex-col items-center gap-2 py-2 w-full">
+          <div className="flex w-full flex-col items-center gap-2 py-2">
             {allergies.length > 0 ? (
-              <div className="border rounded-md px-3 py-2 w-full md:w-[28rem] max-h-48 overflow-y-auto bg-white">
+              <div className="max-h-48 w-full overflow-y-auto rounded-md border border-neutral-200 bg-white px-3 py-2 md:w-[28rem]">
                 <div className="flex flex-col gap-2">
                   {allergies.map((allergy) => (
                     <label
@@ -86,23 +86,22 @@ export const AllergiesManager = ({
                         type="checkbox"
                         value={allergy.id}
                         checked={effectiveSelected?.includes(allergy.id) ?? false}
+                        className="h-4 w-4 rounded border-neutral-300 text-primary-600 focus-visible:ring-primary-600"
                         onChange={(event) =>
                           toggleAllergy(allergy.id, event.target.checked)
                         }
                       />
-                      <span className="text-sm text-gray-700">
-                        {allergy.title}
-                      </span>
+                      <span className="text-sm text-neutral-700">{allergy.title}</span>
                     </label>
                   ))}
                 </div>
               </div>
             ) : (
-              <div className="text-sm text-gray-500 py-2">Inga allergier</div>
+              <div className="py-2 text-sm text-neutral-600">Inga allergier</div>
             )}
           </div>
         ) : (
-          <div className="text-sm text-gray-700 mb-4 py-2">
+          <div className="mb-4 py-2 text-sm text-neutral-700">
             {effectiveSelected && effectiveSelected.length > 0
               ? effectiveSelected
                   .map(

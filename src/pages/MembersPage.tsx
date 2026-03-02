@@ -1,12 +1,17 @@
-import { useEffect, useState, useCallback } from "react";
+﻿import { useCallback, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import {
+  PageContainer,
+  inputClass,
+  selectClass,
+} from "../components";
 import { useAuth } from "../context";
 import useFetch from "../hooks/useFetch";
-import type { PublicUser } from "../types";
 import { listAchievements } from "../services/achievements";
 import { listLodges } from "../services/lodges";
 import { listOfficials } from "../services/officials";
 import { listUsers as listUsersService } from "../services/users";
+import type { PublicUser } from "../types";
 
 export const MembersPage = () => {
   const { run, data: members } = useFetch<PublicUser[]>();
@@ -26,7 +31,6 @@ export const MembersPage = () => {
   const [lodgeId, setLodgeId] = useState<number | null>(null);
   const [officialId, setOfficialId] = useState<number | null>(null);
 
-  // Fetch static lists via useFetch so errors go through `useError`.
   useEffect(() => {
     runAchievements(() => listAchievements()).catch(() => {
       // handled by useFetch
@@ -47,9 +51,9 @@ export const MembersPage = () => {
           achievementId,
           lodgeId,
           officialId,
-        })
+        }),
       ),
-    [run, debouncedQuery, achievementId, lodgeId, officialId]
+    [run, debouncedQuery, achievementId, lodgeId, officialId],
   );
 
   useEffect(() => {
@@ -58,111 +62,104 @@ export const MembersPage = () => {
     });
   }, [doFetch]);
 
-  // Debounce query to avoid fetching on every keystroke.
   useEffect(() => {
     const t = setTimeout(() => setDebouncedQuery(query), 1000);
     return () => clearTimeout(t);
   }, [query]);
 
   return (
-    <div className="flex flex-col items-center min-h-screen p-6">
-      <div className="w-full max-w-4xl mx-auto p-4 md:p-6">
-        <h2 className="text-2xl font-bold mb-4">Medlemmar</h2>
-        <div className="flex flex-col md:flex-row gap-y-2 md:gap-y-0 md:gap-x-4 py-2 mb-4">
-          <input
-            id="search"
-            name="search"
-            type="search"
-            placeholder="Sök namn, e-post eller matrikelnummer"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            className="flex-1 px-4 py-2 border rounded-md"
-          />
-          <select
-            id="achievementFilter"
-            name="achievementFilter"
-            value={achievementId ?? ""}
-            onChange={(e) =>
-              setAchievementId(e.target.value ? Number(e.target.value) : null)
-            }
-            className="px-4 py-2 border rounded-md"
-          >
-            <option value="">Alla grader</option>
-            {(achievements ?? []).map((a) => (
-              <option key={a.id} value={a.id}>
-                {a.title}
-              </option>
-            ))}
-          </select>
-          <select
-            id="lodgeFilter"
-            name="lodgeFilter"
-            value={lodgeId ?? ""}
-            onChange={(e) =>
-              setLodgeId(e.target.value ? Number(e.target.value) : null)
-            }
-            className="px-4 py-2 border rounded-md"
-          >
-            <option value="">Alla loger</option>
-            {(lodges ?? []).map((l) => (
-              <option key={l.id} value={l.id}>
-                {l.name}
-              </option>
-            ))}
-          </select>
-          <select
-            id="officialFilter"
-            name="officialFilter"
-            value={officialId ?? ""}
-            onChange={(e) =>
-              setOfficialId(e.target.value ? Number(e.target.value) : null)
-            }
-            className="px-4 py-2 border rounded-md"
-          >
-            <option value="">Alla tjänster</option>
-            {(officials ?? []).map((o) => (
-              <option key={o.id} value={o.id}>
-                {o.title}
-              </option>
-            ))}
-          </select>
-          {user &&
-            (user.roles ?? []).some((r) => ["Admin", "Editor"].includes(r)) && (
-              <Link
-                to="/members/create"
-                className="flex items-center text-white bg-green-600 hover:bg-green-700 text-sm font-medium transition px-3 py-2 rounded-md"
-              >
-                Skapa
-              </Link>
-            )}
-        </div>
+    <PageContainer size="xl" className="ui-page">
+      <h2 className="ui-page-title mb-4">Medlemmar</h2>
 
-        {Array.isArray(members) && (
-          <div className="w-full grid gap-4 grid-cols-1 lg:grid-cols-3">
-            {members.map((member: PublicUser) => (
-              <Link
-                to={`/members/${member.matrikelnummer}`}
-                key={member.matrikelnummer}
-                className="p-4 bg-white rounded-md shadow-md hover:shadow-lg transition flex items-center gap-x-4"
-              >
-                <img
-                  src={member.pictureUrl}
-                  alt={`${member.firstname} ${member.lastname}`}
-                  className="w-16 h-16 rounded-full flex-shrink-0"
-                />
-                <div className="min-w-0">
-                  <div className="font-semibold truncate">
-                    {member.firstname} {member.lastname}
-                  </div>
-                  <div className="text-sm text-gray-500 truncate">
-                    {member.email}
-                  </div>
-                </div>
-              </Link>
-            ))}
-          </div>
-        )}
+      <div className="mb-4 grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-5">
+        <input
+          id="search"
+          name="search"
+          type="search"
+          placeholder="SÃ¶k namn, e-post eller matrikelnummer"
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          className={inputClass}
+        />
+        <select
+          id="achievementFilter"
+          name="achievementFilter"
+          value={achievementId ?? ""}
+          onChange={(e) =>
+            setAchievementId(e.target.value ? Number(e.target.value) : null)
+          }
+          className={selectClass}
+        >
+          <option value="">Alla grader</option>
+          {(achievements ?? []).map((a) => (
+            <option key={a.id} value={a.id}>
+              {a.title}
+            </option>
+          ))}
+        </select>
+        <select
+          id="lodgeFilter"
+          name="lodgeFilter"
+          value={lodgeId ?? ""}
+          onChange={(e) =>
+            setLodgeId(e.target.value ? Number(e.target.value) : null)
+          }
+          className={selectClass}
+        >
+          <option value="">Alla loger</option>
+          {(lodges ?? []).map((l) => (
+            <option key={l.id} value={l.id}>
+              {l.name}
+            </option>
+          ))}
+        </select>
+        <select
+          id="officialFilter"
+          name="officialFilter"
+          value={officialId ?? ""}
+          onChange={(e) =>
+            setOfficialId(e.target.value ? Number(e.target.value) : null)
+          }
+          className={selectClass}
+        >
+          <option value="">Alla tjÃ¤nster</option>
+          {(officials ?? []).map((o) => (
+            <option key={o.id} value={o.id}>
+              {o.title}
+            </option>
+          ))}
+        </select>
+        {user &&
+          (user.roles ?? []).some((r) => ["Admin", "Editor"].includes(r)) && (
+            <Link to="/members/create" className="ui-btn ui-btn-primary w-full sm:w-auto">
+              Skapa
+            </Link>
+          )}
       </div>
-    </div>
+
+      {Array.isArray(members) && (
+        <div className="grid w-full grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+          {members.map((member: PublicUser) => (
+            <Link
+              to={`/members/${member.matrikelnummer}`}
+              key={member.matrikelnummer}
+              className="ui-card ui-card-hover flex items-center gap-4"
+            >
+              <img
+                src={member.pictureUrl}
+                alt={`${member.firstname} ${member.lastname}`}
+                className="h-16 w-16 shrink-0 rounded-full"
+              />
+              <div className="min-w-0">
+                <div className="truncate font-semibold text-neutral-900">
+                  {member.firstname} {member.lastname}
+                </div>
+                <div className="truncate text-sm text-neutral-600">{member.email}</div>
+              </div>
+            </Link>
+          ))}
+        </div>
+      )}
+    </PageContainer>
   );
 };

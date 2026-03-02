@@ -1,4 +1,4 @@
-import type { Role } from "../../types";
+﻿import type { Role } from "../../types";
 
 export const RolesManager = ({
   rolesList,
@@ -20,15 +20,15 @@ export const RolesManager = ({
   if (!canEditRoles || !isEditRoute) return null;
 
   return (
-    <div className="mb-4 w-full flex flex-col items-center">
-      <fieldset className="text-center mb-1">
-        <legend className="block font-medium">Roller</legend>
-        <div className="flex flex-col md:flex-row gap-2 py-2">
+    <div className="mb-4 w-full">
+      <fieldset className="w-full text-center">
+        <legend className="ui-label text-center">Roller</legend>
+        <div className="flex flex-col gap-2 py-2 md:flex-row md:flex-wrap md:justify-center">
           {rolesList.map((r) => (
             <label
               key={r.id}
               htmlFor={`role-${r.id}`}
-              className="inline-flex items-center gap-2 border rounded-md px-3 py-2"
+              className="inline-flex items-center gap-2 rounded-md border border-neutral-200 px-3 py-2 text-sm text-neutral-700"
             >
               <input
                 id={`role-${r.id}`}
@@ -36,6 +36,7 @@ export const RolesManager = ({
                 type="checkbox"
                 value={r.id}
                 checked={selectedRoleIds.includes(r.id)}
+                className="h-4 w-4 rounded border-neutral-300 text-primary-600 focus-visible:ring-primary-600"
                 onChange={(e) => {
                   const next = e.target.checked
                     ? [...selectedRoleIds, r.id]
@@ -43,10 +44,9 @@ export const RolesManager = ({
                   setSelectedRoleIds(next);
                 }}
               />
-              <span className="text-sm text-gray-700">{r.name}</span>
+              <span>{r.name}</span>
             </label>
           ))}
-          {/* Role save is handled by parent consolidated save */}
         </div>
       </fieldset>
     </div>

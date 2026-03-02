@@ -1,8 +1,14 @@
-import { useEffect, useState, type FormEvent } from "react";
+﻿import { useEffect, useState, type FormEvent } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import {
+  PageContainer,
+  inputClass,
+  labelClass,
+  selectClass,
+} from "../components";
+import { useError } from "../context";
 import useFetch from "../hooks/useFetch";
 import { createRevision, listLodges } from "../services";
-import { useError } from "../context";
 import type { Lodge } from "../types";
 import {
   buildPdfFormData,
@@ -46,10 +52,10 @@ export const UploadRevisions = () => {
       parsedYear < 1900 ||
       parsedYear > 3000
     ) {
-      return setError("År måste vara ett giltigt år");
+      return setError("Ã…r mÃ¥ste vara ett giltigt Ã¥r");
     }
     if (!Number.isInteger(parsedLodgeId) || parsedLodgeId <= 0) {
-      return setError("Välj en loge");
+      return setError("VÃ¤lj en loge");
     }
 
     const fileError = validatePdfFile(file);
@@ -74,92 +80,84 @@ export const UploadRevisions = () => {
   }
 
   return (
-    <div className="flex flex-col items-center min-h-screen p-6">
-      <div className="max-w-3xl w-full mx-auto p-0">
-        <Link
-          to="/revisions"
-          className="text-sm text-green-600 hover:text-green-700 hover:underline"
-        >
-          ← Tillbaka
-        </Link>
-        <h2 className="text-2xl font-bold mt-4 mb-4">Lägg till revision</h2>
+    <PageContainer size="md" className="ui-page">
+      <Link to="/revisions" className="ui-link">
+        â† Tillbaka
+      </Link>
+      <h2 className="ui-page-title mb-4 mt-4">LÃ¤gg till revision</h2>
 
-        <form onSubmit={onSubmit} className="bg-white p-4 rounded-md shadow">
-          <div className="mb-4">
-            <label htmlFor="revision-title" className="block font-medium mb-1">
-              Titel
-            </label>
-            <input
-              id="revision-title"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              className="w-full border rounded-md px-3 py-2"
-              autoComplete="off"
-            />
-          </div>
+      <form onSubmit={onSubmit} className="ui-card">
+        <div className="mb-4">
+          <label htmlFor="revision-title" className={labelClass}>
+            Titel
+          </label>
+          <input
+            id="revision-title"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            className={inputClass}
+            autoComplete="off"
+          />
+        </div>
 
-          <div className="mb-4">
-            <label htmlFor="revision-year" className="block font-medium mb-1">
-              År
-            </label>
-            <input
-              id="revision-year"
-              type="number"
-              inputMode="numeric"
-              min={1924}
-              max={3000}
-              value={year}
-              onChange={(e) => setYear(e.target.value)}
-              className="w-full border rounded-md px-3 py-2"
-            />
-          </div>
+        <div className="mb-4">
+          <label htmlFor="revision-year" className={labelClass}>
+            Ã…r
+          </label>
+          <input
+            id="revision-year"
+            type="number"
+            inputMode="numeric"
+            min={1924}
+            max={3000}
+            value={year}
+            onChange={(e) => setYear(e.target.value)}
+            className={inputClass}
+          />
+        </div>
 
-          <div className="mb-4">
-            <label htmlFor="revision-lodge" className="block font-medium mb-1">
-              Loge
-            </label>
-            <select
-              id="revision-lodge"
-              value={lodgeId}
-              onChange={(e) => setLodgeId(e.target.value)}
-              className="w-full border rounded-md px-3 py-2 bg-white"
-            >
-              <option value="">Välj loge</option>
-              {(lodges ?? []).map((lodge) => (
-                <option key={lodge.id} value={String(lodge.id)}>
-                  {lodge.name}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div className="mb-4">
-            <label htmlFor="revision-file" className="block font-medium mb-1">
-              Fil (PDF)
-            </label>
-            <input
-              id="revision-file"
-              type="file"
-              accept=".pdf,application/pdf"
-              onChange={(e) => {
-                const nextFile =
-                  e.target.files && e.target.files[0]
-                    ? e.target.files[0]
-                    : null;
-                setFile(nextFile);
-              }}
-            />
-          </div>
-
-          <button
-            type="submit"
-            disabled={loading}
-            className="text-sm font-medium text-white bg-green-600 hover:bg-green-700 transition px-3 py-2 rounded-md disabled:opacity-60"
+        <div className="mb-4">
+          <label htmlFor="revision-lodge" className={labelClass}>
+            Loge
+          </label>
+          <select
+            id="revision-lodge"
+            value={lodgeId}
+            onChange={(e) => setLodgeId(e.target.value)}
+            className={selectClass}
           >
-            {loading ? "Sparar..." : "Skapa"}
-          </button>
-        </form>
-      </div>
-    </div>
+            <option value="">VÃ¤lj loge</option>
+            {(lodges ?? []).map((lodge) => (
+              <option key={lodge.id} value={String(lodge.id)}>
+                {lodge.name}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div className="mb-4">
+          <label htmlFor="revision-file" className={labelClass}>
+            Fil (PDF)
+          </label>
+          <input
+            id="revision-file"
+            type="file"
+            accept=".pdf,application/pdf"
+            className={inputClass}
+            onChange={(e) => {
+              const nextFile =
+                e.target.files && e.target.files[0]
+                  ? e.target.files[0]
+                  : null;
+              setFile(nextFile);
+            }}
+          />
+        </div>
+
+        <button type="submit" disabled={loading} className="ui-btn ui-btn-primary">
+          {loading ? "Sparar..." : "Skapa"}
+        </button>
+      </form>
+    </PageContainer>
   );
 };

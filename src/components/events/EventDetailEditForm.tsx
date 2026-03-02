@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+﻿import { Link } from "react-router-dom";
 import type { Lodge } from "../../types";
 
 export type EventFormState = {
@@ -41,7 +41,7 @@ export function EventDetailEditForm({
   return (
     <div className="space-y-4">
       <div>
-        <label htmlFor="title" className="block text-sm font-medium mb-1">
+        <label htmlFor="title" className="ui-label">
           Titel
         </label>
         <input
@@ -49,19 +49,20 @@ export function EventDetailEditForm({
           name="title"
           value={form.title}
           onChange={(e) => setForm({ ...form, title: e.target.value })}
-          className="w-full border rounded-md px-3 py-2"
+          className="ui-input"
         />
       </div>
 
       <div>
-        <label className="block text-sm font-medium mb-1">Kopplade loger</label>
-        <div className="grid grid-cols-2 gap-2 max-h-40 overflow-auto border rounded-md p-2">
+        <label className="ui-label">Kopplade loger</label>
+        <div className="grid max-h-40 grid-cols-1 gap-2 overflow-auto rounded-md border border-neutral-200 p-2 sm:grid-cols-2">
           {Array.isArray(lodges) && lodges.length > 0 ? (
             lodges.map((l) => (
-              <label key={l.id} className="flex items-center gap-x-2">
+              <label key={l.id} className="inline-flex items-center gap-2 rounded-md border border-neutral-200 px-3 py-2 text-sm text-neutral-700">
                 <input
                   type="checkbox"
                   checked={linkedIds.includes(l.id)}
+                  className="h-4 w-4 rounded border-neutral-300 text-primary-600 focus-visible:ring-primary-600"
                   onChange={(e) => {
                     const checked = e.target.checked;
                     setLinkedIds((prev) =>
@@ -71,17 +72,17 @@ export function EventDetailEditForm({
                     );
                   }}
                 />
-                <span className="text-sm">{l.name}</span>
+                <span>{l.name}</span>
               </label>
             ))
           ) : (
-            <div className="text-sm text-gray-500">Inga loger att välja</div>
+            <div className="text-sm text-neutral-600">Inga loger att vÃ¤lja</div>
           )}
         </div>
       </div>
 
       <div>
-        <label htmlFor="description" className="block text-sm font-medium mb-1">
+        <label htmlFor="description" className="ui-label">
           Beskrivning
         </label>
         <textarea
@@ -89,13 +90,13 @@ export function EventDetailEditForm({
           name="description"
           value={form.description}
           onChange={(e) => setForm({ ...form, description: e.target.value })}
-          className="w-full border rounded-md px-3 py-2"
+          className="ui-textarea"
         />
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div>
-          <label htmlFor="startDate" className="block text-sm font-medium mb-1">
+          <label htmlFor="startDate" className="ui-label">
             Startdatum
           </label>
           <input
@@ -104,11 +105,11 @@ export function EventDetailEditForm({
             name="startDate"
             value={form.startDate}
             onChange={(e) => setForm({ ...form, startDate: e.target.value })}
-            className="w-full border rounded-md px-3 py-2"
+            className="ui-input"
           />
         </div>
         <div>
-          <label htmlFor="endDate" className="block text-sm font-medium mb-1">
+          <label htmlFor="endDate" className="ui-label">
             Slutdatum
           </label>
           <input
@@ -117,14 +118,14 @@ export function EventDetailEditForm({
             name="endDate"
             value={form.endDate}
             onChange={(e) => setForm({ ...form, endDate: e.target.value })}
-            className="w-full border rounded-md px-3 py-2"
+            className="ui-input"
           />
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
         <div>
-          <label htmlFor="price" className="block text-sm font-medium mb-1">
+          <label htmlFor="price" className="ui-label">
             Pris
           </label>
           <input
@@ -132,57 +133,53 @@ export function EventDetailEditForm({
             name="price"
             value={form.price}
             onChange={(e) => setForm({ ...form, price: e.target.value })}
-            className="w-full border rounded-md px-3 py-2"
+            className="ui-input"
           />
         </div>
         <div>
-          <label htmlFor="foodPreview" className="block text-sm font-medium mb-1">
+          <label htmlFor="foodPreview" className="ui-label">
             Mat (auto)
           </label>
           <input
             id="foodPreview"
             name="foodPreview"
             value={String(foodPreview)}
-            className="w-full border rounded-md px-3 py-2 bg-gray-100"
+            className="ui-input bg-neutral-100"
             readOnly
           />
         </div>
-        <div className="flex items-center gap-x-4 py-2">
+        <label htmlFor="lodgeMeeting" className="mt-2 inline-flex items-center gap-2 text-sm text-neutral-700">
           <input
             id="lodgeMeeting"
             type="checkbox"
             checked={form.lodgeMeeting}
+            className="h-4 w-4 rounded border-neutral-300 text-primary-600 focus-visible:ring-primary-600"
             onChange={(e) => setForm({ ...form, lodgeMeeting: e.target.checked })}
           />
-          <label htmlFor="lodgeMeeting" className="text-sm">
-            Logemöte
-          </label>
-        </div>
+          LogemÃ¶te
+        </label>
       </div>
 
-      <div className="flex gap-x-4 py-2">
+      <div className="flex flex-col gap-2 py-2 sm:flex-row">
         <button
           type="button"
-          className="bg-green-600 hover:bg-green-700 text-sm font-medium transition text-white px-4 py-2 rounded-md"
+          className="ui-btn ui-btn-primary"
           onClick={onSave}
           disabled={saving}
         >
-          {saving ? "Sparar…" : "Spara"}
+          {saving ? "Spararâ€¦" : "Spara"}
         </button>
         {isAdmin && onDelete && (
           <button
             type="button"
-            className="bg-red-600 hover:bg-red-700 text-sm font-medium transition text-white px-4 py-2 rounded-md disabled:opacity-60"
+            className="ui-btn ui-btn-danger"
             onClick={onDelete}
             disabled={saving}
           >
             Radera
           </button>
         )}
-        <Link
-          to={cancelTo}
-          className="bg-gray-100 hover:bg-gray-200 transition px-4 py-2 rounded-md border"
-        >
+        <Link to={cancelTo} className="ui-btn ui-btn-secondary">
           Avbryt
         </Link>
       </div>

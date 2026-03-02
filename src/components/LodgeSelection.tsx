@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+﻿import { useMemo } from "react";
 import type { Lodge } from "../types";
 import { normalizeLodgeIds } from "./lodgeSelectionUtils";
 
@@ -42,13 +42,10 @@ export function LodgeSelection({
   const hasLodges = Array.isArray(lodges) && lodges.length > 0;
 
   return (
-    <div className="mb-4 w-full flex flex-col items-center">
-      <fieldset className="text-center mb-1 w-full">
-        <legend className="block font-medium">{label}</legend>
-        <div
-          id={name}
-          className="flex flex-col md:flex-row md:flex-wrap gap-2 py-2 w-full"
-        >
+    <div className="mb-4 w-full">
+      <fieldset className="w-full">
+        <legend className="ui-label">{label}</legend>
+        <div id={name} className="flex w-full flex-col gap-2 py-2 md:flex-row md:flex-wrap">
           {hasLodges &&
             lodges!.map((lodge) => {
               const value = String(lodge.id);
@@ -57,7 +54,7 @@ export function LodgeSelection({
                 <label
                   key={lodge.id}
                   htmlFor={inputId}
-                  className={`inline-flex items-center gap-2 border rounded-md px-3 py-2 ${
+                  className={`inline-flex items-center gap-2 rounded-md border border-neutral-200 px-3 py-2 text-sm text-neutral-700 ${
                     disabled ? "opacity-60" : ""
                   }`}
                 >
@@ -68,18 +65,17 @@ export function LodgeSelection({
                     value={value}
                     checked={normalizedSelected.includes(value)}
                     disabled={disabled}
+                    className="h-4 w-4 rounded border-neutral-300 text-primary-600 focus-visible:ring-primary-600"
                     onChange={(event) => toggle(lodge.id, event.target.checked)}
                   />
-                  <span className="text-sm text-gray-700">{lodge.name}</span>
+                  <span>{lodge.name}</span>
                 </label>
               );
             })}
           {!hasLodges && !loading && (
-            <div className="text-sm text-gray-500 py-2">{emptyLabel}</div>
+            <div className="py-2 text-sm text-neutral-600">{emptyLabel}</div>
           )}
-          {loading && (
-            <div className="text-sm text-gray-500 py-2">Laddar loger...</div>
-          )}
+          {loading && <div className="py-2 text-sm text-neutral-600">Laddar loger...</div>}
         </div>
       </fieldset>
     </div>

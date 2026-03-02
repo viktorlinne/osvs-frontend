@@ -4,6 +4,8 @@ import { useForm } from "react-hook-form";
 import {
   AchievementsPanel,
   AllergiesManager,
+  Button,
+  PageContainer,
   OfficialsManager,
   ProfileForm,
   ProfileHeader,
@@ -202,12 +204,11 @@ export const Profile = () => {
   });
 
   return (
-    <div className="flex flex-col items-center min-h-screen">
-      <div className="max-w-3xl w-full mx-auto p-6">
+    <PageContainer size="md" className="ui-page">
         <ProfileHeader user={user} isEditRoute={isEditRoute} />
-        <h2 className="text-2xl font-bold mt-4 mb-4">Din profil</h2>
+        <h2 className="ui-page-title mb-4 mt-4">Din profil</h2>
 
-        <form onSubmit={handleProfileSave} className="bg-white p-4 rounded-md shadow">
+        <form onSubmit={handleProfileSave} className="ui-card">
           <AchievementsPanel
             user={user}
             achievements={achievements}
@@ -277,19 +278,17 @@ export const Profile = () => {
           />
 
           {isEditRoute ? (
-            <div className="flex items-center gap-x-4 py-4">
-              <button
+            <div className="flex flex-col gap-2 py-4 sm:flex-row">
+              <Button
                 type="submit"
-                className="bg-green-600 hover:bg-green-700 text-sm font-medium transition text-white px-4 py-2 rounded-md"
                 disabled={saving}
               >
                 {saving ? "Sparar..." : "Spara"}
-              </button>
+              </Button>
             </div>
           ) : null}
         </form>
-      </div>
-    </div>
+    </PageContainer>
   );
 };
 

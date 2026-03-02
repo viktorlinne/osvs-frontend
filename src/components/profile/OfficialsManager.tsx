@@ -1,6 +1,6 @@
-import { useEffect, useMemo, useState } from "react";
-import type { OfficialHistoryItem, PublicUser } from "../../types";
+﻿import { useEffect, useMemo, useState } from "react";
 import { listOfficials } from "../../services/officials";
+import type { OfficialHistoryItem, PublicUser } from "../../types";
 
 type Official = { id: number; title: string };
 type UserWithOfficials = PublicUser & {
@@ -106,13 +106,13 @@ export const OfficialsManager = ({
   }
 
   return (
-    <div className="mb-4 w-full flex flex-col items-center">
-      <fieldset className="text-center mb-1 w-full">
-        <legend className="block font-medium">Aktiva Tjänster</legend>
+    <div className="mb-4 w-full">
+      <fieldset className="w-full">
+        <legend className="ui-label text-center">Aktiva TjÃ¤nster</legend>
         {isEditRoute ? (
-          <div className="flex flex-col items-center gap-2 py-2 w-full">
+          <div className="flex w-full flex-col items-center gap-2 py-2">
             {officials.length > 0 ? (
-              <div className="border rounded-md px-3 py-2 w-full md:w-[28rem] max-h-48 overflow-y-auto bg-white">
+              <div className="max-h-48 w-full overflow-y-auto rounded-md border border-neutral-200 bg-white px-3 py-2 md:w-[28rem]">
                 <div className="flex flex-col gap-2">
                   {officials.map((official) => (
                     <label
@@ -126,51 +126,48 @@ export const OfficialsManager = ({
                         type="checkbox"
                         value={official.id}
                         checked={effectiveSelected?.includes(official.id) ?? false}
+                        className="h-4 w-4 rounded border-neutral-300 text-primary-600 focus-visible:ring-primary-600"
                         onChange={(event) =>
                           toggleOfficial(official.id, event.target.checked)
                         }
                       />
-                      <span className="text-sm text-gray-700">{official.title}</span>
+                      <span className="text-sm text-neutral-700">{official.title}</span>
                     </label>
                   ))}
                 </div>
               </div>
             ) : (
-              <div className="text-sm text-gray-500 py-2">Inga tjänster</div>
+              <div className="py-2 text-sm text-neutral-600">Inga tjÃ¤nster</div>
             )}
           </div>
         ) : (
-          <div className="text-sm text-gray-700 mb-4 py-2">
+          <div className="mb-4 py-2 text-sm text-neutral-700">
             {effectiveSelected && effectiveSelected.length > 0
               ? effectiveSelected
-                .map((id) => officials.find((official) => official.id === id)?.title ?? "")
-                .filter(Boolean)
-                .join(", ")
-              : "Ingen tjänst"}
+                  .map((id) => officials.find((official) => official.id === id)?.title ?? "")
+                  .filter(Boolean)
+                  .join(", ")
+              : "Ingen tjÃ¤nst"}
           </div>
         )}
 
-        <div className="text-center mb-1">
-          <label htmlFor="officialHistoryList" className="block font-medium">
-            Tidigare tjänster
+        <div className="mb-1 text-center">
+          <label htmlFor="officialHistoryList" className="ui-label text-center">
+            Tidigare tjÃ¤nster
           </label>
           {officialHistory.length > 0 ? (
-            <select
-              id="officialHistoryList"
-              name="officialHistoryList"
-              className="w-auto border rounded-md px-4 py-2 mb-2"
-            >
+            <select id="officialHistoryList" name="officialHistoryList" className="ui-select w-auto">
               {officialHistory.map((entry) => (
                 <option
                   key={`${entry.id}-${entry.appointedAt}-${entry.unappointedAt}`}
                   value={`${entry.id}:${entry.appointedAt}`}
                 >
-                  {entry.title} {formatDate(entry.appointedAt)} — {formatDate(entry.unappointedAt)}
+                  {entry.title} {formatDate(entry.appointedAt)} â€” {formatDate(entry.unappointedAt)}
                 </option>
               ))}
             </select>
           ) : (
-            <div className="text-sm text-gray-500 py-2">Inga tidigare tjänster</div>
+            <div className="py-2 text-sm text-neutral-600">Inga tidigare tjÃ¤nster</div>
           )}
         </div>
       </fieldset>

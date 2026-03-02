@@ -1,8 +1,9 @@
-import { useEffect } from "react";
-import useFetch from "../hooks/useFetch";
-import type { Lodge } from "../types";
-import { listLodges } from "../services";
+﻿import { useEffect } from "react";
 import { Link } from "react-router-dom";
+import { PageContainer } from "../components";
+import useFetch from "../hooks/useFetch";
+import { listLodges } from "../services";
+import type { Lodge } from "../types";
 
 export const LodgesPage = () => {
   async function fetchLodges(): Promise<Lodge[]> {
@@ -19,27 +20,29 @@ export const LodgesPage = () => {
   }, [run]);
 
   return (
-    <div className="flex flex-col items-center min-h-screen">
-      <div className="max-w-3xl w-full mx-auto p-6">
-        <h2 className="text-2xl font-bold mb-4">Loger</h2>
-        {Array.isArray(lodges) && (
-          <div className="w-full grid gap-4 grid-cols-1">
-            {lodges.map((lodge: Lodge) => (
-              <Link
-                to={`/lodges/${lodge.id}`}
-                key={lodge.id}
-                className="block p-3 bg-white rounded-md shadow-md hover:shadow-lg transition"
-              >
-                <img src={lodge?.picture ?? undefined} alt={lodge.name} className="w-16 h-16 rounded-full flex-shrink-0" />
-                <div className="font-semibold truncate">{lodge.name}</div>
-                {lodge.email && (
-                  <div className="text-sm text-gray-500 truncate">{lodge.email}</div>
-                )}
-              </Link>
-            ))}
-          </div>
-        )}
-      </div>
-    </div>
+    <PageContainer size="xl" className="ui-page">
+      <h2 className="ui-page-title mb-4">Loger</h2>
+      {Array.isArray(lodges) && (
+        <div className="grid w-full grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {lodges.map((lodge: Lodge) => (
+            <Link
+              to={`/lodges/${lodge.id}`}
+              key={lodge.id}
+              className="ui-card ui-card-hover block"
+            >
+              <img
+                src={lodge?.picture ?? undefined}
+                alt={lodge.name}
+                className="mb-2 h-16 w-16 rounded-full object-cover"
+              />
+              <div className="truncate font-semibold text-neutral-900">{lodge.name}</div>
+              {lodge.email && (
+                <div className="truncate text-sm text-neutral-600">{lodge.email}</div>
+              )}
+            </Link>
+          ))}
+        </div>
+      )}
+    </PageContainer>
   );
 };

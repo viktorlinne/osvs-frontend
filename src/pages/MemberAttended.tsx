@@ -1,5 +1,6 @@
-import { useEffect } from "react";
+﻿import { useEffect } from "react";
 import { Link, useParams } from "react-router-dom";
+import { PageContainer } from "../components";
 import useFetch from "../hooks/useFetch";
 import { getUserAttendedEvents } from "../services/users";
 import type { AttendedEventsResponse } from "../types";
@@ -31,30 +32,25 @@ export const MemberAttended = () => {
   const sinceLastAchievementCount = data?.sinceLastAchievementCount ?? 0;
 
   return (
-    <div className="max-w-3xl w-full mx-auto p-6 min-h-screen">
-      <Link
-        to={`/members/${matrikelnummer}`}
-        className="text-sm text-green-600 hover:text-green-700 hover:underline"
-      >
-        ← Tillbaka
+    <PageContainer size="md" className="ui-page">
+      <Link to={`/members/${matrikelnummer}`} className="ui-link">
+        â† Tillbaka
       </Link>
 
-      <h2 className="text-2xl font-bold mt-4 mb-4">Närvaro</h2>
+      <h2 className="ui-page-title mb-4 mt-4">NÃ¤rvaro</h2>
 
-      <div className="bg-white p-4 rounded-md shadow mb-4">
-        <p className="text-sm text-gray-600">
-          Närvaro sedan senaste utmärkelse
-        </p>
-        <p className="text-3xl font-bold mt-1">{sinceLastAchievementCount}</p>
+      <div className="ui-card mb-4">
+        <p className="text-sm text-neutral-600">NÃ¤rvaro sedan senaste utmÃ¤rkelse</p>
+        <p className="mt-1 text-3xl font-bold text-neutral-900">{sinceLastAchievementCount}</p>
       </div>
 
-      <div className="bg-white p-4 rounded-md shadow">
-        <h3 className="text-lg font-semibold mb-3">Attenderade möten</h3>
+      <div className="ui-card">
+        <h3 className="mb-3 text-lg font-semibold text-neutral-900">Attenderade mÃ¶ten</h3>
 
-        {loading ? <p className="text-gray-500">Laddar...</p> : null}
+        {loading ? <p className="text-neutral-600">Laddar...</p> : null}
 
         {!loading && events.length === 0 ? (
-          <p className="text-gray-500">Inga attenderade möten hittades.</p>
+          <p className="text-neutral-600">Inga attenderade mÃ¶ten hittades.</p>
         ) : null}
 
         {!loading && events.length > 0 ? (
@@ -62,24 +58,19 @@ export const MemberAttended = () => {
             {events.map((event) => (
               <li
                 key={event.id}
-                className="border rounded-md px-3 py-2 flex items-center justify-between gap-3"
+                className="flex items-center justify-between gap-3 rounded-md border border-neutral-200 px-3 py-2"
               >
                 <div className="min-w-0">
-                  <Link
-                    to={`/events/${event.id}`}
-                    className="font-medium text-green-700 hover:text-green-800 hover:underline"
-                  >
+                  <Link to={`/events/${event.id}`} className="ui-link text-sm">
                     {event.title}
                   </Link>
-                  <p className="text-sm text-gray-600">
-                    {formatEventDate(event.startDate)}
-                  </p>
+                  <p className="text-sm text-neutral-600">{formatEventDate(event.startDate)}</p>
                 </div>
               </li>
             ))}
           </ul>
         ) : null}
       </div>
-    </div>
+    </PageContainer>
   );
 };

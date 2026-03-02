@@ -1,12 +1,19 @@
-import { useEffect, useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
-import { createPost, listLodges } from "../services";
-import useFetch from "../hooks/useFetch";
-import LodgeSelection from "../components/LodgeSelection";
-import { normalizeLodgeIds } from "../components/lodgeSelectionUtils";
-import { useError } from "../context";
-import type { CreatePostForm, Lodge } from "../types";
+﻿import { useEffect, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { useForm, useWatch } from "react-hook-form";
+import {
+  LodgeSelection,
+  PageContainer,
+  errorTextClass,
+  inputClass,
+  labelClass,
+  textareaClass,
+} from "../components";
+import { useError } from "../context";
+import useFetch from "../hooks/useFetch";
+import { normalizeLodgeIds } from "../components/lodgeSelectionUtils";
+import { createPost, listLodges } from "../services";
+import type { CreatePostForm, Lodge } from "../types";
 
 export const CreatePost = () => {
   const { clearError: clearGlobalError, setError: setGlobalError } = useError();
@@ -43,7 +50,7 @@ export const CreatePost = () => {
       })
       .catch(() => {
         if (mounted) {
-          setGlobalError("Misslyckades att hämta loger");
+          setGlobalError("Misslyckades att hÃ¤mta loger");
         }
       })
       .finally(() => {
@@ -76,7 +83,6 @@ export const CreatePost = () => {
       if (id) navigate(`/posts/${id}`);
       else navigate("/posts");
     } catch (e: unknown) {
-      // map server-side validation errors to fields when possible
       const err = e as { status?: number; details?: unknown };
       if (
         err?.status === 400 &&
@@ -90,104 +96,89 @@ export const CreatePost = () => {
             if (typeof p === "string") {
               setFieldError(p as unknown as keyof CreatePostForm, {
                 type: "server",
-                message: "Ogiltigt värde",
+                message: "Ogiltigt vÃ¤rde",
               });
             }
           });
           return;
         }
       }
-      // otherwise rely on global error handling
     }
   }
 
   return (
-    <div className="flex flex-col items-center min-h-screen">
-      <div className="max-w-3xl w-full mx-auto p-6">
-        <Link
-          to="/posts"
-          className="text-sm text-green-600 hover:text-green-700 hover:underline"
-        >
-          ← Tillbaka
-        </Link>
-        <h2 className="text-2xl font-bold mt-4 mb-4">Skapa inlägg</h2>
-        <form
-          onSubmit={handleSubmit(onSubmit)}
-          className="bg-white p-4 rounded-md shadow"
-        >
-          <div className="mb-4">
-            <label htmlFor="title" className="block font-medium mb-1">
-              Titel
-            </label>
-            <input
-              id="title"
-              {...register("title")}
-              className="w-full border rounded-md px-3 py-2"
-            />
-            {errors.title && (
-              <div className="text-red-600 mt-1">{errors.title?.message}</div>
-            )}
-          </div>
+    <PageContainer size="md" className="ui-page">
+      <Link to="/posts" className="ui-link">
+        â† Tillbaka
+      </Link>
+      <h2 className="ui-page-title mb-4 mt-4">Skapa inlÃ¤gg</h2>
+      <form onSubmit={handleSubmit(onSubmit)} className="ui-card">
+        <div className="mb-4">
+          <label htmlFor="title" className={labelClass}>
+            Titel
+          </label>
+          <input id="title" {...register("title")} className={inputClass} />
+          {errors.title && <div className={errorTextClass}>{errors.title?.message}</div>}
+        </div>
 
-          <div className="mb-4">
-            <label htmlFor="description" className="block font-medium mb-1">
-              Beskrivning
-            </label>
-            <textarea
-              id="description"
-              {...register("description")}
-              rows={6}
-              className="w-full border rounded-md px-3 py-2"
-            />
-            {errors.description && (
-              <div className="text-red-600 mt-1">
-                {errors.description?.message}
-              </div>
-            )}
-          </div>
-
-          <div className="mb-4">
-            <label htmlFor="picture" className="block font-medium mb-1">
-              Bild (valfritt)
-            </label>
-            <input
-              id="picture"
-              type="file"
-              accept="image/*"
-              onChange={(e) =>
-                setPicture(e.target.files ? e.target.files[0] : null)
-              }
-              />
-          </div>
-
-          <div className="mb-4 flex items-center gap-x-3">
-            <input id="publicum" type="checkbox" {...register("publicum")} />
-            <label htmlFor="publicum" className="font-medium">
-              Publicum
-            </label>
-          </div>
-
-          <LodgeSelection
-            lodges={lodges}
-            selectedIds={watchedLodges}
-            onChange={(ids) => setValue("lodgeIds", ids, { shouldDirty: true })}
-            disabled={loading || lodgesLoading}
-            loading={lodgesLoading}
-            label="Koppla loger"
-            name="post-lodge-selection"
+        <div className="mb-4">
+          <label htmlFor="description" className={labelClass}>
+            Beskrivning
+          </label>
+          <textarea
+            id="description"
+            {...register("description")}
+            rows={6}
+            className={textareaClass}
           />
+          {errors.description && (
+            <div className={errorTextClass}>{errors.description?.message}</div>
+          )}
+        </div>
 
-          <div className="flex items-center gap-x-4 py-2">
-            <button
-              type="submit"
-              className="text-sm font-medium text-white bg-green-600 hover:bg-green-700 transition px-3 py-2 rounded-md"
-              disabled={loading}
-            >
-              Skapa
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
+        <div className="mb-4">
+          <label htmlFor="picture" className={labelClass}>
+            Bild (valfritt)
+          </label>
+          <input
+            id="picture"
+            type="file"
+            accept="image/*"
+            className={inputClass}
+            onChange={(e) =>
+              setPicture(e.target.files ? e.target.files[0] : null)
+            }
+          />
+        </div>
+
+        <div className="mb-4 flex items-center gap-3">
+          <input
+            id="publicum"
+            type="checkbox"
+            {...register("publicum")}
+            className="h-4 w-4 rounded border-neutral-300 text-primary-600 focus-visible:ring-primary-600"
+          />
+          <label htmlFor="publicum" className="text-sm font-medium text-neutral-700">
+            Publicum
+          </label>
+        </div>
+
+        <LodgeSelection
+          lodges={lodges}
+          selectedIds={watchedLodges}
+          onChange={(ids) => setValue("lodgeIds", ids, { shouldDirty: true })}
+          disabled={loading || lodgesLoading}
+          loading={lodgesLoading}
+          label="Koppla loger"
+          name="post-lodge-selection"
+        />
+
+        <div className="flex flex-col gap-2 py-2 sm:flex-row">
+          <button type="submit" className="ui-btn ui-btn-primary" disabled={loading}>
+            Skapa
+          </button>
+        </div>
+      </form>
+    </PageContainer>
   );
 };

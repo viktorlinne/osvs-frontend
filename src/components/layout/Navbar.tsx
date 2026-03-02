@@ -12,13 +12,18 @@ type NavButtonProps = {
   onClick?: () => void;
 };
 
+const navButtonBase =
+  "block rounded-md px-3 py-2 text-sm font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-600 focus-visible:ring-offset-2";
+
 const NavButton: React.FC<NavButtonProps> = ({ to, children, onClick }) => (
   <NavLink
     to={to}
     onClick={onClick}
     className={({ isActive }) =>
-      `block px-3 py-2 rounded-md text-sm font-medium transition ${
-        isActive ? "bg-green-600 text-white" : "text-gray-700 hover:bg-gray-100"
+      `${navButtonBase} ${
+        isActive
+          ? "bg-primary-600 text-white"
+          : "text-neutral-700 hover:bg-neutral-100"
       }`
     }
   >
@@ -65,16 +70,13 @@ export const Navbar: React.FC = () => {
 
   return (
     <>
-      <header className="bg-white shadow-sm">
-        <nav
-          className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"
-          aria-label="Top"
-        >
-          <div className="w-full py-3 flex items-center justify-between">
+      <header className="border-b border-neutral-200 bg-white shadow-sm">
+        <nav className="container" aria-label="Top">
+          <div className="flex w-full items-center justify-between gap-4 py-3">
             <div className="flex items-center gap-4">
               <NavLink
                 to="/"
-                className="text-2xl font-bold text-green-600 hover:text-green-700 transition"
+                className="text-2xl font-bold text-primary-600 transition hover:text-primary-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-600 focus-visible:ring-offset-2"
               >
                 OSVS
               </NavLink>
@@ -87,7 +89,7 @@ export const Navbar: React.FC = () => {
                   <button
                     type="button"
                     onMouseEnter={() => setMenuOpen(true)}
-                    className="inline-flex items-center px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-100 transition"
+                    className="inline-flex items-center rounded-md px-3 py-2 text-sm font-medium text-neutral-700 transition hover:bg-neutral-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-600 focus-visible:ring-offset-2"
                     aria-expanded={menuOpen}
                   >
                     Publika sidor
@@ -107,7 +109,7 @@ export const Navbar: React.FC = () => {
                   </button>
 
                   {menuOpen && (
-                    <div className="absolute left-0 w-48 bg-white border rounded-md shadow-lg z-30">
+                    <div className="absolute left-0 z-30 w-48 rounded-md border border-neutral-200 bg-white shadow-card">
                       <div>
                         <NavButton
                           to="/"
@@ -194,7 +196,7 @@ export const Navbar: React.FC = () => {
                     </NavButton>
                     <button
                       onClick={handleLogout}
-                      className="block px-3 py-2 rounded-md text-sm font-medium transition bg-red-600 hover:bg-red-700 text-white"
+                      className="ui-btn ui-btn-sm ui-btn-danger"
                     >
                       Logga ut
                     </button>
@@ -208,7 +210,7 @@ export const Navbar: React.FC = () => {
                 aria-expanded={open}
                 aria-label="Toggle navigation"
                 onClick={() => setOpen((s) => !s)}
-                className="md:hidden inline-flex items-center justify-center p-2 rounded-md text-gray-700 hover:bg-gray-100 transition"
+                className="inline-flex min-h-10 min-w-10 items-center justify-center rounded-md p-2 text-neutral-700 transition hover:bg-neutral-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-600 focus-visible:ring-offset-2 md:hidden"
               >
                 <svg
                   className="h-6 w-6"
@@ -239,7 +241,7 @@ export const Navbar: React.FC = () => {
           </div>
 
           {open && (
-            <div className="md:hidden pb-4">
+            <div className="border-t border-neutral-200 pb-4 pt-3 md:hidden">
               <div className="px-2 space-y-1">
                 <NavButton to="/" onClick={() => setOpen(false)}>
                   Hem
@@ -289,7 +291,7 @@ export const Navbar: React.FC = () => {
                         setOpen(false);
                         void handleLogout();
                       }}
-                      className="block px-3 py-2 rounded-md text-sm font-medium transition text-red-600 hover:bg-gray-100"
+                      className="ui-btn ui-btn-sm ui-btn-danger w-full"
                     >
                       Logga ut
                     </button>

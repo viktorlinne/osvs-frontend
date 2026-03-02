@@ -1,8 +1,9 @@
-import { useEffect } from "react";
-import { getMyMemberships } from "../services/";
-import useFetch from "../hooks/useFetch";
-import type { MembershipPayment } from "../types";
+﻿import { useEffect } from "react";
 import { Link } from "react-router-dom";
+import { PageContainer } from "../components";
+import useFetch from "../hooks/useFetch";
+import { getMyMemberships } from "../services/";
+import type { MembershipPayment } from "../types";
 
 export const MembershipPage = () => {
   const { run, loading, data: payments, setData: setPayments } = useFetch<MembershipPayment[]>();
@@ -21,7 +22,6 @@ export const MembershipPage = () => {
       });
   }, [run, setPayments]);
 
-
   function formatDate(d: string | Date | null | undefined) {
     if (!d) return "";
     const dt = typeof d === "string" ? new Date(d) : d;
@@ -33,54 +33,41 @@ export const MembershipPage = () => {
   }
 
   return (
-    <div className="max-w-3xl w-full mx-auto p-6 min-h-screen flex flex-col items-center">
-      <Link to=".." relative="path" className="w-full flex justify-start mb-4 text-sm text-green-600 hover:text-green-700 hover:underline">
-        ← Tillbaka
+    <PageContainer size="md" className="ui-page">
+      <Link to=".." relative="path" className="ui-link mb-4 inline-flex">
+        â† Tillbaka
       </Link>
-      <h2 className="text-2xl font-bold mb-4">Medlemskaps Betalningar</h2>
+      <h2 className="ui-page-title mb-4">Medlemskaps Betalningar</h2>
 
       {!loading && payments && payments.length === 0 && (
-        <div>Inga medlemskapsbetalningar hittades.</div>
+        <div className="text-neutral-600">Inga medlemskapsbetalningar hittades.</div>
       )}
 
       {!loading && payments && payments.length > 0 && (
-        <ul className="w-full max-w-2xl space-y-2">
+        <ul className="w-full space-y-2">
           {payments.map((p) => (
-            <li
-              key={p.id}
-              className="border rounded-md p-3 flex justify-between items-center"
-            >
+            <li key={p.id} className="ui-card flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <div>
-                <div className="font-semibold">År: {p.year}</div>
-                <div>
-                  Belopp: {p.amount} SEK
-                </div>
-                <div>Status: {p.status}</div>
+                <div className="font-semibold text-neutral-900">Ã…r: {p.year}</div>
+                <div className="text-neutral-700">Belopp: {p.amount} SEK</div>
+                <div className="text-neutral-700">Status: {p.status}</div>
               </div>
-              <div className="flex items-center gap-x-4 py-2">
-                <div className="text-sm text-gray-500">
-                  {formatDate(p.createdAt)}
-                </div>
+              <div className="flex flex-col items-start gap-2 sm:items-end">
+                <div className="text-sm text-neutral-600">{formatDate(p.createdAt)}</div>
                 {p.status === "Pending" && (
-                  <>
-                    <button
-                      className="bg-green-600 hover:bg-green-700 transition text-sm font-medium text-white px-3 py-2 rounded-md"
-                    >
-                      Betala
-                    </button>
+                  <div className="flex items-center gap-2">
+                    <button className="ui-btn ui-btn-primary ui-btn-sm">Betala</button>
                     <span className="relative flex size-3">
-                      <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-green-600 opacity-75"></span>
-                      <span className="relative inline-flex size-3 rounded-full bg-green-600"></span>
+                      <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary-600 opacity-75"></span>
+                      <span className="relative inline-flex size-3 rounded-full bg-primary-600"></span>
                     </span>
-                  </>
+                  </div>
                 )}
-
               </div>
-
             </li>
           ))}
         </ul>
       )}
-    </div>
+    </PageContainer>
   );
 };

@@ -1,14 +1,19 @@
-import { useEffect, useState } from "react";
-import { useParams, Link, useNavigate, useLocation } from "react-router-dom";
-import { useAuth } from "../context";
-import { getPost, updatePost, deletePost, listLodges } from "../services";
-import type { Post, Lodge } from "../types";
-import LodgeSelection from "../components/LodgeSelection";
-import { normalizeLodgeIds } from "../components/lodgeSelectionUtils";
-import { useError } from "../context";
-import useFetch from "../hooks/useFetch";
+﻿import { useEffect, useState } from "react";
+import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
 import { useForm, useWatch } from "react-hook-form";
-import type { UpdatePostForm } from "../types";
+import {
+  LodgeSelection,
+  PageContainer,
+  errorTextClass,
+  inputClass,
+  labelClass,
+  textareaClass,
+} from "../components";
+import { useAuth, useError } from "../context";
+import useFetch from "../hooks/useFetch";
+import { normalizeLodgeIds } from "../components/lodgeSelectionUtils";
+import { deletePost, getPost, listLodges, updatePost } from "../services";
+import type { Lodge, Post, UpdatePostForm } from "../types";
 
 export const PostDetail = () => {
   const { user } = useAuth();
@@ -58,7 +63,7 @@ export const PostDetail = () => {
         }
       })
       .catch(() => {
-        if (mounted) setGlobalError("Misslyckades att hämta loger");
+        if (mounted) setGlobalError("Misslyckades att hÃ¤mta loger");
       })
       .finally(() => {
         if (mounted) setLodgesLoading(false);
@@ -71,7 +76,7 @@ export const PostDetail = () => {
   useEffect(() => {
     let mounted = true;
     if (!id) {
-      setGlobalError("Saknar inläggs-id");
+      setGlobalError("Saknar inlÃ¤ggs-id");
       return () => {
         mounted = false;
       };
@@ -121,7 +126,6 @@ export const PostDetail = () => {
       await runSubmit(() =>
         updatePost(id as string, fd as unknown as Record<string, unknown>),
       );
-      // refresh the post data so view mode shows updated content
       try {
         await run(() => getPost(id as string));
       } catch {
@@ -129,21 +133,18 @@ export const PostDetail = () => {
       }
       navigate(`/posts/${id}`);
     } catch (err: unknown) {
-      // map server validation details to form fields when available
       const maybe = err as { details?: unknown } | undefined;
       const details = maybe?.details;
       if (details && typeof details === "object") {
-        // expected shape: { missing?: { field: string, message?: string }[] }
         const missing = (details as Record<string, unknown>).missing as
           | Array<{ field: string; message?: string }>
           | undefined;
         if (Array.isArray(missing)) {
           missing.forEach((m) => {
             if (m && typeof m.field === "string") {
-              // set field error
               setFieldError(m.field as keyof UpdatePostForm, {
                 type: "server",
-                message: m.message ?? "Ogiltigt värde",
+                message: m.message ?? "Ogiltigt vÃ¤rde",
               });
             }
           });
@@ -156,7 +157,7 @@ export const PostDetail = () => {
     if (!id || !isAdmin) return;
 
     const confirmed = window.confirm(
-      "Är du säker på att du vill radera inlägget?",
+      "Ã„r du sÃ¤ker pÃ¥ att du vill radera inlÃ¤gget?",
     );
     if (!confirmed) return;
 
@@ -164,140 +165,127 @@ export const PostDetail = () => {
       await runSubmit(() => deletePost(id));
       navigate("/posts");
     } catch {
-      setGlobalError("Misslyckades att radera inlägget");
+      setGlobalError("Misslyckades att radera inlÃ¤gget");
     }
   }
 
   return (
-    <div className="flex flex-col items-center min-h-screen">
-      <div className="max-w-3xl w-full mx-auto p-6">
-        <div className="flex items-center justify-between">
-          <Link
-            to=".."
-            relative="path"
-            className="text-sm text-green-600 hover:text-green-700 hover:underline mb-2"
-          >
-            ← Tillbaka
+    <PageContainer size="md" className="ui-page">
+      <div className="mb-2 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+        <Link to=".." relative="path" className="ui-link">
+          â† Tillbaka
+        </Link>
+        {canEdit && post && !isEditRoute && (
+          <Link to={`/posts/${post.id}/edit`} className="ui-btn ui-btn-primary ui-btn-sm">
+            Redigera
           </Link>
-          {canEdit && post && !isEditRoute && (
-            <Link
-              to={`/posts/${post.id}/edit`}
-              className="text-sm font-medium text-white bg-green-600 hover:bg-green-700 transition px-3 py-2 rounded-md"
-            >
-              Redigera
-            </Link>
-          )}
-        </div>
-        {post && !isEditRoute && (
-          <div className="mt-4 grid gap-4 md:grid-cols-3">
-            <div className="md:col-span-1">
-              <img
-                src={
-                  post.pictureUrl ??
-                  "https://kmxmlfhkojdbuoktavul.supabase.co/storage/v1/object/public/posts/postPlaceholder.png"
-                }
-                alt={post.title}
-                className="w-full h-64 md:h-full object-cover rounded"
-              />
-            </div>
-            <div className="md:col-span-2">
-              <h1 className="text-2xl font-bold mb-2">{post.title}</h1>
-              <div className="prose">
-                <p>{post.description}</p>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {post && isEditRoute && canEdit && (
-          <form
-            onSubmit={handleSubmit(onSubmit)}
-            className="bg-white p-4 rounded-md shadow"
-          >
-            <div className="mb-4">
-              <label htmlFor="title" className="block font-medium mb-1">
-                Titel
-              </label>
-              <input
-                id="title"
-                {...register("title")}
-                className="w-full border rounded-md px-3 py-2"
-              />
-            </div>
-
-            <div className="mb-4">
-              <label htmlFor="description" className="block font-medium mb-1">
-                Beskrivning
-              </label>
-              <textarea
-                id="description"
-                {...register("description")}
-                rows={6}
-                className="w-full border rounded-md px-3 py-2"
-              />
-              {errors.description && (
-                <p className="text-red-500 text-sm mt-1">
-                  {errors.description.message}
-                </p>
-              )}
-            </div>
-
-            <div className="mb-4">
-              <label htmlFor="picture" className="block font-medium mb-1">
-                Bild
-              </label>
-              <input
-                id="picture"
-                name="picture"
-                type="file"
-                accept="image/*"
-                onChange={(e) =>
-                  setPicture(e.target.files ? e.target.files[0] : null)
-                }
-              />
-            </div>
-
-            <div className="mb-4 flex items-center gap-x-3">
-              <input id="publicum" type="checkbox" {...register("publicum")} />
-              <label htmlFor="publicum" className="font-medium">
-                Publicum
-              </label>
-            </div>
-
-            <LodgeSelection
-              lodges={lodges}
-              selectedIds={watchedLodges}
-              onChange={(ids) =>
-                setValue("lodgeIds", ids, { shouldDirty: true })
-              }
-              disabled={submitting || lodgesLoading}
-              loading={lodgesLoading}
-              label="Koppla loger"
-              name="edit-lodge-selection"
-            />
-
-            <div className="flex items-center gap-x-4 py-2">
-              <button
-                type="submit"
-                className="bg-green-600 hover:bg-green-700 text-sm font-medium transition text-white px-4 py-2 rounded-md disabled:opacity-60"
-                disabled={submitting}
-              >
-                {submitting ? "Sparar..." : "Spara"}
-              </button>
-              {isAdmin && (
-                <button
-                  type="button"
-                  className="bg-red-600 hover:bg-red-700 text-sm font-medium transition text-white px-4 py-2 rounded-md disabled:opacity-60"
-                  onClick={handleDeletePost}
-                  disabled={submitting}
-                >
-                  Radera
-                </button>
-              )}
-            </div>
-          </form>
         )}
       </div>
-    </div>
+
+      {post && !isEditRoute && (
+        <div className="ui-card mt-4 grid gap-4 md:grid-cols-3">
+          <div className="md:col-span-1">
+            <img
+              src={
+                post.pictureUrl ??
+                "https://kmxmlfhkojdbuoktavul.supabase.co/storage/v1/object/public/posts/postPlaceholder.png"
+              }
+              alt={post.title}
+              className="h-64 w-full rounded-md object-cover md:h-full"
+            />
+          </div>
+          <div className="md:col-span-2">
+            <h1 className="ui-section-title mb-2">{post.title}</h1>
+            <p className="text-neutral-700">{post.description}</p>
+          </div>
+        </div>
+      )}
+
+      {post && isEditRoute && canEdit && (
+        <form onSubmit={handleSubmit(onSubmit)} className="ui-card">
+          <div className="mb-4">
+            <label htmlFor="title" className={labelClass}>
+              Titel
+            </label>
+            <input id="title" {...register("title")} className={inputClass} />
+          </div>
+
+          <div className="mb-4">
+            <label htmlFor="description" className={labelClass}>
+              Beskrivning
+            </label>
+            <textarea
+              id="description"
+              {...register("description")}
+              rows={6}
+              className={textareaClass}
+            />
+            {errors.description && (
+              <p className={errorTextClass}>{errors.description.message}</p>
+            )}
+          </div>
+
+          <div className="mb-4">
+            <label htmlFor="picture" className={labelClass}>
+              Bild
+            </label>
+            <input
+              id="picture"
+              name="picture"
+              type="file"
+              accept="image/*"
+              className={inputClass}
+              onChange={(e) =>
+                setPicture(e.target.files ? e.target.files[0] : null)
+              }
+            />
+          </div>
+
+          <div className="mb-4 flex items-center gap-3">
+            <input
+              id="publicum"
+              type="checkbox"
+              {...register("publicum")}
+              className="h-4 w-4 rounded border-neutral-300 text-primary-600 focus-visible:ring-primary-600"
+            />
+            <label htmlFor="publicum" className="text-sm font-medium text-neutral-700">
+              Publicum
+            </label>
+          </div>
+
+          <LodgeSelection
+            lodges={lodges}
+            selectedIds={watchedLodges}
+            onChange={(ids) =>
+              setValue("lodgeIds", ids, { shouldDirty: true })
+            }
+            disabled={submitting || lodgesLoading}
+            loading={lodgesLoading}
+            label="Koppla loger"
+            name="edit-lodge-selection"
+          />
+
+          <div className="flex flex-col gap-2 py-2 sm:flex-row">
+            <button
+              type="submit"
+              className="ui-btn ui-btn-primary"
+              disabled={submitting}
+            >
+              {submitting ? "Sparar..." : "Spara"}
+            </button>
+            {isAdmin && (
+              <button
+                type="button"
+                className="ui-btn ui-btn-danger"
+                onClick={handleDeletePost}
+                disabled={submitting}
+              >
+                Radera
+              </button>
+            )}
+          </div>
+        </form>
+      )}
+    </PageContainer>
   );
 };

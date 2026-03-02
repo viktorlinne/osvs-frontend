@@ -1,7 +1,8 @@
-import { useState } from "react";
+﻿import { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { useAuth } from "../context/useAuth";
+import { Button, PageContainer, inputClass } from "../components";
 import { useError } from "../context";
+import { useAuth } from "../context/useAuth";
 import useFetch from "../hooks/useFetch";
 
 export const LoginPage = () => {
@@ -40,19 +41,15 @@ export const LoginPage = () => {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen">
-      <form
-        onSubmit={submit}
-        className="max-w-md w-full bg-white p-6 rounded-md shadow"
-      >
-        <h2 className="text-2xl font-bold mb-4">Logga in</h2>
-        {/* top-level errors shown by ErrorProvider */}
-        <label htmlFor="email" className="block mb-2">
-          <div className="text-sm">Email</div>
+    <PageContainer size="md" className="ui-page flex min-h-full items-center justify-center">
+      <form onSubmit={submit} className="ui-card w-full max-w-md">
+        <h2 className="ui-page-title mb-4">Logga in</h2>
+        <label htmlFor="email" className="ui-label">
+          Email
           <input
             id="email"
             name="email"
-            className="border px-4 py-2 w-full"
+            className={inputClass}
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             type="email"
@@ -60,12 +57,12 @@ export const LoginPage = () => {
             required
           />
         </label>
-        <label htmlFor="password" className="block mb-4">
-          <div className="text-sm">Lösenord</div>
+        <label htmlFor="password" className="ui-label mb-4 mt-3">
+          LÃ¶senord
           <input
             id="password"
             name="password"
-            className="border px-4 py-2 w-full"
+            className={inputClass}
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             type="password"
@@ -73,14 +70,10 @@ export const LoginPage = () => {
             required
           />
         </label>
-        <button
-          type="submit"
-          className="px-4 py-2 rounded-md bg-green-600 hover:bg-green-700 text-sm font-medium transition text-white "
-          disabled={loading}
-        >
+        <Button type="submit" disabled={loading}>
           {loading ? "Loggar in..." : "Logga in"}
-        </button>
+        </Button>
       </form>
-    </div>
+    </PageContainer>
   );
 };

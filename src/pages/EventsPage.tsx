@@ -1,12 +1,13 @@
-import React, { useEffect, useMemo, useState } from "react";
-import { listMyEvents, listEvents } from "../services";
-import { useAuth } from "../context";
-import type { Event as EventRecord } from "../types";
+﻿import React, { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
+import { Button, PageContainer } from "../components";
+import { useAuth } from "../context";
 import useFetch from "../hooks/useFetch";
+import { listEvents, listMyEvents } from "../services";
+import type { Event as EventRecord } from "../types";
 
 // Start week on Monday
-const WEEK_DAYS = ["Mån", "Tis", "Ons", "Tor", "Fre", "Lör", "Sön"];
+const WEEK_DAYS = ["MÃ¥n", "Tis", "Ons", "Tor", "Fre", "LÃ¶r", "SÃ¶n"];
 
 function formatMonthNameSv(date: Date) {
   const name = new Intl.DateTimeFormat("sv-SE", { month: "long" }).format(date);
@@ -29,7 +30,7 @@ function getMonthMatrix(year: number, month: number) {
   let week: Array<Date | null> = [];
 
   // fill leading nulls (week starts on Monday)
-  const startWeekday = (start.getDay() + 6) % 7; // map Sunday=0 -> 6, Monday=1 -> 0, ...
+  const startWeekday = (start.getDay() + 6) % 7;
   for (let i = 0; i < startWeekday; i++) week.push(null);
 
   for (let d = 1; d <= end.getDate(); d++) {
@@ -40,13 +41,11 @@ function getMonthMatrix(year: number, month: number) {
     }
   }
 
-  // trailing nulls
   if (week.length > 0) {
     while (week.length < 7) week.push(null);
     matrix.push(week);
   }
 
-  // ensure 6 weeks (for consistent height)
   while (matrix.length < 6) matrix.push(Array(7).fill(null));
 
   return matrix;
@@ -69,7 +68,7 @@ function dateKeyFromString(s?: string) {
 export const EventsPage = () => {
   const today = new Date();
   const [viewDate, setViewDate] = useState(
-    () => new Date(today.getFullYear(), today.getMonth(), 1)
+    () => new Date(today.getFullYear(), today.getMonth(), 1),
   );
   const [eventsByDate, setEventsByDate] = useState<Record<string, EventRecord[]>>({});
   const { run, loading } = useFetch<{ events?: EventRecord[] }>();
@@ -83,7 +82,11 @@ export const EventsPage = () => {
 
   useEffect(() => {
     let mounted = true;
-    void run(() => (user && Array.isArray(user.roles) && user.roles.includes("Admin") ? listEvents() : listMyEvents()))
+    void run(() =>
+      user && Array.isArray(user.roles) && user.roles.includes("Admin")
+        ? listEvents()
+        : listMyEvents(),
+    )
       .then((res: { events?: EventRecord[] } | undefined) => {
         if (!mounted) return;
         const payload = res;
@@ -100,7 +103,6 @@ export const EventsPage = () => {
       .catch(() => {
         /* useFetch sets global error */
       });
-
 
     return () => {
       mounted = false;
@@ -120,52 +122,37 @@ export const EventsPage = () => {
   }
 
   return (
-    <div className="p-6 w-full xl:max-w-[1100px] mx-auto min-h-screen">
-      <div className="flex flex-col sm:flex-row gap-y-2 sm:gap-y-0 sm:gap-x-4 py-2 mb-4">
-        <div className="flex items-center justify-between w-full ">
-          <h2 className="text-2xl font-bold mb-4">Möteskalender</h2>
-          <div className="flex flex-col sm:flex-row gap-y-2 sm:gap-y-0 sm:gap-x-2">
-            <button
-              onClick={prevMonth}
-              className="transition px-3 py-2 rounded-md text-sm font-medium bg-gray-100 hover:bg-gray-200"
-              aria-label="Previous month"
-            >
-              Förra
-            </button>
-            <button
-              onClick={jumpToToday}
-              className="transition px-3 py-2 rounded-md text-sm font-medium bg-gray-100 hover:bg-gray-200"
-            >
-              Idag
-            </button>
-            <button
-              onClick={nextMonth}
-              className="transition px-3 py-2 rounded-md text-sm font-medium bg-gray-100 hover:bg-gray-200"
-              aria-label="Next month"
-            >
-              Nästa
-            </button>
-            {user &&
-              (user.roles ?? []).some((r) =>
-                ["Admin", "Editor"].includes(r)
-              ) && (
-                <Link
-                  to="/events/create"
-                  className="flex text-white bg-green-600 hover:bg-green-700 text-sm font-medium transtion px-3 py-2 rounded-md"
-                >
-                  Skapa
-                </Link>
-              )}
-          </div>
+    <PageContainer size="xl" className="ui-page">
+      <div className="mb-4 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+        <h2 className="ui-page-title">MÃ¶teskalender</h2>
+
+        <div className="flex flex-wrap gap-2">
+          <Button onClick={prevMonth} variant="secondary" size="sm" aria-label="Previous month">
+            FÃ¶rra
+          </Button>
+          <Button onClick={jumpToToday} variant="secondary" size="sm">
+            Idag
+          </Button>
+          <Button onClick={nextMonth} variant="secondary" size="sm" aria-label="Next month">
+            NÃ¤sta
+          </Button>
+          {user &&
+            (user.roles ?? []).some((r) => ["Admin", "Editor"].includes(r)) && (
+              <Link to="/events/create" className="ui-btn ui-btn-primary ui-btn-sm">
+                Skapa
+              </Link>
+            )}
         </div>
       </div>
-      <div className="mb-4 flex items-center justify-between">
-        <p className="text-xl font-medium">
+
+      <div className="mb-4">
+        <p className="text-lg font-medium text-neutral-700 md:text-xl">
           {formatMonthNameSv(viewDate)} {year}
         </p>
       </div>
+
       {/* Mobile: single column, date-ordered list */}
-      <div className="block sm:hidden border rounded-md overflow-hidden">
+      <div className="block overflow-hidden rounded-md border border-neutral-200 bg-white sm:hidden">
         {(() => {
           const end = endOfMonth(year, month);
           const daysInMonth = end.getDate();
@@ -177,21 +164,21 @@ export const EventsPage = () => {
             const weekday = WEEK_DAYS[(date.getDay() + 6) % 7];
 
             rows.push(
-              <div key={key} className="flex items-start border-b last:border-b-0 p-3 gap-3">
-                <div className="w-20 min-w-[5rem] bg-gray-50 p-2 rounded-md text-sm font-medium text-center">
-                  <div className="text-xs text-gray-500">{weekday}</div>
+              <div key={key} className="flex items-start gap-3 border-b border-neutral-200 p-3 last:border-b-0">
+                <div className="w-20 shrink-0 rounded-md bg-neutral-100 p-2 text-center text-sm font-medium">
+                  <div className="text-xs text-neutral-600">{weekday}</div>
                   <div className="text-sm font-semibold">{d}</div>
                 </div>
                 <div className="flex-1">
                   {evs.length === 0 ? (
-                    <div className="text-xs text-gray-400">Inga möten</div>
+                    <div className="text-xs text-neutral-600">Inga mÃ¶ten</div>
                   ) : (
                     <div className="flex flex-col gap-2">
                       {evs.map((e) => (
                         <Link
                           key={e.id}
                           to={`/events/${e.id}`}
-                          className="block truncate text-sm bg-green-50 text-green-800 px-2 py-1 rounded-md"
+                          className="block truncate rounded-md bg-primary-50 px-2 py-1 text-sm text-primary-800"
                           title={e.title}
                         >
                           {e.title}
@@ -200,7 +187,7 @@ export const EventsPage = () => {
                     </div>
                   )}
                 </div>
-              </div>
+              </div>,
             );
           }
           return rows;
@@ -208,11 +195,11 @@ export const EventsPage = () => {
       </div>
 
       {/* Desktop / tablet: month grid */}
-      <div className="hidden sm:grid grid-cols-7 gap-1 border rounded-md-lg overflow-hidden">
+      <div className="hidden overflow-hidden rounded-md border border-neutral-200 bg-white sm:grid sm:grid-cols-7 sm:gap-1">
         {WEEK_DAYS.map((wd) => (
           <div
             key={wd}
-            className="bg-gray-50 text-center py-2 text-sm font-medium"
+            className="bg-neutral-100 py-2 text-center text-sm font-medium text-neutral-700"
           >
             {wd}
           </div>
@@ -223,8 +210,8 @@ export const EventsPage = () => {
             {week.map((date, di) => {
               const isToday = date
                 ? date.getFullYear() === today.getFullYear() &&
-                date.getMonth() === today.getMonth() &&
-                date.getDate() === today.getDate()
+                  date.getMonth() === today.getMonth() &&
+                  date.getDate() === today.getDate()
                 : false;
 
               const inMonth = date ? date.getMonth() === month : false;
@@ -232,20 +219,17 @@ export const EventsPage = () => {
               return (
                 <div
                   key={di}
-                  className={`min-h-[80px] md:min-h-[100px] lg:min-h-[120px] px-4 py-2 text-sm border-t border-l bg-white min-w-0 ${inMonth ? "" : "bg-gray-50 text-gray-400"
-                    }`}
-                  style={{ display: "flex", flexDirection: "column" }}
+                  className={`flex min-h-[80px] min-w-0 flex-col border-l border-t border-neutral-200 px-3 py-2 text-sm md:min-h-[100px] md:px-4 lg:min-h-[120px] ${inMonth ? "bg-white text-neutral-700" : "bg-neutral-100 text-neutral-600"}`}
                 >
                   <div className="flex items-start justify-between">
                     <div
-                      className={`w-6 h-6 flex items-center justify-center rounded-full ${isToday ? "bg-green-600 text-white" : "text-gray-700"
-                        }`}
+                      className={`flex h-6 w-6 items-center justify-center rounded-full ${isToday ? "bg-primary-600 text-white" : "text-neutral-700"}`}
                     >
                       {date ? date.getDate() : ""}
                     </div>
                   </div>
 
-                  <div className="mt-4 text-xs text-gray-600 min-w-0 overflow-hidden">
+                  <div className="mt-4 min-w-0 overflow-hidden text-xs text-neutral-700">
                     {!loading &&
                       date &&
                       (() => {
@@ -259,7 +243,7 @@ export const EventsPage = () => {
                               <Link
                                 key={e.id}
                                 to={`/events/${e.id}`}
-                                className="block w-full truncate rounded-md px-1 py-0.5 text-xs bg-green-50 text-green-800 hover:bg-green-100 transition overflow-hidden"
+                                className="block w-full truncate overflow-hidden rounded-md bg-primary-50 px-1 py-0.5 text-xs text-primary-800 transition hover:bg-primary-100"
                                 title={e.title}
                               >
                                 {e.title}
@@ -275,6 +259,6 @@ export const EventsPage = () => {
           </React.Fragment>
         ))}
       </div>
-    </div>
+    </PageContainer>
   );
 };

@@ -1,15 +1,20 @@
-import { useState, useEffect } from "react";
+﻿import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { AllergiesManager } from "../components";
-import api, { fetchData } from "../services/api";
-import { setMemberAllergies } from "../services/allergies";
-import { listLodges } from "../services/lodges";
-import type { RegisterForm, Lodge } from "../types";
-import useFetch from "../hooks/useFetch";
-
 import { useForm } from "react-hook-form";
 import type { FieldError } from "react-hook-form";
+import {
+  AllergiesManager,
+  PageContainer,
+  errorTextClass,
+  inputClass,
+  selectClass,
+} from "../components";
 import useError from "../context/useError";
+import useFetch from "../hooks/useFetch";
+import { setMemberAllergies } from "../services/allergies";
+import api, { fetchData } from "../services/api";
+import { listLodges } from "../services/lodges";
+import type { Lodge, RegisterForm } from "../types";
 
 type RegisterResponse = {
   user?: { matrikelnummer?: unknown };
@@ -51,12 +56,12 @@ export const CreateMember = () => {
   });
 
   function validatePicture(): string | null {
-    if (!picture) return "Profilbild är obligatorisk";
+    if (!picture) return "Profilbild Ã¤r obligatorisk";
     if (picture.size > 5 * 1024 * 1024)
-      return "Profilbilden måste vara högst 5MB";
+      return "Profilbilden mÃ¥ste vara hÃ¶gst 5MB";
     const allowed = ["image/jpeg", "image/png", "image/gif", "image/webp"];
     if (!allowed.includes(picture.type))
-      return "Profilbilden måste vara JPEG, PNG, GIF eller WebP";
+      return "Profilbilden mÃ¥ste vara JPEG, PNG, GIF eller WebP";
     return null;
   }
 
@@ -128,10 +133,9 @@ export const CreateMember = () => {
         if (missing) {
           missing.forEach((p: unknown) => {
             if (typeof p === "string") {
-              // set as field error
               setFieldError(p as keyof RegisterForm, {
                 type: "server",
-                message: "Ogiltigt värde",
+                message: "Ogiltigt vÃ¤rde",
               });
             }
           });
@@ -139,15 +143,13 @@ export const CreateMember = () => {
         }
       }
 
-      if (e instanceof Error)
-        setError(e.message ?? "Kunde inte skapa användare");
-      else setError(String(e ?? "Kunde inte skapa användare"));
+      if (e instanceof Error) setError(e.message ?? "Kunde inte skapa anvÃ¤ndare");
+      else setError(String(e ?? "Kunde inte skapa anvÃ¤ndare"));
     } finally {
       setLoading(false);
     }
   }
 
-  // Load lodges on mount
   useEffect(() => {
     runLodges(() => listLodges())
       .then((data) => {
@@ -162,176 +164,152 @@ export const CreateMember = () => {
       });
   }, [runLodges]);
 
-  // error display handled by global ErrorProvider
   return (
-    <div className="flex flex-col items-center min-h-screen">
-      <div className="max-w-3xl w-full mx-auto p-6">
-        <div className="w-full flex items-center justify-between">
-          <Link
-            to=".."
-            relative="path"
-            className="text-sm text-green-600 hover:text-green-700 hover:underline"
-          >
-            ← Tillbaka
-          </Link>
+    <PageContainer size="md" className="ui-page">
+      <div className="mb-4 flex w-full items-center justify-between">
+        <Link to=".." relative="path" className="ui-link">
+          â† Tillbaka
+        </Link>
+      </div>
+      <h2 className="ui-page-title mb-4">Skapa anvÃ¤ndare</h2>
+
+      {Object.keys(errors).length > 0 && (
+        <div className={`${errorTextClass} mb-2`}>
+          <ul className="list-disc pl-5">
+            {(Object.keys(errors) as Array<keyof RegisterForm>).map((k) => {
+              const fieldErr = errors[k] as FieldError | undefined;
+              const msg = fieldErr?.message;
+              return msg ? (
+                <li key={String(k)}>{`${String(k)}: ${msg}`}</li>
+              ) : null;
+            })}
+          </ul>
         </div>
-        <h2 className="text-2xl font-bold mt-4 mb-4">Skapa användare</h2>
+      )}
 
-        {/* Centralized field error list (component is source of truth) */}
-        {Object.keys(errors).length > 0 && (
-          <div className="text-red-600 mb-2">
-            <ul className="list-disc pl-5">
-              {(Object.keys(errors) as Array<keyof RegisterForm>).map((k) => {
-                const fieldErr = errors[k] as FieldError | undefined;
-                const msg = fieldErr?.message;
-                return msg ? (
-                  <li key={String(k)}>{`${String(k)}: ${msg}`}</li>
-                ) : null;
-              })}
-            </ul>
-          </div>
-        )}
+      <form className="ui-card space-y-3">
+        <input placeholder="Email" {...register("email")} className={inputClass} />
 
-        <form className="bg-white p-4 rounded-md shadow space-y-3">
+        <input
+          placeholder="LÃ¶senord"
+          type="password"
+          {...register("password")}
+          className={inputClass}
+          autoComplete="off"
+        />
+
+        <input
+          placeholder="FÃ¶rnamn"
+          type="text"
+          {...register("firstname")}
+          className={inputClass}
+        />
+
+        <input
+          placeholder="Efternamn"
+          type="text"
+          {...register("lastname")}
+          className={inputClass}
+        />
+
+        <label className="ui-label">
+          FÃ¶delsedatum
+          <input type="date" {...register("dateOfBirth")} className={inputClass} />
+        </label>
+
+        <input
+          placeholder="Jobb eller tidigare sysselsÃ¤ttning"
+          type="text"
+          {...register("work")}
+          className={inputClass}
+        />
+
+        <input
+          placeholder="Mobilnummer"
+          type="text"
+          {...register("mobile")}
+          className={inputClass}
+        />
+
+        <input
+          placeholder="Hemnummer"
+          type="text"
+          {...register("homeNumber")}
+          className={inputClass}
+        />
+
+        <input placeholder="Stad" type="text" {...register("city")} className={inputClass} />
+
+        <input
+          placeholder="Adress"
+          type="text"
+          {...register("address")}
+          className={inputClass}
+        />
+
+        <input
+          placeholder="Postnummer"
+          type="text"
+          {...register("zipcode")}
+          className={inputClass}
+        />
+
+        <input
+          placeholder="Noteringar"
+          type="text"
+          {...register("notes")}
+          className={inputClass}
+        />
+
+        <AllergiesManager
+          isEditRoute
+          selectedIds={selectedAllergyIds}
+          setSelectedIds={(ids) => setSelectedAllergyIds(Array.isArray(ids) ? ids : [])}
+        />
+
+        <label className="ui-label">
+          Loge
+          {lodgesLoading ? (
+            <div className="py-2 text-neutral-600">Laddar logerâ€¦</div>
+          ) : (
+            <select {...register("lodgeId")} className={selectClass}>
+              <option value="">VÃ¤lj loge...</option>
+              {lodges.map((l) => (
+                <option key={l.id} value={String(l.id)}>
+                  {l.name}
+                </option>
+              ))}
+            </select>
+          )}
+        </label>
+
+        <label className="ui-label">
+          Profilbild
           <input
-            placeholder="Email"
-            {...register("email")}
-            className="w-full px-4 py-2 border rounded-md"
+            type="file"
+            accept="image/*"
+            onChange={(e) => setPicture(e.target.files?.[0] ?? null)}
+            className={inputClass}
           />
+        </label>
 
-          <input
-            placeholder="Lösenord"
-            type="password"
-            {...register("password")}
-            className="w-full px-4 py-2 border rounded-md"
-            autoComplete="off"
-          />
-
-          <input
-            placeholder="Förnamn"
-            type="text"
-            {...register("firstname")}
-            className="w-full px-4 py-2 border rounded-md"
-          />
-
-          <input
-            placeholder="Efternamn"
-            type="text"
-            {...register("lastname")}
-            className="w-full px-4 py-2 border rounded-md"
-          />
-
-          <label className="block">
-            <div className="text-sm text-gray-600">Födelsedatum</div>
-            <input
-              type="date"
-              {...register("dateOfBirth")}
-              className="w-full px-4 py-2 border rounded-md"
-            />
-          </label>
-
-          <input
-            placeholder="Jobb eller tidigare sysselsättning"
-            type="text"
-            {...register("work")}
-            className="w-full px-4 py-2 border rounded-md"
-          />
-
-          <input
-            placeholder="Mobilnummer"
-            type="text"
-            {...register("mobile")}
-            className="w-full px-4 py-2 border rounded-md"
-          />
-
-          <input
-            placeholder="Hemnummer"
-            type="text"
-            {...register("homeNumber")}
-            className="w-full px-4 py-2 border rounded-md"
-          />
-
-          <input
-            placeholder="Stad"
-            type="text"
-            {...register("city")}
-            className="w-full px-4 py-2 border rounded-md"
-          />
-
-          <input
-            placeholder="Adress"
-            type="text"
-            {...register("address")}
-            className="w-full px-4 py-2 border rounded-md"
-          />
-
-          <input
-            placeholder="Postnummer"
-            type="text"
-            {...register("zipcode")}
-            className="w-full px-4 py-2 border rounded-md"
-          />
-
-          <input
-            placeholder="Noteringar "
-            type="text"
-            {...register("notes")}
-            className="w-full px-4 py-2 border rounded-md"
-          />
-
-          <AllergiesManager
-            isEditRoute
-            selectedIds={selectedAllergyIds}
-            setSelectedIds={(ids) => setSelectedAllergyIds(Array.isArray(ids) ? ids : [])}
-          />
-
-          <label className="block">
-            {lodgesLoading ? (
-              <div className="px-4 py-2">Laddar loger…</div>
-            ) : (
-              <select
-                {...register("lodgeId")}
-                className="w-full px-4 py-2 border rounded-md"
-              >
-                <option value="">Välj loge...</option>
-                {lodges.map((l) => (
-                  <option key={l.id} value={String(l.id)}>
-                    {l.name}
-                  </option>
-                ))}
-              </select>
-            )}
-          </label>
-
-          <label className="block border">
-            <input
-              type="file"
-              accept="image/*"
-              onChange={(e) => setPicture(e.target.files?.[0] ?? null)}
-              className="w-full px-4 py-2 rounded-md"
-            />
-          </label>
-
-          <div className="flex items-center gap-x-4 py-4">
-            <button
-              type="button"
-              onClick={handleSubmit(onSubmit)}
-              disabled={loading}
-              className="bg-green-600 hover:bg-green-700 text-sm font-medium transition text-white px-4 py-2 rounded-md"
-            >
-                            {loading
-                ? createdUserId !== null
-                  ? "Sparar..."
-                  : "Skapar..."
-                : createdUserId !== null
+        <div className="flex flex-col gap-2 py-4 sm:flex-row">
+          <button
+            type="button"
+            onClick={handleSubmit(onSubmit)}
+            disabled={loading}
+            className="ui-btn ui-btn-primary"
+          >
+            {loading
+              ? createdUserId !== null
+                ? "Sparar..."
+                : "Skapar..."
+              : createdUserId !== null
                 ? "Spara allergier"
                 : "Skapa anv\u00E4ndare"}
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
+          </button>
+        </div>
+      </form>
+    </PageContainer>
   );
 };
-
-

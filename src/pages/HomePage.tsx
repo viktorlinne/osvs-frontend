@@ -2,6 +2,7 @@ import { useState } from "react";
 import {
   BannerCarousel,
   EventList,
+  PageContainer,
   PublicumDisplay,
   PublicumList,
 } from "../components/";
@@ -26,12 +27,12 @@ export const HomePage = () => {
   };
 
   return (
-    <div className="min-h-screen">
+    <div className="ui-page">
       <BannerCarousel />
-      <div className="flex items-start justify-center py-12 px-6 ">
-        <div className="w-full max-w-6xl grid grid-cols-1 lg:grid-cols-3 gap-8">
-          <section>
-            <h3 className="text-2xl font-semibold text-green-600">
+      <PageContainer size="xl" className="pt-8 md:pt-10">
+        <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
+          <section className="space-y-3">
+            <h3 className="ui-section-title text-primary-600">
               Ordenskalender
             </h3>
             <EventList />
@@ -41,12 +42,12 @@ export const HomePage = () => {
             imageUrl={displayedPublicum.imageUrl}
             description={displayedPublicum.description}
           />
-          <section>
-            <h3 className="text-2xl font-semibold text-green-600">Publicum</h3>
+          <section className="space-y-3">
+            <h3 className="ui-section-title text-primary-600">Publicum</h3>
             <PublicumList onSelect={handlePublicumSelect} />
           </section>
         </div>
-      </div>
+      </PageContainer>
     </div>
   );
 };

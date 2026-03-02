@@ -1,8 +1,21 @@
-import { useCallback, useEffect, useState } from "react";
+﻿import { useCallback, useEffect, useState } from "react";
 import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
-import useFetch from "../hooks/useFetch";
+import { useForm } from "react-hook-form";
+import { PageContainer } from "../components";
+import {
+  AchievementsPanel,
+  AllergiesManager,
+  OfficialsManager,
+  ProfileForm,
+  RolesManager,
+} from "../components/profile/";
 import { useAuth, useError } from "../context";
-import type { Achievement, Lodge, PublicUser, Role, UpdateUserForm } from "../types";
+import useFetch from "../hooks/useFetch";
+import { listRoles } from "../services/admin";
+import achievementsService from "../services/achievements";
+import { setMemberAllergies } from "../services/allergies";
+import lodgesService from "../services/lodges";
+import { setMemberOfficials } from "../services/officials";
 import {
   adminUpdateUser,
   getPublicUserById,
@@ -14,24 +27,17 @@ import {
   uploadUserPicture,
 } from "../services/users";
 import type { UserLodgeResponse } from "../services/users";
-import achievementsService from "../services/achievements";
-import { setMemberAllergies } from "../services/allergies";
-import lodgesService from "../services/lodges";
-import { setMemberOfficials } from "../services/officials";
-import { listRoles } from "../services/admin";
-import { useForm } from "react-hook-form";
-import {
-  AchievementsPanel,
-  AllergiesManager,
-  OfficialsManager,
-  ProfileForm,
-  RolesManager,
-} from "../components/profile/";
+import type {
+  Achievement,
+  Lodge,
+  PublicUser,
+  Role,
+  UpdateUserForm,
+} from "../types";
 import {
   extractMissingFields,
   toUserProfileUpdatePayload,
 } from "../utils/userProfileForm";
-
 function mapRolesResponseToList(value: unknown): Role[] {
   const raw = value as { roles?: unknown } | null | undefined;
   const items = Array.isArray(value)
@@ -269,7 +275,7 @@ export const MemberDetail = () => {
           await runAction(() => setMemberOfficials(userId, selectedOfficialIds));
         }
       } catch {
-        setGlobalError("Misslyckades att uppdatera tjänster");
+        setGlobalError("Misslyckades att uppdatera tjÃ¤nster");
       }
 
       try {
@@ -292,7 +298,7 @@ export const MemberDetail = () => {
           setAwardDate("");
         }
       } catch {
-        setGlobalError("Misslyckades att tilldela utmärkelse");
+        setGlobalError("Misslyckades att tilldela utmÃ¤rkelse");
       }
 
       try {
@@ -311,7 +317,7 @@ export const MemberDetail = () => {
         missing.forEach((field) => {
           setFieldError(field as keyof UpdateUserForm, {
             type: "server",
-            message: "Ogiltigt värde",
+            message: "Ogiltigt vÃ¤rde",
           });
         });
         return;
@@ -324,28 +330,27 @@ export const MemberDetail = () => {
   });
 
   return (
-    <div className="flex flex-col items-center min-h-screen">
-      <div className="max-w-3xl w-full mx-auto p-6">
-        <div className="flex items-center justify-between">
+    <PageContainer size="md" className="ui-page">
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
           <Link
             to=".."
             relative="path"
-            className="text-sm text-green-600 hover:text-green-700 hover:underline"
+            className="ui-link"
           >
-            ← Tillbaka
+            â† Tillbaka
           </Link>
           {!isEditRoute && (
-            <div className="flex items-center gap-2">
+            <div className="flex flex-col gap-2 sm:flex-row">
               <Link
                 to={`/members/${matrikelnummer}/attended`}
-                className="text-sm font-medium text-white bg-green-600 hover:bg-green-700 transition px-3 py-2 rounded-md"
+                className="ui-btn ui-btn-primary ui-btn-sm"
               >
-                Närvaro
+                NÃ¤rvaro
               </Link>
               {canEdit && (
                 <Link
                   to={`/members/${matrikelnummer}/edit`}
-                  className="text-sm font-medium text-white bg-green-600 hover:bg-green-700 transition px-3 py-2 rounded-md"
+                  className="ui-btn ui-btn-primary ui-btn-sm"
                 >
                   Redigera
                 </Link>
@@ -354,10 +359,10 @@ export const MemberDetail = () => {
           )}
         </div>
 
-        <h2 className="text-2xl font-bold mt-4 mb-4">Medlem</h2>
+        <h2 className="ui-page-title mb-4 mt-4">Medlem</h2>
 
         {member && (
-          <form onSubmit={handleMemberSave} className="bg-white p-4 rounded-md shadow">
+          <form onSubmit={handleMemberSave} className="ui-card">
             <AchievementsPanel
               user={member}
               achievements={achievements}
@@ -458,10 +463,10 @@ export const MemberDetail = () => {
             />
 
             {isEditRoute ? (
-              <div className="flex items-center gap-x-4 py-4">
+              <div className="flex flex-col gap-2 py-4 sm:flex-row">
                 <button
                   type="submit"
-                  className="bg-green-600 hover:bg-green-700 text-sm font-medium transition text-white px-4 py-2 rounded-md"
+                  className="ui-btn ui-btn-primary"
                   disabled={saving}
                 >
                   {saving ? "Sparar..." : "Spara"}
@@ -470,8 +475,11 @@ export const MemberDetail = () => {
             ) : null}
           </form>
         )}
-      </div>
-    </div>
+    </PageContainer>
   );
 };
+
+
+
+
 

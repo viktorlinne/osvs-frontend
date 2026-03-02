@@ -1,9 +1,15 @@
-import { useEffect, useState } from "react";
+﻿import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import {
+  PageContainer,
+  inputClass,
+  labelClass,
+  selectClass,
+} from "../components";
 import { useAuth, useError } from "../context";
-import { listPosts, listLodges } from "../services";
-import type { Post, Lodge } from "../types";
 import useFetch from "../hooks/useFetch";
+import { listLodges, listPosts } from "../services";
+import type { Lodge, Post } from "../types";
 
 export const NewsPage = () => {
   const { data: posts, loading, notFound, run } = useFetch<Post[]>();
@@ -25,7 +31,7 @@ export const NewsPage = () => {
         }
       })
       .catch(() => {
-        setError("Misslyckades att hämta loger");
+        setError("Misslyckades att hÃ¤mta loger");
       });
     return () => {
       mounted = false;
@@ -54,7 +60,7 @@ export const NewsPage = () => {
       .then((res) => {
         if (!mounted) return;
         if (!Array.isArray(res)) {
-          setError("Något gick fel vid hämtning av inlägg.");
+          setError("NÃ¥got gick fel vid hÃ¤mtning av inlÃ¤gg.");
         } else if (res.length === 0) {
           setEmpty(true);
         } else {
@@ -70,39 +76,38 @@ export const NewsPage = () => {
   }, [run, setError, selectedLodge, debouncedTitleQuery]);
 
   return (
-    <div className="flex flex-col items-center min-h-screen p-6">
-      <div className="w-full max-w-3xl flex flex-wrap items-center justify-between gap-3 mb-4">
-        <h2 className="text-2xl font-bold">Nyheter</h2>
+    <PageContainer size="xl" className="ui-page">
+      <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+        <h2 className="ui-page-title">Nyheter</h2>
         {user &&
           (user.roles ?? []).some((r) => ["Admin", "Editor"].includes(r)) && (
-            <Link
-              to="/posts/create"
-              className="flex text-white bg-green-600 hover:bg-green-700 text-sm font-medium transition px-3 py-2 rounded-md "
-            >
-              Skapa Inlägg
+            <Link to="/posts/create" className="ui-btn ui-btn-primary">
+              Skapa InlÃ¤gg
             </Link>
           )}
       </div>
-      <div className="w-full max-w-3xl flex flex-col sm:flex-row sm:items-end gap-3 mb-6">
-        <label className="flex flex-col text-sm font-medium text-gray-700" htmlFor="titleSearch">
-          Sök på titel
+
+      <div className="mb-6 grid grid-cols-1 gap-3 md:grid-cols-2">
+        <label className={labelClass} htmlFor="titleSearch">
+          SÃ¶k pÃ¥ titel
           <input
             id="titleSearch"
             name="titleSearch"
             type="search"
             value={titleQuery}
             onChange={(e) => setTitleQuery(e.target.value)}
-            placeholder="Sök inläggstitel"
-            className="mt-1 rounded-md border border-gray-300 bg-white px-3 py-2 text-base text-gray-900 shadow-sm focus:border-green-600 focus:outline-none focus:ring-2 focus:ring-green-200"
+            placeholder="SÃ¶k inlÃ¤ggstitel"
+            className={inputClass}
           />
         </label>
-        <label className="flex flex-col text-sm font-medium text-gray-700" htmlFor="lodgeFilter">
-          Filtrera på loge
+
+        <label className={labelClass} htmlFor="lodgeFilter">
+          Filtrera pÃ¥ loge
           <select
             id="lodgeFilter"
             value={selectedLodge}
             onChange={(e) => setSelectedLodge(e.target.value)}
-            className="mt-1 rounded-md border border-gray-300 bg-white px-3 py-2 text-base text-gray-900 shadow-sm focus:border-green-600 focus:outline-none focus:ring-2 focus:ring-green-200"
+            className={selectClass}
           >
             <option value="">Alla loger</option>
             {lodges.map((lodge) => (
@@ -113,41 +118,32 @@ export const NewsPage = () => {
           </select>
         </label>
       </div>
-      <div className="w-full max-w-3xl grid gap-6 grid-cols-1 mx-auto">
+
+      <div className="grid w-full grid-cols-1 gap-6 md:grid-cols-2">
         {(posts ?? []).map((p) => (
           <Link
             to={`/posts/${p.id}`}
             key={p.id}
-            className="rounded-md shadow-md hover:shadow-lg transition bg-white flex flex-col p-4 md:p-6"
+            className="ui-card ui-card-hover flex flex-col p-0"
           >
             <img
               src={p.pictureUrl ?? ""}
               alt={p.title}
-              className="w-full h-48 md:h-56 lg:h-48 object-cover rounded-t-md"
+              className="h-48 w-full rounded-t-card object-cover md:h-56"
             />
-            <div className="p-4 flex-1">
-              <h3 className="text-xl font-semibold mb-2 truncate">
+            <div className="flex-1 p-4 md:p-5">
+              <h3 className="mb-2 truncate text-xl font-semibold text-neutral-900">
                 {p.title}
               </h3>
-              <p
-                className="text-gray-700 overflow-hidden"
-                style={{
-                  display: "-webkit-box",
-                  WebkitLineClamp: 2,
-                  WebkitBoxOrient: "vertical",
-                }}
-              >
-                {p.description}
-              </p>
+              <p className="line-clamp-2 text-neutral-700">{p.description}</p>
             </div>
           </Link>
-        ))
-        }
+        ))}
       </div>
 
       {!loading && (posts ?? []).length === 0 && !notFound && empty && (
-        <p className="mt-6 text-gray-600">Inga inlägg än.</p>
+        <p className="mt-6 text-neutral-600">Inga inlÃ¤gg Ã¤n.</p>
       )}
-    </div>
+    </PageContainer>
   );
 };

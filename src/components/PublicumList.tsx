@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+﻿import { useEffect, useState } from "react";
 import {
   listPublicumPosts,
   type PublicumPostListItem,
@@ -45,21 +45,21 @@ export function PublicumList({ onSelect }: PublicumListProps) {
     };
   }, []);
 
-  if (loading) return <p className="text-sm text-gray-500">Laddar publicum...</p>;
-  if (failed) return <p className="text-sm text-red-600">Kunde inte hamta publicum</p>;
-  if (!posts.length) return <p className="text-sm text-gray-500">Inga publicum-inlagg</p>;
+  if (loading) return <p className="text-sm text-neutral-600">Laddar publicum...</p>;
+  if (failed) return <p className="text-sm text-danger-600">Kunde inte hamta publicum</p>;
+  if (!posts.length) return <p className="text-sm text-neutral-600">Inga publicum-inlagg</p>;
 
   return (
     <ul className="space-y-2">
       {posts.map((post) => (
-        <li key={post.id} className="border-b pb-2">
+        <li key={post.id} className="border-b border-neutral-200 pb-2">
           <button
             type="button"
-            className="w-full text-left hover:opacity-80"
+            className="w-full rounded-md p-1 text-left transition hover:bg-neutral-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-600 focus-visible:ring-offset-2"
             onClick={() => onSelect?.(post)}
           >
-            <p className="italic text-sm text-gray-600">{formatYear(post.createdAt)}</p>
-            <p>{post.title}</p>
+            <p className="text-sm italic text-neutral-600">{formatYear(post.createdAt)}</p>
+            <p className="text-neutral-900">{post.title}</p>
           </button>
         </li>
       ))}
