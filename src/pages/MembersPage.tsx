@@ -5,6 +5,7 @@ import useFetch from "../hooks/useFetch";
 import type { PublicUser } from "../types";
 import { listAchievements } from "../services/achievements";
 import { listLodges } from "../services/lodges";
+import { listOfficials } from "../services/officials";
 import { listUsers as listUsersService } from "../services/users";
 
 export const MembersPage = () => {
@@ -15,11 +16,15 @@ export const MembersPage = () => {
   const { run: runLodges, data: lodges } = useFetch<
     Array<{ id: number; name: string }>
   >();
+  const { run: runOfficials, data: officials } = useFetch<
+    Array<{ id: number; title: string }>
+  >();
   const { user } = useAuth();
   const [query, setQuery] = useState("");
   const [debouncedQuery, setDebouncedQuery] = useState(query);
   const [achievementId, setAchievementId] = useState<number | null>(null);
   const [lodgeId, setLodgeId] = useState<number | null>(null);
+  const [officialId, setOfficialId] = useState<number | null>(null);
 
   // Fetch static lists via useFetch so errors go through `useError`.
   useEffect(() => {
@@ -29,7 +34,10 @@ export const MembersPage = () => {
     runLodges(() => listLodges()).catch(() => {
       // handled by useFetch
     });
-  }, [runAchievements, runLodges]);
+    runOfficials(() => listOfficials()).catch(() => {
+      // handled by useFetch
+    });
+  }, [runAchievements, runLodges, runOfficials]);
 
   const doFetch = useCallback(
     () =>
@@ -38,9 +46,10 @@ export const MembersPage = () => {
           name: debouncedQuery || undefined,
           achievementId,
           lodgeId,
+          officialId,
         })
       ),
-    [run, debouncedQuery, achievementId, lodgeId]
+    [run, debouncedQuery, achievementId, lodgeId, officialId]
   );
 
   useEffect(() => {
@@ -64,7 +73,7 @@ export const MembersPage = () => {
             id="search"
             name="search"
             type="search"
-            placeholder="Sök förnamn eller efternamn"
+            placeholder="Sök namn, e-post eller matrikelnummer"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             className="flex-1 px-4 py-2 border rounded-md"
@@ -98,6 +107,22 @@ export const MembersPage = () => {
             {(lodges ?? []).map((l) => (
               <option key={l.id} value={l.id}>
                 {l.name}
+              </option>
+            ))}
+          </select>
+          <select
+            id="officialFilter"
+            name="officialFilter"
+            value={officialId ?? ""}
+            onChange={(e) =>
+              setOfficialId(e.target.value ? Number(e.target.value) : null)
+            }
+            className="px-4 py-2 border rounded-md"
+          >
+            <option value="">Alla tjänster</option>
+            {(officials ?? []).map((o) => (
+              <option key={o.id} value={o.id}>
+                {o.title}
               </option>
             ))}
           </select>

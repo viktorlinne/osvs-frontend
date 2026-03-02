@@ -16,6 +16,7 @@ export type ListUsersFilters = {
   name?: string;
   achievementId?: number | null;
   lodgeId?: number | null;
+  officialId?: number | null;
 };
 
 export type PublicUserDetailResponse = {
@@ -141,6 +142,9 @@ export async function listUsers(
   }
   if (filters?.lodgeId != null) {
     search.set("lodgeId", String(filters.lodgeId));
+  }
+  if (filters?.officialId != null) {
+    search.set("officialId", String(filters.officialId));
   }
   const query = search.toString();
   const url = query ? `/users?${query}` : "/users";
