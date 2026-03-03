@@ -20,10 +20,9 @@ const NavButton: React.FC<NavButtonProps> = ({ to, children, onClick }) => (
     to={to}
     onClick={onClick}
     className={({ isActive }) =>
-      `${navButtonBase} ${
-        isActive
-          ? "bg-primary-600 text-white"
-          : "text-neutral-700 hover:bg-neutral-100"
+      `${navButtonBase} ${isActive
+        ? "bg-primary-600 text-white"
+        : "text-neutral-700 hover:bg-neutral-100"
       }`
     }
   >
@@ -173,6 +172,9 @@ export const Navbar: React.FC = () => {
                   <NavButton to="/members" onClick={() => setOpen(false)}>
                     Medlemmar
                   </NavButton>
+                  <NavButton to="/regalia" onClick={() => setOpen(false)}>
+                    Regalier
+                  </NavButton>
                   <NavButton to="/revisions" onClick={() => setOpen(false)}>
                     Revisioner
                   </NavButton>
@@ -268,6 +270,9 @@ export const Navbar: React.FC = () => {
                     </NavButton>
                     <NavButton to="/members" onClick={() => setOpen(false)}>
                       Medlemmar
+                    </NavButton>
+                    <NavButton to="/regalia" onClick={() => setOpen(false)}>
+                      Regalier
                     </NavButton>
                     <NavButton to="/revisions" onClick={() => setOpen(false)}>
                       Revisioner

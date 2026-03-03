@@ -51,6 +51,9 @@ export const Footer: React.FC = () => {
                   <NavLink to="/members" className={footerLinkClass}>
                     Medlemmar
                   </NavLink>
+                  <NavLink to="/regalia" className={footerLinkClass}>
+                    Regalier
+                  </NavLink>
                   <NavLink to="/revisions" className={footerLinkClass}>
                     Revisioner
                   </NavLink>

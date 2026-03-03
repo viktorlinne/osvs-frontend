@@ -20,3 +20,8 @@ export * from "./MembersPage";
 export * from "./MemberDetail";
 export * from "./MemberAttended";
 export * from "./CreateMember";
+export * from "./RevisionsPage";
+export * from "./DocumentsPage";
+export * from "./UploadRevisions";
+export * from "./UploadDocument";
+export * from "./Regalia";

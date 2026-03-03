@@ -115,7 +115,7 @@ export const CreateMember = () => {
         );
       } catch {
         setError(
-          `Anv\u00E4ndare skapad (ID ${userId}) men allergier kunde inte sparas.`,
+          `Användare skapad (ID ${userId}) men allergier kunde inte sparas.`,
         );
         return;
       }
@@ -306,7 +306,7 @@ export const CreateMember = () => {
                 : "Skapar..."
               : createdUserId !== null
                 ? "Spara allergier"
-                : "Skapa anv\u00E4ndare"}
+                : "Skapa användare"}
           </button>
         </div>
       </form>

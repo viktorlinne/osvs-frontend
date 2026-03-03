@@ -21,13 +21,14 @@ import {
   EventsPage,
   CreateEvent,
   MembershipPage,
+  RevisionsPage,
+  DocumentsPage,
+  UploadRevisions,
+  UploadDocument,
+  Regalia
 } from "../pages";
 import { AppLayout } from "../app/AppLayout";
 import AuthGuard from "./AuthGuard";
-import { RevisionsPage } from "../pages/RevisionsPage";
-import { DocumentsPage } from "../pages/DocumentsPage";
-import { UploadRevisions } from "../pages/UploadRevisions";
-import { UploadDocument } from "../pages/UploadDocument";
 
 const routes = [
   {
@@ -236,6 +237,14 @@ const routes = [
         element: (
           <AuthGuard roles={["Admin", "Editor"]}>
             <UploadDocument />
+          </AuthGuard>
+        ),
+      },
+      {
+        path: "regalia",
+        element: (
+          <AuthGuard >
+            <Regalia />
           </AuthGuard>
         ),
       },
