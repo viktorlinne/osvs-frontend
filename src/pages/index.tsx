@@ -17,7 +17,7 @@ export * from "./CreatePost";
 export * from "./Profile";
 export * from "./ProfileAttended";
 export * from "./MembersPage";
-export * from "./MembersMapPage";
+export * from "./MapPage";
 export * from "./MemberDetail";
 export * from "./MemberAttended";
 export * from "./CreateMember";

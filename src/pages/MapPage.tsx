@@ -1,5 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
-import { Link } from "react-router-dom";
+﻿import { useCallback, useEffect, useMemo, useState } from "react";
 import L from "leaflet";
 import { MapContainer, Marker, Popup, TileLayer, useMap } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
@@ -129,7 +128,7 @@ function toEditableUser(user: PublicUser): EditableUser {
   };
 }
 
-export const MembersMapPage = () => {
+export const MapPage = () => {
   const { user: authUser } = useAuth();
 
   const { run: runPins, data: pins } = useFetch<UserMapPin[]>();
@@ -143,7 +142,7 @@ export const MembersMapPage = () => {
 
   const canEditOthers = Boolean(
     authUser &&
-      (authUser.roles ?? []).some((role) => role === "Admin" || role === "Editor"),
+    (authUser.roles ?? []).some((role) => role === "Admin" || role === "Editor"),
   );
 
   const refreshPins = useCallback(
@@ -254,12 +253,7 @@ export const MembersMapPage = () => {
 
   return (
     <PageContainer size="xl" className="ui-page">
-      <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-        <h2 className="ui-page-title">Medlemskarta</h2>
-        <Link to="/members" className="ui-link">
-          ← Till Medlemmar
-        </Link>
-      </div>
+      <h2 className="ui-page-title mb-4">Medlemskarta</h2>
 
       <div className="grid gap-4 lg:grid-cols-3">
         <div className="ui-card lg:col-span-2">
@@ -405,4 +399,5 @@ export const MembersMapPage = () => {
   );
 };
 
-export default MembersMapPage;
+export default MapPage;
+

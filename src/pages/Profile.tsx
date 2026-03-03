@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import {
   AchievementsPanel,
@@ -8,7 +8,6 @@ import {
   PageContainer,
   OfficialsManager,
   ProfileForm,
-  ProfileHeader,
   RolesManager,
 } from "../components";
 import { useAuth, useError } from "../context";
@@ -205,7 +204,26 @@ export const Profile = () => {
 
   return (
     <PageContainer size="md" className="ui-page">
-        <ProfileHeader user={user} isEditRoute={isEditRoute} />
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+          <Link to=".." relative="path" className="ui-link">
+            {"\u2190"} Tillbaka
+          </Link>
+          <div className="flex flex-col gap-2 sm:flex-row">
+            {user && !isEditRoute && (
+              <Link to="/profile/edit" className="ui-btn ui-btn-primary ui-btn-sm">
+                Redigera
+              </Link>
+            )}
+            {user && (
+              <Link to="/profile/attended" className="ui-btn ui-btn-primary ui-btn-sm">
+                Närvaro
+              </Link>
+            )}
+            <Link to="/profile/memberships" className="ui-btn ui-btn-primary ui-btn-sm">
+              Medlemskap
+            </Link>
+          </div>
+        </div>
         <h2 className="ui-page-title mb-4 mt-4">Din profil</h2>
 
         <form onSubmit={handleProfileSave} className="ui-card">

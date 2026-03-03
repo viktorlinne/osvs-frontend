@@ -12,7 +12,7 @@ import {
   Profile,
   ProfileAttended,
   MembersPage,
-  MembersMapPage,
+  MapPage,
   MemberDetail,
   MemberAttended,
   CreateMember,
@@ -253,7 +253,7 @@ const routes = [
         path: "map",
         element: (
           <AuthGuard>
-            <MembersMapPage />
+            <MapPage />
           </AuthGuard>
         ),
       },
