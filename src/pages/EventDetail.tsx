@@ -6,10 +6,11 @@ import { PageContainer } from "../components";
 import { useAuth, useError } from "../context";
 import useFetch from "../hooks/useFetch";
 import {
+  isEventStartedNowStockholm,
+  isMoreThan48HoursFromNowStockholm,
   formatEventDisplayDate,
   toEventDateInputValue,
 } from "./events/dateUtils";
-import { getCurrentTimestampMs } from "../utils/time";
 import {
   deleteEvent,
   getEvent,
@@ -76,27 +77,15 @@ export const EventDetail = () => {
   const [attendanceSavingUid, setAttendanceSavingUid] = useState<number | null>(
     null,
   );
-  const hasStarted = (() => {
-    if (!event?.startDate) return false;
-    const start = new Date(event.startDate);
-    if (Number.isNaN(start.getTime())) return false;
-    return start.getTime() <= getCurrentTimestampMs();
-  })();
+  const hasStarted = isEventStartedNowStockholm(event?.startDate);
 
-  const canRsvp = (() => {
-    if (!event?.startDate) return false;
-    const start = new Date(event.startDate);
-    if (Number.isNaN(start.getTime())) return false;
-    const twoDaysMs = 2 * 24 * 60 * 60 * 1000;
-    return start.getTime() - getCurrentTimestampMs() > twoDaysMs;
-  })();
+  const canRsvp = isMoreThan48HoursFromNowStockholm(event?.startDate);
 
   const canBookFood = (() => {
-    if (!event?.food || !event?.startDate || rsvpStatus !== "going")
+    if (!event?.food || !event?.startDate || rsvpStatus !== "going") {
       return false;
-    const start = new Date(event.startDate);
-    if (Number.isNaN(start.getTime())) return false;
-    return start.getTime() > getCurrentTimestampMs();
+    }
+    return !isEventStartedNowStockholm(event.startDate);
   })();
 
   useEffect(() => {

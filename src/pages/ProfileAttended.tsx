@@ -4,18 +4,7 @@ import { PageContainer } from "../components";
 import useFetch from "../hooks/useFetch";
 import { getMyAttendedEvents } from "../services/users";
 import type { AttendedEventsResponse } from "../types";
-
-function formatEventDate(value: string) {
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return value;
-  return new Intl.DateTimeFormat("sv-SE", {
-    year: "numeric",
-    month: "long",
-    day: "2-digit",
-    hour: "2-digit",
-    minute: "2-digit",
-  }).format(date);
-}
+import { formatEventDisplayDate } from "./events/dateUtils";
 
 export const ProfileAttended = () => {
   const { run, data, loading } = useFetch<AttendedEventsResponse>();
@@ -69,7 +58,7 @@ export const ProfileAttended = () => {
                   <Link to={`/events/${event.id}`} className="ui-link text-sm">
                     {event.title}
                   </Link>
-                  <p className="text-sm text-neutral-600">{formatEventDate(event.startDate)}</p>
+                  <p className="text-sm text-neutral-600">{formatEventDisplayDate(event.startDate)}</p>
                 </div>
               </li>
             ))}

@@ -5,6 +5,7 @@ import { useAuth } from "../context";
 import useFetch from "../hooks/useFetch";
 import { listEvents, listMyEvents } from "../services";
 import type { Event as EventRecord } from "../types";
+import { dateKeyFromEventDate } from "./events/dateUtils";
 
 // Start week on Monday
 const WEEK_DAYS = ["Mån", "Tis", "Ons", "Tor", "Fre", "Lör", "Sön"];
@@ -58,13 +59,6 @@ function formatDateKey(d: Date) {
   return `${y}-${m}-${day}`;
 }
 
-function dateKeyFromString(s?: string) {
-  if (!s) return "";
-  const d = new Date(s);
-  if (Number.isNaN(d.getTime())) return "";
-  return formatDateKey(d);
-}
-
 export const EventsPage = () => {
   const today = new Date();
   const [viewDate, setViewDate] = useState(
@@ -93,7 +87,7 @@ export const EventsPage = () => {
         const arr = payload?.events ?? [];
         const map: Record<string, EventRecord[]> = {};
         for (const ev of arr) {
-          const key = dateKeyFromString(ev.startDate);
+          const key = dateKeyFromEventDate(ev.startDate);
           if (!key) continue;
           map[key] = map[key] ?? [];
           map[key].push(ev);
