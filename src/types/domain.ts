@@ -38,6 +38,13 @@ export type User = {
   notes?: string | null;
 };
 
+export type UserMapPin = {
+  id: number;
+  name: string;
+  lat: number;
+  lng: number;
+};
+
 export type Post = {
   id: number;
   title: string;

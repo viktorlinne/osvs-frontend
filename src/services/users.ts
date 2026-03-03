@@ -8,6 +8,7 @@ import type {
   Official,
   OfficialHistoryItem,
   PublicUser,
+  UserMapPin,
 } from "../types";
 import { parseAllergies, parseOfficialHistory } from "./parsers/userMetadata";
 
@@ -75,6 +76,25 @@ function parseAttendedEventsResponse(value: unknown): AttendedEventsResponse {
   };
 }
 
+function parseUserMapPins(value: unknown): UserMapPin[] {
+  if (!Array.isArray(value)) return [];
+  return value
+    .map((entry) => entry as Record<string, unknown>)
+    .map((entry) => ({
+      id: Number(entry.id),
+      name: String(entry.name ?? "").trim(),
+      lat: Number(entry.lat),
+      lng: Number(entry.lng),
+    }))
+    .filter(
+      (entry) =>
+        Number.isFinite(entry.id) &&
+        entry.name.length > 0 &&
+        Number.isFinite(entry.lat) &&
+        Number.isFinite(entry.lng),
+    );
+}
+
 export async function updateMe(payload: Record<string, unknown>) {
   return fetchData(api.put("/users/me", payload));
 }
@@ -122,6 +142,11 @@ export async function listUsers(
   const url = query ? `/users?${query}` : "/users";
   const res = await fetchData(api.get(url));
   return ((res as { users?: PublicUser[] })?.users ?? []) as PublicUser[];
+}
+
+export async function listUsersMapPins(): Promise<UserMapPin[]> {
+  const res = await fetchData(api.get("/users/map"));
+  return parseUserMapPins((res as { users?: unknown })?.users);
 }
 
 export async function getPublicUserById(
@@ -193,6 +218,19 @@ export async function setUserLodge(
   return fetchData(api.post(`/users/${matrikelnummer}/lodges`, { lodgeId }));
 }
 
+export async function setUserLocation(
+  matrikelnummer: number | string,
+  payload: { lat: number; lng: number },
+) {
+  return fetchData(api.put(`/users/${matrikelnummer}/location`, payload));
+}
+
+export async function clearUserLocationOverride(
+  matrikelnummer: number | string,
+) {
+  return fetchData(api.delete(`/users/${matrikelnummer}/location-override`));
+}
+
 export async function setRoles(
   matrikelnummer: number | string,
   roleIds: number[],
@@ -225,10 +263,13 @@ export default {
   uploadMyPicture,
   uploadUserPicture,
   listUsers,
+  listUsersMapPins,
   getPublicUserById,
   getUserRoles,
   getUserLodge,
   setUserLodge,
+  setUserLocation,
+  clearUserLocationOverride,
   setRoles,
   postAchievement,
   getMyAttendedEvents,
