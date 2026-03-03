@@ -388,7 +388,7 @@ export const EventDetail = () => {
         )}
       </div>
 
-      <h2 className="ui-page-title mb-4 mt-4">Mote</h2>
+      <h2 className="ui-page-title mb-4 mt-4">Möte</h2>
 
       {event ? (
         <div className="ui-card">

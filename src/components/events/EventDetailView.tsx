@@ -117,7 +117,7 @@ export function EventDetailView({
         <strong className="text-neutral-900">Mat:</strong> {event.food ? "Ja" : "Nej"}
       </div>
       <div className="mb-2 text-neutral-700">
-        <strong className="text-neutral-900">Logemote:</strong> {event.lodgeMeeting ? "Ja" : "Nej"}
+        <strong className="text-neutral-900">Logemöte:</strong> {event.lodgeMeeting ? "Ja" : "Nej"}
       </div>
 
       <div className="mb-2 text-neutral-700">
