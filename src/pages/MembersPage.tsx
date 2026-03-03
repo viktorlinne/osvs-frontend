@@ -76,7 +76,7 @@ export const MembersPage = () => {
           id="search"
           name="search"
           type="search"
-          placeholder="SÃ¶k namn, e-post eller matrikelnummer"
+          placeholder="Sök namn, e-post eller matrikelnummer"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           className={inputClass}
@@ -122,7 +122,7 @@ export const MembersPage = () => {
           }
           className={selectClass}
         >
-          <option value="">Alla tjÃ¤nster</option>
+          <option value="">Alla tjänster</option>
           {(officials ?? []).map((o) => (
             <option key={o.id} value={o.id}>
               {o.title}

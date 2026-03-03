@@ -52,10 +52,10 @@ export const UploadRevisions = () => {
       parsedYear < 1900 ||
       parsedYear > 3000
     ) {
-      return setError("Ã…r mÃ¥ste vara ett giltigt Ã¥r");
+      return setError("År måste vara ett giltigt år");
     }
     if (!Number.isInteger(parsedLodgeId) || parsedLodgeId <= 0) {
-      return setError("VÃ¤lj en loge");
+      return setError("Välj en loge");
     }
 
     const fileError = validatePdfFile(file);
@@ -82,9 +82,9 @@ export const UploadRevisions = () => {
   return (
     <PageContainer size="md" className="ui-page">
       <Link to="/revisions" className="ui-link">
-        â† Tillbaka
+        ← Tillbaka
       </Link>
-      <h2 className="ui-page-title mb-4 mt-4">LÃ¤gg till revision</h2>
+      <h2 className="ui-page-title mb-4 mt-4">Lägg till revision</h2>
 
       <form onSubmit={onSubmit} className="ui-card">
         <div className="mb-4">
@@ -102,7 +102,7 @@ export const UploadRevisions = () => {
 
         <div className="mb-4">
           <label htmlFor="revision-year" className={labelClass}>
-            Ã…r
+            År
           </label>
           <input
             id="revision-year"
@@ -126,7 +126,7 @@ export const UploadRevisions = () => {
             onChange={(e) => setLodgeId(e.target.value)}
             className={selectClass}
           >
-            <option value="">VÃ¤lj loge</option>
+            <option value="">Välj loge</option>
             {(lodges ?? []).map((lodge) => (
               <option key={lodge.id} value={String(lodge.id)}>
                 {lodge.name}

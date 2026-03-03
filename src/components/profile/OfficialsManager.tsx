@@ -108,7 +108,7 @@ export const OfficialsManager = ({
   return (
     <div className="mb-4 w-full">
       <fieldset className="w-full">
-        <legend className="ui-label text-center">Aktiva TjÃ¤nster</legend>
+        <legend className="ui-label text-center">Aktiva Tjänster</legend>
         {isEditRoute ? (
           <div className="flex w-full flex-col items-center gap-2 py-2">
             {officials.length > 0 ? (
@@ -137,23 +137,23 @@ export const OfficialsManager = ({
                 </div>
               </div>
             ) : (
-              <div className="py-2 text-sm text-neutral-600">Inga tjÃ¤nster</div>
+              <div className="py-2 text-sm text-neutral-600">Inga tjänster</div>
             )}
           </div>
         ) : (
           <div className="mb-4 py-2 text-sm text-neutral-700">
             {effectiveSelected && effectiveSelected.length > 0
               ? effectiveSelected
-                  .map((id) => officials.find((official) => official.id === id)?.title ?? "")
-                  .filter(Boolean)
-                  .join(", ")
-              : "Ingen tjÃ¤nst"}
+                .map((id) => officials.find((official) => official.id === id)?.title ?? "")
+                .filter(Boolean)
+                .join(", ")
+              : "Ingen tjänst"}
           </div>
         )}
 
         <div className="mb-1 text-center">
           <label htmlFor="officialHistoryList" className="ui-label text-center">
-            Tidigare tjÃ¤nster
+            Tidigare tjänster
           </label>
           {officialHistory.length > 0 ? (
             <select id="officialHistoryList" name="officialHistoryList" className="ui-select w-auto">
@@ -162,12 +162,12 @@ export const OfficialsManager = ({
                   key={`${entry.id}-${entry.appointedAt}-${entry.unappointedAt}`}
                   value={`${entry.id}:${entry.appointedAt}`}
                 >
-                  {entry.title} {formatDate(entry.appointedAt)} â€” {formatDate(entry.unappointedAt)}
+                  {entry.title} {formatDate(entry.appointedAt)} - {formatDate(entry.unappointedAt)}
                 </option>
               ))}
             </select>
           ) : (
-            <div className="py-2 text-sm text-neutral-600">Inga tidigare tjÃ¤nster</div>
+            <div className="py-2 text-sm text-neutral-600">Inga tidigare tjänster</div>
           )}
         </div>
       </fieldset>

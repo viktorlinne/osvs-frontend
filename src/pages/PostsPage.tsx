@@ -31,7 +31,7 @@ export const NewsPage = () => {
         }
       })
       .catch(() => {
-        setError("Misslyckades att hÃ¤mta loger");
+        setError("Misslyckades att hämta loger");
       });
     return () => {
       mounted = false;
@@ -51,16 +51,16 @@ export const NewsPage = () => {
       listPosts(
         lodgeFilter || hasTitleFilter
           ? {
-              lodgeIds: lodgeFilter,
-              title: hasTitleFilter ? debouncedTitleQuery : undefined,
-            }
+            lodgeIds: lodgeFilter,
+            title: hasTitleFilter ? debouncedTitleQuery : undefined,
+          }
           : undefined,
       ),
     )
       .then((res) => {
         if (!mounted) return;
         if (!Array.isArray(res)) {
-          setError("NÃ¥got gick fel vid hÃ¤mtning av inlÃ¤gg.");
+          setError("Något gick fel vid hämtning av inlägg.");
         } else if (res.length === 0) {
           setEmpty(true);
         } else {
@@ -82,27 +82,27 @@ export const NewsPage = () => {
         {user &&
           (user.roles ?? []).some((r) => ["Admin", "Editor"].includes(r)) && (
             <Link to="/posts/create" className="ui-btn ui-btn-primary">
-              Skapa InlÃ¤gg
+              Skapa Inlägg
             </Link>
           )}
       </div>
 
       <div className="mb-6 grid grid-cols-1 gap-3 md:grid-cols-2">
         <label className={labelClass} htmlFor="titleSearch">
-          SÃ¶k pÃ¥ titel
+          Sök på titel
           <input
             id="titleSearch"
             name="titleSearch"
             type="search"
             value={titleQuery}
             onChange={(e) => setTitleQuery(e.target.value)}
-            placeholder="SÃ¶k inlÃ¤ggstitel"
+            placeholder="Sök inläggstitel"
             className={inputClass}
           />
         </label>
 
         <label className={labelClass} htmlFor="lodgeFilter">
-          Filtrera pÃ¥ loge
+          Filtrera på loge
           <select
             id="lodgeFilter"
             value={selectedLodge}
@@ -142,7 +142,7 @@ export const NewsPage = () => {
       </div>
 
       {!loading && (posts ?? []).length === 0 && !notFound && empty && (
-        <p className="mt-6 text-neutral-600">Inga inlÃ¤gg Ã¤n.</p>
+        <p className="mt-6 text-neutral-600">Inga inlägg än.</p>
       )}
     </PageContainer>
   );

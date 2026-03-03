@@ -13,15 +13,15 @@ export const AboutPage = () => {
             />
           </div>
           <p className="text-sm text-neutral-600">
-            Ordenssamfundet VS Ã¤r en sluten orden med fÃ¶r samtliga loger
+            Ordenssamfundet VS är en sluten orden med för samtliga loger
             gemensamma ordningsregler och grader.
           </p>
-          <h3 className="text-xl font-medium text-primary-600">Samfundet bestÃ¥r av:</h3>
+          <h3 className="text-xl font-medium text-primary-600">Samfundet består av:</h3>
           <ul className="list-inside list-disc space-y-1 text-sm text-neutral-600">
             <li>Stamlogen i Karskrona bildad 7 september 1924</li>
             <li>Logen Stella Polaris i Helsingborg 21 mars 1931</li>
-            <li>Logen Regulus i Ã„ngelholm 15 januari 1933</li>
-            <li>Logen Orion i GÃ¶teborg bildad 26 februari 1943</li>
+            <li>Logen Regulus i Ängelholm 15 januari 1933</li>
+            <li>Logen Orion i Göteborg bildad 26 februari 1943</li>
             <li>Logen Capella i Halmstad 28 november 1975</li>
           </ul>
         </section>
@@ -29,51 +29,51 @@ export const AboutPage = () => {
         <section className="space-y-6 text-sm text-neutral-700">
           <h2 className="ui-section-title text-primary-600">Vad vill VS?</h2>
           <p>
-            Samfundet VS vill sammanfÃ¶ra mÃ¤n av olika Ã¥ldrar, intressen och
-            yrken till broderlig samvaro under vÃ¤rdiga sÃ¤llskapliga former fÃ¶r
-            att slÃ¥ vakt omkring vÃ¥ra humanitÃ¤ra, ideella och kulturella
-            vÃ¤rden.
+            Samfundet VS vill sammanföra män av olika åldrar, intressen och
+            yrken till broderlig samvaro under värda sällskapliga former för
+            att slå vakt omkring våra humanitära, ideella och kulturella
+            värden.
           </p>
 
           <h2 className="ui-section-title text-primary-600">Vad kan VS erbjuda dig?</h2>
           <p>
-            En afton i logen omfattar en hÃ¶gtidlig upptagning av BrÃ¶der i
-            nÃ¥gon av graderna. KvÃ¤llen avslutas som regel med en brÃ¶dramÃ¥ltid
-            i angenÃ¤m samvaro genom att BrÃ¶der i olika Ã¥ldrar och av skilda
-            yrken och grader fÃ¥r tillfÃ¤lle till ett utbyte av tankar och
-            Ã¥sikter i kanske fÃ¶r dig aktuella spÃ¶rsmÃ¥l.
+            En afton i logen omfattar en högtidlig upptagning av Bröder i
+            nån av graderna. Kvällen avslutas som regel med en brödramåltid
+            i angenäm samvaro genom att Bröder i olika åldrar och av skilda
+            yrken och grader får tillfälle till ett utbyte av tankar och
+            åsikter i kanske för dig aktuella spörsmål.
           </p>
 
-          <h2 className="ui-section-title text-primary-600">Vad Ã¤r VS?</h2>
+          <h2 className="ui-section-title text-primary-600">Vad är VS?</h2>
           <p>
-            Initialenerna VS bÃ¤r olika betydelse i graderna. Den slutliga
-            avsÃ¶jas inte fÃ¶rrÃ¤n medlemmen recipierar i hÃ¶gsta graden. Den
-            medmÃ¤nskliga livssynen Ã¤r grunden fÃ¶r Ordenssamfundets VSÂ´s etik
-            och ideal. VS tvingar inga medlemmar nÃ¥gon viss
+            Initialenerna VS bär olika betydelse i graderna. Den slutliga
+            avsöjas inte förrän medlemmen recipierar i högsta graden. Den
+            medmänskliga livssynen är grunden för Ordenssamfundets VS:s etik
+            och ideal. VS tvingar inga medlemmar någon viss
             religionsuppfattning. En broder i VS deltar med den egna tron.
           </p>
         </section>
 
         <section className="space-y-6 text-sm text-neutral-700">
-          <h2 className="ui-section-title text-primary-600">VarfÃ¶r bara mÃ¤n?</h2>
+          <h2 className="ui-section-title text-primary-600">Varförför bara män?</h2>
           <p>
-            I vÃ¥r tid, nÃ¤r jÃ¤mstÃ¤lldheten mellan man och kvinna Ã¤r en
-            sjÃ¤lvklarhet, kan det verka egendomligt att Ordern Ã¤r Ã¶ppen endast
-            fÃ¶r mÃ¤n. NÃ¤r samfundet grundades 1924 hade nÃ¥gra av grundarna den
-            erfarenheten frÃ¥n andra ordenssamfund med enbart manliga medlemmar
-            enligt traditioner, som gÃ¥r tillbaka till medeltiden. Ã„n idag
-            fÃ¶ljer vi dessa traditioner. Detta betyder inte att
-            Ordenssamfundet VS pÃ¥ nÃ¥got sÃ¤tt nedvÃ¤rderar kvinnan.
+            I vår tid, när jämställdheten mellan man och kvinna är en
+            självklarhet, kan det verka egendomligt att Ordern är öppen endast
+            för män. När samfundet grundades 1924 hade några av grundarna den
+            erfarenheten från andra ordenssamfund med enbart manliga medlemmar
+            enligt traditioner, som går tillbaka till medeltiden. Än idag
+            följer vi dessa traditioner. Detta betyder inte att
+            Ordenssamfundet VS på något sätt nedvärderar kvinnan.
           </p>
 
           <h2 className="ui-section-title text-primary-600">VS Damerna</h2>
           <p>
-            VÃ¥ra damer kan knytas till Ordenssamfundet genom ett medlemskap i
-            Damklubben. Klubben har till syfte, fÃ¶rutom nÃ¶jet av gemensamt
-            umgÃ¤nge, att genom aktivitet stÃ¶dja och frÃ¤mja arbetet inom "sin
+            Våra damer kan knytas till Ordenssamfundet genom ett medlemskap i
+            Damklubben. Klubben har till syfte, förutom nöjet av gemensamt
+            umgänge, att genom aktivitet stödja och främja arbetet inom "sin
             loge". Damklubbens i logen insatser har visat sig ha en mycket
-            stor betydelse fÃ¶r logerna, och Damernas arbete har rÃ¶nt en stor
-            uppskattning bland brÃ¶derna.
+            stor betydelse för logerna, och Damernas arbete har rönt en stor
+            uppskattning bland bröderna.
           </p>
         </section>
       </div>

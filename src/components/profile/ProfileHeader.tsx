@@ -10,7 +10,7 @@ export const ProfileHeader = ({
 }) => (
   <div className="flex w-full flex-col items-stretch gap-2 md:flex-row md:items-start md:justify-between">
     <Link to=".." relative="path" className="ui-link w-fit">
-      â† Tillbaka
+      ← Tillbaka
     </Link>
     <div className="flex flex-col gap-2 sm:flex-row">
       {user && !isEditRoute && (
@@ -20,7 +20,7 @@ export const ProfileHeader = ({
       )}
       {user && (
         <Link to="/profile/attended" className="ui-btn ui-btn-primary w-full sm:w-auto">
-          NÃ¤rvaro
+          Närvaro
         </Link>
       )}
       <Link to="/profile/memberships" className="ui-btn ui-btn-primary w-full sm:w-auto">

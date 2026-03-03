@@ -260,7 +260,7 @@ export const EventDetail = () => {
     }
 
     const confirmed = window.confirm(
-      "Ã„r du sÃ¤ker pÃ¥ att du vill radera mÃ¶tet?",
+      "Är du säker på att du vill radera mötet?",
     );
     if (!confirmed) return;
 
@@ -268,7 +268,7 @@ export const EventDetail = () => {
       await runAction(() => deleteEvent(eventId));
       navigate("/events");
     } catch {
-      setGlobalError("Misslyckades att radera mÃ¶tet");
+      setGlobalError("Misslyckades att radera mötet");
     }
   }
 
@@ -387,7 +387,7 @@ export const EventDetail = () => {
           relative="path"
           className="ui-link"
         >
-          â† Tillbaka
+          ← Tillbaka
         </Link>
         {canEdit && !isEditRoute && (
           <Link
@@ -441,7 +441,7 @@ export const EventDetail = () => {
           )}
         </div>
       ) : (
-        <div className="text-neutral-600">Ingen mÃ¶tesdata</div>
+        <div className="text-neutral-600">Ingen mötesdata</div>
       )}
     </PageContainer>
   );

@@ -16,10 +16,10 @@ export const LoginPage = () => {
   const { run } = useFetch();
   const from = (
     location.state as
-      | {
-          from?: { pathname?: string; search?: string; hash?: string };
-        }
-      | undefined
+    | {
+      from?: { pathname?: string; search?: string; hash?: string };
+    }
+    | undefined
   )?.from;
   const redirectTo = from?.pathname
     ? `${from.pathname}${from.search ?? ""}${from.hash ?? ""}`
@@ -58,7 +58,7 @@ export const LoginPage = () => {
           />
         </label>
         <label htmlFor="password" className="ui-label mb-4 mt-3">
-          LÃ¶senord
+          Lösenord
           <input
             id="password"
             name="password"

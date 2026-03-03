@@ -35,7 +35,7 @@ export const MembershipPage = () => {
   return (
     <PageContainer size="md" className="ui-page">
       <Link to=".." relative="path" className="ui-link mb-4 inline-flex">
-        â† Tillbaka
+        ← Tillbaka
       </Link>
       <h2 className="ui-page-title mb-4">Medlemskaps Betalningar</h2>
 
@@ -48,7 +48,7 @@ export const MembershipPage = () => {
           {payments.map((p) => (
             <li key={p.id} className="ui-card flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <div>
-                <div className="font-semibold text-neutral-900">Ã…r: {p.year}</div>
+                <div className="font-semibold text-neutral-900">År: {p.year}</div>
                 <div className="text-neutral-700">Belopp: {p.amount} SEK</div>
                 <div className="text-neutral-700">Status: {p.status}</div>
               </div>

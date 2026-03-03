@@ -43,12 +43,12 @@ export function EventList() {
     };
   }, []);
 
-  if (loading) return <p className="text-sm text-neutral-600">Laddar mÃ¶ten...</p>;
+  if (loading) return <p className="text-sm text-neutral-600">Laddar möten...</p>;
   if (failed) {
-    return <p className="text-sm text-danger-600">Kunde inte hÃ¤mta kommande mÃ¶ten</p>;
+    return <p className="text-sm text-danger-600">Kunde inte hämta kommande möten</p>;
   }
   if (!events.length) {
-    return <p className="text-sm text-neutral-600">Inga kommande mÃ¶ten</p>;
+    return <p className="text-sm text-neutral-600">Inga kommande möten</p>;
   }
 
   return (

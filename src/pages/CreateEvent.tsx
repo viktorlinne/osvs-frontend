@@ -19,7 +19,7 @@ export const CreateEvent = () => {
   const { user } = useAuth();
   const canCreate = Boolean(
     user &&
-      (user.roles ?? []).some((r: string) => ["Admin", "Editor"].includes(r)),
+    (user.roles ?? []).some((r: string) => ["Admin", "Editor"].includes(r)),
   );
 
   const { run: runLodges, data: lodges } = useFetch<Lodge[]>();
@@ -47,11 +47,11 @@ export const CreateEvent = () => {
     e?.preventDefault();
     clearGlobalError();
     if (!canCreate)
-      return setGlobalError("Du har inte behÃ¶righet att skapa mÃ¶ten");
-    if (!form.title) return setGlobalError("Titel Ã¤r obligatorisk");
-    if (!form.description) return setGlobalError("Beskrivning Ã¤r obligatorisk");
-    if (!form.startDate) return setGlobalError("Startdatum Ã¤r obligatoriskt");
-    if (!form.endDate) return setGlobalError("Slutdatum Ã¤r obligatoriskt");
+      return setGlobalError("Du har inte behörighet att skapa möten");
+    if (!form.title) return setGlobalError("Titel är obligatorisk");
+    if (!form.description) return setGlobalError("Beskrivning är obligatorisk");
+    if (!form.startDate) return setGlobalError("Startdatum är obligatoriskt");
+    if (!form.endDate) return setGlobalError("Slutdatum är obligatoriskt");
     try {
       const normalizedLodgeIds = Array.from(
         new Set(
@@ -100,11 +100,11 @@ export const CreateEvent = () => {
     <PageContainer size="md" className="ui-page">
       <div className="mb-4 flex items-center justify-between">
         <Link to="/events" className="ui-link">
-          â† Tillbaka
+          ← Tillbaka
         </Link>
       </div>
 
-      <h2 className="ui-page-title mb-4">Skapa MÃ¶te</h2>
+      <h2 className="ui-page-title mb-4">Skapa Möte</h2>
 
       <form onSubmit={handleCreate} className="ui-card space-y-4">
         <div>
@@ -201,7 +201,7 @@ export const CreateEvent = () => {
                 setForm({ ...form, lodgeMeeting: e.target.checked })
               }
             />
-            LogemÃ¶te
+            Logemöte
           </label>
         </div>
 

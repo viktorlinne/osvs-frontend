@@ -63,7 +63,7 @@ export const PostDetail = () => {
         }
       })
       .catch(() => {
-        if (mounted) setGlobalError("Misslyckades att hÃ¤mta loger");
+        if (mounted) setGlobalError("Misslyckades att hämta loger");
       })
       .finally(() => {
         if (mounted) setLodgesLoading(false);
@@ -76,7 +76,7 @@ export const PostDetail = () => {
   useEffect(() => {
     let mounted = true;
     if (!id) {
-      setGlobalError("Saknar inlÃ¤ggs-id");
+      setGlobalError("Saknar inläggs-id");
       return () => {
         mounted = false;
       };
@@ -144,7 +144,7 @@ export const PostDetail = () => {
             if (m && typeof m.field === "string") {
               setFieldError(m.field as keyof UpdatePostForm, {
                 type: "server",
-                message: m.message ?? "Ogiltigt vÃ¤rde",
+                message: m.message ?? "Ogiltigt värde",
               });
             }
           });
@@ -157,7 +157,7 @@ export const PostDetail = () => {
     if (!id || !isAdmin) return;
 
     const confirmed = window.confirm(
-      "Ã„r du sÃ¤ker pÃ¥ att du vill radera inlÃ¤gget?",
+      "Är du säker på att du vill radera inlägget?",
     );
     if (!confirmed) return;
 
@@ -165,7 +165,7 @@ export const PostDetail = () => {
       await runSubmit(() => deletePost(id));
       navigate("/posts");
     } catch {
-      setGlobalError("Misslyckades att radera inlÃ¤gget");
+      setGlobalError("Misslyckades att radera inlägget");
     }
   }
 
@@ -173,7 +173,7 @@ export const PostDetail = () => {
     <PageContainer size="md" className="ui-page">
       <div className="mb-2 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <Link to=".." relative="path" className="ui-link">
-          â† Tillbaka
+          ← Tillbaka
         </Link>
         {canEdit && post && !isEditRoute && (
           <Link to={`/posts/${post.id}/edit`} className="ui-btn ui-btn-primary ui-btn-sm">

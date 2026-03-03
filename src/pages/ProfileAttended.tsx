@@ -32,23 +32,23 @@ export const ProfileAttended = () => {
   return (
     <PageContainer size="md" className="ui-page">
       <Link to="/profile" className="ui-link">
-        â† Tillbaka
+        ← Tillbaka
       </Link>
 
-      <h2 className="ui-page-title mb-4 mt-4">Min nÃ¤rvaro</h2>
+      <h2 className="ui-page-title mb-4 mt-4">Min närvaro</h2>
 
       <div className="ui-card mb-4">
-        <p className="text-sm text-neutral-600">MÃ¶ten sedan senaste utmÃ¤rkelse</p>
+        <p className="text-sm text-neutral-600">Möten sedan senaste utmärkelse</p>
         <p className="mt-1 text-3xl font-bold text-neutral-900">{sinceLastAchievementCount}</p>
       </div>
 
       <div className="ui-card">
-        <h3 className="mb-3 text-lg font-semibold text-neutral-900">MÃ¶ten deltagna</h3>
+        <h3 className="mb-3 text-lg font-semibold text-neutral-900">Möten deltagna</h3>
 
         {loading ? <p className="text-neutral-600">Laddar...</p> : null}
 
         {!loading && events.length === 0 ? (
-          <p className="text-neutral-600">Inga detagna mÃ¶ten hittades.</p>
+          <p className="text-neutral-600">Inga detagna möten hittades.</p>
         ) : null}
 
         {!loading && events.length > 0 ? (

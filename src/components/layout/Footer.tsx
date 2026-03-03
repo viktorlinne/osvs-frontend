@@ -46,7 +46,7 @@ export const Footer: React.FC = () => {
                     Nyheter
                   </NavLink>
                   <NavLink to="/events" className={footerLinkClass}>
-                    MÃ¶ten
+                    Möten
                   </NavLink>
                   <NavLink to="/members" className={footerLinkClass}>
                     Medlemmar

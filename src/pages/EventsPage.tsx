@@ -7,7 +7,7 @@ import { listEvents, listMyEvents } from "../services";
 import type { Event as EventRecord } from "../types";
 
 // Start week on Monday
-const WEEK_DAYS = ["MÃ¥n", "Tis", "Ons", "Tor", "Fre", "LÃ¶r", "SÃ¶n"];
+const WEEK_DAYS = ["Mån", "Tis", "Ons", "Tor", "Fre", "Lör", "Sön"];
 
 function formatMonthNameSv(date: Date) {
   const name = new Intl.DateTimeFormat("sv-SE", { month: "long" }).format(date);
@@ -124,17 +124,17 @@ export const EventsPage = () => {
   return (
     <PageContainer size="xl" className="ui-page">
       <div className="mb-4 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-        <h2 className="ui-page-title">MÃ¶teskalender</h2>
+        <h2 className="ui-page-title">Möteskalender</h2>
 
         <div className="flex flex-wrap gap-2">
           <Button onClick={prevMonth} variant="secondary" size="sm" aria-label="Previous month">
-            FÃ¶rra
+            Förra
           </Button>
           <Button onClick={jumpToToday} variant="secondary" size="sm">
             Idag
           </Button>
           <Button onClick={nextMonth} variant="secondary" size="sm" aria-label="Next month">
-            NÃ¤sta
+            Nästa
           </Button>
           {user &&
             (user.roles ?? []).some((r) => ["Admin", "Editor"].includes(r)) && (
@@ -171,7 +171,7 @@ export const EventsPage = () => {
                 </div>
                 <div className="flex-1">
                   {evs.length === 0 ? (
-                    <div className="text-xs text-neutral-600">Inga mÃ¶ten</div>
+                    <div className="text-xs text-neutral-600">Inga möten</div>
                   ) : (
                     <div className="flex flex-col gap-2">
                       {evs.map((e) => (
@@ -210,8 +210,8 @@ export const EventsPage = () => {
             {week.map((date, di) => {
               const isToday = date
                 ? date.getFullYear() === today.getFullYear() &&
-                  date.getMonth() === today.getMonth() &&
-                  date.getDate() === today.getDate()
+                date.getMonth() === today.getMonth() &&
+                date.getDate() === today.getDate()
                 : false;
 
               const inMonth = date ? date.getMonth() === month : false;

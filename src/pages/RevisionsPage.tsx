@@ -69,14 +69,14 @@ export const RevisionsPage = () => {
         <h2 className="ui-page-title">Revisioner</h2>
         {canCreate && (
           <Link to="/revisions/create" className="ui-btn ui-btn-primary">
-            LÃ¤gg till revision
+            Lägg till revision
           </Link>
         )}
       </div>
 
       <div className="mb-6 grid grid-cols-1 gap-3 md:grid-cols-2">
         <label htmlFor="revision-year-filter" className={labelClass}>
-          Filtrera pÃ¥ Ã¥r
+          Filtrera på år
           <input
             id="revision-year-filter"
             type="number"
@@ -91,7 +91,7 @@ export const RevisionsPage = () => {
         </label>
 
         <label htmlFor="revision-lodge-filter" className={labelClass}>
-          Filtrera pÃ¥ loge
+          Filtrera på loge
           <select
             id="revision-lodge-filter"
             value={selectedLodge}

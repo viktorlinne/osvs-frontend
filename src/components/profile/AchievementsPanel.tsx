@@ -76,23 +76,23 @@ export const AchievementsPanel = ({
         </fieldset>
 
         <div className="mb-1 text-center">
-          <label htmlFor="achievementsList" className="ui-label text-center">UtmÃ¤rkelser</label>
+          <label htmlFor="achievementsList" className="ui-label text-center">Utmärkelser</label>
           {achievements && achievements.length > 0 ? (
             <select id="achievementsList" name="achievementsList" className="ui-select w-auto">
               {achievements.map((a) => (
                 <option key={a.id} value={a.id}>
-                  {a.title} â€” {a.awardedAt ? new Date(a.awardedAt).toLocaleDateString() : ""}
+                  {a.title} - {a.awardedAt ? new Date(a.awardedAt).toLocaleDateString() : ""}
                 </option>
               ))}
             </select>
           ) : (
-            <div className="mb-4 text-sm text-neutral-600">Inga utmÃ¤rkelser</div>
+            <div className="mb-4 text-sm text-neutral-600">Inga utmärkelser</div>
           )}
         </div>
 
         {isEditRoute && canAward ? (
           <div className="mb-1 text-center">
-            <label htmlFor="awardSelect" className="ui-label text-center">Tilldela ny utmÃ¤rkelse</label>
+            <label htmlFor="awardSelect" className="ui-label text-center">Tilldela ny utmärkelse</label>
             <div className="flex flex-col gap-2 md:flex-row">
               <select
                 id="awardSelect"
@@ -103,7 +103,7 @@ export const AchievementsPanel = ({
                 }
                 className="ui-select w-full"
               >
-                <option value="">VÃ¤lj utmÃ¤rkelse</option>
+                <option value="">Välj utmärkelse</option>
                 {available.map((opt) => (
                   <option key={opt.id} value={opt.id}>
                     {opt.title}

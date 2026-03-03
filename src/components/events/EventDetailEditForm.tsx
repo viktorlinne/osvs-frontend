@@ -76,7 +76,7 @@ export function EventDetailEditForm({
               </label>
             ))
           ) : (
-            <div className="text-sm text-neutral-600">Inga loger att vÃ¤lja</div>
+            <div className="text-sm text-neutral-600">Inga loger att välja</div>
           )}
         </div>
       </div>
@@ -156,7 +156,7 @@ export function EventDetailEditForm({
             className="h-4 w-4 rounded border-neutral-300 text-primary-600 focus-visible:ring-primary-600"
             onChange={(e) => setForm({ ...form, lodgeMeeting: e.target.checked })}
           />
-          LogemÃ¶te
+          Logemöte
         </label>
       </div>
 

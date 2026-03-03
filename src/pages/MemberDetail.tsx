@@ -275,7 +275,7 @@ export const MemberDetail = () => {
           await runAction(() => setMemberOfficials(userId, selectedOfficialIds));
         }
       } catch {
-        setGlobalError("Misslyckades att uppdatera tjÃ¤nster");
+        setGlobalError("Misslyckades att uppdatera tjänster");
       }
 
       try {
@@ -298,7 +298,7 @@ export const MemberDetail = () => {
           setAwardDate("");
         }
       } catch {
-        setGlobalError("Misslyckades att tilldela utmÃ¤rkelse");
+        setGlobalError("Misslyckades att tilldela utmärkelse");
       }
 
       try {
@@ -317,7 +317,7 @@ export const MemberDetail = () => {
         missing.forEach((field) => {
           setFieldError(field as keyof UpdateUserForm, {
             type: "server",
-            message: "Ogiltigt vÃ¤rde",
+            message: "Ogiltigt värde",
           });
         });
         return;
@@ -331,150 +331,150 @@ export const MemberDetail = () => {
 
   return (
     <PageContainer size="md" className="ui-page">
-        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-          <Link
-            to=".."
-            relative="path"
-            className="ui-link"
-          >
-            â† Tillbaka
-          </Link>
-          {!isEditRoute && (
-            <div className="flex flex-col gap-2 sm:flex-row">
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+        <Link
+          to=".."
+          relative="path"
+          className="ui-link"
+        >
+          ← Tillbaka
+        </Link>
+        {!isEditRoute && (
+          <div className="flex flex-col gap-2 sm:flex-row">
+            <Link
+              to={`/members/${matrikelnummer}/attended`}
+              className="ui-btn ui-btn-primary ui-btn-sm"
+            >
+              Närvaro
+            </Link>
+            {canEdit && (
               <Link
-                to={`/members/${matrikelnummer}/attended`}
+                to={`/members/${matrikelnummer}/edit`}
                 className="ui-btn ui-btn-primary ui-btn-sm"
               >
-                NÃ¤rvaro
+                Redigera
               </Link>
-              {canEdit && (
-                <Link
-                  to={`/members/${matrikelnummer}/edit`}
-                  className="ui-btn ui-btn-primary ui-btn-sm"
-                >
-                  Redigera
-                </Link>
-              )}
-            </div>
-          )}
-        </div>
-
-        <h2 className="ui-page-title mb-4 mt-4">Medlem</h2>
-
-        {member && (
-          <form onSubmit={handleMemberSave} className="ui-card">
-            <AchievementsPanel
-              user={member}
-              achievements={achievements}
-              available={available}
-              lodge={lodges.find((lodge) => lodge.id === selectedLid) ?? null}
-              lodges={lodges}
-              selectedLid={selectedLid}
-              setSelectedLid={setSelectedLid}
-              onSaveLodge={async (targetUserId: number, lodgeId: number | null) => {
-                if (!targetUserId) throw new Error("Invalid target");
-                clearGlobalError();
-                setSaving(true);
-                try {
-                  await runAction(() =>
-                    setUserLodge(
-                      String(targetUserId),
-                      lodgeId === null ? null : Number(lodgeId),
-                    ),
-                  );
-                  await run(loadMember);
-                } catch {
-                  setGlobalError("Misslyckades att uppdatera loge");
-                } finally {
-                  setSaving(false);
-                }
-              }}
-              isEditRoute={isEditRoute}
-              selectedAid={selectedAid}
-              setSelectedAid={setSelectedAid}
-              awardDate={awardDate}
-              setAwardDate={setAwardDate}
-              canAward={canAward}
-              assignAchievement={async (
-                targetUserId: number,
-                achievementId: number,
-                awardedAt?: string,
-              ) => {
-                if (!targetUserId) throw new Error("Invalid target");
-                clearGlobalError();
-                setSaving(true);
-                try {
-                  await runAction(() =>
-                    postAchievement(String(targetUserId), {
-                      achievementId,
-                      awardedAt,
-                    }),
-                  );
-                  await run(loadMember);
-                } finally {
-                  setSaving(false);
-                }
-              }}
-            />
-
-            <RolesManager
-              userId={member?.matrikelnummer}
-              rolesList={rolesList}
-              selectedRoleIds={selectedRoleIds}
-              setSelectedRoleIds={setSelectedRoleIds}
-              canEditRoles={canEdit}
-              isEditRoute={isEditRoute}
-              saveRoles={async (targetUserId: number, roleIds: number[]) => {
-                if (!targetUserId) throw new Error("Invalid target");
-                clearGlobalError();
-                setSaving(true);
-                try {
-                  await runAction(() => setRoles(String(targetUserId), roleIds));
-                  await run(loadMember);
-                } finally {
-                  setSaving(false);
-                }
-              }}
-              setGlobalError={setGlobalError}
-              setSaving={setSaving}
-            />
-
-            <OfficialsManager
-              user={member}
-              isEditRoute={isEditRoute}
-              selectedIds={selectedOfficialIds ?? undefined}
-              setSelectedIds={setSelectedOfficialIds}
-            />
-
-            <AllergiesManager
-              user={member}
-              isEditRoute={isEditRoute}
-              selectedIds={selectedAllergyIds ?? undefined}
-              setSelectedIds={setSelectedAllergyIds}
-            />
-
-            <ProfileForm
-              user={member}
-              register={register}
-              errors={errors}
-              isEditRoute={isEditRoute}
-              setPictureFile={setPictureFile}
-              saving={saving}
-            />
-
-            {isEditRoute ? (
-              <div className="flex flex-col gap-2 py-4 sm:flex-row">
-                <button
-                  type="submit"
-                  className="ui-btn ui-btn-primary"
-                  disabled={saving}
-                >
-                  {saving ? "Sparar..." : "Spara"}
-                </button>
-              </div>
-            ) : null}
-          </form>
+            )}
+          </div>
         )}
+      </div>
+
+      <h2 className="ui-page-title mb-4 mt-4">Medlem</h2>
+
+      {member && (
+        <form onSubmit={handleMemberSave} className="ui-card">
+          <AchievementsPanel
+            user={member}
+            achievements={achievements}
+            available={available}
+            lodge={lodges.find((lodge) => lodge.id === selectedLid) ?? null}
+            lodges={lodges}
+            selectedLid={selectedLid}
+            setSelectedLid={setSelectedLid}
+            onSaveLodge={async (targetUserId: number, lodgeId: number | null) => {
+              if (!targetUserId) throw new Error("Invalid target");
+              clearGlobalError();
+              setSaving(true);
+              try {
+                await runAction(() =>
+                  setUserLodge(
+                    String(targetUserId),
+                    lodgeId === null ? null : Number(lodgeId),
+                  ),
+                );
+                await run(loadMember);
+              } catch {
+                setGlobalError("Misslyckades att uppdatera loge");
+              } finally {
+                setSaving(false);
+              }
+            }}
+            isEditRoute={isEditRoute}
+            selectedAid={selectedAid}
+            setSelectedAid={setSelectedAid}
+            awardDate={awardDate}
+            setAwardDate={setAwardDate}
+            canAward={canAward}
+            assignAchievement={async (
+              targetUserId: number,
+              achievementId: number,
+              awardedAt?: string,
+            ) => {
+              if (!targetUserId) throw new Error("Invalid target");
+              clearGlobalError();
+              setSaving(true);
+              try {
+                await runAction(() =>
+                  postAchievement(String(targetUserId), {
+                    achievementId,
+                    awardedAt,
+                  }),
+                );
+                await run(loadMember);
+              } finally {
+                setSaving(false);
+              }
+            }}
+          />
+
+          <RolesManager
+            userId={member?.matrikelnummer}
+            rolesList={rolesList}
+            selectedRoleIds={selectedRoleIds}
+            setSelectedRoleIds={setSelectedRoleIds}
+            canEditRoles={canEdit}
+            isEditRoute={isEditRoute}
+            saveRoles={async (targetUserId: number, roleIds: number[]) => {
+              if (!targetUserId) throw new Error("Invalid target");
+              clearGlobalError();
+              setSaving(true);
+              try {
+                await runAction(() => setRoles(String(targetUserId), roleIds));
+                await run(loadMember);
+              } finally {
+                setSaving(false);
+              }
+            }}
+            setGlobalError={setGlobalError}
+            setSaving={setSaving}
+          />
+
+          <OfficialsManager
+            user={member}
+            isEditRoute={isEditRoute}
+            selectedIds={selectedOfficialIds ?? undefined}
+            setSelectedIds={setSelectedOfficialIds}
+          />
+
+          <AllergiesManager
+            user={member}
+            isEditRoute={isEditRoute}
+            selectedIds={selectedAllergyIds ?? undefined}
+            setSelectedIds={setSelectedAllergyIds}
+          />
+
+          <ProfileForm
+            user={member}
+            register={register}
+            errors={errors}
+            isEditRoute={isEditRoute}
+            setPictureFile={setPictureFile}
+            saving={saving}
+          />
+
+          {isEditRoute ? (
+            <div className="flex flex-col gap-2 py-4 sm:flex-row">
+              <button
+                type="submit"
+                className="ui-btn ui-btn-primary"
+                disabled={saving}
+              >
+                {saving ? "Sparar..." : "Spara"}
+              </button>
+            </div>
+          ) : null}
+        </form>
+      )}
     </PageContainer>
   );
 };

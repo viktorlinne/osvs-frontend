@@ -50,7 +50,7 @@ export const CreatePost = () => {
       })
       .catch(() => {
         if (mounted) {
-          setGlobalError("Misslyckades att hÃ¤mta loger");
+          setGlobalError("Misslyckades att hämta loger");
         }
       })
       .finally(() => {
@@ -96,7 +96,7 @@ export const CreatePost = () => {
             if (typeof p === "string") {
               setFieldError(p as unknown as keyof CreatePostForm, {
                 type: "server",
-                message: "Ogiltigt vÃ¤rde",
+                message: "Ogiltigt värde",
               });
             }
           });
@@ -109,9 +109,9 @@ export const CreatePost = () => {
   return (
     <PageContainer size="md" className="ui-page">
       <Link to="/posts" className="ui-link">
-        â† Tillbaka
+        ← Tillbaka
       </Link>
-      <h2 className="ui-page-title mb-4 mt-4">Skapa inlÃ¤gg</h2>
+      <h2 className="ui-page-title mb-4 mt-4">Skapa inlägg</h2>
       <form onSubmit={handleSubmit(onSubmit)} className="ui-card">
         <div className="mb-4">
           <label htmlFor="title" className={labelClass}>

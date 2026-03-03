@@ -47,9 +47,9 @@ export const UploadDocument = () => {
   return (
     <PageContainer size="md" className="ui-page">
       <Link to="/documents" className="ui-link">
-        â† Tillbaka
+        ← Tillbaka
       </Link>
-      <h2 className="ui-page-title mb-4 mt-4">LÃ¤gg till dokument</h2>
+      <h2 className="ui-page-title mb-4 mt-4">Lägg till dokument</h2>
 
       <form onSubmit={onSubmit} className="ui-card">
         <div className="mb-4">

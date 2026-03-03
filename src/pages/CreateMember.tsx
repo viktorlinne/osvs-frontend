@@ -56,12 +56,12 @@ export const CreateMember = () => {
   });
 
   function validatePicture(): string | null {
-    if (!picture) return "Profilbild Ã¤r obligatorisk";
+    if (!picture) return "Profilbild är obligatorisk";
     if (picture.size > 5 * 1024 * 1024)
-      return "Profilbilden mÃ¥ste vara hÃ¶gst 5MB";
+      return "Profilbilden måste vara högst 5MB";
     const allowed = ["image/jpeg", "image/png", "image/gif", "image/webp"];
     if (!allowed.includes(picture.type))
-      return "Profilbilden mÃ¥ste vara JPEG, PNG, GIF eller WebP";
+      return "Profilbilden måste vara JPEG, PNG, GIF eller WebP";
     return null;
   }
 
@@ -135,7 +135,7 @@ export const CreateMember = () => {
             if (typeof p === "string") {
               setFieldError(p as keyof RegisterForm, {
                 type: "server",
-                message: "Ogiltigt vÃ¤rde",
+                message: "Ogiltigt värde",
               });
             }
           });
@@ -143,8 +143,8 @@ export const CreateMember = () => {
         }
       }
 
-      if (e instanceof Error) setError(e.message ?? "Kunde inte skapa anvÃ¤ndare");
-      else setError(String(e ?? "Kunde inte skapa anvÃ¤ndare"));
+      if (e instanceof Error) setError(e.message ?? "Kunde inte skapa användare");
+      else setError(String(e ?? "Kunde inte skapa användare"));
     } finally {
       setLoading(false);
     }
@@ -168,10 +168,10 @@ export const CreateMember = () => {
     <PageContainer size="md" className="ui-page">
       <div className="mb-4 flex w-full items-center justify-between">
         <Link to=".." relative="path" className="ui-link">
-          â† Tillbaka
+          ← Tillbaka
         </Link>
       </div>
-      <h2 className="ui-page-title mb-4">Skapa anvÃ¤ndare</h2>
+      <h2 className="ui-page-title mb-4">Skapa användare</h2>
 
       {Object.keys(errors).length > 0 && (
         <div className={`${errorTextClass} mb-2`}>
@@ -191,7 +191,7 @@ export const CreateMember = () => {
         <input placeholder="Email" {...register("email")} className={inputClass} />
 
         <input
-          placeholder="LÃ¶senord"
+          placeholder="Lösenord"
           type="password"
           {...register("password")}
           className={inputClass}
@@ -199,7 +199,7 @@ export const CreateMember = () => {
         />
 
         <input
-          placeholder="FÃ¶rnamn"
+          placeholder="Förnamn"
           type="text"
           {...register("firstname")}
           className={inputClass}
@@ -213,12 +213,12 @@ export const CreateMember = () => {
         />
 
         <label className="ui-label">
-          FÃ¶delsedatum
+          Födelsedatum
           <input type="date" {...register("dateOfBirth")} className={inputClass} />
         </label>
 
         <input
-          placeholder="Jobb eller tidigare sysselsÃ¤ttning"
+          placeholder="Jobb eller tidigare sysselsättning"
           type="text"
           {...register("work")}
           className={inputClass}
@@ -273,7 +273,7 @@ export const CreateMember = () => {
             <div className="py-2 text-neutral-600">Laddar logerâ€¦</div>
           ) : (
             <select {...register("lodgeId")} className={selectClass}>
-              <option value="">VÃ¤lj loge...</option>
+              <option value="">Välj loge...</option>
               {lodges.map((l) => (
                 <option key={l.id} value={String(l.id)}>
                   {l.name}

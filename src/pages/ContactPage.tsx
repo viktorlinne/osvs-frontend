@@ -17,16 +17,16 @@ export const ContactPage = () => {
         <section className="space-y-6 text-sm text-neutral-700">
           <h2 className="ui-section-title text-primary-600">Organisation</h2>
           <hr className="border-neutral-200" />
-          <h3 className="text-xl font-semibold text-primary-600">FÃ¶rtroenderÃ¥det</h3>
-          <p>BestÃ¥r av Logernas LogemÃ¤stare, Logekansler och Logesekreterare</p>
+          <h3 className="text-xl font-semibold text-primary-600">Förtroenderådet</h3>
+          <p>Består av Logernas Logemästare, Logekansler och Logesekreterare</p>
           <hr className="border-neutral-200" />
 
-          <h3 className="text-xl font-semibold text-primary-600">OrdensmÃ¤stare</h3>
-          <p>BenÃ¤mning pÃ¥ ordfÃ¶rande i fÃ¶rtroenderÃ¥det</p>
+          <h3 className="text-xl font-semibold text-primary-600">Ordensmästare</h3>
+          <p>Benämning på ordförande i förtroenderådet</p>
           <hr className="border-neutral-200" />
 
           <h3 className="text-xl font-semibold text-primary-600">Ordenssekreterare</h3>
-          <p>BenÃ¤mning pÃ¥ sekreteraren i fÃ¶rtroenderÃ¥det</p>
+          <p>Benämning på sekreteraren i förtroenderådet</p>
           <hr className="border-neutral-200" />
         </section>
 
@@ -57,7 +57,7 @@ export const ContactPage = () => {
 
           <h3 className="text-xl font-semibold text-primary-600">Logen Regulus</h3>
           <div className="flex flex-col">
-            <p>Ã„ngelholm</p>
+            <p>Ängelholm</p>
             <p>
               E-post:{" "}
               <a className="ui-link" href="mailto:regulus@osvs.se">
@@ -68,7 +68,7 @@ export const ContactPage = () => {
 
           <h3 className="text-xl font-semibold text-primary-600">Logen Orion</h3>
           <div className="flex flex-col">
-            <p>GÃ¶teborg</p>
+            <p>Göteborg</p>
             <p>
               E-post:{" "}
               <a className="ui-link" href="mailto:orion@osvs.se">

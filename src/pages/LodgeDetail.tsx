@@ -32,7 +32,7 @@ export const LodgeDetail = () => {
       const resp = await getLodge(id);
       const l = (resp as { lodge?: Lodge })?.lodge ?? null;
       return l as Lodge | null;
-    }).catch(() => {});
+    }).catch(() => { });
   }, [id, run, setGlobalError]);
 
   useEffect(() => {
@@ -49,7 +49,7 @@ export const LodgeDetail = () => {
 
   async function handleSave() {
     if (!id) return setGlobalError("Missing lodge id");
-    if (!canEdit) return setGlobalError("Ingen behÃ¶righet");
+    if (!canEdit) return setGlobalError("Ingen behörighet");
     clearGlobalError();
     try {
       const payload = {
@@ -74,7 +74,7 @@ export const LodgeDetail = () => {
     <PageContainer size="md" className="ui-page">
       <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <Link to=".." relative="path" className="ui-link">
-          â† Tillbaka
+          ← Tillbaka
         </Link>
         {canEdit && !isEditRoute && (
           <Link to={`/lodges/${id}/edit`} className="ui-btn ui-btn-primary ui-btn-sm">
@@ -146,14 +146,14 @@ export const LodgeDetail = () => {
                 <img
                   className="mb-2 h-28 w-28 rounded-full object-cover md:h-40 md:w-40"
                   src={lodge?.picture ?? undefined}
-                  alt={`${lodge?.city}s vapenskÃ¶ld`}
+                  alt={`${lodge?.city}s vapensköld`}
                 />
               </div>
               <div>
-                <h1 className="ui-page-title mb-4">{lodge.name}</h1>
+                <h1 className="ui-page-title">{lodge.name}</h1>
               </div>
               <div className="mb-2 text-neutral-700">
-                <strong className="text-neutral-900">Stad:</strong> {lodge.city}
+                <div className="italic">{lodge.city}</div>
               </div>
               <div className="mb-2 text-neutral-700">
                 <strong className="text-neutral-900">Historia:</strong> {lodge.description}

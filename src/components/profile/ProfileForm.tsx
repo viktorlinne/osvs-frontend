@@ -45,7 +45,7 @@ export const ProfileForm = ({
 
       <div className="mb-4 grid grid-cols-1 gap-4 md:grid-cols-2">
         <div>
-          <label htmlFor="firstname" className={labelClass}>FÃ¶rnamn</label>
+          <label htmlFor="firstname" className={labelClass}>Förnamn</label>
           <input
             id="firstname"
             {...register("firstname")}
@@ -68,7 +68,7 @@ export const ProfileForm = ({
 
       <div className="mb-4 grid grid-cols-1 gap-4 md:grid-cols-2">
         <div>
-          <label htmlFor="dateOfBirth" className={labelClass}>FÃ¶delsedatum</label>
+          <label htmlFor="dateOfBirth" className={labelClass}>Födelsedatum</label>
           <input
             id="dateOfBirth"
             type="date"
@@ -178,7 +178,7 @@ export const ProfileForm = ({
       </div>
 
       <div className="mb-4">
-        <label htmlFor="accommodationAvailable" className={labelClass}>TillgÃ¤ngligt boende</label>
+        <label htmlFor="accommodationAvailable" className={labelClass}>Tillgängligt boende</label>
         <input
           id="accommodationAvailable"
           type="checkbox"
