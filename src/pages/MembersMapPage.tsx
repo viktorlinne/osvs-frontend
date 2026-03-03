@@ -23,21 +23,90 @@ type EditableUser = {
   name: string;
 };
 
+type GradeColorPair = {
+  center: string;
+  outline: string;
+};
+
 const SWEDEN_CENTER: [number, number] = [62.0, 15.0];
 
-const markerIcon = L.divIcon({
-  className: "",
-  html: '<div style="width:16px;height:16px;border-radius:9999px;background:#16a34a;border:2px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,0.35)"></div>',
-  iconSize: [16, 16],
-  iconAnchor: [8, 8],
-});
+const GRADE_COLOR_PALETTE: Record<number, GradeColorPair> = {
+  1: { center: "#D0D0C6", outline: "#38826B" },
+  2: { center: "#56923C", outline: "#A4690F" },
+  3: { center: "#A3A9A5", outline: "#1E2326" },
+  4: { center: "#9D2320", outline: "#5B615F" },
+  5: { center: "#0C7459", outline: "#928E73" },
+  6: { center: "#5A7DA3", outline: "#5A5250" },
+  7: { center: "#B13C66", outline: "#9D8D51" },
+  8: { center: "#CBC5B7", outline: "#8D784B" },
+  9: { center: "#97201C", outline: "#B9A350" },
+  10: { center: "#C52C26", outline: "#D7C8CF" },
+};
 
-const selectedMarkerIcon = L.divIcon({
-  className: "",
-  html: '<div style="width:18px;height:18px;border-radius:9999px;background:#0ea5e9;border:2px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,0.45)"></div>',
-  iconSize: [18, 18],
-  iconAnchor: [9, 9],
-});
+const NO_GRADE_COLOR: GradeColorPair = {
+  center: "#94A3B8",
+  outline: "#334155",
+};
+
+const GRADE_ROMAN_LABELS: Record<number, string> = {
+  1: "I",
+  2: "II",
+  3: "III",
+  4: "IV",
+  5: "V",
+  6: "VI",
+  7: "VII",
+  8: "VIII",
+  9: "IX",
+  10: "X",
+};
+
+const ICON_CACHE = new Map<string, L.DivIcon>();
+
+function getColorPairByRank(rank: number | null): GradeColorPair {
+  if (typeof rank !== "number" || rank < 1 || rank > 10) {
+    return NO_GRADE_COLOR;
+  }
+  return GRADE_COLOR_PALETTE[rank];
+}
+
+function toRomanGrade(rank: number | null): string | null {
+  if (typeof rank !== "number" || rank < 1 || rank > 10) {
+    return null;
+  }
+  return GRADE_ROMAN_LABELS[rank];
+}
+
+function buildMarkerIcon(color: GradeColorPair, selected: boolean): L.DivIcon {
+  const glow = selected
+    ? '<div style="position:absolute;inset:0;border-radius:9999px;box-shadow:0 0 0 3px rgba(14,165,233,0.45);"></div>'
+    : "";
+  const html = [
+    '<div style="position:relative;width:24px;height:24px;">',
+    glow,
+    `<div style="position:absolute;inset:${selected ? 4 : 2}px;border-radius:9999px;background:${color.outline};box-shadow:0 1px 4px rgba(0,0,0,0.4);"></div>`,
+    `<div style="position:absolute;inset:${selected ? 8 : 6}px;border-radius:9999px;background:${color.center};border:1px solid rgba(255,255,255,0.9);"></div>`,
+    "</div>",
+  ].join("");
+
+  return L.divIcon({
+    className: "",
+    html,
+    iconSize: [24, 24],
+    iconAnchor: [12, 12],
+    popupAnchor: [0, -14],
+  });
+}
+
+function getMarkerIcon(rank: number | null, selected: boolean): L.DivIcon {
+  const key = `${rank ?? "none"}:${selected ? "selected" : "default"}`;
+  const cached = ICON_CACHE.get(key);
+  if (cached) return cached;
+
+  const icon = buildMarkerIcon(getColorPairByRank(rank), selected);
+  ICON_CACHE.set(key, icon);
+  return icon;
+}
 
 function FitToPins({ pins }: { pins: UserMapPin[] }) {
   const map = useMap();
@@ -113,6 +182,18 @@ export const MembersMapPage = () => {
     ];
   }, [allUsers, authUser, canEditOthers]);
 
+  const gradeLegendItems = useMemo(
+    () => [
+      { key: "none", label: "Ingen grad", rank: null as number | null },
+      ...Object.entries(GRADE_ROMAN_LABELS).map(([rank, label]) => ({
+        key: rank,
+        label: `Grad ${label}`,
+        rank: Number(rank),
+      })),
+    ],
+    [],
+  );
+
   const effectiveSelectedUserId = useMemo(() => {
     if (selectedUserId !== null) return selectedUserId;
     return editableUsers.length > 0 ? editableUsers[0].id : null;
@@ -176,7 +257,7 @@ export const MembersMapPage = () => {
       <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <h2 className="ui-page-title">Medlemskarta</h2>
         <Link to="/members" className="ui-link">
-          {"\u2190"} Till Medlemmar
+          ← Till Medlemmar
         </Link>
       </div>
 
@@ -198,17 +279,55 @@ export const MembersMapPage = () => {
               <Marker
                 key={pin.id}
                 position={[pin.lat, pin.lng]}
-                icon={pin.id === effectiveSelectedUserId ? selectedMarkerIcon : markerIcon}
+                icon={getMarkerIcon(
+                  pin.highestGradeRank,
+                  pin.id === effectiveSelectedUserId,
+                )}
                 eventHandlers={{
                   click: () => {
                     setSelectedUserId(pin.id);
                   },
                 }}
               >
-                <Popup>{pin.name}</Popup>
+                <Popup>
+                  <div className="text-sm">
+                    <div className="font-semibold">{pin.name}</div>
+                    <div>{`Tillhör ${pin.lodgeName ?? "Ingen loge"}`}</div>
+                    <div>{`Med graden ${toRomanGrade(pin.highestGradeRank) ?? "Ingen grad"}`}</div>
+                  </div>
+                </Popup>
               </Marker>
             ))}
           </MapContainer>
+
+          <div className="mt-4">
+            <p className="text-sm font-medium text-neutral-700">Gradfärger</p>
+            <div className="mt-2 grid grid-cols-2 gap-2 sm:grid-cols-3 xl:grid-cols-4">
+              {gradeLegendItems.map((entry) => {
+                const color = getColorPairByRank(entry.rank);
+                return (
+                  <div
+                    key={entry.key}
+                    className="flex items-center gap-2 text-xs text-neutral-700"
+                  >
+                    <span
+                      aria-hidden
+                      style={{
+                        width: "16px",
+                        height: "16px",
+                        borderRadius: "9999px",
+                        backgroundColor: color.center,
+                        border: `3px solid ${color.outline}`,
+                        boxShadow: "0 1px 2px rgba(0,0,0,0.2)",
+                        display: "inline-block",
+                      }}
+                    />
+                    <span>{entry.label}</span>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
         </div>
 
         <div className="ui-card">

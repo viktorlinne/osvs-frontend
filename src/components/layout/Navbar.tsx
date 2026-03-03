@@ -175,6 +175,9 @@ export const Navbar: React.FC = () => {
                   <NavButton to="/regalia" onClick={() => setOpen(false)}>
                     Regalier
                   </NavButton>
+                  <NavButton to="/map" onClick={() => setOpen(false)}>
+                    Karta
+                  </NavButton>
                   <NavButton to="/revisions" onClick={() => setOpen(false)}>
                     Revisioner
                   </NavButton>
@@ -273,6 +276,9 @@ export const Navbar: React.FC = () => {
                     </NavButton>
                     <NavButton to="/regalia" onClick={() => setOpen(false)}>
                       Regalier
+                    </NavButton>
+                    <NavButton to="/map" onClick={() => setOpen(false)}>
+                      Karta
                     </NavButton>
                     <NavButton to="/revisions" onClick={() => setOpen(false)}>
                       Revisioner

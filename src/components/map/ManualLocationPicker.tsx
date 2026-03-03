@@ -26,17 +26,19 @@ const pickerIcon = L.divIcon({
 });
 
 function RecenterMap({
-  center,
+  lat,
+  lng,
   zoom,
 }: {
-  center: [number, number];
+  lat: number;
+  lng: number;
   zoom: number;
 }) {
   const map = useMap();
 
   useEffect(() => {
-    map.setView(center, zoom);
-  }, [map, center, zoom]);
+    map.setView([lat, lng], zoom);
+  }, [map, lat, lng, zoom]);
 
   return null;
 }
@@ -59,9 +61,9 @@ function ClickCapture({
 }
 
 export function ManualLocationPicker({ value, onChange, disabled = false }: Props) {
-  const center: [number, number] = value
-    ? [value.lat, value.lng]
-    : SWEDEN_CENTER;
+  const lat = value ? value.lat : SWEDEN_CENTER[0];
+  const lng = value ? value.lng : SWEDEN_CENTER[1];
+  const center: [number, number] = [lat, lng];
   const zoom = value ? 13 : 5;
 
   return (
@@ -69,14 +71,14 @@ export function ManualLocationPicker({ value, onChange, disabled = false }: Prop
       center={center}
       zoom={zoom}
       style={{ height: "320px", width: "100%" }}
-      scrollWheelZoom={!disabled}
+      scrollWheelZoom
     >
       <TileLayer
         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
       />
 
-      <RecenterMap center={center} zoom={zoom} />
+      <RecenterMap lat={lat} lng={lng} zoom={zoom} />
       <ClickCapture disabled={disabled} onSelect={onChange} />
 
       {value ? (

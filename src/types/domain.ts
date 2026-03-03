@@ -43,6 +43,10 @@ export type UserMapPin = {
   name: string;
   lat: number;
   lng: number;
+  lodgeId: number | null;
+  lodgeName: string | null;
+  highestGradeRank: number | null;
+  highestGrade: string | null;
 };
 
 export type Post = {

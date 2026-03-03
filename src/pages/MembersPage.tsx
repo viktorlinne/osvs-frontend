@@ -145,9 +145,6 @@ export const MembersPage = () => {
           />
           <span>Tillgängligt boende</span>
         </label>
-        <Link to="/members/map" className="ui-btn ui-btn-secondary w-full sm:w-auto">
-          Karta
-        </Link>
         {user &&
           (user.roles ?? []).some((r) => ["Admin", "Editor"].includes(r)) && (
             <Link to="/members/create" className="ui-btn ui-btn-primary w-full sm:w-auto">

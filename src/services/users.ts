@@ -80,12 +80,33 @@ function parseUserMapPins(value: unknown): UserMapPin[] {
   if (!Array.isArray(value)) return [];
   return value
     .map((entry) => entry as Record<string, unknown>)
-    .map((entry) => ({
-      id: Number(entry.id),
-      name: String(entry.name ?? "").trim(),
-      lat: Number(entry.lat),
-      lng: Number(entry.lng),
-    }))
+    .map((entry) => {
+      const parsedRank = Number(entry.highestGradeRank);
+      const highestGradeRank =
+        Number.isFinite(parsedRank) && parsedRank >= 1 && parsedRank <= 10
+          ? parsedRank
+          : null;
+
+      return {
+        id: Number(entry.id),
+        name: String(entry.name ?? "").trim(),
+        lat: Number(entry.lat),
+        lng: Number(entry.lng),
+        lodgeId: Number.isFinite(Number(entry.lodgeId))
+          ? Number(entry.lodgeId)
+          : null,
+        lodgeName:
+          typeof entry.lodgeName === "string" && entry.lodgeName.trim().length > 0
+            ? entry.lodgeName.trim()
+            : null,
+        highestGradeRank,
+        highestGrade:
+          typeof entry.highestGrade === "string" &&
+          entry.highestGrade.trim().length > 0
+            ? entry.highestGrade.trim()
+            : null,
+      };
+    })
     .filter(
       (entry) =>
         Number.isFinite(entry.id) &&

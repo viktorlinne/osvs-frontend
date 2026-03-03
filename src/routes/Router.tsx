@@ -90,14 +90,6 @@ const routes = [
         ),
       },
       {
-        path: "members/map",
-        element: (
-          <AuthGuard>
-            <MembersMapPage />
-          </AuthGuard>
-        ),
-      },
-      {
         path: "members/create",
         element: (
           <AuthGuard roles={["Admin", "Editor"]}>
@@ -254,6 +246,14 @@ const routes = [
         element: (
           <AuthGuard >
             <Regalia />
+          </AuthGuard>
+        ),
+      },
+      {
+        path: "map",
+        element: (
+          <AuthGuard>
+            <MembersMapPage />
           </AuthGuard>
         ),
       },
