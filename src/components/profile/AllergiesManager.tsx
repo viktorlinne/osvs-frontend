@@ -66,14 +66,14 @@ export const AllergiesManager = ({
   }
 
   return (
-    <div className="mb-4 w-full">
+    <div className="mb-4 w-full text-center">
       <fieldset className="w-full">
         <legend className="ui-label text-center">Allergier</legend>
         {isEditRoute ? (
           <div className="flex w-full flex-col items-center gap-2 py-2">
             {allergies.length > 0 ? (
-              <div className="max-h-48 w-full overflow-y-auto rounded-md border border-neutral-200 bg-white px-3 py-2 md:w-[28rem]">
-                <div className="flex flex-col gap-2">
+              <div className="mx-auto max-h-48 w-full overflow-y-auto rounded-md border border-neutral-200 bg-white px-3 py-2 md:w-[28rem]">
+                <div className="flex flex-col gap-2 text-left">
                   {allergies.map((allergy) => (
                     <label
                       key={allergy.id}
@@ -101,7 +101,7 @@ export const AllergiesManager = ({
             )}
           </div>
         ) : (
-          <div className="mb-4 py-2 text-sm text-neutral-700">
+          <div className="mb-4 py-2 text-center text-sm text-neutral-700">
             {effectiveSelected && effectiveSelected.length > 0
               ? effectiveSelected
                   .map(

@@ -106,14 +106,14 @@ export const OfficialsManager = ({
   }
 
   return (
-    <div className="mb-4 w-full">
+    <div className="mb-4 w-full text-center">
       <fieldset className="w-full">
         <legend className="ui-label text-center">Aktiva Tjänster</legend>
         {isEditRoute ? (
           <div className="flex w-full flex-col items-center gap-2 py-2">
             {officials.length > 0 ? (
-              <div className="max-h-48 w-full overflow-y-auto rounded-md border border-neutral-200 bg-white px-3 py-2 md:w-[28rem]">
-                <div className="flex flex-col gap-2">
+              <div className="mx-auto max-h-48 w-full overflow-y-auto rounded-md border border-neutral-200 bg-white px-3 py-2 md:w-[28rem]">
+                <div className="flex flex-col gap-2 text-left">
                   {officials.map((official) => (
                     <label
                       key={official.id}
@@ -141,7 +141,7 @@ export const OfficialsManager = ({
             )}
           </div>
         ) : (
-          <div className="mb-4 py-2 text-sm text-neutral-700">
+          <div className="mb-4 py-2 text-center text-sm text-neutral-700">
             {effectiveSelected && effectiveSelected.length > 0
               ? effectiveSelected
                 .map((id) => officials.find((official) => official.id === id)?.title ?? "")
@@ -156,7 +156,11 @@ export const OfficialsManager = ({
             Tidigare tjänster
           </label>
           {officialHistory.length > 0 ? (
-            <select id="officialHistoryList" name="officialHistoryList" className="ui-select w-auto">
+            <select
+              id="officialHistoryList"
+              name="officialHistoryList"
+              className="ui-select mx-auto block w-auto"
+            >
               {officialHistory.map((entry) => (
                 <option
                   key={`${entry.id}-${entry.appointedAt}-${entry.unappointedAt}`}
