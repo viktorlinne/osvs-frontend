@@ -30,6 +30,7 @@ export const MembersPage = () => {
   const [achievementId, setAchievementId] = useState<number | null>(null);
   const [lodgeId, setLodgeId] = useState<number | null>(null);
   const [officialId, setOfficialId] = useState<number | null>(null);
+  const [accommodationOnly, setAccommodationOnly] = useState(false);
 
   useEffect(() => {
     runAchievements(() => listAchievements()).catch(() => {
@@ -51,9 +52,10 @@ export const MembersPage = () => {
           achievementId,
           lodgeId,
           officialId,
+          accommodationAvailable: accommodationOnly ? true : null,
         }),
       ),
-    [run, debouncedQuery, achievementId, lodgeId, officialId],
+    [run, debouncedQuery, achievementId, lodgeId, officialId, accommodationOnly],
   );
 
   useEffect(() => {
@@ -71,12 +73,12 @@ export const MembersPage = () => {
     <PageContainer size="xl" className="ui-page">
       <h2 className="ui-page-title mb-4">Medlemmar</h2>
 
-      <div className="mb-4 grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-5">
+      <div className="mb-4 grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-6">
         <input
           id="search"
           name="search"
           type="search"
-          placeholder="Sök namn, e-post eller matrikelnummer"
+          placeholder="Sök..."
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           className={inputClass}
@@ -129,6 +131,20 @@ export const MembersPage = () => {
             </option>
           ))}
         </select>
+        <label
+          htmlFor="accommodationFilter"
+          className="flex items-center gap-2 rounded-md border border-neutral-200 bg-white px-3 py-2 text-sm text-neutral-700"
+        >
+          <input
+            id="accommodationFilter"
+            name="accommodationFilter"
+            type="checkbox"
+            checked={accommodationOnly}
+            onChange={(event) => setAccommodationOnly(event.target.checked)}
+            className="h-4 w-4 rounded border-neutral-300 text-primary-600 focus-visible:ring-primary-600"
+          />
+          <span>Tillgängligt boende</span>
+        </label>
         {user &&
           (user.roles ?? []).some((r) => ["Admin", "Editor"].includes(r)) && (
             <Link to="/members/create" className="ui-btn ui-btn-primary w-full sm:w-auto">

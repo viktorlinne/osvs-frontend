@@ -28,6 +28,7 @@ export const ProfileAttended = () => {
 
   const events = data?.events ?? [];
   const sinceLastAchievementCount = data?.sinceLastAchievementCount ?? 0;
+  const totalMeetingsCount = data?.totalMeetingsCount ?? 0;
 
   return (
     <PageContainer size="md" className="ui-page">
@@ -37,9 +38,15 @@ export const ProfileAttended = () => {
 
       <h2 className="ui-page-title mb-4 mt-4">Min närvaro</h2>
 
-      <div className="ui-card mb-4">
-        <p className="text-sm text-neutral-600">Möten sedan senaste utmärkelse</p>
-        <p className="mt-1 text-3xl font-bold text-neutral-900">{sinceLastAchievementCount}</p>
+      <div className="mb-4 grid gap-4 sm:grid-cols-2">
+        <div className="ui-card">
+          <p className="text-sm text-neutral-600">Möten sedan senaste utmärkelse</p>
+          <p className="mt-1 text-3xl font-bold text-neutral-900">{sinceLastAchievementCount}</p>
+        </div>
+        <div className="ui-card">
+          <p className="text-sm text-neutral-600">Totalt deltagna möten</p>
+          <p className="mt-1 text-3xl font-bold text-neutral-900">{totalMeetingsCount}</p>
+        </div>
       </div>
 
       <div className="ui-card">

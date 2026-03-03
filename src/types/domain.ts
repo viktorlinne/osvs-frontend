@@ -70,6 +70,7 @@ export type AttendedEventsResponse = {
   events: AttendedEvent[];
   sinceLastAchievementCount: number;
   lastAchievementAt: string | null;
+  totalMeetingsCount: number;
 };
 
 export type Achievement = {

@@ -18,6 +18,7 @@ export type ListUsersFilters = {
   achievementId?: number | null;
   lodgeId?: number | null;
   officialId?: number | null;
+  accommodationAvailable?: boolean | null;
 };
 
 export type PublicUserDetailResponse = {
@@ -53,9 +54,11 @@ function parseAttendedEventsResponse(value: unknown): AttendedEventsResponse {
     events?: unknown;
     sinceLastAchievementCount?: unknown;
     lastAchievementAt?: unknown;
+    totalMeetingsCount?: unknown;
   };
+  const events = parseAttendedEvents(payload?.events);
   return {
-    events: parseAttendedEvents(payload?.events),
+    events,
     sinceLastAchievementCount: Number.isFinite(
       Number(payload?.sinceLastAchievementCount),
     )
@@ -66,6 +69,9 @@ function parseAttendedEventsResponse(value: unknown): AttendedEventsResponse {
       payload.lastAchievementAt.length > 0
         ? payload.lastAchievementAt
         : null,
+    totalMeetingsCount: Number.isFinite(Number(payload?.totalMeetingsCount))
+      ? Number(payload?.totalMeetingsCount)
+      : events.length,
   };
 }
 
@@ -108,6 +114,9 @@ export async function listUsers(
   }
   if (filters?.officialId != null) {
     search.set("officialId", String(filters.officialId));
+  }
+  if (filters?.accommodationAvailable === true) {
+    search.set("accommodationAvailable", "1");
   }
   const query = search.toString();
   const url = query ? `/users?${query}` : "/users";
