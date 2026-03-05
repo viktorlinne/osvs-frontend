@@ -471,6 +471,9 @@ export const MemberDetail = () => {
               >
                 {saving ? "Sparar..." : "Spara"}
               </button>
+              <Link to=".." relative="path" className="ui-btn ui-btn-secondary">
+                Avbryt
+              </Link>
             </div>
           ) : null}
         </form>
