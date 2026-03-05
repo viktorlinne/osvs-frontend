@@ -82,7 +82,7 @@ export const NewsPage = () => {
         {user &&
           (user.roles ?? []).some((r) => ["Admin", "Editor"].includes(r)) && (
             <Link to="/posts/create" className="ui-btn ui-btn-primary">
-              Skapa Inlägg
+              Skapa
             </Link>
           )}
       </div>

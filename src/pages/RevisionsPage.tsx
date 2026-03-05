@@ -69,7 +69,7 @@ export const RevisionsPage = () => {
         <h2 className="ui-page-title">Revisioner</h2>
         {canCreate && (
           <Link to="/revisions/create" className="ui-btn ui-btn-primary">
-            Lägg till revision
+            Skapa
           </Link>
         )}
       </div>

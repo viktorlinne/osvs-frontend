@@ -25,7 +25,7 @@ export const DocumentsPage = () => {
         <h2 className="ui-page-title">Dokument</h2>
         {canCreate && (
           <Link to="/documents/create" className="ui-btn ui-btn-primary">
-            Lägg till dokument
+            Skapa
           </Link>
         )}
       </div>

@@ -132,7 +132,7 @@ export const EventsPage = () => {
           </Button>
           {user &&
             (user.roles ?? []).some((r) => ["Admin", "Editor"].includes(r)) && (
-              <Link to="/events/create" className="ui-btn ui-btn-primary ui-btn-sm">
+              <Link to="/events/create" className="ui-btn ui-btn-primary">
                 Skapa
               </Link>
             )}
