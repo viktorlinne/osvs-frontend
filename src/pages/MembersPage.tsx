@@ -71,9 +71,17 @@ export const MembersPage = () => {
 
   return (
     <PageContainer size="xl" className="ui-page">
-      <h2 className="ui-page-title mb-4">Medlemmar</h2>
+      <div className="mb-4 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+        <h2 className="ui-page-title">Medlemmar</h2>
+        {user &&
+          (user.roles ?? []).some((r) => ["Admin", "Editor"].includes(r)) && (
+            <Link to="/members/create" className="ui-btn ui-btn-primary">
+              Skapa
+            </Link>
+          )}
+      </div>
 
-      <div className="mb-4 grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-6">
+      <div className="mb-4 grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-5">
         <input
           id="search"
           name="search"
@@ -145,12 +153,6 @@ export const MembersPage = () => {
           />
           <span>Tillgängligt boende</span>
         </label>
-        {user &&
-          (user.roles ?? []).some((r) => ["Admin", "Editor"].includes(r)) && (
-            <Link to="/members/create" className="ui-btn ui-btn-primary w-full sm:w-auto">
-              Skapa
-            </Link>
-          )}
       </div>
 
       {Array.isArray(members) && (
