@@ -203,10 +203,10 @@ export const Profile = () => {
   });
 
   return (
-    <PageContainer size="md" className="ui-page">
+    <PageContainer size="xl" className="ui-page">
       <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <Link to=".." relative="path" className="ui-link">
-          {"\u2190"} Tillbaka
+          ← Tillbaka
         </Link>
         <div className="flex flex-col gap-2 sm:flex-row">
           {user && !isEditRoute && (

@@ -342,8 +342,8 @@ export const MemberDetail = () => {
   });
 
   return (
-    <PageContainer size="md" className="ui-page">
-      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+    <PageContainer size="xl" className="ui-page">
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between mb-4">
         <Link to=".." relative="path" className="ui-link">
           ← Tillbaka
         </Link>

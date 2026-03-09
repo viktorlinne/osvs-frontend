@@ -31,7 +31,7 @@ export const BannerCarousel = () => {
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
     >
-      <div className="relative w-full h-40 md:h-56 lg:h-72 bg-gray-100">
+      <div className="relative w-full h-40 md:h-56 lg:h-72">
         {imageUrls.map((src, i) => (
           <img
             key={src}

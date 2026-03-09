@@ -4,6 +4,6 @@ export * from "./events";
 export * from "./ui";
 export * from "./EventList";
 export * from "./PublicumList";
-export * from "./events/PublicumDisplay";
+export * from "./PublicumDisplay";
 export * from "./LodgeSelection";
 export * from "./lodgeSelectionUtils";
