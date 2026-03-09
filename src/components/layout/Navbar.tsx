@@ -12,17 +12,23 @@ type NavButtonProps = {
   onClick?: () => void;
 };
 
+type DropdownKey = "public" | "members" | "archive";
+
 const navButtonBase =
   "block rounded-md px-3 py-2 text-sm font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-600 focus-visible:ring-offset-2";
+
+const dropdownButtonBase =
+  "inline-flex items-center rounded-md px-3 py-2 text-sm font-medium text-neutral-700 transition hover:bg-neutral-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-600 focus-visible:ring-offset-2";
 
 const NavButton: React.FC<NavButtonProps> = ({ to, children, onClick }) => (
   <NavLink
     to={to}
     onClick={onClick}
     className={({ isActive }) =>
-      `${navButtonBase} ${isActive
-        ? "bg-primary-600 text-white"
-        : "text-neutral-700 hover:bg-neutral-100"
+      `${navButtonBase} ${
+        isActive
+          ? "bg-primary-600 text-white"
+          : "text-neutral-700 hover:bg-neutral-100"
       }`
     }
   >
@@ -30,29 +36,112 @@ const NavButton: React.FC<NavButtonProps> = ({ to, children, onClick }) => (
   </NavLink>
 );
 
+type DropdownProps = {
+  id: DropdownKey;
+  label: string;
+  activeDropdown: DropdownKey | null;
+  setActiveDropdown: React.Dispatch<React.SetStateAction<DropdownKey | null>>;
+  closeAllMenus: () => void;
+  children: React.ReactNode;
+};
+
+const Dropdown: React.FC<DropdownProps> = ({
+  id,
+  label,
+  activeDropdown,
+  setActiveDropdown,
+  closeAllMenus,
+  children,
+}) => {
+  const isOpen = activeDropdown === id;
+
+  return (
+    <div
+      className="relative"
+      onMouseEnter={() => setActiveDropdown(id)}
+      onMouseLeave={() => {
+        if (isOpen) setActiveDropdown(null);
+      }}
+    >
+      <button
+        type="button"
+        aria-haspopup="true"
+        aria-expanded={isOpen}
+        onClick={() => setActiveDropdown((prev) => (prev === id ? null : id))}
+        className={dropdownButtonBase}
+      >
+        {label}
+        <svg
+          className="ml-2 h-4 w-4"
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 20 20"
+          fill="currentColor"
+          aria-hidden="true"
+        >
+          <path
+            fillRule="evenodd"
+            d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.06 1.06l-4.24 4.24a.75.75 0 01-1.06 0L5.21 8.29a.75.75 0 01.02-1.08z"
+            clipRule="evenodd"
+          />
+        </svg>
+      </button>
+
+      {isOpen && (
+        <div className="absolute left-0 top-full z-30 w-52 rounded-md border border-neutral-200 bg-white shadow-card">
+          <div
+            onClick={closeAllMenus}
+            className="max-h-[70vh] overflow-y-auto overflow-x-hidden"
+          >
+            {children}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
 export const Navbar: React.FC = () => {
   const { user, logout } = useAuth();
   const { setError, clearError } = useError();
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
-  const [menuOpen, setMenuOpen] = useState(false);
-  const menuRef = useRef<HTMLDivElement | null>(null);
+  const [activeDropdown, setActiveDropdown] = useState<DropdownKey | null>(
+    null,
+  );
+  const navRef = useRef<HTMLElement | null>(null);
+
+  const closeAllMenus = () => {
+    setOpen(false);
+    setActiveDropdown(null);
+  };
 
   useEffect(() => {
     const onDocClick = (e: MouseEvent) => {
-      if (!menuRef.current) return;
-      if (e.target instanceof Node && !menuRef.current.contains(e.target)) {
-        setMenuOpen(false);
+      if (!navRef.current) return;
+      if (e.target instanceof Node && !navRef.current.contains(e.target)) {
+        setActiveDropdown(null);
       }
     };
     document.addEventListener("click", onDocClick);
     return () => document.removeEventListener("click", onDocClick);
   }, []);
 
+  useEffect(() => {
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        setOpen(false);
+        setActiveDropdown(null);
+      }
+    };
+    document.addEventListener("keydown", onKeyDown);
+    return () => document.removeEventListener("keydown", onKeyDown);
+  }, []);
+
   const handleLogout = async () => {
     try {
       await logout();
       clearError();
+      closeAllMenus();
       navigate("/login");
     } catch (e: unknown) {
       if (axios.isAxiosError(e) && e.response) {
@@ -70,133 +159,96 @@ export const Navbar: React.FC = () => {
   return (
     <>
       <header className="border-b border-neutral-200 bg-white shadow-sm">
-        <nav className="container" aria-label="Top">
-          <div className="flex w-full items-center justify-between gap-4 py-3">
-            <div className="flex items-center gap-4">
+        <nav ref={navRef} className="container" aria-label="Top">
+          <div className="flex w-full min-w-0 items-center justify-between gap-2 py-3 lg:gap-4">
+            <div className="flex min-w-0 items-center gap-2 lg:gap-3">
               <NavLink
                 to="/"
+                onClick={closeAllMenus}
                 className="text-2xl font-bold text-primary-600 transition hover:text-primary-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-600 focus-visible:ring-offset-2"
               >
                 OSVS
               </NavLink>
-              <div className="hidden md:flex items-center">
-                <div
-                  className="relative"
-                  ref={menuRef}
-                  onMouseLeave={() => setMenuOpen(false)}
-                >
-                  <button
-                    type="button"
-                    onMouseEnter={() => setMenuOpen(true)}
-                    className="inline-flex items-center rounded-md px-3 py-2 text-sm font-medium text-neutral-700 transition hover:bg-neutral-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-600 focus-visible:ring-offset-2"
-                    aria-expanded={menuOpen}
-                  >
-                    Publika sidor
-                    <svg
-                      className="ml-2 h-4 w-4"
-                      xmlns="http://www.w3.org/2000/svg"
-                      viewBox="0 0 20 20"
-                      fill="currentColor"
-                      aria-hidden="true"
-                    >
-                      <path
-                        fillRule="evenodd"
-                        d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.06 1.06l-4.24 4.24a.75.75 0 01-1.06 0L5.21 8.29a.75.75 0 01.02-1.08z"
-                        clipRule="evenodd"
-                      />
-                    </svg>
-                  </button>
 
-                  {menuOpen && (
-                    <div className="absolute left-0 z-30 w-48 rounded-md border border-neutral-200 bg-white shadow-card">
-                      <div>
-                        <NavButton
-                          to="/"
-                          onClick={() => {
-                            setOpen(false);
-                            setMenuOpen(false);
-                          }}
-                        >
-                          Hem
-                        </NavButton>
-                        <NavButton
-                          to="/about"
-                          onClick={() => {
-                            setOpen(false);
-                            setMenuOpen(false);
-                          }}
-                        >
-                          Om VS
-                        </NavButton>
-                        <NavButton
-                          to="/lodges"
-                          onClick={() => {
-                            setOpen(false);
-                            setMenuOpen(false);
-                          }}
-                        >
-                          Loger
-                        </NavButton>
-                        <NavButton
-                          to="/gdpr"
-                          onClick={() => {
-                            setOpen(false);
-                            setMenuOpen(false);
-                          }}
-                        >
-                          GDPR
-                        </NavButton>
-                        <NavButton
-                          to="/contact"
-                          onClick={() => {
-                            setOpen(false);
-                            setMenuOpen(false);
-                          }}
-                        >
-                          Kontakt
-                        </NavButton>
-                        {/* only the four public links in this dropdown */}
-                      </div>
-                    </div>
-                  )}
-                </div>
+              <div className="hidden min-w-0 items-center gap-1 lg:flex lg:gap-2">
+                <Dropdown
+                  id="public"
+                  label="Publika sidor"
+                  activeDropdown={activeDropdown}
+                  setActiveDropdown={setActiveDropdown}
+                  closeAllMenus={closeAllMenus}
+                >
+                  <NavButton to="/" onClick={closeAllMenus}>
+                    Hem
+                  </NavButton>
+                  <NavButton to="/about" onClick={closeAllMenus}>
+                    Om VS
+                  </NavButton>
+                  <NavButton to="/lodges" onClick={closeAllMenus}>
+                    Loger
+                  </NavButton>
+                  <NavButton to="/gdpr" onClick={closeAllMenus}>
+                    GDPR
+                  </NavButton>
+                  <NavButton to="/contact" onClick={closeAllMenus}>
+                    Kontakt
+                  </NavButton>
+                </Dropdown>
+
+                {user && (
+                  <Dropdown
+                    id="members"
+                    label="Medlemssidor"
+                    activeDropdown={activeDropdown}
+                    setActiveDropdown={setActiveDropdown}
+                    closeAllMenus={closeAllMenus}
+                  >
+                    <NavButton to="/posts" onClick={closeAllMenus}>
+                      Nyheter
+                    </NavButton>
+                    <NavButton to="/members" onClick={closeAllMenus}>
+                      Medlemmar
+                    </NavButton>
+                    <NavButton to="/events" onClick={closeAllMenus}>
+                      Möten
+                    </NavButton>
+                    <NavButton to="/regalia" onClick={closeAllMenus}>
+                      Regalier
+                    </NavButton>
+                    <NavButton to="/map" onClick={closeAllMenus}>
+                      Karta
+                    </NavButton>
+                  </Dropdown>
+                )}
+
+                {user && (
+                  <Dropdown
+                    id="archive"
+                    label="Arkiv"
+                    activeDropdown={activeDropdown}
+                    setActiveDropdown={setActiveDropdown}
+                    closeAllMenus={closeAllMenus}
+                  >
+                    <NavButton to="/documents" onClick={closeAllMenus}>
+                      Dokument
+                    </NavButton>
+                    <NavButton to="/revisions" onClick={closeAllMenus}>
+                      Revisioner
+                    </NavButton>
+                  </Dropdown>
+                )}
               </div>
-              {user && (
-                <div className="hidden md:flex items-center space-x-2">
-                  <NavButton to="/posts" onClick={() => setOpen(false)}>
-                    Nyheter
-                  </NavButton>
-                  <NavButton to="/events" onClick={() => setOpen(false)}>
-                    Möten
-                  </NavButton>
-                  <NavButton to="/members" onClick={() => setOpen(false)}>
-                    Medlemmar
-                  </NavButton>
-                  <NavButton to="/regalia" onClick={() => setOpen(false)}>
-                    Regalier
-                  </NavButton>
-                  <NavButton to="/map" onClick={() => setOpen(false)}>
-                    Karta
-                  </NavButton>
-                  <NavButton to="/revisions" onClick={() => setOpen(false)}>
-                    Revisioner
-                  </NavButton>
-                  <NavButton to="/documents" onClick={() => setOpen(false)}>
-                    Dokument
-                  </NavButton>
-                </div>
-              )}
             </div>
 
-            <div className="flex items-center gap-3">
-              <div className="hidden md:flex items-center gap-2">
+            <div className="flex shrink-0 items-center gap-2 lg:gap-3">
+              <div className="hidden items-center gap-2 lg:flex">
                 {!user ? (
-                  <NavButton to="/login" onClick={() => setOpen(false)}>
+                  <NavButton to="/login" onClick={closeAllMenus}>
                     Logga in
                   </NavButton>
                 ) : (
                   <>
-                    <NavButton to="/profile" onClick={() => setOpen(false)}>
+                    <NavButton to="/profile" onClick={closeAllMenus}>
                       Profil
                     </NavButton>
                     <button
@@ -209,13 +261,15 @@ export const Navbar: React.FC = () => {
                 )}
               </div>
 
-              {/* Mobile menu button */}
               <button
                 type="button"
                 aria-expanded={open}
                 aria-label="Toggle navigation"
-                onClick={() => setOpen((s) => !s)}
-                className="inline-flex min-h-10 min-w-10 items-center justify-center rounded-md p-2 text-neutral-700 transition hover:bg-neutral-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-600 focus-visible:ring-offset-2 md:hidden"
+                onClick={() => {
+                  setActiveDropdown(null);
+                  setOpen((state) => !state);
+                }}
+                className="inline-flex min-h-10 min-w-10 items-center justify-center rounded-md p-2 text-neutral-700 transition hover:bg-neutral-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-600 focus-visible:ring-offset-2 lg:hidden"
               >
                 <svg
                   className="h-6 w-6"
@@ -246,60 +300,61 @@ export const Navbar: React.FC = () => {
           </div>
 
           {open && (
-            <div className="border-t border-neutral-200 pb-4 pt-3 md:hidden">
-              <div className="px-2 space-y-1">
-                <NavButton to="/" onClick={() => setOpen(false)}>
+            <div className="border-t border-neutral-200 pb-4 pt-3 lg:hidden">
+              <div className="space-y-1 px-2">
+                <NavButton to="/" onClick={closeAllMenus}>
                   Hem
                 </NavButton>
-                <NavButton to="/about" onClick={() => setOpen(false)}>
+                <NavButton to="/about" onClick={closeAllMenus}>
                   Om VS
                 </NavButton>
-                <NavButton to="/lodges" onClick={() => setOpen(false)}>
+                <NavButton to="/lodges" onClick={closeAllMenus}>
                   Loger
                 </NavButton>
-                <NavButton to="/gdpr" onClick={() => setOpen(false)}>
+                <NavButton to="/gdpr" onClick={closeAllMenus}>
                   GDPR
                 </NavButton>
-                <NavButton to="/contact" onClick={() => setOpen(false)}>
+                <NavButton to="/contact" onClick={closeAllMenus}>
                   Kontakt
                 </NavButton>
+
                 {user ? (
                   <>
-                    <NavButton to="/posts" onClick={() => setOpen(false)}>
+                    <NavButton to="/posts" onClick={closeAllMenus}>
                       Nyheter
                     </NavButton>
-                    <NavButton to="/events" onClick={() => setOpen(false)}>
-                      Möten
-                    </NavButton>
-                    <NavButton to="/members" onClick={() => setOpen(false)}>
+                    <NavButton to="/members" onClick={closeAllMenus}>
                       Medlemmar
                     </NavButton>
-                    <NavButton to="/regalia" onClick={() => setOpen(false)}>
+                    <NavButton to="/events" onClick={closeAllMenus}>
+                      Möten
+                    </NavButton>
+                    <NavButton to="/regalia" onClick={closeAllMenus}>
                       Regalier
                     </NavButton>
-                    <NavButton to="/map" onClick={() => setOpen(false)}>
+                    <NavButton to="/map" onClick={closeAllMenus}>
                       Karta
                     </NavButton>
-                    <NavButton to="/revisions" onClick={() => setOpen(false)}>
-                      Revisioner
-                    </NavButton>
-                    <NavButton to="/documents" onClick={() => setOpen(false)}>
+                    <NavButton to="/documents" onClick={closeAllMenus}>
                       Dokument
+                    </NavButton>
+                    <NavButton to="/revisions" onClick={closeAllMenus}>
+                      Revisioner
                     </NavButton>
                   </>
                 ) : null}
+
                 {!user ? (
-                  <NavButton to="/login" onClick={() => setOpen(false)}>
+                  <NavButton to="/login" onClick={closeAllMenus}>
                     Logga in
                   </NavButton>
                 ) : (
                   <>
-                    <NavButton to="/profile" onClick={() => setOpen(false)}>
+                    <NavButton to="/profile" onClick={closeAllMenus}>
                       Profil
                     </NavButton>
                     <button
                       onClick={() => {
-                        setOpen(false);
                         void handleLogout();
                       }}
                       className="ui-btn ui-btn-sm ui-btn-danger w-full"
