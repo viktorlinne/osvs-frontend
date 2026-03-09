@@ -14,6 +14,14 @@ type NavButtonProps = {
 
 type DropdownKey = "public" | "members" | "archive";
 
+function formatSessionCountdown(expiresAt: string, nowMs: number) {
+  const remainingMs = Math.max(0, Date.parse(expiresAt) - nowMs);
+  const totalSeconds = Math.ceil(remainingMs / 1000);
+  const minutes = Math.floor(totalSeconds / 60);
+  const seconds = totalSeconds % 60;
+  return `${minutes}:${String(seconds).padStart(2, "0")}`;
+}
+
 const navButtonBase =
   "block rounded-md px-3 py-2 text-sm font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-600 focus-visible:ring-offset-2";
 
@@ -101,14 +109,19 @@ const Dropdown: React.FC<DropdownProps> = ({
 };
 
 export const Navbar: React.FC = () => {
-  const { user, logout } = useAuth();
+  const { user, session, logout } = useAuth();
   const { setError, clearError } = useError();
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
   const [activeDropdown, setActiveDropdown] = useState<DropdownKey | null>(
     null,
   );
+  const [nowMs, setNowMs] = useState(() => Date.now());
   const navRef = useRef<HTMLElement | null>(null);
+  const countdown =
+    user && session
+      ? formatSessionCountdown(session.inactivityExpiresAt, nowMs)
+      : null;
 
   const closeAllMenus = () => {
     setOpen(false);
@@ -136,6 +149,14 @@ export const Navbar: React.FC = () => {
     document.addEventListener("keydown", onKeyDown);
     return () => document.removeEventListener("keydown", onKeyDown);
   }, []);
+
+  useEffect(() => {
+    if (!user || !session) return;
+    const timer = window.setInterval(() => {
+      setNowMs(Date.now());
+    }, 1000);
+    return () => window.clearInterval(timer);
+  }, [user, session]);
 
   const handleLogout = async () => {
     try {
@@ -248,6 +269,11 @@ export const Navbar: React.FC = () => {
                   </NavButton>
                 ) : (
                   <>
+                    {countdown ? (
+                      <span className="rounded-md bg-neutral-100 px-3 py-2 text-sm text-neutral-700">
+                        Utloggning om {countdown}
+                      </span>
+                    ) : null}
                     <NavButton to="/profile" onClick={closeAllMenus}>
                       Profil
                     </NavButton>
@@ -350,6 +376,11 @@ export const Navbar: React.FC = () => {
                   </NavButton>
                 ) : (
                   <>
+                    {countdown ? (
+                      <p className="px-3 py-2 text-sm text-neutral-600">
+                        Utloggning om {countdown}
+                      </p>
+                    ) : null}
                     <NavButton to="/profile" onClick={closeAllMenus}>
                       Profil
                     </NavButton>

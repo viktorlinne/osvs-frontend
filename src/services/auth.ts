@@ -3,12 +3,28 @@ import type {
   AuthUser,
   LoginPayload,
 } from "../types";
+import { parseSessionInfo, type SessionInfo } from "./globalAuth";
 import {
   parseAllergies,
   parseOfficialHistory,
 } from "./parsers/userMetadata";
 
 type OfficialPayload = { id?: unknown };
+export type AuthState = {
+  user: AuthUser | null;
+  session: SessionInfo | null;
+};
+
+function readSessionInfo(res: unknown): SessionInfo {
+  const record = res && typeof res === "object"
+    ? (res as Record<string, unknown>)
+    : null;
+  const session = parseSessionInfo(record?.session);
+  if (!session) {
+    throw new Error("Ogiltigt sessionssvar från servern");
+  }
+  return session;
+}
 
 function mergeAuthResponse(res: unknown): AuthUser | null {
   if (res == null) return null;
@@ -87,25 +103,49 @@ function mergeAuthResponse(res: unknown): AuthUser | null {
   return result;
 }
 
-async function fetchCurrentAuthUser(): Promise<AuthUser | null> {
+function mergeAuthState(res: unknown): AuthState {
+  const record = res && typeof res === "object"
+    ? (res as Record<string, unknown>)
+    : null;
+
+  return {
+    user: mergeAuthResponse(res),
+    session: parseSessionInfo(record?.session),
+  };
+}
+
+async function fetchCurrentAuthUser(): Promise<AuthState> {
   const res = await fetchData(api.get("/auth/me"));
-  return mergeAuthResponse(res);
+  return mergeAuthState(res);
 }
 
 export async function login({
   email,
   password,
-}: LoginPayload): Promise<AuthUser | null> {
+}: LoginPayload): Promise<AuthState> {
   await fetchData(api.post<LoginPayload>("/auth/login", { email, password }));
   return fetchCurrentAuthUser();
+}
+
+export async function restoreSession(): Promise<AuthState> {
+  const session = readSessionInfo(await fetchData(api.post("/auth/refresh")));
+  const authState = await fetchCurrentAuthUser();
+  return {
+    user: authState.user,
+    session: authState.session ?? session,
+  };
+}
+
+export async function heartbeat(): Promise<SessionInfo> {
+  return readSessionInfo(await fetchData(api.post("/auth/heartbeat")));
 }
 
 export async function logout(): Promise<void> {
   await fetchData(api.post<void>("/auth/logout"));
 }
 
-export async function me(): Promise<AuthUser | null> {
+export async function me(): Promise<AuthState> {
   return fetchCurrentAuthUser();
 }
 
-export default { login, logout, me };
+export default { heartbeat, login, logout, me, restoreSession };

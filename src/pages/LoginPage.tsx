@@ -16,10 +16,10 @@ export const LoginPage = () => {
   const { run } = useFetch();
   const from = (
     location.state as
-    | {
-      from?: { pathname?: string; search?: string; hash?: string };
-    }
-    | undefined
+      | {
+          from?: { pathname?: string; search?: string; hash?: string };
+        }
+      | undefined
   )?.from;
   const redirectTo = from?.pathname
     ? `${from.pathname}${from.search ?? ""}${from.hash ?? ""}`
@@ -41,7 +41,10 @@ export const LoginPage = () => {
   };
 
   return (
-    <PageContainer size="md" className="ui-page flex min-h-full items-center justify-center">
+    <PageContainer
+      size="md"
+      className="ui-page flex min-h-full items-center justify-center"
+    >
       <form onSubmit={submit} className="ui-card w-full max-w-md">
         <h2 className="ui-page-title mb-4">Logga in</h2>
         <label htmlFor="email" className="ui-label">

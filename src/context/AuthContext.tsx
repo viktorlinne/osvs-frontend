@@ -1,8 +1,10 @@
 import { createContext } from "react";
 import type { AuthUser } from "../types";
+import type { SessionInfo } from "../services/globalAuth";
 
 export type AuthContextValue = {
   user: AuthUser | null;
+  session: SessionInfo | null;
   loading: boolean;
   login: (email: string, password: string) => Promise<AuthUser | null>;
   logout: () => Promise<void>;

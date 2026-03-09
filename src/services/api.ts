@@ -19,44 +19,35 @@ export const api = axios.create({
   timeout: 10000,
 });
 
-type RetriableRequestConfig = AxiosRequestConfig & {
-  _retry?: boolean;
+type ApiRequestConfig = AxiosRequestConfig & {
   _unauthorizedNotified?: boolean;
 };
 
-function isAuthFlowRequest(config?: AxiosRequestConfig): boolean {
-  const url = String(config?.url ?? "");
-  return /\/auth\/(login|refresh)\b/.test(url);
+function getRequestPath(config?: AxiosRequestConfig): string {
+  const rawUrl = String(config?.url ?? "");
+  if (!rawUrl) return "";
+
+  const normalized = rawUrl.startsWith("http")
+    ? new URL(rawUrl).pathname
+    : rawUrl;
+
+  return normalized
+    .replace(/^https?:\/\/[^/]+/i, "")
+    .replace(/^\/api\b/, "")
+    .split("?")[0] ?? "";
 }
 
-// Minimal refresh strategy: on first 401 we POST to `/auth/refresh`
-// using the browser `fetch` API (to avoid axios interceptor recursion).
-// If the refresh succeeds we retry the original request once.
+function isAuthFlowRequest(config?: AxiosRequestConfig): boolean {
+  return /^\/auth(?:\/|$)/.test(getRequestPath(config));
+}
+
 api.interceptors.response.use(
   (r) => r,
   async (err: AxiosError) => {
-    const originalConfig = err.config as RetriableRequestConfig;
+    const originalConfig = err.config as ApiRequestConfig | undefined;
     if (!originalConfig) return Promise.reject(err);
 
     const status = err.response?.status;
-    if (status === 401 && !originalConfig._retry) {
-      originalConfig._retry = true;
-      try {
-        const resp = await fetch(
-          `${BASE_URL.replace(/\/$/, "")}/auth/refresh`,
-          {
-            method: "POST",
-            credentials: "include",
-          },
-        );
-        if (resp.ok) {
-          return api.request(originalConfig);
-        }
-      } catch {
-        // fallthrough to reject with original error
-      }
-    }
-
     if (
       status === 401 &&
       !isAuthFlowRequest(originalConfig) &&
@@ -105,7 +96,7 @@ export async function fetchData<T = unknown>(
         };
 
         if (status === 401) {
-          const requestConfig = config as RetriableRequestConfig;
+          const requestConfig = config as ApiRequestConfig;
           if (
             !isAuthFlowRequest(requestConfig) &&
             !requestConfig._unauthorizedNotified
@@ -135,7 +126,7 @@ export async function fetchData<T = unknown>(
     if (err && err.response) {
       const status = err.response.status ?? 0;
       const raw = err.response.data as unknown;
-      const requestConfig = err.config as RetriableRequestConfig | undefined;
+      const requestConfig = err.config as ApiRequestConfig | undefined;
       let serverMsg: string | undefined;
       let code: string | undefined;
       if (typeof raw === "object" && raw !== null) {

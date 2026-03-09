@@ -22,9 +22,9 @@ export function AppLayout() {
 
   useEffect(() => {
     registerUnauthorizedHandler(() => {
-      setError("Vänligen logga in");
       clearUser();
       if (location.pathname === "/login") return;
+      setError("Vänligen logga in");
       if (redirectingRef.current) return;
       redirectingRef.current = true;
       navigate("/login", {
