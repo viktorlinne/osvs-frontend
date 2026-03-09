@@ -349,14 +349,14 @@ export const MemberDetail = () => {
         </Link>
         {!isEditRoute && (
           <div className="flex flex-col gap-2 sm:flex-row">
-            <Button className="ui-btn-primary">
-              <Link to={`/members/${matrikelnummer}/attended`}>Närvaro</Link>
-            </Button>
             {canEdit && (
               <Button className="ui-btn-primary">
                 <Link to={`/members/${matrikelnummer}/edit`}>Redigera</Link>
               </Button>
             )}
+            <Button className="ui-btn-primary">
+              <Link to={`/members/${matrikelnummer}/attended`}>Närvaro</Link>
+            </Button>
           </div>
         )}
       </div>
