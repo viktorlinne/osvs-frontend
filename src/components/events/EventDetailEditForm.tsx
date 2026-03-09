@@ -1,5 +1,6 @@
 ﻿import { Link } from "react-router-dom";
 import type { Lodge } from "../../types";
+import { Button } from "../ui";
 
 export type EventFormState = {
   title: string;
@@ -20,7 +21,6 @@ type Props = {
   onDelete?: () => void | Promise<void>;
   isAdmin: boolean;
   saving: boolean;
-  cancelTo: string;
 };
 
 export function EventDetailEditForm({
@@ -33,7 +33,6 @@ export function EventDetailEditForm({
   onDelete,
   isAdmin,
   saving,
-  cancelTo,
 }: Props) {
   const foodPreview =
     Number.isFinite(Number(form.price)) && Number(form.price) > 0 ? 1 : 0;
@@ -58,7 +57,10 @@ export function EventDetailEditForm({
         <div className="grid max-h-40 grid-cols-1 gap-2 overflow-auto rounded-md border border-neutral-200 p-2 sm:grid-cols-2">
           {Array.isArray(lodges) && lodges.length > 0 ? (
             lodges.map((l) => (
-              <label key={l.id} className="inline-flex items-center gap-2 rounded-md border border-neutral-200 px-3 py-2 text-sm text-neutral-700">
+              <label
+                key={l.id}
+                className="inline-flex items-center gap-2 rounded-md border border-neutral-200 px-3 py-2 text-sm text-neutral-700"
+              >
                 <input
                   type="checkbox"
                   checked={linkedIds.includes(l.id)}
@@ -148,40 +150,41 @@ export function EventDetailEditForm({
             readOnly
           />
         </div>
-        <label htmlFor="lodgeMeeting" className="mt-2 inline-flex items-center gap-2 text-sm text-neutral-700">
+        <label
+          htmlFor="lodgeMeeting"
+          className="mt-2 inline-flex items-center gap-2 text-sm text-neutral-700"
+        >
           <input
             id="lodgeMeeting"
             type="checkbox"
             checked={form.lodgeMeeting}
             className="h-4 w-4 rounded border-neutral-300 text-primary-600 focus-visible:ring-primary-600"
-            onChange={(e) => setForm({ ...form, lodgeMeeting: e.target.checked })}
+            onChange={(e) =>
+              setForm({ ...form, lodgeMeeting: e.target.checked })
+            }
           />
           Logemöte
         </label>
       </div>
 
       <div className="flex flex-col gap-2 py-2 sm:flex-row">
-        <button
-          type="button"
-          className="ui-btn ui-btn-primary"
-          onClick={onSave}
-          disabled={saving}
-        >
-          {saving ? "Spararâ€¦" : "Spara"}
-        </button>
+        <Button className="ui-btn-primary" onClick={onSave} disabled={saving}>
+          {saving ? "Sparar..." : "Spara"}
+        </Button>
         {isAdmin && onDelete && (
-          <button
-            type="button"
-            className="ui-btn ui-btn-danger"
+          <Button
+            className="ui-btn-danger"
             onClick={onDelete}
             disabled={saving}
           >
             Radera
-          </button>
+          </Button>
         )}
-        <Link to={cancelTo} className="ui-btn ui-btn-secondary">
-          Avbryt
-        </Link>
+        <Button className="ui-btn-secondary">
+          <Link to=".." relative="path">
+            Avbryt
+          </Link>
+        </Button>
       </div>
     </div>
   );

@@ -2,6 +2,7 @@
 import { Link, useNavigate } from "react-router-dom";
 import { useForm, useWatch } from "react-hook-form";
 import {
+  Button,
   LodgeSelection,
   PageContainer,
   errorTextClass,
@@ -31,7 +32,12 @@ export const CreatePost = () => {
     setValue,
     control,
   } = useForm<CreatePostForm>({
-    defaultValues: { title: "", description: "", lodgeIds: [], publicum: false },
+    defaultValues: {
+      title: "",
+      description: "",
+      lodgeIds: [],
+      publicum: false,
+    },
   });
   const watchedLodges = useWatch({ control, name: "lodgeIds" }) ?? [];
 
@@ -107,8 +113,8 @@ export const CreatePost = () => {
   }
 
   return (
-    <PageContainer size="md" className="ui-page">
-      <Link to="/posts" className="ui-link">
+    <PageContainer size="xl" className="ui-page">
+      <Link to=".." relative="path" className="ui-link">
         ← Tillbaka
       </Link>
       <h2 className="ui-page-title mb-4 mt-4">Skapa inlägg</h2>
@@ -118,7 +124,9 @@ export const CreatePost = () => {
             Titel
           </label>
           <input id="title" {...register("title")} className={inputClass} />
-          {errors.title && <div className={errorTextClass}>{errors.title?.message}</div>}
+          {errors.title && (
+            <div className={errorTextClass}>{errors.title?.message}</div>
+          )}
         </div>
 
         <div className="mb-4">
@@ -158,7 +166,10 @@ export const CreatePost = () => {
             {...register("publicum")}
             className="h-4 w-4 rounded border-neutral-300 text-primary-600 focus-visible:ring-primary-600"
           />
-          <label htmlFor="publicum" className="text-sm font-medium text-neutral-700">
+          <label
+            htmlFor="publicum"
+            className="text-sm font-medium text-neutral-700"
+          >
             Publicum
           </label>
         </div>
@@ -174,9 +185,14 @@ export const CreatePost = () => {
         />
 
         <div className="flex flex-col gap-2 py-2 sm:flex-row">
-          <button type="submit" className="ui-btn ui-btn-primary" disabled={loading}>
+          <Button type="submit" className="ui-btn-primary" disabled={loading}>
             Skapa
-          </button>
+          </Button>
+          <Button className="ui-btn ui-btn-secondary">
+            <Link to=".." relative="path">
+              Avbryt
+            </Link>
+          </Button>
         </div>
       </form>
     </PageContainer>

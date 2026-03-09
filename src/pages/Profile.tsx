@@ -37,9 +37,9 @@ export const Profile = () => {
   const [pictureFile, setPictureFile] = useState<File | null>(null);
   const [lodges, setLodges] = useState<Lodge[]>([]);
   const [selectedLid, setSelectedLid] = useState<number | null>(null);
-  const [selectedOfficialIds, setSelectedOfficialIds] = useState<number[] | null>(
-    null,
-  );
+  const [selectedOfficialIds, setSelectedOfficialIds] = useState<
+    number[] | null
+  >(null);
   const [selectedAllergyIds, setSelectedAllergyIds] = useState<number[] | null>(
     null,
   );
@@ -204,109 +204,110 @@ export const Profile = () => {
 
   return (
     <PageContainer size="md" className="ui-page">
-        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-          <Link to=".." relative="path" className="ui-link">
-            {"\u2190"} Tillbaka
-          </Link>
-          <div className="flex flex-col gap-2 sm:flex-row">
-            {user && !isEditRoute && (
-              <Link to="/profile/edit" className="ui-btn ui-btn-primary ui-btn-sm">
-                Redigera
-              </Link>
-            )}
-            {user && (
-              <Link to="/profile/attended" className="ui-btn ui-btn-primary ui-btn-sm">
-                Närvaro
-              </Link>
-            )}
-            <Link to="/profile/memberships" className="ui-btn ui-btn-primary ui-btn-sm">
-              Medlemskap
-            </Link>
-          </div>
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+        <Link to=".." relative="path" className="ui-link">
+          {"\u2190"} Tillbaka
+        </Link>
+        <div className="flex flex-col gap-2 sm:flex-row">
+          {user && !isEditRoute && (
+            <Button className="ui-btn-primary">
+              <Link to="/profile/edit">Redigera</Link>
+            </Button>
+          )}
+          {user && (
+            <Button className="ui-btn-primary">
+              <Link to="/profile/attended">Närvaro</Link>
+            </Button>
+          )}
+          <Button className="ui-btn-primary">
+            <Link to="/profile/memberships">Medlemskap</Link>
+          </Button>
         </div>
-        <h2 className="ui-page-title mb-4 mt-4">Din profil</h2>
+      </div>
+      <h2 className="ui-page-title mb-4 mt-4">Din profil</h2>
 
-        <form onSubmit={handleProfileSave} className="ui-card">
-          <AchievementsPanel
-            user={user}
-            achievements={achievements}
-            available={available}
-            lodge={lodge}
-            lodges={lodges}
-            selectedLid={selectedLid}
-            setSelectedLid={setSelectedLid}
-            onSaveLodge={async (targetUserId: number, lodgeId: number | null) => {
-              if (!targetUserId) throw new Error("Invalid target");
+      <form onSubmit={handleProfileSave} className="ui-card">
+        <AchievementsPanel
+          user={user}
+          achievements={achievements}
+          available={available}
+          lodge={lodge}
+          lodges={lodges}
+          selectedLid={selectedLid}
+          setSelectedLid={setSelectedLid}
+          onSaveLodge={async (targetUserId: number, lodgeId: number | null) => {
+            if (!targetUserId) throw new Error("Invalid target");
 
-              setSaving(true);
-              try {
-                await setUserLodge(
-                  String(targetUserId),
-                  lodgeId === null ? null : Number(lodgeId),
-                );
-                await refresh();
-              } catch {
-                // state refresh is handled in useProfile fallback
-              } finally {
-                setSaving(false);
-              }
-            }}
-            isEditRoute={isEditRoute}
-            selectedAid={selectedAid}
-            setSelectedAid={setSelectedAid}
-            awardDate={awardDate}
-            setAwardDate={setAwardDate}
-            canAward={canAward}
-            assignAchievement={assignAchievement}
-          />
+            setSaving(true);
+            try {
+              await setUserLodge(
+                String(targetUserId),
+                lodgeId === null ? null : Number(lodgeId),
+              );
+              await refresh();
+            } catch {
+              // state refresh is handled in useProfile fallback
+            } finally {
+              setSaving(false);
+            }
+          }}
+          isEditRoute={isEditRoute}
+          selectedAid={selectedAid}
+          setSelectedAid={setSelectedAid}
+          awardDate={awardDate}
+          setAwardDate={setAwardDate}
+          canAward={canAward}
+          assignAchievement={assignAchievement}
+        />
 
-          <RolesManager
-            userId={user?.matrikelnummer}
-            rolesList={rolesList}
-            selectedRoleIds={selectedRoleIds}
-            setSelectedRoleIds={setSelectedRoleIds}
-            canEditRoles={canEditRoles}
-            isEditRoute={isEditRoute}
-            saveRoles={saveRoles}
-            setGlobalError={setGlobalError}
-            setSaving={setSaving}
-          />
+        <RolesManager
+          userId={user?.matrikelnummer}
+          rolesList={rolesList}
+          selectedRoleIds={selectedRoleIds}
+          setSelectedRoleIds={setSelectedRoleIds}
+          canEditRoles={canEditRoles}
+          isEditRoute={isEditRoute}
+          saveRoles={saveRoles}
+          setGlobalError={setGlobalError}
+          setSaving={setSaving}
+        />
 
-          <OfficialsManager
-            user={user}
-            isEditRoute={isEditRoute}
-            selectedIds={selectedOfficialIds ?? undefined}
-            setSelectedIds={setSelectedOfficialIds}
-          />
+        <OfficialsManager
+          user={user}
+          isEditRoute={isEditRoute}
+          selectedIds={selectedOfficialIds ?? undefined}
+          setSelectedIds={setSelectedOfficialIds}
+        />
 
-          <AllergiesManager
-            user={user}
-            isEditRoute={isEditRoute}
-            selectedIds={selectedAllergyIds ?? undefined}
-            setSelectedIds={setSelectedAllergyIds}
-          />
+        <AllergiesManager
+          user={user}
+          isEditRoute={isEditRoute}
+          selectedIds={selectedAllergyIds ?? undefined}
+          setSelectedIds={setSelectedAllergyIds}
+        />
 
-          <ProfileForm
-            user={user}
-            register={register}
-            errors={errors}
-            isEditRoute={isEditRoute}
-            setPictureFile={setPictureFile}
-            saving={saving}
-          />
+        <ProfileForm
+          user={user}
+          register={register}
+          errors={errors}
+          isEditRoute={isEditRoute}
+          setPictureFile={setPictureFile}
+          saving={saving}
+        />
 
-          {isEditRoute ? (
-            <div className="flex flex-col gap-2 py-4 sm:flex-row">
-              <Button
-                type="submit"
-                disabled={saving}
-              >
-                {saving ? "Sparar..." : "Spara"}
-              </Button>
-            </div>
-          ) : null}
-        </form>
+        {isEditRoute ? (
+          <div className="flex flex-col gap-2 py-4 sm:flex-row">
+            <Button type="submit" disabled={saving}>
+              {saving ? "Sparar..." : "Spara"}
+            </Button>
+            <Button className="ui-btn-secondary" disabled={saving}>
+              <Link to=".." relative="path">
+                Avbryt
+              </Link>
+            </Button>
+          </div>
+        ) : null}
+      </form>
     </PageContainer>
   );
 };
-

@@ -1,6 +1,7 @@
 ﻿import { useEffect, useState, type FormEvent } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
+  Button,
   PageContainer,
   inputClass,
   labelClass,
@@ -81,7 +82,7 @@ export const UploadRevisions = () => {
 
   return (
     <PageContainer size="md" className="ui-page">
-      <Link to="/revisions" className="ui-link">
+      <Link to=".." relative="path" className="ui-link">
         ← Tillbaka
       </Link>
       <h2 className="ui-page-title mb-4 mt-4">Lägg till revision</h2>
@@ -146,17 +147,15 @@ export const UploadRevisions = () => {
             className={inputClass}
             onChange={(e) => {
               const nextFile =
-                e.target.files && e.target.files[0]
-                  ? e.target.files[0]
-                  : null;
+                e.target.files && e.target.files[0] ? e.target.files[0] : null;
               setFile(nextFile);
             }}
           />
         </div>
 
-        <button type="submit" disabled={loading} className="ui-btn ui-btn-primary">
+        <Button type="submit" disabled={loading} className="ui-btn-primary">
           {loading ? "Sparar..." : "Skapa"}
-        </button>
+        </Button>
       </form>
     </PageContainer>
   );

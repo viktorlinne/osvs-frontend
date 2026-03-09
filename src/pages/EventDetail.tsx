@@ -2,7 +2,7 @@
 import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
 import { EventDetailEditForm, EventDetailView } from "../components/events";
 import type { EventFormState } from "../components/events/EventDetailEditForm";
-import { PageContainer } from "../components";
+import { Button, PageContainer } from "../components";
 import { useAuth, useError } from "../context";
 import useFetch from "../hooks/useFetch";
 import {
@@ -80,6 +80,12 @@ export const EventDetail = () => {
   const hasStarted = isEventStartedNowStockholm(event?.startDate);
 
   const canRsvp = isMoreThan48HoursFromNowStockholm(event?.startDate);
+  const authUserId = Number(user?.matrikelnummer);
+  const isUserInvitedToEvent =
+    Number.isFinite(authUserId) &&
+    Array.isArray(attendances) &&
+    attendances.some((row) => Number(row.uid) === authUserId);
+  const canShowRsvpButtons = Boolean(user) && isUserInvitedToEvent && canRsvp;
 
   const canBookFood = (() => {
     if (!event?.food || !event?.startDate || rsvpStatus !== "going") {
@@ -369,26 +375,17 @@ export const EventDetail = () => {
   }
 
   return (
-    <PageContainer size="md" className="ui-page">
-      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-        <Link
-          to=".."
-          relative="path"
-          className="ui-link"
-        >
+    <PageContainer size="xl" className="ui-page">
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between mb-4">
+        <Link to=".." relative="path" className="ui-link">
           ← Tillbaka
         </Link>
         {canEdit && !isEditRoute && (
-          <Link
-            to={`/events/${id}/edit`}
-            className="ui-btn ui-btn-primary ui-btn-sm"
-          >
-            Redigera
-          </Link>
+          <Button className="ui-btn-primary">
+            <Link to={`/events/${id}/edit`}>Redigera</Link>
+          </Button>
         )}
       </div>
-
-      <h2 className="ui-page-title mb-4 mt-4">Möte</h2>
 
       {event ? (
         <div className="ui-card">
@@ -403,12 +400,11 @@ export const EventDetail = () => {
               onDelete={handleDeleteEvent}
               isAdmin={isAdmin}
               saving={saving}
-              cancelTo={`/events/${id}`}
             />
           ) : (
             <EventDetailView
               event={event}
-              userCanRsvp={Boolean(user && canRsvp)}
+              userCanRsvp={canShowRsvpButtons}
               onRsvp={handleRsvp}
               userCanBookFood={Boolean(user && canBookFood)}
               onBookFood={handleBookFood}
@@ -435,6 +431,3 @@ export const EventDetail = () => {
     </PageContainer>
   );
 };
-
-
-

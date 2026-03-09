@@ -1,10 +1,6 @@
 ﻿import { useState, type FormEvent } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import {
-  PageContainer,
-  inputClass,
-  labelClass,
-} from "../components";
+import { Button, PageContainer, inputClass, labelClass } from "../components";
 import { useError } from "../context";
 import useFetch from "../hooks/useFetch";
 import { createDocument } from "../services";
@@ -46,7 +42,7 @@ export const UploadDocument = () => {
 
   return (
     <PageContainer size="md" className="ui-page">
-      <Link to="/documents" className="ui-link">
+      <Link to=".." relative="path" className="ui-link">
         ← Tillbaka
       </Link>
       <h2 className="ui-page-title mb-4 mt-4">Lägg till dokument</h2>
@@ -76,17 +72,15 @@ export const UploadDocument = () => {
             className={inputClass}
             onChange={(e) => {
               const nextFile =
-                e.target.files && e.target.files[0]
-                  ? e.target.files[0]
-                  : null;
+                e.target.files && e.target.files[0] ? e.target.files[0] : null;
               setFile(nextFile);
             }}
           />
         </div>
 
-        <button type="submit" disabled={loading} className="ui-btn ui-btn-primary">
+        <Button type="submit" disabled={loading} className="ui-btn-primary">
           {loading ? "Sparar..." : "Skapa"}
-        </button>
+        </Button>
       </form>
     </PageContainer>
   );

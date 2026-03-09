@@ -64,7 +64,9 @@ export const EventsPage = () => {
   const [viewDate, setViewDate] = useState(
     () => new Date(today.getFullYear(), today.getMonth(), 1),
   );
-  const [eventsByDate, setEventsByDate] = useState<Record<string, EventRecord[]>>({});
+  const [eventsByDate, setEventsByDate] = useState<
+    Record<string, EventRecord[]>
+  >({});
   const { run, loading } = useFetch<{ events?: EventRecord[] }>();
 
   const year = viewDate.getFullYear();
@@ -121,20 +123,32 @@ export const EventsPage = () => {
         <h2 className="ui-page-title">Möteskalender</h2>
 
         <div className="flex flex-wrap gap-2">
-          <Button onClick={prevMonth} variant="secondary" size="sm" aria-label="Previous month">
+          <Button
+            onClick={prevMonth}
+            className="ui-btn-secondary"
+            aria-label="Previous month"
+          >
             Förra
           </Button>
-          <Button onClick={jumpToToday} variant="secondary" size="sm">
+          <Button
+            onClick={jumpToToday}
+            className="ui-btn-secondary"
+            aria-label="Jump to current month"
+          >
             Idag
           </Button>
-          <Button onClick={nextMonth} variant="secondary" size="sm" aria-label="Next month">
+          <Button
+            onClick={nextMonth}
+            className="ui-btn-secondary"
+            aria-label="Next month"
+          >
             Nästa
           </Button>
           {user &&
             (user.roles ?? []).some((r) => ["Admin", "Editor"].includes(r)) && (
-              <Link to="/events/create" className="ui-btn ui-btn-primary">
-                Skapa
-              </Link>
+              <Button>
+                <Link to="/events/create">Skapa</Link>
+              </Button>
             )}
         </div>
       </div>
@@ -158,7 +172,10 @@ export const EventsPage = () => {
             const weekday = WEEK_DAYS[(date.getDay() + 6) % 7];
 
             rows.push(
-              <div key={key} className="flex items-start gap-3 border-b border-neutral-200 p-3 last:border-b-0">
+              <div
+                key={key}
+                className="flex items-start gap-3 border-b border-neutral-200 p-3 last:border-b-0"
+              >
                 <div className="w-20 shrink-0 rounded-md bg-neutral-100 p-2 text-center text-sm font-medium">
                   <div className="text-xs text-neutral-600">{weekday}</div>
                   <div className="text-sm font-semibold">{d}</div>
@@ -204,8 +221,8 @@ export const EventsPage = () => {
             {week.map((date, di) => {
               const isToday = date
                 ? date.getFullYear() === today.getFullYear() &&
-                date.getMonth() === today.getMonth() &&
-                date.getDate() === today.getDate()
+                  date.getMonth() === today.getMonth() &&
+                  date.getDate() === today.getDate()
                 : false;
 
               const inMonth = date ? date.getMonth() === month : false;

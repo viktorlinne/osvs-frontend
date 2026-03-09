@@ -2,6 +2,7 @@
 import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
 import { useForm, useWatch } from "react-hook-form";
 import {
+  Button,
   LodgeSelection,
   PageContainer,
   errorTextClass,
@@ -45,7 +46,12 @@ export const PostDetail = () => {
     control,
     formState: { errors },
   } = useForm<UpdatePostForm>({
-    defaultValues: { title: "", description: "", lodgeIds: [], publicum: false },
+    defaultValues: {
+      title: "",
+      description: "",
+      lodgeIds: [],
+      publicum: false,
+    },
   });
   const watchedLodges = useWatch({ control, name: "lodgeIds" }) ?? [];
 
@@ -170,20 +176,20 @@ export const PostDetail = () => {
   }
 
   return (
-    <PageContainer size="md" className="ui-page">
-      <div className="mb-2 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+    <PageContainer size="xl" className="ui-page">
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between mb-4">
         <Link to=".." relative="path" className="ui-link">
           ← Tillbaka
         </Link>
         {canEdit && post && !isEditRoute && (
-          <Link to={`/posts/${post.id}/edit`} className="ui-btn ui-btn-primary ui-btn-sm">
-            Redigera
-          </Link>
+          <Button className="ui-btn-primary">
+            <Link to={`/posts/${post.id}/edit`}>Redigera</Link>
+          </Button>
         )}
       </div>
 
       {post && !isEditRoute && (
-        <div className="ui-card mt-4 grid gap-4 md:grid-cols-3">
+        <div className="ui-card grid gap-4 md:grid-cols-3">
           <div className="md:col-span-1">
             <img
               src={
@@ -248,7 +254,10 @@ export const PostDetail = () => {
               {...register("publicum")}
               className="h-4 w-4 rounded border-neutral-300 text-primary-600 focus-visible:ring-primary-600"
             />
-            <label htmlFor="publicum" className="text-sm font-medium text-neutral-700">
+            <label
+              htmlFor="publicum"
+              className="text-sm font-medium text-neutral-700"
+            >
               Publicum
             </label>
           </div>
@@ -256,9 +265,7 @@ export const PostDetail = () => {
           <LodgeSelection
             lodges={lodges}
             selectedIds={watchedLodges}
-            onChange={(ids) =>
-              setValue("lodgeIds", ids, { shouldDirty: true })
-            }
+            onChange={(ids) => setValue("lodgeIds", ids, { shouldDirty: true })}
             disabled={submitting || lodgesLoading}
             loading={lodgesLoading}
             label="Koppla loger"
@@ -266,23 +273,28 @@ export const PostDetail = () => {
           />
 
           <div className="flex flex-col gap-2 py-2 sm:flex-row">
-            <button
+            <Button
               type="submit"
-              className="ui-btn ui-btn-primary"
+              className="ui-btn-primary"
               disabled={submitting}
             >
               {submitting ? "Sparar..." : "Spara"}
-            </button>
+            </Button>
             {isAdmin && (
-              <button
+              <Button
                 type="button"
-                className="ui-btn ui-btn-danger"
+                className="ui-btn-danger"
                 onClick={handleDeletePost}
                 disabled={submitting}
               >
                 Radera
-              </button>
+              </Button>
             )}
+            <Button className="ui-btn-secondary">
+              <Link to=".." relative="path">
+                Avbryt
+              </Link>
+            </Button>
           </div>
         </form>
       )}

@@ -1,6 +1,7 @@
 ﻿import { useEffect, useState } from "react";
 import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
 import {
+  Button,
   PageContainer,
   inputClass,
   labelClass,
@@ -24,7 +25,12 @@ export const LodgeDetail = () => {
     user && (user.roles ?? []).some((r) => ["Admin", "Editor"].includes(r)),
   );
 
-  const [form, setForm] = useState({ name: "", city: "", description: "", email: "" });
+  const [form, setForm] = useState({
+    name: "",
+    city: "",
+    description: "",
+    email: "",
+  });
 
   useEffect(() => {
     if (!id) return setGlobalError("Missing lodge id");
@@ -32,7 +38,7 @@ export const LodgeDetail = () => {
       const resp = await getLodge(id);
       const l = (resp as { lodge?: Lodge })?.lodge ?? null;
       return l as Lodge | null;
-    }).catch(() => { });
+    }).catch(() => {});
   }, [id, run, setGlobalError]);
 
   useEffect(() => {
@@ -48,7 +54,7 @@ export const LodgeDetail = () => {
   }, [lodge, isEditRoute]);
 
   async function handleSave() {
-    if (!id) return setGlobalError("Missing lodge id");
+    if (!id) return setGlobalError("Saknar loge-id");
     if (!canEdit) return setGlobalError("Ingen behörighet");
     clearGlobalError();
     try {
@@ -66,20 +72,20 @@ export const LodgeDetail = () => {
       });
       navigate(`/lodges/${id}`);
     } catch {
-      setGlobalError("Failed to save lodge");
+      setGlobalError("Misslyckades att spara logen");
     }
   }
 
   return (
-    <PageContainer size="md" className="ui-page">
-      <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+    <PageContainer size="xl" className="ui-page">
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between mb-4">
         <Link to=".." relative="path" className="ui-link">
           ← Tillbaka
         </Link>
         {canEdit && !isEditRoute && (
-          <Link to={`/lodges/${id}/edit`} className="ui-btn ui-btn-primary ui-btn-sm">
-            Redigera
-          </Link>
+          <Button className="ui-btn-primary">
+            <Link to={`/lodges/${id}/edit`}>Redigera</Link>
+          </Button>
         )}
       </div>
 
@@ -88,7 +94,9 @@ export const LodgeDetail = () => {
           {isEditRoute && canEdit ? (
             <div className="space-y-4">
               <div>
-                <label htmlFor="name" className={labelClass}>Namn</label>
+                <label htmlFor="name" className={labelClass}>
+                  Namn
+                </label>
                 <input
                   id="name"
                   name="name"
@@ -99,7 +107,9 @@ export const LodgeDetail = () => {
                 />
               </div>
               <div>
-                <label htmlFor="city" className={labelClass}>Stad</label>
+                <label htmlFor="city" className={labelClass}>
+                  Stad
+                </label>
                 <input
                   id="city"
                   name="city"
@@ -110,18 +120,24 @@ export const LodgeDetail = () => {
                 />
               </div>
               <div>
-                <label htmlFor="description" className={labelClass}>Beskrivning</label>
+                <label htmlFor="description" className={labelClass}>
+                  Beskrivning
+                </label>
                 <textarea
                   id="description"
                   name="description"
                   rows={8}
                   value={form.description}
-                  onChange={(e) => setForm({ ...form, description: e.target.value })}
+                  onChange={(e) =>
+                    setForm({ ...form, description: e.target.value })
+                  }
                   className={textareaClass}
                 />
               </div>
               <div>
-                <label htmlFor="email" className={labelClass}>E-post</label>
+                <label htmlFor="email" className={labelClass}>
+                  E-post
+                </label>
                 <input
                   id="email"
                   name="email"
@@ -132,12 +148,18 @@ export const LodgeDetail = () => {
                 />
               </div>
               <div className="flex flex-col gap-2 py-2 sm:flex-row">
-                <button className="ui-btn ui-btn-primary" onClick={handleSave} disabled={saving}>
-                  {saving ? "Spararâ€¦" : "Spara"}
-                </button>
-                <Link to=".." relative="path" className="ui-btn ui-btn-secondary">
-                  Avbryt
-                </Link>
+                <Button
+                  className="ui-btn-primary"
+                  onClick={handleSave}
+                  disabled={saving}
+                >
+                  {saving ? "Sparar..." : "Spara"}
+                </Button>
+                <Button className="ui-btn-secondary">
+                  <Link to=".." relative="path">
+                    Avbryt
+                  </Link>
+                </Button>
               </div>
             </div>
           ) : (
@@ -156,11 +178,14 @@ export const LodgeDetail = () => {
                 <div className="italic">{lodge.city}</div>
               </div>
               <div className="mb-2 text-neutral-700">
-                <strong className="text-neutral-900">Historia:</strong> {lodge.description}
+                <strong className="text-neutral-900">Historia:</strong>{" "}
+                {lodge.description}
               </div>
               <div className="mb-2 text-neutral-700">
                 <strong className="text-neutral-900">Kontakt:</strong>{" "}
-                <a className="ui-link" href={`mailto:${lodge.email}`}>{lodge.email}</a>
+                <a className="ui-link" href={`mailto:${lodge.email}`}>
+                  {lodge.email}
+                </a>
               </div>
             </div>
           )}

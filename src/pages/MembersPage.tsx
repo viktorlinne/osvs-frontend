@@ -1,10 +1,6 @@
 ﻿import { useCallback, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import {
-  PageContainer,
-  inputClass,
-  selectClass,
-} from "../components";
+import { Button, PageContainer, inputClass, selectClass } from "../components";
 import { useAuth } from "../context";
 import useFetch from "../hooks/useFetch";
 import { listAchievements } from "../services/achievements";
@@ -15,15 +11,12 @@ import type { PublicUser } from "../types";
 
 export const MembersPage = () => {
   const { run, data: members } = useFetch<PublicUser[]>();
-  const { run: runAchievements, data: achievements } = useFetch<
-    Array<{ id: number; title: string }>
-  >();
-  const { run: runLodges, data: lodges } = useFetch<
-    Array<{ id: number; name: string }>
-  >();
-  const { run: runOfficials, data: officials } = useFetch<
-    Array<{ id: number; title: string }>
-  >();
+  const { run: runAchievements, data: achievements } =
+    useFetch<Array<{ id: number; title: string }>>();
+  const { run: runLodges, data: lodges } =
+    useFetch<Array<{ id: number; name: string }>>();
+  const { run: runOfficials, data: officials } =
+    useFetch<Array<{ id: number; title: string }>>();
   const { user } = useAuth();
   const [query, setQuery] = useState("");
   const [debouncedQuery, setDebouncedQuery] = useState(query);
@@ -55,7 +48,14 @@ export const MembersPage = () => {
           accommodationAvailable: accommodationOnly ? true : null,
         }),
       ),
-    [run, debouncedQuery, achievementId, lodgeId, officialId, accommodationOnly],
+    [
+      run,
+      debouncedQuery,
+      achievementId,
+      lodgeId,
+      officialId,
+      accommodationOnly,
+    ],
   );
 
   useEffect(() => {
@@ -75,9 +75,11 @@ export const MembersPage = () => {
         <h2 className="ui-page-title">Medlemmar</h2>
         {user &&
           (user.roles ?? []).some((r) => ["Admin", "Editor"].includes(r)) && (
-            <Link to="/members/create" className="ui-btn ui-btn-primary">
-              Skapa
-            </Link>
+            <Button className="ui-btn-primary">
+              <Link to="/members/create">
+                Skapa
+              </Link>
+            </Button>
           )}
       </div>
 
@@ -172,7 +174,9 @@ export const MembersPage = () => {
                 <div className="truncate font-semibold text-neutral-900">
                   {member.firstname} {member.lastname}
                 </div>
-                <div className="truncate text-sm text-neutral-600">{member.email}</div>
+                <div className="truncate text-sm text-neutral-600">
+                  {member.email}
+                </div>
               </div>
             </Link>
           ))}

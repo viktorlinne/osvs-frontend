@@ -1,7 +1,7 @@
 ﻿import { useCallback, useEffect, useState } from "react";
 import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
 import { useForm } from "react-hook-form";
-import { PageContainer } from "../components";
+import { Button, PageContainer } from "../components";
 import {
   AchievementsPanel,
   AllergiesManager,
@@ -73,10 +73,7 @@ function mapMemberRoleNames(member: PublicUser | null): string[] {
 
 export const MemberDetail = () => {
   const { matrikelnummer } = useParams<{ matrikelnummer: string }>();
-  const {
-    run,
-    data: member,
-  } = useFetch<PublicUser | null>();
+  const { run, data: member } = useFetch<PublicUser | null>();
   const { run: runAvailable } = useFetch<Achievement[]>();
   const { run: runLodges } = useFetch<Lodge[]>();
   const { run: runRoles } = useFetch<unknown>();
@@ -89,10 +86,12 @@ export const MemberDetail = () => {
   const navigate = useNavigate();
 
   const canAward = Boolean(
-    authUser && (authUser.roles ?? []).some((r) => ["Admin", "Editor"].includes(r))
+    authUser &&
+    (authUser.roles ?? []).some((r) => ["Admin", "Editor"].includes(r)),
   );
   const canEdit = Boolean(
-    authUser && (authUser.roles ?? []).some((r) => ["Admin", "Editor"].includes(r))
+    authUser &&
+    (authUser.roles ?? []).some((r) => ["Admin", "Editor"].includes(r)),
   );
   const isEditRoute = location.pathname.endsWith("/edit");
   const shouldLoadRoleData = isEditRoute && canEdit;
@@ -107,9 +106,9 @@ export const MemberDetail = () => {
   const [achievements, setAchievements] = useState<Achievement[]>([]);
   const [rolesList, setRolesList] = useState<Role[]>([]);
   const [selectedRoleIds, setSelectedRoleIds] = useState<number[]>([]);
-  const [selectedOfficialIds, setSelectedOfficialIds] = useState<number[] | null>(
-    null,
-  );
+  const [selectedOfficialIds, setSelectedOfficialIds] = useState<
+    number[] | null
+  >(null);
   const [selectedAllergyIds, setSelectedAllergyIds] = useState<number[] | null>(
     null,
   );
@@ -140,7 +139,9 @@ export const MemberDetail = () => {
     if (!matrikelnummer) throw new Error("Missing matrikelnummer");
 
     const detail = await getPublicUserById(matrikelnummer);
-    setAchievements(Array.isArray(detail.achievements) ? detail.achievements : []);
+    setAchievements(
+      Array.isArray(detail.achievements) ? detail.achievements : [],
+    );
 
     let userObj: PublicUser | null = detail.user
       ? (detail.user as PublicUser)
@@ -195,7 +196,9 @@ export const MemberDetail = () => {
     }
 
     runUserLodge(() => getUserLodge(matrikelnummer))
-      .then((current) => setSelectedLid(current?.lodge ? Number(current.lodge.id) : null))
+      .then((current) =>
+        setSelectedLid(current?.lodge ? Number(current.lodge.id) : null),
+      )
       .catch(() => {
         // useFetch handles global error
       });
@@ -228,7 +231,9 @@ export const MemberDetail = () => {
     reset({
       firstname: member.firstname ?? "",
       lastname: member.lastname ?? "",
-      dateOfBirth: member.dateOfBirth ? String(member.dateOfBirth).slice(0, 10) : "",
+      dateOfBirth: member.dateOfBirth
+        ? String(member.dateOfBirth).slice(0, 10)
+        : "",
       work: member.work ?? undefined,
       notes: member.notes ?? undefined,
       mobile: member.mobile ?? "",
@@ -258,7 +263,9 @@ export const MemberDetail = () => {
       if (!matrikelnummer) throw new Error("Missing matrikelnummer");
       const userId = matrikelnummer;
 
-      await runAction(() => adminUpdateUser(userId, toUserProfileUpdatePayload(values)));
+      await runAction(() =>
+        adminUpdateUser(userId, toUserProfileUpdatePayload(values)),
+      );
 
       if (pictureFile) {
         await runAction(() => uploadUserPicture(userId, pictureFile));
@@ -272,7 +279,9 @@ export const MemberDetail = () => {
 
       try {
         if (Array.isArray(selectedOfficialIds)) {
-          await runAction(() => setMemberOfficials(userId, selectedOfficialIds));
+          await runAction(() =>
+            setMemberOfficials(userId, selectedOfficialIds),
+          );
         }
       } catch {
         setGlobalError("Misslyckades att uppdatera tjänster");
@@ -303,7 +312,10 @@ export const MemberDetail = () => {
 
       try {
         await runAction(() =>
-          setUserLodge(userId, selectedLid === null ? null : Number(selectedLid)),
+          setUserLodge(
+            userId,
+            selectedLid === null ? null : Number(selectedLid),
+          ),
         );
       } catch {
         setGlobalError("Misslyckades att uppdatera loge");
@@ -332,34 +344,22 @@ export const MemberDetail = () => {
   return (
     <PageContainer size="md" className="ui-page">
       <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-        <Link
-          to=".."
-          relative="path"
-          className="ui-link"
-        >
+        <Link to=".." relative="path" className="ui-link">
           ← Tillbaka
         </Link>
         {!isEditRoute && (
           <div className="flex flex-col gap-2 sm:flex-row">
-            <Link
-              to={`/members/${matrikelnummer}/attended`}
-              className="ui-btn ui-btn-primary ui-btn-sm"
-            >
-              Närvaro
-            </Link>
+            <Button className="ui-btn-primary">
+              <Link to={`/members/${matrikelnummer}/attended`}>Närvaro</Link>
+            </Button>
             {canEdit && (
-              <Link
-                to={`/members/${matrikelnummer}/edit`}
-                className="ui-btn ui-btn-primary ui-btn-sm"
-              >
-                Redigera
-              </Link>
+              <Button className="ui-btn-primary">
+                <Link to={`/members/${matrikelnummer}/edit`}>Redigera</Link>
+              </Button>
             )}
           </div>
         )}
       </div>
-
-      <h2 className="ui-page-title mb-4 mt-4">Medlem</h2>
 
       {member && (
         <form onSubmit={handleMemberSave} className="ui-card">
@@ -371,7 +371,10 @@ export const MemberDetail = () => {
             lodges={lodges}
             selectedLid={selectedLid}
             setSelectedLid={setSelectedLid}
-            onSaveLodge={async (targetUserId: number, lodgeId: number | null) => {
+            onSaveLodge={async (
+              targetUserId: number,
+              lodgeId: number | null,
+            ) => {
               if (!targetUserId) throw new Error("Invalid target");
               clearGlobalError();
               setSaving(true);
@@ -464,16 +467,14 @@ export const MemberDetail = () => {
 
           {isEditRoute ? (
             <div className="flex flex-col gap-2 py-4 sm:flex-row">
-              <button
-                type="submit"
-                className="ui-btn ui-btn-primary"
-                disabled={saving}
-              >
+              <Button type="submit" disabled={saving}>
                 {saving ? "Sparar..." : "Spara"}
-              </button>
-              <Link to=".." relative="path" className="ui-btn ui-btn-secondary">
-                Avbryt
-              </Link>
+              </Button>
+              <Button className="ui-btn-secondary">
+                <Link to=".." relative="path">
+                  Avbryt
+                </Link>
+              </Button>
             </div>
           ) : null}
         </form>
@@ -481,8 +482,3 @@ export const MemberDetail = () => {
     </PageContainer>
   );
 };
-
-
-
-
-

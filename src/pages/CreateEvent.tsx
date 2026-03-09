@@ -1,6 +1,7 @@
 ﻿import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
+  Button,
   LodgeSelection,
   PageContainer,
   inputClass,
@@ -97,9 +98,9 @@ export const CreateEvent = () => {
   }
 
   return (
-    <PageContainer size="md" className="ui-page">
-      <div className="mb-4 flex items-center justify-between">
-        <Link to="/events" className="ui-link">
+    <PageContainer size="xl" className="ui-page">
+      <div className="flex items-center justify-between mb-4">
+        <Link to=".." relative="path" className="ui-link">
           ← Tillbaka
         </Link>
       </div>
@@ -191,7 +192,10 @@ export const CreateEvent = () => {
               readOnly
             />
           </div>
-          <label htmlFor="lodgeMeeting" className="mt-2 inline-flex items-center gap-2 text-sm text-neutral-700">
+          <label
+            htmlFor="lodgeMeeting"
+            className="mt-2 inline-flex items-center gap-2 text-sm text-neutral-700"
+          >
             <input
               id="lodgeMeeting"
               type="checkbox"
@@ -216,16 +220,14 @@ export const CreateEvent = () => {
         />
 
         <div className="flex flex-col gap-2 py-2 sm:flex-row">
-          <button
-            type="submit"
-            className="ui-btn ui-btn-primary"
-            disabled={saving}
-          >
-            {saving ? "Skaparâ€¦" : "Skapa"}
-          </button>
-          <Link to="/events" className="ui-btn ui-btn-secondary">
-            Avbryt
-          </Link>
+          <Button type="submit" className="ui-btn-primary" disabled={saving}>
+            {saving ? "Skapar..." : "Skapa"}
+          </Button>
+          <Button className="ui-btn-secondary">
+            <Link to=".." relative="path">
+              Avbryt
+            </Link>
+          </Button>
         </div>
       </form>
     </PageContainer>
