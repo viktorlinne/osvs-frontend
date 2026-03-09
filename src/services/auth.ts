@@ -15,6 +15,8 @@ export type AuthState = {
   session: SessionInfo | null;
 };
 
+let restoreSessionPromise: Promise<AuthState> | null = null;
+
 function readSessionInfo(res: unknown): SessionInfo {
   const record = res && typeof res === "object"
     ? (res as Record<string, unknown>)
@@ -128,12 +130,24 @@ export async function login({
 }
 
 export async function restoreSession(): Promise<AuthState> {
-  const session = readSessionInfo(await fetchData(api.post("/auth/refresh")));
-  const authState = await fetchCurrentAuthUser();
-  return {
-    user: authState.user,
-    session: authState.session ?? session,
-  };
+  if (restoreSessionPromise) {
+    return restoreSessionPromise;
+  }
+
+  restoreSessionPromise = (async () => {
+    const session = readSessionInfo(await fetchData(api.post("/auth/refresh")));
+    const authState = await fetchCurrentAuthUser();
+    return {
+      user: authState.user,
+      session: authState.session ?? session,
+    };
+  })();
+
+  try {
+    return await restoreSessionPromise;
+  } finally {
+    restoreSessionPromise = null;
+  }
 }
 
 export async function heartbeat(): Promise<SessionInfo> {
