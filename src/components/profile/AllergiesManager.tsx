@@ -22,11 +22,13 @@ function normalizeAllergiesField(field: unknown): number[] | null {
 
 export const AllergiesManager = ({
   user,
+  assignedAllergies,
   isEditRoute,
   selectedIds,
   setSelectedIds,
 }: {
   user?: PublicUser | null;
+  assignedAllergies?: unknown;
   isEditRoute?: boolean;
   selectedIds?: number[] | null;
   setSelectedIds?: (ids: number[] | null) => void;
@@ -51,7 +53,7 @@ export const AllergiesManager = ({
   }, []);
 
   const userAllergies = normalizeAllergiesField(
-    (user as UserWithAllergies | undefined)?.allergies,
+    assignedAllergies ?? (user as UserWithAllergies | undefined)?.allergies,
   );
   const effectiveSelected =
     selectedIds !== undefined ? selectedIds : localSelected ?? userAllergies;

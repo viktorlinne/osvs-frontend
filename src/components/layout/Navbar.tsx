@@ -1,9 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
-import axios from "axios";
 import { NavLink, useNavigate } from "react-router-dom";
 import { useAuth, useError } from "../../context";
-import type { ApiError } from "../../types";
-import { isApiError } from "../../types/api";
+import { getApiErrorMessage } from "../../utils/apiErrors";
 import { Banner } from "./Banner";
 
 type NavButtonProps = {
@@ -164,15 +162,8 @@ export const Navbar: React.FC = () => {
       clearError();
       closeAllMenus();
       navigate("/login");
-    } catch (e: unknown) {
-      if (axios.isAxiosError(e) && e.response) {
-        const data = e.response.data as ApiError;
-        setError(data?.message ?? "Logout failed");
-      } else if (isApiError(e)) {
-        setError(e.message ?? "Logout failed");
-      } else {
-        setError(String(e ?? "Logout failed"));
-      }
+    } catch (error: unknown) {
+      setError(getApiErrorMessage(error) ?? "Kunde inte logga ut");
       setTimeout(() => clearError(), 6000);
     }
   };

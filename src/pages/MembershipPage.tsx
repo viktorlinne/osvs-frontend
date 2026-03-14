@@ -6,21 +6,16 @@ import { getMyMemberships } from "../services/";
 import type { MembershipPayment } from "../types";
 
 export const MembershipPage = () => {
-  const { run, loading, data: payments, setData: setPayments } = useFetch<MembershipPayment[]>();
+  const { run, loading, data: payments } = useFetch<MembershipPayment[]>();
 
   useEffect(() => {
     void run(() => getMyMemberships())
-      .then((res) => {
-        try {
-          setPayments(Array.isArray(res) ? (res as MembershipPayment[]) : []);
-        } catch {
-          setPayments([]);
-        }
-      })
       .catch(() => {
         /* useFetch handles global error */
       });
-  }, [run, setPayments]);
+  }, [run]);
+
+  const rows = payments ?? [];
 
   function formatDate(d: string | Date | null | undefined) {
     if (!d) return "";
@@ -39,13 +34,13 @@ export const MembershipPage = () => {
       </Link>
       <h2 className="ui-page-title mb-4">Medlemskaps Betalningar</h2>
 
-      {!loading && payments && payments.length === 0 && (
+      {!loading && rows.length === 0 && (
         <div className="text-neutral-600">Inga medlemskapsbetalningar hittades.</div>
       )}
 
-      {!loading && payments && payments.length > 0 && (
+      {!loading && rows.length > 0 && (
         <ul className="w-full space-y-2">
-          {payments.map((p) => (
+          {rows.map((p) => (
             <li key={p.id} className="ui-card flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <div>
                 <div className="font-semibold text-neutral-900">År: {p.year}</div>

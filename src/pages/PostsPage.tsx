@@ -26,9 +26,7 @@ export const NewsPage = () => {
     listLodges()
       .then((data) => {
         if (!mounted) return;
-        if (Array.isArray(data)) {
-          setLodges(data);
-        }
+        setLodges(data);
       })
       .catch(() => {
         setError("Misslyckades att hämta loger");
@@ -59,9 +57,7 @@ export const NewsPage = () => {
     )
       .then((res) => {
         if (!mounted) return;
-        if (!Array.isArray(res)) {
-          setError("Något gick fel vid hämtning av inlägg.");
-        } else if (res.length === 0) {
+        if (res.length === 0) {
           setEmpty(true);
         } else {
           setEmpty(false);

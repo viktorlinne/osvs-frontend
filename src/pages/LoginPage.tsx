@@ -32,7 +32,7 @@ export const LoginPage = () => {
     try {
       const user = await run(() => login(email, password));
       if (user) navigate(redirectTo, { replace: true });
-      else setError("Login failed");
+      else setError("Kunde inte logga in");
     } catch {
       // useFetch already sets friendly messages via global error
     } finally {

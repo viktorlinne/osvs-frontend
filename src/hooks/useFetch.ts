@@ -41,7 +41,7 @@ export default function useFetch<T>() {
         } else if (e instanceof Error) {
           setError(e.message ?? String(e));
         } else {
-          setError(String(e ?? "Request failed"));
+          setError(String(e ?? "Begäran misslyckades"));
         }
         throw e;
       } finally {

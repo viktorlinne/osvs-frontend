@@ -181,33 +181,15 @@ export async function getPublicUserById(
     officials?: Official[];
     officialHistory?: OfficialHistoryItem[];
   };
-  const allergiesFromPayload = parseAllergies(payload?.allergies);
-  const allergiesFromUser = parseAllergies(
-    (payload?.user as { allergies?: unknown } | null | undefined)?.allergies,
-  );
-  const allergies =
-    allergiesFromPayload.length > 0
-      ? allergiesFromPayload
-      : Array.isArray(payload?.allergies)
-      ? []
-      : allergiesFromUser;
-
-  const historyFromPayload = parseOfficialHistory(payload?.officialHistory);
-  const historyFromUser = parseOfficialHistory(
-    (payload?.user as { officialHistory?: unknown } | null | undefined)
-      ?.officialHistory,
-  );
-  const officialHistory =
-    historyFromPayload.length > 0
-      ? historyFromPayload
-      : Array.isArray(payload?.officialHistory)
-        ? []
-        : historyFromUser;
+  const allergies = Array.isArray(payload?.allergies)
+    ? parseAllergies(payload.allergies)
+    : [];
+  const officialHistory = Array.isArray(payload?.officialHistory)
+    ? parseOfficialHistory(payload.officialHistory)
+    : [];
 
   return {
-    user: payload?.user
-      ? ({ ...payload.user, allergies, officialHistory } as PublicUser)
-      : null,
+    user: payload?.user ?? null,
     achievements: Array.isArray(payload?.achievements)
       ? payload.achievements
       : [],

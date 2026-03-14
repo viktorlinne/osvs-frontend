@@ -143,7 +143,7 @@ export async function fetchData<T = unknown>(
       const message =
         (serverMsg as string) ??
         STATUS_MESSAGES[status] ??
-        `Request failed with status ${status}`;
+        `Begäran misslyckades (status ${status})`;
       const apiErr: ApiError = {
         status,
         code,

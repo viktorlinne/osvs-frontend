@@ -29,7 +29,10 @@ import {
 import type { UserLodgeResponse } from "../services/users";
 import type {
   Achievement,
+  Allergy,
   Lodge,
+  Official,
+  OfficialHistoryItem,
   PublicUser,
   Role,
   UpdateUserForm,
@@ -103,6 +106,11 @@ export const MemberDetail = () => {
   const [available, setAvailable] = useState<Achievement[]>([]);
   const [lodges, setLodges] = useState<Lodge[]>([]);
   const [achievements, setAchievements] = useState<Achievement[]>([]);
+  const [memberAllergies, setLoadedMemberAllergies] = useState<Allergy[]>([]);
+  const [memberOfficials, setLoadedMemberOfficials] = useState<Official[]>([]);
+  const [memberOfficialHistory, setMemberOfficialHistory] = useState<
+    OfficialHistoryItem[]
+  >([]);
   const [rolesList, setRolesList] = useState<Role[]>([]);
   const [selectedRoleIds, setSelectedRoleIds] = useState<number[]>([]);
   const [selectedOfficialIds, setSelectedOfficialIds] = useState<
@@ -143,6 +151,15 @@ export const MemberDetail = () => {
     const detail = await getPublicUserById(matrikelnummer);
     setAchievements(
       Array.isArray(detail.achievements) ? detail.achievements : [],
+    );
+    setLoadedMemberAllergies(
+      Array.isArray(detail.allergies) ? detail.allergies : [],
+    );
+    setLoadedMemberOfficials(
+      Array.isArray(detail.officials) ? detail.officials : [],
+    );
+    setMemberOfficialHistory(
+      Array.isArray(detail.officialHistory) ? detail.officialHistory : [],
     );
 
     let userObj: PublicUser | null = detail.user
@@ -443,6 +460,8 @@ export const MemberDetail = () => {
 
           <OfficialsManager
             user={member}
+            assignedOfficials={memberOfficials}
+            historyEntries={memberOfficialHistory}
             isEditRoute={isEditRoute}
             selectedIds={selectedOfficialIds ?? undefined}
             setSelectedIds={setSelectedOfficialIds}
@@ -450,6 +469,7 @@ export const MemberDetail = () => {
 
           <AllergiesManager
             user={member}
+            assignedAllergies={memberAllergies}
             isEditRoute={isEditRoute}
             selectedIds={selectedAllergyIds ?? undefined}
             setSelectedIds={setSelectedAllergyIds}

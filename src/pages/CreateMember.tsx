@@ -15,7 +15,7 @@ import { setMemberAllergies } from "../services/allergies";
 import { registerMember } from "../services/auth";
 import { listLodges } from "../services/lodges";
 import type { Lodge, RegisterForm } from "../types";
-import { applyApiFieldErrors } from "../utils/apiErrors";
+import { applyApiFieldErrors, getApiErrorMessage } from "../utils/apiErrors";
 import {
   registerFormRules,
   validateImageFile,
@@ -76,7 +76,10 @@ export const CreateMember = () => {
       if (userId === null) {
         const picErr = validateImageFile(picture, { required: true });
         if (picErr) {
-          setError(picErr);
+          setFieldError("picture", {
+            type: "manual",
+            message: picErr,
+          });
           return;
         }
 
@@ -132,11 +135,7 @@ export const CreateMember = () => {
         return;
       }
 
-      if (error instanceof Error) {
-        setError(error.message ?? "Kunde inte skapa användare");
-      } else {
-        setError(String(error ?? "Kunde inte skapa användare"));
-      }
+      setError(getApiErrorMessage(error) ?? "Kunde inte skapa användare");
     } finally {
       setLoading(false);
     }
@@ -145,11 +144,7 @@ export const CreateMember = () => {
   useEffect(() => {
     runLodges(() => listLodges())
       .then((data) => {
-        if (Array.isArray(data)) setLodges(data as Lodge[]);
-        else if (data && typeof data === "object") {
-          const lodgesField = (data as Record<string, unknown>)["lodges"];
-          if (Array.isArray(lodgesField)) setLodges(lodgesField as Lodge[]);
-        }
+        setLodges(data);
       })
       .catch(() => {
         // ignore; validation will catch missing lodge
@@ -296,10 +291,15 @@ export const CreateMember = () => {
           <input
             type="file"
             accept="image/*"
-            onChange={(e) => setPicture(e.target.files?.[0] ?? null)}
+            onChange={(e) => {
+              clearErrors("picture");
+              setPicture(e.target.files?.[0] ?? null);
+            }}
             className={inputClass}
           />
-          {pictureError ? (
+          {errors.picture?.message ? (
+            <p className={errorTextClass}>{errors.picture.message}</p>
+          ) : pictureError ? (
             <p className={errorTextClass}>{pictureError}</p>
           ) : null}
         </label>

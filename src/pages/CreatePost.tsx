@@ -59,9 +59,7 @@ export const CreatePost = () => {
     listLodges()
       .then((res) => {
         if (!mounted) return;
-        if (Array.isArray(res)) {
-          setLodges(res);
-        }
+        setLodges(res);
       })
       .catch(() => {
         if (mounted) {

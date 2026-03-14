@@ -54,11 +54,15 @@ function formatDate(value: string) {
 
 export const OfficialsManager = ({
   user,
+  assignedOfficials,
+  historyEntries,
   isEditRoute,
   selectedIds,
   setSelectedIds,
 }: {
   user?: PublicUser | null;
+  assignedOfficials?: unknown;
+  historyEntries?: unknown;
   isEditRoute?: boolean;
   selectedIds?: number[] | null;
   setSelectedIds?: (ids: number[] | null) => void;
@@ -83,7 +87,7 @@ export const OfficialsManager = ({
   }, []);
 
   const userOfficials = normalizeOfficialsField(
-    (user as UserWithOfficials | undefined)?.officials,
+    assignedOfficials ?? (user as UserWithOfficials | undefined)?.officials,
   );
   const effectiveSelected =
     selectedIds !== undefined ? selectedIds : localSelected ?? userOfficials;
@@ -91,9 +95,9 @@ export const OfficialsManager = ({
   const officialHistory = useMemo(
     () =>
       normalizeOfficialHistoryField(
-        (user as UserWithOfficials | undefined)?.officialHistory,
+        historyEntries ?? (user as UserWithOfficials | undefined)?.officialHistory,
       ),
-    [user],
+    [historyEntries, user],
   );
 
   function toggleOfficial(officialId: number, checked: boolean) {

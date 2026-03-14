@@ -32,7 +32,7 @@ function mergeAuthResponse(res: unknown): AuthUser | null {
   if (res == null) return null;
   if (typeof res !== "object") return null;
   const rec = res as Record<string, unknown>;
-  // backend returns { user: PublicUser, roles: string[] } or a PublicUser directly
+  // backend returns { user: PublicUser, roles, achievements, allergies, officials, officialHistory }
   const rawUser = (rec.user ?? rec) as Record<string, unknown> | null;
   if (!rawUser) return null;
 
@@ -46,12 +46,7 @@ function mergeAuthResponse(res: unknown): AuthUser | null {
   }
 
   const result = { ...rawUser, roles } as AuthUser;
-  // Attach achievements if provided either at top-level or on the user object
-  const rawAchievements = Array.isArray(rec.achievements)
-    ? rec.achievements
-    : Array.isArray(rawUser.achievements)
-    ? (rawUser.achievements as unknown[])
-    : undefined;
+  const rawAchievements = Array.isArray(rec.achievements) ? rec.achievements : undefined;
   if (result && Array.isArray(rawAchievements)) {
     result.achievements = rawAchievements
       .map((a) => a as Record<string, unknown>)
@@ -64,11 +59,7 @@ function mergeAuthResponse(res: unknown): AuthUser | null {
       .filter((a) => Number.isFinite(a.id));
   }
 
-  const rawAllergies = Array.isArray(rec.allergies)
-    ? rec.allergies
-    : Array.isArray(rawUser.allergies)
-    ? (rawUser.allergies as unknown[])
-    : undefined;
+  const rawAllergies = Array.isArray(rec.allergies) ? rec.allergies : undefined;
   const parsedAllergies = parseAllergies(rawAllergies);
   if (parsedAllergies.length > 0) {
     result.allergies = parsedAllergies;
@@ -76,12 +67,7 @@ function mergeAuthResponse(res: unknown): AuthUser | null {
     result.allergies = [];
   }
 
-  // Attach officials if provided either at top-level or on the user object
-  const rawOfficials = Array.isArray(rec.officials)
-    ? rec.officials
-    : Array.isArray(rawUser.officials)
-    ? (rawUser.officials as unknown[])
-    : undefined;
+  const rawOfficials = Array.isArray(rec.officials) ? rec.officials : undefined;
   if (result && Array.isArray(rawOfficials)) {
     result.officials = rawOfficials
       .map((o) => {
@@ -95,7 +81,7 @@ function mergeAuthResponse(res: unknown): AuthUser | null {
 
   const rawOfficialHistory = Array.isArray(rec.officialHistory)
     ? rec.officialHistory
-    : rawUser.officialHistory;
+    : undefined;
   const parsedOfficialHistory = parseOfficialHistory(rawOfficialHistory);
   if (parsedOfficialHistory.length > 0) {
     result.officialHistory = parsedOfficialHistory;
