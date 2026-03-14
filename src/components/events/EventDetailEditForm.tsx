@@ -1,6 +1,6 @@
-﻿import { Link } from "react-router-dom";
+import { Link } from "react-router-dom";
 import type { Lodge } from "../../types";
-import { Button } from "../ui";
+import { Button, errorTextClass } from "../ui";
 
 export type EventFormState = {
   title: string;
@@ -21,6 +21,9 @@ type Props = {
   onDelete?: () => void | Promise<void>;
   isAdmin: boolean;
   saving: boolean;
+  errors: Record<string, string>;
+  canSubmit: boolean;
+  clearServerField: (field: string) => void;
 };
 
 export function EventDetailEditForm({
@@ -33,6 +36,9 @@ export function EventDetailEditForm({
   onDelete,
   isAdmin,
   saving,
+  errors,
+  canSubmit,
+  clearServerField,
 }: Props) {
   const foodPreview =
     Number.isFinite(Number(form.price)) && Number(form.price) > 0 ? 1 : 0;
@@ -47,9 +53,13 @@ export function EventDetailEditForm({
           id="title"
           name="title"
           value={form.title}
-          onChange={(e) => setForm({ ...form, title: e.target.value })}
+          onChange={(e) => {
+            clearServerField("title");
+            setForm({ ...form, title: e.target.value });
+          }}
           className="ui-input"
         />
+        {errors.title ? <p className={errorTextClass}>{errors.title}</p> : null}
       </div>
 
       <div>
@@ -66,6 +76,8 @@ export function EventDetailEditForm({
                   checked={linkedIds.includes(l.id)}
                   className="h-4 w-4 rounded border-neutral-300 text-primary-600 focus-visible:ring-primary-600"
                   onChange={(e) => {
+                    clearServerField("lodgeId");
+                    clearServerField("lodgeIds");
                     const checked = e.target.checked;
                     setLinkedIds((prev) =>
                       checked
@@ -91,9 +103,15 @@ export function EventDetailEditForm({
           id="description"
           name="description"
           value={form.description}
-          onChange={(e) => setForm({ ...form, description: e.target.value })}
+          onChange={(e) => {
+            clearServerField("description");
+            setForm({ ...form, description: e.target.value });
+          }}
           className="ui-textarea"
         />
+        {errors.description ? (
+          <p className={errorTextClass}>{errors.description}</p>
+        ) : null}
       </div>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -106,9 +124,15 @@ export function EventDetailEditForm({
             id="startDate"
             name="startDate"
             value={form.startDate}
-            onChange={(e) => setForm({ ...form, startDate: e.target.value })}
+            onChange={(e) => {
+              clearServerField("startDate");
+              setForm({ ...form, startDate: e.target.value });
+            }}
             className="ui-input"
           />
+          {errors.startDate ? (
+            <p className={errorTextClass}>{errors.startDate}</p>
+          ) : null}
         </div>
         <div>
           <label htmlFor="endDate" className="ui-label">
@@ -119,9 +143,15 @@ export function EventDetailEditForm({
             id="endDate"
             name="endDate"
             value={form.endDate}
-            onChange={(e) => setForm({ ...form, endDate: e.target.value })}
+            onChange={(e) => {
+              clearServerField("endDate");
+              setForm({ ...form, endDate: e.target.value });
+            }}
             className="ui-input"
           />
+          {errors.endDate ? (
+            <p className={errorTextClass}>{errors.endDate}</p>
+          ) : null}
         </div>
       </div>
 
@@ -134,9 +164,13 @@ export function EventDetailEditForm({
             id="price"
             name="price"
             value={form.price}
-            onChange={(e) => setForm({ ...form, price: e.target.value })}
+            onChange={(e) => {
+              clearServerField("price");
+              setForm({ ...form, price: e.target.value });
+            }}
             className="ui-input"
           />
+          {errors.price ? <p className={errorTextClass}>{errors.price}</p> : null}
         </div>
         <div>
           <label htmlFor="foodPreview" className="ui-label">
@@ -159,16 +193,21 @@ export function EventDetailEditForm({
             type="checkbox"
             checked={form.lodgeMeeting}
             className="h-4 w-4 rounded border-neutral-300 text-primary-600 focus-visible:ring-primary-600"
-            onChange={(e) =>
-              setForm({ ...form, lodgeMeeting: e.target.checked })
-            }
+            onChange={(e) => {
+              clearServerField("lodgeMeeting");
+              setForm({ ...form, lodgeMeeting: e.target.checked });
+            }}
           />
           Logemöte
         </label>
       </div>
 
       <div className="flex flex-col gap-2 py-2 sm:flex-row">
-        <Button className="ui-btn-primary" onClick={onSave} disabled={saving}>
+        <Button
+          className="ui-btn-primary"
+          onClick={onSave}
+          disabled={saving || !canSubmit}
+        >
           {saving ? "Sparar..." : "Spara"}
         </Button>
         {isAdmin && onDelete && (

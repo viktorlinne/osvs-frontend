@@ -129,6 +129,10 @@ export async function login({
   return fetchCurrentAuthUser();
 }
 
+export async function registerMember(payload: FormData) {
+  return fetchData(api.post("/auth/register", payload));
+}
+
 export async function restoreSession(): Promise<AuthState> {
   if (restoreSessionPromise) {
     return restoreSessionPromise;
@@ -162,4 +166,4 @@ export async function me(): Promise<AuthState> {
   return fetchCurrentAuthUser();
 }
 
-export default { heartbeat, login, logout, me, restoreSession };
+export default { heartbeat, login, logout, me, registerMember, restoreSession };

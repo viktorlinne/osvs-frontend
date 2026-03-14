@@ -15,6 +15,11 @@ import useFetch from "../hooks/useFetch";
 import { normalizeLodgeIds } from "../components/lodgeSelectionUtils";
 import { deletePost, getPost, listLodges, updatePost } from "../services";
 import type { Lodge, Post, UpdatePostForm } from "../types";
+import { applyApiFieldErrors, getApiErrorMessage } from "../utils/apiErrors";
+import {
+  postFormRules,
+  validateOptionalPostImage,
+} from "../utils/formValidation";
 
 export const PostDetail = () => {
   const { user } = useAuth();
@@ -42,10 +47,13 @@ export const PostDetail = () => {
     handleSubmit,
     setError: setFieldError,
     reset,
+    trigger,
+    clearErrors,
     setValue,
     control,
-    formState: { errors },
+    formState: { errors, isValid },
   } = useForm<UpdatePostForm>({
+    mode: "onChange",
     defaultValues: {
       title: "",
       description: "",
@@ -54,6 +62,7 @@ export const PostDetail = () => {
     },
   });
   const watchedLodges = useWatch({ control, name: "lodgeIds" }) ?? [];
+  const pictureError = validateOptionalPostImage(picture);
 
   useEffect(() => {
     register("lodgeIds");
@@ -100,6 +109,7 @@ export const PostDetail = () => {
             lodgeIds: (normalized.lodges ?? []).map((l) => String(l.id)),
             publicum: Boolean(normalized.publicum),
           });
+          void trigger();
         }
       } catch {
         /* handled by useFetch */
@@ -109,10 +119,12 @@ export const PostDetail = () => {
     return () => {
       mounted = false;
     };
-  }, [id, clearGlobalError, setGlobalError, run, reset]);
+  }, [id, clearGlobalError, setGlobalError, run, reset, trigger]);
 
   async function onSubmit(values: UpdatePostForm) {
     clearGlobalError();
+    clearErrors();
+    if (pictureError) return;
 
     const fd = new FormData();
     if (values.title && String(values.title).trim())
@@ -138,24 +150,14 @@ export const PostDetail = () => {
         /* ignore - view will reload fallback */
       }
       navigate(`/posts/${id}`);
-    } catch (err: unknown) {
-      const maybe = err as { details?: unknown } | undefined;
-      const details = maybe?.details;
-      if (details && typeof details === "object") {
-        const missing = (details as Record<string, unknown>).missing as
-          | Array<{ field: string; message?: string }>
-          | undefined;
-        if (Array.isArray(missing)) {
-          missing.forEach((m) => {
-            if (m && typeof m.field === "string") {
-              setFieldError(m.field as keyof UpdatePostForm, {
-                type: "server",
-                message: m.message ?? "Ogiltigt värde",
-              });
-            }
-          });
-        }
+    } catch (error: unknown) {
+      if (applyApiFieldErrors(error, setFieldError)) {
+        return;
       }
+
+      setGlobalError(
+        getApiErrorMessage(error) ?? "Misslyckades att spara inlägget",
+      );
     }
   }
 
@@ -213,7 +215,12 @@ export const PostDetail = () => {
             <label htmlFor="title" className={labelClass}>
               Titel
             </label>
-            <input id="title" {...register("title")} className={inputClass} />
+            <input
+              id="title"
+              {...register("title", postFormRules.title)}
+              className={inputClass}
+            />
+            {errors.title && <p className={errorTextClass}>{errors.title.message}</p>}
           </div>
 
           <div className="mb-4">
@@ -222,7 +229,7 @@ export const PostDetail = () => {
             </label>
             <textarea
               id="description"
-              {...register("description")}
+              {...register("description", postFormRules.description)}
               rows={6}
               className={textareaClass}
             />
@@ -245,6 +252,7 @@ export const PostDetail = () => {
                 setPicture(e.target.files ? e.target.files[0] : null)
               }
             />
+            {pictureError ? <p className={errorTextClass}>{pictureError}</p> : null}
           </div>
 
           <div className="mb-4 flex items-center gap-3">
@@ -265,7 +273,9 @@ export const PostDetail = () => {
           <LodgeSelection
             lodges={lodges}
             selectedIds={watchedLodges}
-            onChange={(ids) => setValue("lodgeIds", ids, { shouldDirty: true })}
+            onChange={(ids) =>
+              setValue("lodgeIds", ids, { shouldDirty: true, shouldValidate: true })
+            }
             disabled={submitting || lodgesLoading}
             loading={lodgesLoading}
             label="Koppla loger"
@@ -276,7 +286,9 @@ export const PostDetail = () => {
             <Button
               type="submit"
               className="ui-btn-primary"
-              disabled={submitting}
+              disabled={
+                submitting || lodgesLoading || !isValid || Boolean(pictureError)
+              }
             >
               {submitting ? "Sparar..." : "Spara"}
             </Button>

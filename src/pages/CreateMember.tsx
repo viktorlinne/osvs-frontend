@@ -1,4 +1,4 @@
-﻿import { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import type { FieldError } from "react-hook-form";
@@ -12,9 +12,14 @@ import {
 import useError from "../context/useError";
 import useFetch from "../hooks/useFetch";
 import { setMemberAllergies } from "../services/allergies";
-import api, { fetchData } from "../services/api";
+import { registerMember } from "../services/auth";
 import { listLodges } from "../services/lodges";
 import type { Lodge, RegisterForm } from "../types";
+import { applyApiFieldErrors } from "../utils/apiErrors";
+import {
+  registerFormRules,
+  validateImageFile,
+} from "../utils/formValidation";
 
 type RegisterResponse = {
   user?: { matrikelnummer?: unknown };
@@ -35,9 +40,11 @@ export const CreateMember = () => {
   const {
     register,
     handleSubmit,
+    clearErrors,
     setError: setFieldError,
-    formState: { errors },
+    formState: { errors, isValid },
   } = useForm<RegisterForm>({
+    mode: "onChange",
     defaultValues: {
       email: "",
       password: "",
@@ -55,23 +62,19 @@ export const CreateMember = () => {
     },
   });
 
-  function validatePicture(): string | null {
-    if (!picture) return "Profilbild är obligatorisk";
-    if (picture.size > 5 * 1024 * 1024)
-      return "Profilbilden måste vara högst 5MB";
-    const allowed = ["image/jpeg", "image/png", "image/gif", "image/webp"];
-    if (!allowed.includes(picture.type))
-      return "Profilbilden måste vara JPEG, PNG, GIF eller WebP";
-    return null;
-  }
+  const pictureError =
+    createdUserId === null
+      ? validateImageFile(picture, { required: true })
+      : null;
 
   async function onSubmit(values: RegisterForm) {
     setError(null);
+    clearErrors();
     setLoading(true);
     try {
       let userId = createdUserId;
       if (userId === null) {
-        const picErr = validatePicture();
+        const picErr = validateImageFile(picture, { required: true });
         if (picErr) {
           setError(picErr);
           return;
@@ -84,7 +87,9 @@ export const CreateMember = () => {
         fd.append("lastname", String(values.lastname ?? "").trim());
         fd.append("dateOfBirth", String(values.dateOfBirth ?? ""));
         if (values.work) fd.append("work", String(values.work));
-        if (values.homeNumber) fd.append("homeNumber", String(values.homeNumber));
+        if (values.homeNumber) {
+          fd.append("homeNumber", String(values.homeNumber).trim());
+        }
         fd.append("mobile", String(values.mobile ?? "").trim());
         fd.append("city", String(values.city ?? "").trim());
         fd.append("address", String(values.address ?? "").trim());
@@ -94,7 +99,7 @@ export const CreateMember = () => {
         if (picture) fd.append("picture", picture);
 
         const registerResponse = (await runSubmit(() =>
-          fetchData(api.post("/auth/register", fd)),
+          registerMember(fd),
         )) as RegisterResponse;
 
         const parsedId = Number(registerResponse?.user?.matrikelnummer);
@@ -111,40 +116,27 @@ export const CreateMember = () => {
 
       try {
         await runSubmit(() =>
-          setMemberAllergies(userId, Array.isArray(selectedAllergyIds) ? selectedAllergyIds : []),
+          setMemberAllergies(
+            userId,
+            Array.isArray(selectedAllergyIds) ? selectedAllergyIds : [],
+          ),
         );
       } catch {
-        setError(
-          `Användare skapad (ID ${userId}) men allergier kunde inte sparas.`,
-        );
+        setError(`Användare skapad (ID ${userId}) men allergier kunde inte sparas.`);
         return;
       }
 
       navigate("/members");
-    } catch (e: unknown) {
-      const err = e as { status?: number; details?: unknown };
-      if (
-        err?.status === 400 &&
-        err.details &&
-        typeof err.details === "object"
-      ) {
-        const rec = err.details as Record<string, unknown>;
-        const missing = Array.isArray(rec.missing) ? rec.missing : undefined;
-        if (missing) {
-          missing.forEach((p: unknown) => {
-            if (typeof p === "string") {
-              setFieldError(p as keyof RegisterForm, {
-                type: "server",
-                message: "Ogiltigt värde",
-              });
-            }
-          });
-          return;
-        }
+    } catch (error: unknown) {
+      if (applyApiFieldErrors(error, setFieldError)) {
+        return;
       }
 
-      if (e instanceof Error) setError(e.message ?? "Kunde inte skapa användare");
-      else setError(String(e ?? "Kunde inte skapa användare"));
+      if (error instanceof Error) {
+        setError(error.message ?? "Kunde inte skapa användare");
+      } else {
+        setError(String(error ?? "Kunde inte skapa användare"));
+      }
     } finally {
       setLoading(false);
     }
@@ -176,24 +168,28 @@ export const CreateMember = () => {
       {Object.keys(errors).length > 0 && (
         <div className={`${errorTextClass} mb-2`}>
           <ul className="list-disc pl-5">
-            {(Object.keys(errors) as Array<keyof RegisterForm>).map((k) => {
-              const fieldErr = errors[k] as FieldError | undefined;
+            {(Object.keys(errors) as Array<keyof RegisterForm>).map((key) => {
+              const fieldErr = errors[key] as FieldError | undefined;
               const msg = fieldErr?.message;
               return msg ? (
-                <li key={String(k)}>{`${String(k)}: ${msg}`}</li>
+                <li key={String(key)}>{`${String(key)}: ${msg}`}</li>
               ) : null;
             })}
           </ul>
         </div>
       )}
 
-      <form className="ui-card space-y-3">
-        <input placeholder="Email" {...register("email")} className={inputClass} />
+      <form onSubmit={handleSubmit(onSubmit)} className="ui-card space-y-3">
+        <input
+          placeholder="Email"
+          {...register("email", registerFormRules.email)}
+          className={inputClass}
+        />
 
         <input
           placeholder="Lösenord"
           type="password"
-          {...register("password")}
+          {...register("password", registerFormRules.password)}
           className={inputClass}
           autoComplete="off"
         />
@@ -201,20 +197,24 @@ export const CreateMember = () => {
         <input
           placeholder="Förnamn"
           type="text"
-          {...register("firstname")}
+          {...register("firstname", registerFormRules.firstname)}
           className={inputClass}
         />
 
         <input
           placeholder="Efternamn"
           type="text"
-          {...register("lastname")}
+          {...register("lastname", registerFormRules.lastname)}
           className={inputClass}
         />
 
         <label className="ui-label">
           Födelsedatum
-          <input type="date" {...register("dateOfBirth")} className={inputClass} />
+          <input
+            type="date"
+            {...register("dateOfBirth", registerFormRules.dateOfBirth)}
+            className={inputClass}
+          />
         </label>
 
         <input
@@ -227,30 +227,38 @@ export const CreateMember = () => {
         <input
           placeholder="Mobilnummer"
           type="text"
-          {...register("mobile")}
+          inputMode="tel"
+          {...register("mobile", registerFormRules.mobile)}
           className={inputClass}
         />
 
         <input
           placeholder="Hemnummer"
           type="text"
-          {...register("homeNumber")}
+          inputMode="tel"
+          {...register("homeNumber", registerFormRules.homeNumber)}
           className={inputClass}
         />
 
-        <input placeholder="Stad" type="text" {...register("city")} className={inputClass} />
+        <input
+          placeholder="Stad"
+          type="text"
+          {...register("city", registerFormRules.city)}
+          className={inputClass}
+        />
 
         <input
           placeholder="Adress"
           type="text"
-          {...register("address")}
+          {...register("address", registerFormRules.address)}
           className={inputClass}
         />
 
         <input
           placeholder="Postnummer"
           type="text"
-          {...register("zipcode")}
+          inputMode="numeric"
+          {...register("zipcode", registerFormRules.zipcode)}
           className={inputClass}
         />
 
@@ -270,13 +278,13 @@ export const CreateMember = () => {
         <label className="ui-label">
           Loge
           {lodgesLoading ? (
-            <div className="py-2 text-neutral-600">Laddar logerâ€¦</div>
+            <div className="py-2 text-neutral-600">Laddar loger…</div>
           ) : (
             <select {...register("lodgeId")} className={selectClass}>
               <option value="">Välj loge...</option>
-              {lodges.map((l) => (
-                <option key={l.id} value={String(l.id)}>
-                  {l.name}
+              {lodges.map((lodge) => (
+                <option key={lodge.id} value={String(lodge.id)}>
+                  {lodge.name}
                 </option>
               ))}
             </select>
@@ -291,13 +299,18 @@ export const CreateMember = () => {
             onChange={(e) => setPicture(e.target.files?.[0] ?? null)}
             className={inputClass}
           />
+          {pictureError ? (
+            <p className={errorTextClass}>{pictureError}</p>
+          ) : null}
         </label>
 
         <div className="flex flex-col gap-2 py-4 sm:flex-row">
           <button
-            type="button"
-            onClick={handleSubmit(onSubmit)}
-            disabled={loading}
+            type="submit"
+            disabled={
+              loading ||
+              (createdUserId === null && (!isValid || Boolean(pictureError)))
+            }
             className="ui-btn ui-btn-primary"
           >
             {loading
@@ -306,7 +319,7 @@ export const CreateMember = () => {
                 : "Skapar..."
               : createdUserId !== null
                 ? "Spara allergier"
-                : "Skapa användare"}
+                : "Skapa"}
           </button>
         </div>
       </form>

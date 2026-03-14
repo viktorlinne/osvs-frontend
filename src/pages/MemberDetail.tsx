@@ -34,10 +34,9 @@ import type {
   Role,
   UpdateUserForm,
 } from "../types";
-import {
-  extractMissingFields,
-  toUserProfileUpdatePayload,
-} from "../utils/userProfileForm";
+import { toUserProfileUpdatePayload } from "../utils/userProfileForm";
+import { applyApiFieldErrors } from "../utils/apiErrors";
+import { validateImageFile } from "../utils/formValidation";
 function mapRolesResponseToList(value: unknown): Role[] {
   const raw = value as { roles?: unknown } | null | undefined;
   const items = Array.isArray(value)
@@ -117,9 +116,12 @@ export const MemberDetail = () => {
     register,
     handleSubmit,
     reset,
+    trigger,
+    clearErrors,
     setError: setFieldError,
-    formState: { errors },
+    formState: { errors, isValid },
   } = useForm<UpdateUserForm>({
+    mode: "onChange",
     defaultValues: {
       firstname: "",
       lastname: "",
@@ -244,7 +246,8 @@ export const MemberDetail = () => {
       accommodationAvailable: member.accommodationAvailable ?? null,
     });
     setPictureFile(null);
-  }, [member, reset]);
+    void trigger();
+  }, [member, reset, trigger]);
 
   useEffect(() => {
     if (!pictureFile) return;
@@ -255,8 +258,11 @@ export const MemberDetail = () => {
     };
   }, [pictureFile]);
 
+  const pictureError = validateImageFile(pictureFile);
+
   const handleMemberSave = handleSubmit(async (values) => {
     clearGlobalError();
+    clearErrors();
     setSaving(true);
 
     try {
@@ -324,14 +330,7 @@ export const MemberDetail = () => {
       await run(loadMember);
       navigate(`/members/${matrikelnummer}`, { replace: true });
     } catch (error: unknown) {
-      const missing = extractMissingFields(error);
-      if (missing) {
-        missing.forEach((field) => {
-          setFieldError(field as keyof UpdateUserForm, {
-            type: "server",
-            message: "Ogiltigt värde",
-          });
-        });
+      if (applyApiFieldErrors(error, setFieldError)) {
         return;
       }
 
@@ -462,12 +461,16 @@ export const MemberDetail = () => {
             errors={errors}
             isEditRoute={isEditRoute}
             setPictureFile={setPictureFile}
+            pictureError={pictureError}
             saving={saving}
           />
 
           {isEditRoute ? (
             <div className="flex flex-col gap-2 py-4 sm:flex-row">
-              <Button type="submit" disabled={saving}>
+              <Button
+                type="submit"
+                disabled={saving || !isValid || Boolean(pictureError)}
+              >
                 {saving ? "Sparar..." : "Spara"}
               </Button>
               <Button className="ui-btn-secondary">

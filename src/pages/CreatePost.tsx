@@ -15,6 +15,11 @@ import useFetch from "../hooks/useFetch";
 import { normalizeLodgeIds } from "../components/lodgeSelectionUtils";
 import { createPost, listLodges } from "../services";
 import type { CreatePostForm, Lodge } from "../types";
+import { applyApiFieldErrors, getApiErrorMessage } from "../utils/apiErrors";
+import {
+  postFormRules,
+  validateOptionalPostImage,
+} from "../utils/formValidation";
 
 export const CreatePost = () => {
   const { clearError: clearGlobalError, setError: setGlobalError } = useError();
@@ -27,19 +32,23 @@ export const CreatePost = () => {
   const {
     register,
     handleSubmit,
-    formState: { errors },
+    clearErrors,
+    formState: { errors, isValid },
     setError: setFieldError,
     setValue,
     control,
   } = useForm<CreatePostForm>({
+    mode: "onChange",
     defaultValues: {
       title: "",
       description: "",
+      picture: "",
       lodgeIds: [],
       publicum: false,
     },
   });
   const watchedLodges = useWatch({ control, name: "lodgeIds" }) ?? [];
+  const pictureError = validateOptionalPostImage(picture, { required: true });
 
   useEffect(() => {
     register("lodgeIds");
@@ -69,6 +78,16 @@ export const CreatePost = () => {
 
   async function onSubmit(values: CreatePostForm) {
     clearGlobalError();
+    clearErrors();
+    if (pictureError) {
+      setFieldError("picture", {
+        type: "manual",
+        message: pictureError,
+      });
+      return;
+    }
+    if (!picture) return;
+
     const fd = new FormData();
     fd.append("title", values.title.trim());
     fd.append("description", String(values.description ?? "").trim());
@@ -79,7 +98,7 @@ export const CreatePost = () => {
     } else {
       selectedLodges.forEach((id) => fd.append("lodgeIds", id));
     }
-    if (picture) fd.append("picture", picture);
+    fd.append("picture", picture);
 
     try {
       const res = await run(() =>
@@ -88,27 +107,14 @@ export const CreatePost = () => {
       const id = res?.id ?? null;
       if (id) navigate(`/posts/${id}`);
       else navigate("/posts");
-    } catch (e: unknown) {
-      const err = e as { status?: number; details?: unknown };
-      if (
-        err?.status === 400 &&
-        err.details &&
-        typeof err.details === "object"
-      ) {
-        const rec = err.details as Record<string, unknown>;
-        const missing = Array.isArray(rec.missing) ? rec.missing : undefined;
-        if (missing) {
-          missing.forEach((p: unknown) => {
-            if (typeof p === "string") {
-              setFieldError(p as unknown as keyof CreatePostForm, {
-                type: "server",
-                message: "Ogiltigt värde",
-              });
-            }
-          });
-          return;
-        }
+    } catch (error: unknown) {
+      if (applyApiFieldErrors(error, setFieldError)) {
+        return;
       }
+
+      setGlobalError(
+        getApiErrorMessage(error) ?? "Misslyckades att skapa inlägget",
+      );
     }
   }
 
@@ -123,7 +129,11 @@ export const CreatePost = () => {
           <label htmlFor="title" className={labelClass}>
             Titel
           </label>
-          <input id="title" {...register("title")} className={inputClass} />
+          <input
+            id="title"
+            {...register("title", postFormRules.title)}
+            className={inputClass}
+          />
           {errors.title && (
             <div className={errorTextClass}>{errors.title?.message}</div>
           )}
@@ -135,7 +145,7 @@ export const CreatePost = () => {
           </label>
           <textarea
             id="description"
-            {...register("description")}
+            {...register("description", postFormRules.description)}
             rows={6}
             className={textareaClass}
           />
@@ -146,17 +156,23 @@ export const CreatePost = () => {
 
         <div className="mb-4">
           <label htmlFor="picture" className={labelClass}>
-            Bild (valfritt)
+            Bild
           </label>
           <input
             id="picture"
             type="file"
             accept="image/*"
             className={inputClass}
-            onChange={(e) =>
-              setPicture(e.target.files ? e.target.files[0] : null)
-            }
+            onChange={(e) => {
+              clearErrors("picture");
+              setPicture(e.target.files ? e.target.files[0] : null);
+            }}
           />
+          {errors.picture?.message ? (
+            <div className={errorTextClass}>{errors.picture.message}</div>
+          ) : pictureError ? (
+            <div className={errorTextClass}>{pictureError}</div>
+          ) : null}
         </div>
 
         <div className="mb-4 flex items-center gap-3">
@@ -177,7 +193,9 @@ export const CreatePost = () => {
         <LodgeSelection
           lodges={lodges}
           selectedIds={watchedLodges}
-          onChange={(ids) => setValue("lodgeIds", ids, { shouldDirty: true })}
+          onChange={(ids) =>
+            setValue("lodgeIds", ids, { shouldDirty: true, shouldValidate: true })
+          }
           disabled={loading || lodgesLoading}
           loading={lodgesLoading}
           label="Koppla loger"
@@ -185,7 +203,13 @@ export const CreatePost = () => {
         />
 
         <div className="flex flex-col gap-2 py-2 sm:flex-row">
-          <Button type="submit" className="ui-btn-primary" disabled={loading}>
+          <Button
+            type="submit"
+            className="ui-btn-primary"
+            disabled={
+              loading || lodgesLoading || !isValid || Boolean(pictureError)
+            }
+          >
             Skapa
           </Button>
           <Button className="ui-btn ui-btn-secondary">

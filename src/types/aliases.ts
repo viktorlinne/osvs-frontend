@@ -32,5 +32,6 @@ export type ApiError = {
   message?: string;
   code?: string;
   status?: number;
-  details?: unknown;
+  details?: ApiErrorDetails | unknown;
 };
+import type { ApiErrorDetails } from "./api";

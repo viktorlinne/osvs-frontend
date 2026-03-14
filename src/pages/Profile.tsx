@@ -18,10 +18,9 @@ import { setMemberOfficials } from "../services/officials";
 import lodgesService from "../services/lodges";
 import { setUserLodge, updateMe, uploadMyPicture } from "../services/users";
 import type { Lodge, UpdateUserForm } from "../types";
-import {
-  extractMissingFields,
-  toUserProfileUpdatePayload,
-} from "../utils/userProfileForm";
+import { applyApiFieldErrors } from "../utils/apiErrors";
+import { validateImageFile } from "../utils/formValidation";
+import { toUserProfileUpdatePayload } from "../utils/userProfileForm";
 
 export const Profile = () => {
   const { user, refresh } = useAuth();
@@ -65,9 +64,12 @@ export const Profile = () => {
     register,
     handleSubmit,
     reset,
+    trigger,
+    clearErrors,
     setError: setFieldError,
-    formState: { errors },
+    formState: { errors, isValid },
   } = useForm<UpdateUserForm>({
+    mode: "onChange",
     defaultValues: {
       firstname: user?.firstname ?? "",
       lastname: user?.lastname ?? "",
@@ -97,7 +99,8 @@ export const Profile = () => {
       zipcode: user?.zipcode ?? "",
       accommodationAvailable: user?.accommodationAvailable ?? null,
     });
-  }, [reset, user]);
+    void trigger();
+  }, [reset, trigger, user]);
 
   useEffect(() => {
     let mounted = true;
@@ -121,8 +124,11 @@ export const Profile = () => {
     setSelectedLid(lodge?.id ? Number(lodge.id) : null);
   }, [lodge]);
 
+  const pictureError = validateImageFile(pictureFile);
+
   const handleProfileSave = handleSubmit(async (values) => {
     clearGlobalError();
+    clearErrors();
     setSaving(true);
 
     try {
@@ -185,14 +191,7 @@ export const Profile = () => {
       await refresh();
       navigate("/profile", { replace: true });
     } catch (error: unknown) {
-      const missing = extractMissingFields(error);
-      if (missing) {
-        missing.forEach((field) => {
-          setFieldError(field as keyof UpdateUserForm, {
-            type: "server",
-            message: "Ogiltigt värde",
-          });
-        });
+      if (applyApiFieldErrors(error, setFieldError)) {
         return;
       }
 
@@ -292,12 +291,16 @@ export const Profile = () => {
           errors={errors}
           isEditRoute={isEditRoute}
           setPictureFile={setPictureFile}
+          pictureError={pictureError}
           saving={saving}
         />
 
         {isEditRoute ? (
           <div className="flex flex-col gap-2 py-4 sm:flex-row">
-            <Button type="submit" disabled={saving}>
+            <Button
+              type="submit"
+              disabled={saving || !isValid || Boolean(pictureError)}
+            >
               {saving ? "Sparar..." : "Spara"}
             </Button>
             <Button className="ui-btn-secondary" disabled={saving}>

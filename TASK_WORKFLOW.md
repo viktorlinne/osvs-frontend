@@ -1,130 +1,147 @@
-# Frontend Architecture (osvs-frontend)
+# Frontend Task Workflow (Codex / Agent Operating Procedure)
 
-## Overview
+This is the standard procedure for implementing features safely and consistently in this frontend repo.
 
-This is a React + TypeScript Single Page Application built with Vite.
+## Standard Workflow (Always Follow)
 
-Key characteristics:
+### Step 0 - Identify Impact
 
-- SPA routing via React Router (data router / `createBrowserRouter`)
-- Auth handled via `AuthProvider` context and route guarding
-- Global error banner handled via `ErrorProvider` context
-- No Redux/Zustand/React Query; state is primarily local with hooks
-- Forms use `react-hook-form`
-- API layer uses a shared Axios instance with cookie-based auth and refresh handling
+Before coding:
 
----
+- Identify affected pages in `src/pages/*`
+- Identify affected services in `src/services/*`
+- Confirm whether routing changes are needed in `src/Router.tsx`
+- Confirm whether auth / roles apply (`AuthGuard` and existing role-gating patterns)
+- Confirm whether backend `message` / `details.fields` handling affects the UI
 
-## Bootstrapping
+Output:
 
-### `src/main.tsx`
-
-- Creates the root React tree
-- Wraps the router with:
-  - `ErrorProvider` (global error banner + reporting)
-  - `AuthProvider` (auth state + session bootstrap)
+- Short plan:
+  - files to change
+  - API endpoints involved
+  - UI states impacted
+  - verification steps
 
 ---
 
-## Layout & Navigation
+### Step 1 - API First (Frontend Perspective)
 
-### `src/components/layout/AppLayout.tsx`
+If an endpoint or payload changes:
 
-- App shell:
-  - Navbar
-  - Outlet (route content)
-  - Footer
-- Also participates in global unauthorized handling registration (via auth/api integration)
+- Prefer updating or adding a service method in `src/services/*`
+- Ensure it goes through `fetchData` / shared Axios in `src/services/api.ts`
+- Avoid adding any new page-level Axios calls
+- Preserve backend field errors from `details.fields`
 
----
+Output:
 
-## Routing
-
-### `src/Router.tsx`
-
-- Routing is defined using `createBrowserRouter`
-- Public routes include:
-  - `/`, `/about`, `/gdpr`, `/contact`, `/login`, `/lodges`, `/lodges/:id`
-- Most routes are protected via `AuthGuard`
-- Certain create/edit flows are role-gated (Admin/Editor)
-- Wildcard route uses `NotFound`
-
-### Auth Guard
-
-`src/components/auth/AuthGuard.tsx`
-
-- Ensures user session is resolved before showing protected content
-- Redirects unauthenticated users to `/login`
-- Known UX risk: potential “blank” while auth is resolving
+- Service method signature + endpoint + DTO shape
 
 ---
 
-## State Management
+### Step 2 - UI Implementation
 
-- Local state uses `useState`, `useEffect`
-- Forms use `react-hook-form`
-- Global state:
-  - `AuthProvider` (`src/providers/AuthProvider.tsx`)
-  - `ErrorProvider` (`src/providers/ErrorProvider.tsx`)
-- Fetch lifecycle is standardized via `useFetch` (`src/hooks/useFetch.ts`)
+- Implement UI changes in pages / components
+- Use existing component patterns and styling conventions
+- Ensure all relevant UI states exist:
+  - loading
+  - error (global + local)
+  - empty
+  - success
 
----
+If forms are involved:
 
-## API Layer
+- map backend `details.fields` inline with `applyApiFieldErrors(...)`
+- keep field validation errors inside the form
+- use the global banner only for non-field failures
 
-### `src/api/api.ts`
+If data fetching is needed:
 
-- Shared Axios instance with:
-  - baseURL
-  - `withCredentials`
-  - timeout
-  - 401 refresh-and-retry interceptor
-- `fetchData` centralizes:
-  - response unwrapping
-  - error normalization
-  - reporting to `ErrorProvider` for global banner
+- Prefer `useFetch` unless there is a better existing pattern in that feature area
 
-### `src/services/*`
+Output:
 
-- Services represent a transport boundary:
-  - endpoints, DTO parsing, normalization
-- Pages should call services, not axios directly
+- UI behavior summary per state
 
 ---
 
-## UI Structure
+### Step 3 - Auth and Authorization
 
-- Pages: `src/pages/*`
-- Components grouped by feature area: `src/components/*` (events/profile/map/ui/etc.)
-- UI primitives: `src/components/ui/*`
-- Global styles: `index.css`
+- Protected routes must use existing `AuthGuard` patterns
+- Role-gated pages must follow existing role gate patterns
+- Ensure unauthorized behavior stays consistent with the shared auth flow
 
----
+Output:
 
-## Build & Tooling
-
-Scripts in `package.json`:
-
-- `dev`
-- `build` (`tsc -b && vite build`)
-- `lint`
-- `preview`
-
-TypeScript:
-
-- strict mode enabled (see `tsconfig.app.json`)
-
-Vite:
-
-- dev proxy configured in `vite.config.ts`
+- Auth / role behavior notes
 
 ---
 
-## Known Risks / Improvement Areas
+### Step 4 - Type Safety Rules
 
-- Type-safety erosion in API usage (casting / unknown unions can hide contract drift)
-- Some direct axios usage bypasses services (should be refactored into services)
-- Large initial bundle; no route-level code splitting
-- UI text encoding artifacts (“â€¦” etc.) exist in some pages
-- No automated test suite; regressions rely on lint + build + manual checks
-- Time/date logic is complex and may have DST edge risks (`dateUtils.ts`)
+- Do not weaken types by adding broad casts
+- Prefer explicit DTO types in services
+- If backend contract is uncertain:
+  - add narrow runtime checks in the service normalization layer
+  - produce a clear error message
+- If the backend returns `details.fields`, preserve that shape so forms can render the errors inline
+
+Output:
+
+- Types added / updated and where they live
+
+---
+
+### Step 5 - Verification
+
+Since there is no test suite:
+
+- Always run:
+  - `npm run lint`
+  - `npm run build` (or `npm.cmd run build` if PowerShell blocks `npm.ps1`)
+- Provide a manual verification checklist:
+  - steps
+  - expected UI behavior
+  - edge cases (unauthorized, missing data, validation errors)
+  - confirm field errors render inline instead of only in the global banner
+
+Output:
+
+- Commands + manual checklist
+
+---
+
+## How to Split Work Into "Specialists"
+
+When a change spans multiple concerns, treat it as tracks:
+
+1. API / service track
+
+- service module updates, DTO normalization, `ApiError` handling
+
+2. UI track
+
+- pages / components changes + UI states
+
+3. Routing / auth track
+
+- router changes, guard / role-gating updates
+
+4. Verification track
+
+- lint / build + manual steps
+
+Merge in this order:
+1 -> 2 -> 3 -> 4 -> 5
+
+---
+
+## Output Format (Use Every Time)
+
+PLAN
+CHANGES (by file)
+API NOTES (endpoints + payloads)
+UI STATES (loading/error/empty/success)
+AUTH NOTES (if applicable)
+VERIFICATION (commands + manual checklist)
+RISKS / NOTES

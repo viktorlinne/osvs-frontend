@@ -1,8 +1,13 @@
+export type ApiErrorDetails = {
+  fields?: Record<string, string>;
+  [key: string]: unknown;
+};
+
 export type ApiError = {
   status: number;
   code?: string;
   message?: string;
-  details?: unknown;
+  details?: ApiErrorDetails | unknown;
 };
 
 export function isApiError(v: unknown): v is ApiError {

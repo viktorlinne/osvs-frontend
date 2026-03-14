@@ -1,8 +1,10 @@
-﻿import { useEffect, useState, type FormEvent } from "react";
+import { useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
 import { Link, useNavigate } from "react-router-dom";
 import {
   Button,
   PageContainer,
+  errorTextClass,
   inputClass,
   labelClass,
   selectClass,
@@ -11,22 +13,59 @@ import { useError } from "../context";
 import useFetch from "../hooks/useFetch";
 import { createRevision, listLodges } from "../services";
 import type { Lodge } from "../types";
+import { applyApiFieldErrors, getApiErrorMessage } from "../utils/apiErrors";
 import {
   buildPdfFormData,
   validatePdfFile,
   validateRequiredTitle,
 } from "../utils/pdfUpload";
 
+type UploadRevisionForm = {
+  title: string;
+  year: string;
+  lodgeId: string;
+  file: string;
+};
+
+function validateRevisionYear(value: string): true | string {
+  const parsedYear = Number(value);
+  if (!Number.isInteger(parsedYear) || parsedYear < 1900 || parsedYear > 3000) {
+    return "År måste vara ett giltigt år";
+  }
+  return true;
+}
+
+function validateRevisionLodge(value: string): true | string {
+  const parsedLodgeId = Number(value);
+  if (!Number.isInteger(parsedLodgeId) || parsedLodgeId <= 0) {
+    return "Välj en loge";
+  }
+  return true;
+}
+
 export const UploadRevisions = () => {
   const navigate = useNavigate();
-  const { setError, clearError } = useError();
+  const { setError: setGlobalError, clearError: clearGlobalError } = useError();
   const { run, loading } = useFetch<{ success?: boolean; id?: number }>();
   const { run: runLodges, data: lodges } = useFetch<Lodge[]>();
 
-  const [title, setTitle] = useState("");
-  const [year, setYear] = useState(String(new Date().getFullYear()));
-  const [lodgeId, setLodgeId] = useState("");
   const [file, setFile] = useState<File | null>(null);
+  const {
+    register,
+    handleSubmit,
+    clearErrors,
+    setError: setFieldError,
+    formState: { errors, isValid },
+  } = useForm<UploadRevisionForm>({
+    mode: "onChange",
+    defaultValues: {
+      title: "",
+      year: String(new Date().getFullYear()),
+      lodgeId: "",
+      file: "",
+    },
+  });
+  const fileError = validatePdfFile(file, { required: true });
 
   useEffect(() => {
     runLodges(async () => {
@@ -37,37 +76,25 @@ export const UploadRevisions = () => {
     });
   }, [runLodges]);
 
-  async function onSubmit(e: FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-    clearError();
+  async function onSubmit(values: UploadRevisionForm) {
+    clearGlobalError();
+    clearErrors();
 
-    const normalizedTitle = title.trim();
-    const parsedYear = Number(year);
-    const parsedLodgeId = Number(lodgeId);
-
-    const titleError = validateRequiredTitle(normalizedTitle);
-    if (titleError) return setError(titleError);
-
-    if (
-      !Number.isInteger(parsedYear) ||
-      parsedYear < 1900 ||
-      parsedYear > 3000
-    ) {
-      return setError("År måste vara ett giltigt år");
+    const nextFileError = validatePdfFile(file, { required: true });
+    if (nextFileError) {
+      setFieldError("file", {
+        type: "manual",
+        message: nextFileError,
+      });
+      return;
     }
-    if (!Number.isInteger(parsedLodgeId) || parsedLodgeId <= 0) {
-      return setError("Välj en loge");
-    }
-
-    const fileError = validatePdfFile(file);
-    if (fileError) return setError(fileError);
     if (!file) return;
 
     const formData = buildPdfFormData(
       {
-        title: normalizedTitle,
-        year: String(parsedYear),
-        lodgeId: String(parsedLodgeId),
+        title: values.title.trim(),
+        year: values.year,
+        lodgeId: values.lodgeId,
       },
       file,
     );
@@ -75,8 +102,12 @@ export const UploadRevisions = () => {
     try {
       await run(() => createRevision(formData));
       navigate("/revisions");
-    } catch {
-      // handled by useFetch
+    } catch (error: unknown) {
+      if (applyApiFieldErrors(error, setFieldError)) {
+        return;
+      }
+
+      setGlobalError(getApiErrorMessage(error) ?? "Kunde inte skapa revisionen");
     }
   }
 
@@ -87,18 +118,22 @@ export const UploadRevisions = () => {
       </Link>
       <h2 className="ui-page-title mb-4 mt-4">Lägg till revision</h2>
 
-      <form onSubmit={onSubmit} className="ui-card">
+      <form onSubmit={handleSubmit(onSubmit)} className="ui-card">
         <div className="mb-4">
           <label htmlFor="revision-title" className={labelClass}>
             Titel
           </label>
           <input
             id="revision-title"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
+            {...register("title", {
+              validate: (value) => validateRequiredTitle(value) ?? true,
+            })}
             className={inputClass}
             autoComplete="off"
           />
+          {errors.title?.message ? (
+            <div className={errorTextClass}>{errors.title.message}</div>
+          ) : null}
         </div>
 
         <div className="mb-4">
@@ -111,10 +146,14 @@ export const UploadRevisions = () => {
             inputMode="numeric"
             min={1924}
             max={3000}
-            value={year}
-            onChange={(e) => setYear(e.target.value)}
+            {...register("year", {
+              validate: validateRevisionYear,
+            })}
             className={inputClass}
           />
+          {errors.year?.message ? (
+            <div className={errorTextClass}>{errors.year.message}</div>
+          ) : null}
         </div>
 
         <div className="mb-4">
@@ -123,8 +162,9 @@ export const UploadRevisions = () => {
           </label>
           <select
             id="revision-lodge"
-            value={lodgeId}
-            onChange={(e) => setLodgeId(e.target.value)}
+            {...register("lodgeId", {
+              validate: validateRevisionLodge,
+            })}
             className={selectClass}
           >
             <option value="">Välj loge</option>
@@ -134,6 +174,9 @@ export const UploadRevisions = () => {
               </option>
             ))}
           </select>
+          {errors.lodgeId?.message ? (
+            <div className={errorTextClass}>{errors.lodgeId.message}</div>
+          ) : null}
         </div>
 
         <div className="mb-4">
@@ -146,14 +189,24 @@ export const UploadRevisions = () => {
             accept=".pdf,application/pdf"
             className={inputClass}
             onChange={(e) => {
+              clearErrors("file");
               const nextFile =
                 e.target.files && e.target.files[0] ? e.target.files[0] : null;
               setFile(nextFile);
             }}
           />
+          {errors.file?.message ? (
+            <div className={errorTextClass}>{errors.file.message}</div>
+          ) : fileError ? (
+            <div className={errorTextClass}>{fileError}</div>
+          ) : null}
         </div>
 
-        <Button type="submit" disabled={loading} className="ui-btn-primary">
+        <Button
+          type="submit"
+          disabled={loading || !isValid || Boolean(fileError)}
+          className="ui-btn-primary"
+        >
           {loading ? "Sparar..." : "Skapa"}
         </Button>
       </form>

@@ -3,7 +3,6 @@ import axios, {
   type AxiosRequestConfig,
   type AxiosResponse,
 } from "axios";
-import { reportGlobalError } from "./globalError";
 import { reportUnauthorized } from "./globalAuth";
 import type { ApiError } from "../types";
 
@@ -108,12 +107,6 @@ export async function fetchData<T = unknown>(
               source: "fetchData-payload",
             });
           }
-        } else {
-          try {
-            reportGlobalError(apiErr.message ?? "Ett fel uppstod");
-          } catch {
-            // ignore
-          }
         }
 
         throw apiErr;
@@ -169,12 +162,6 @@ export async function fetchData<T = unknown>(
             url: String(requestConfig?.url ?? ""),
             source: "fetchData-catch",
           });
-        }
-      } else {
-        try {
-          reportGlobalError(message);
-        } catch {
-          // ignore
         }
       }
 

@@ -11,6 +11,8 @@ import {
   formatEventDisplayDate,
   toEventDateInputValue,
 } from "./events/dateUtils";
+import { getApiErrorMessage, getApiFieldErrors } from "../utils/apiErrors";
+import { getEventFormErrors } from "../utils/formValidation";
 import {
   deleteEvent,
   getEvent,
@@ -72,11 +74,15 @@ export const EventDetail = () => {
   });
   const [originalLinkedIds, setOriginalLinkedIds] = useState<number[]>([]);
   const [linkedIds, setLinkedIds] = useState<number[]>([]);
+  const [serverErrors, setServerErrors] = useState<Record<string, string>>({});
   const [rsvpStatus, setRsvpStatus] = useState<string | null>(null);
   const [bookFoodStatus, setBookFoodStatus] = useState<boolean | null>(null);
   const [attendanceSavingUid, setAttendanceSavingUid] = useState<number | null>(
     null,
   );
+  const clientErrors = getEventFormErrors(form);
+  const formErrors = { ...serverErrors, ...clientErrors };
+  const canSave = Object.keys(clientErrors).length === 0;
   const hasStarted = isEventStartedNowStockholm(event?.startDate);
 
   const canRsvp = isMoreThan48HoursFromNowStockholm(event?.startDate);
@@ -94,9 +100,18 @@ export const EventDetail = () => {
     return !isEventStartedNowStockholm(event.startDate);
   })();
 
+  function clearServerField(field: string) {
+    setServerErrors((prev) => {
+      if (!(field in prev)) return prev;
+      const next = { ...prev };
+      delete next[field];
+      return next;
+    });
+  }
+
   useEffect(() => {
     if (!id) {
-      setGlobalError("Missing event id");
+      setGlobalError("Saknar mötes-id");
       return;
     }
 
@@ -182,17 +197,22 @@ export const EventDetail = () => {
 
   async function handleSave() {
     if (!id) {
-      setGlobalError("Missing event id");
+      setGlobalError("Saknar mötes-id");
       return;
     }
 
     const eventId = Number(id);
     if (!Number.isFinite(eventId)) {
-      setGlobalError("Missing event id");
+      setGlobalError("Saknar mötes-id");
       return;
     }
 
     clearGlobalError();
+    setServerErrors({});
+
+    if (Object.keys(clientErrors).length > 0) {
+      return;
+    }
 
     try {
       const payload: Record<string, unknown> = {
@@ -240,8 +260,14 @@ export const EventDetail = () => {
       });
 
       navigate(`/events/${id}`);
-    } catch {
-      setGlobalError("Failed to save event");
+    } catch (error: unknown) {
+      const fields = getApiFieldErrors(error);
+      if (fields) {
+        setServerErrors(fields);
+        return;
+      }
+
+      setGlobalError(getApiErrorMessage(error) ?? "Misslyckades att spara mötet");
     }
   }
 
@@ -250,7 +276,7 @@ export const EventDetail = () => {
 
     const eventId = Number(id);
     if (!Number.isFinite(eventId)) {
-      setGlobalError("Missing event id");
+      setGlobalError("Saknar mötes-id");
       return;
     }
 
@@ -285,7 +311,7 @@ export const EventDetail = () => {
         return Array.isArray(rows) ? rows : [];
       });
     } catch {
-      setGlobalError("Failed to set RSVP");
+      setGlobalError("Misslyckades att uppdatera osa");
     }
   }
 
@@ -308,7 +334,7 @@ export const EventDetail = () => {
         return Array.isArray(rows) ? rows : [];
       });
     } catch {
-      setGlobalError("Failed to set food booking");
+      setGlobalError("Misslyckades att uppdatera matbokningen");
     }
   }
 
@@ -359,7 +385,7 @@ export const EventDetail = () => {
         });
       }
     } catch {
-      setGlobalError("Failed to update attendance");
+      setGlobalError("Misslyckades att uppdatera närvaron");
       await runAttendances(async () => {
         const rowsResp = await listEventAttendances(eventId);
         const rows =
@@ -400,6 +426,9 @@ export const EventDetail = () => {
               onDelete={handleDeleteEvent}
               isAdmin={isAdmin}
               saving={saving}
+              errors={formErrors}
+              canSubmit={canSave}
+              clearServerField={clearServerField}
             />
           ) : (
             <EventDetailView

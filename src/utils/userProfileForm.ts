@@ -1,3 +1,5 @@
+import { getApiFieldErrors } from "./apiErrors";
+
 export function toUserProfileUpdatePayload(values: Record<string, unknown>) {
   return {
     firstname: String(values.firstname ?? "").trim(),
@@ -17,13 +19,8 @@ export function toUserProfileUpdatePayload(values: Record<string, unknown>) {
 }
 
 export function extractMissingFields(error: unknown): string[] | null {
-  const err = error as { status?: number; details?: unknown };
-  if (!(err?.status === 400 && err.details && typeof err.details === "object")) {
-    return null;
-  }
-  const rec = err.details as Record<string, unknown>;
-  const missing = Array.isArray(rec.missing) ? rec.missing : undefined;
-  if (!missing) return null;
-  return missing.filter((v): v is string => typeof v === "string");
+  const fields = getApiFieldErrors(error);
+  if (!fields) return null;
+  return Object.keys(fields);
 }
 

@@ -15,6 +15,7 @@ export type UpdateUserForm = {
 export type CreatePostForm = {
   title: string;
   description?: string;
+  picture?: string;
   lodgeIds?: string[];
   publicum?: boolean;
 };

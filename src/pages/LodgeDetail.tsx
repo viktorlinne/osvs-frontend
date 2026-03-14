@@ -3,6 +3,7 @@ import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
 import {
   Button,
   PageContainer,
+  errorTextClass,
   inputClass,
   labelClass,
   textareaClass,
@@ -11,6 +12,8 @@ import { useAuth, useError } from "../context";
 import useFetch from "../hooks/useFetch";
 import { getLodge, updateLodge } from "../services/lodges";
 import type { Lodge } from "../types";
+import { getApiErrorMessage, getApiFieldErrors } from "../utils/apiErrors";
+import { getLodgeFormErrors } from "../utils/formValidation";
 
 export const LodgeDetail = () => {
   const { id } = useParams<{ id: string }>();
@@ -31,9 +34,22 @@ export const LodgeDetail = () => {
     description: "",
     email: "",
   });
+  const [serverErrors, setServerErrors] = useState<Record<string, string>>({});
+  const clientErrors = getLodgeFormErrors(form);
+  const formErrors = { ...serverErrors, ...clientErrors };
+  const canSave = canEdit && Object.keys(clientErrors).length === 0;
+
+  function clearServerField(field: string) {
+    setServerErrors((prev) => {
+      if (!(field in prev)) return prev;
+      const next = { ...prev };
+      delete next[field];
+      return next;
+    });
+  }
 
   useEffect(() => {
-    if (!id) return setGlobalError("Missing lodge id");
+    if (!id) return setGlobalError("Saknar loge-id");
     void run(async () => {
       const resp = await getLodge(id);
       const l = (resp as { lodge?: Lodge })?.lodge ?? null;
@@ -57,12 +73,14 @@ export const LodgeDetail = () => {
     if (!id) return setGlobalError("Saknar loge-id");
     if (!canEdit) return setGlobalError("Ingen behörighet");
     clearGlobalError();
+    setServerErrors({});
+    if (Object.keys(clientErrors).length > 0) return;
     try {
       const payload = {
-        name: form.name,
-        city: form.city,
+        name: form.name.trim(),
+        city: form.city.trim(),
         description: form.description || null,
-        email: form.email || undefined,
+        email: form.email.trim() || undefined,
       };
       await runAction(() => updateLodge(id, payload));
       await run(async () => {
@@ -71,8 +89,14 @@ export const LodgeDetail = () => {
         return l as Lodge | null;
       });
       navigate(`/lodges/${id}`);
-    } catch {
-      setGlobalError("Misslyckades att spara logen");
+    } catch (error: unknown) {
+      const fields = getApiFieldErrors(error);
+      if (fields) {
+        setServerErrors(fields);
+        return;
+      }
+
+      setGlobalError(getApiErrorMessage(error) ?? "Misslyckades att spara logen");
     }
   }
 
@@ -102,9 +126,15 @@ export const LodgeDetail = () => {
                   name="name"
                   autoComplete="off"
                   value={form.name}
-                  onChange={(e) => setForm({ ...form, name: e.target.value })}
+                  onChange={(e) => {
+                    clearServerField("name");
+                    setForm({ ...form, name: e.target.value });
+                  }}
                   className={inputClass}
                 />
+                {formErrors.name ? (
+                  <p className={errorTextClass}>{formErrors.name}</p>
+                ) : null}
               </div>
               <div>
                 <label htmlFor="city" className={labelClass}>
@@ -115,9 +145,15 @@ export const LodgeDetail = () => {
                   name="city"
                   autoComplete="off"
                   value={form.city}
-                  onChange={(e) => setForm({ ...form, city: e.target.value })}
+                  onChange={(e) => {
+                    clearServerField("city");
+                    setForm({ ...form, city: e.target.value });
+                  }}
                   className={inputClass}
                 />
+                {formErrors.city ? (
+                  <p className={errorTextClass}>{formErrors.city}</p>
+                ) : null}
               </div>
               <div>
                 <label htmlFor="description" className={labelClass}>
@@ -128,11 +164,15 @@ export const LodgeDetail = () => {
                   name="description"
                   rows={8}
                   value={form.description}
-                  onChange={(e) =>
-                    setForm({ ...form, description: e.target.value })
-                  }
+                  onChange={(e) => {
+                    clearServerField("description");
+                    setForm({ ...form, description: e.target.value });
+                  }}
                   className={textareaClass}
                 />
+                {formErrors.description ? (
+                  <p className={errorTextClass}>{formErrors.description}</p>
+                ) : null}
               </div>
               <div>
                 <label htmlFor="email" className={labelClass}>
@@ -143,15 +183,21 @@ export const LodgeDetail = () => {
                   name="email"
                   autoComplete="off"
                   value={form.email}
-                  onChange={(e) => setForm({ ...form, email: e.target.value })}
+                  onChange={(e) => {
+                    clearServerField("email");
+                    setForm({ ...form, email: e.target.value });
+                  }}
                   className={inputClass}
                 />
+                {formErrors.email ? (
+                  <p className={errorTextClass}>{formErrors.email}</p>
+                ) : null}
               </div>
               <div className="flex flex-col gap-2 py-2 sm:flex-row">
                 <Button
                   className="ui-btn-primary"
                   onClick={handleSave}
-                  disabled={saving}
+                  disabled={saving || !canSave}
                 >
                   {saving ? "Sparar..." : "Spara"}
                 </Button>

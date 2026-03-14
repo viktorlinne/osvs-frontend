@@ -3,6 +3,7 @@ import axios from "axios";
 import { useError } from "../context";
 import type { ApiError } from "../types";
 import { isApiError } from "../types/api";
+import { getApiErrorMessage, hasApiFieldErrors } from "../utils/apiErrors";
 
 export default function useFetch<T>() {
   const [data, setData] = useState<T | null>(null);
@@ -26,13 +27,17 @@ export default function useFetch<T>() {
           }
           const raw = e.response.data as ApiError | undefined;
           if (raw?.status === 404) setNotFound(true);
-          else setError(raw?.message ?? String(e));
+          else if (!hasApiFieldErrors(raw)) {
+            setError(raw?.message ?? String(e));
+          }
         } else if (isApiError(e)) {
           if (e.status === 404) setNotFound(true);
           else if (e.status === 401) {
             // handled globally via API unauthorized handler
           }
-          else setError(e.message ?? String(e));
+          else if (!hasApiFieldErrors(e)) {
+            setError(getApiErrorMessage(e) ?? String(e));
+          }
         } else if (e instanceof Error) {
           setError(e.message ?? String(e));
         } else {
