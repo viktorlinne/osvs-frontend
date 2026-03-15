@@ -35,16 +35,27 @@ export function ErrorProvider({ children }: { children: React.ReactNode }) {
 
   return (
     <ErrorContext.Provider value={value}>
-      <div className="relative" onClick={clearError}>
-        {error ? (
-          <div className="fixed top-10 left-1/2 -translate-x-1/2 z-50 w-full max-w-xl px-4">
-            <div className="bg-red-600 hover:bg-red-700 transition text-white rounded-md shadow p-3 text-center">
-              {error}
-            </div>
+      {error ? (
+        <div className="pointer-events-none fixed top-10 left-1/2 z-50 w-full max-w-xl -translate-x-1/2 px-4">
+          <div
+            role="alert"
+            aria-live="assertive"
+            aria-atomic="true"
+            className="pointer-events-auto flex items-start gap-3 rounded-md bg-red-600 p-3 text-white shadow transition"
+          >
+            <p className="flex-1 text-sm font-medium">{error}</p>
+            <button
+              type="button"
+              onClick={clearError}
+              className="rounded px-2 py-1 text-sm font-medium underline underline-offset-2 transition hover:bg-red-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-red-600"
+              aria-label="Stäng felmeddelandet"
+            >
+              Stäng
+            </button>
           </div>
-        ) : null}
-        {children}
-      </div>
+        </div>
+      ) : null}
+      {children}
     </ErrorContext.Provider>
   );
 }
