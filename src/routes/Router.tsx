@@ -1,35 +1,126 @@
+import { Suspense, lazy, type ComponentType } from "react";
 import { createBrowserRouter } from "react-router";
-import {
-  NotFound,
-  HomePage,
-  AboutPage,
-  GdprPage,
-  ContactPage,
-  LoginPage,
-  NewsPage,
-  PostDetail,
-  CreatePost,
-  Profile,
-  ProfileAttended,
-  MembersPage,
-  MapPage,
-  MemberDetail,
-  MemberAttended,
-  CreateMember,
-  LodgesPage,
-  LodgeDetail,
-  EventDetail,
-  EventsPage,
-  CreateEvent,
-  MembershipPage,
-  RevisionsPage,
-  DocumentsPage,
-  UploadRevisions,
-  UploadDocument,
-  Regalia
-} from "../pages";
 import { AppLayout } from "../app/AppLayout";
+import { PageContainer } from "../components";
 import AuthGuard from "./AuthGuard";
+
+function lazyNamedPage(
+  loader: () => Promise<Record<string, unknown>>,
+  exportName: string,
+) {
+  return lazy(async () => {
+    const module = await loader();
+    const component = module[exportName];
+    if (typeof component !== "function") {
+      throw new Error(`Kunde inte hitta sids export "${exportName}"`);
+    }
+    return { default: component as ComponentType };
+  });
+}
+
+function RouteLoadingFallback() {
+  return (
+    <PageContainer size="xl" className="ui-page">
+      <div className="ui-card py-12 text-center text-neutral-600">
+        Laddar sida...
+      </div>
+    </PageContainer>
+  );
+}
+
+function renderPage(Page: ComponentType) {
+  return (
+    <Suspense fallback={<RouteLoadingFallback />}>
+      <Page />
+    </Suspense>
+  );
+}
+
+function renderProtectedPage(Page: ComponentType, roles?: string[]) {
+  return <AuthGuard roles={roles}>{renderPage(Page)}</AuthGuard>;
+}
+
+const NotFound = lazyNamedPage(() => import("../pages/NotFound"), "NotFound");
+const HomePage = lazyNamedPage(() => import("../pages/HomePage"), "HomePage");
+const AboutPage = lazyNamedPage(() => import("../pages/AboutPage"), "AboutPage");
+const GdprPage = lazyNamedPage(() => import("../pages/GdprPage"), "GdprPage");
+const ContactPage = lazyNamedPage(
+  () => import("../pages/ContactPage"),
+  "ContactPage",
+);
+const LoginPage = lazyNamedPage(() => import("../pages/LoginPage"), "LoginPage");
+const NewsPage = lazyNamedPage(() => import("../pages/PostsPage"), "NewsPage");
+const PostDetail = lazyNamedPage(
+  () => import("../pages/PostDetail"),
+  "PostDetail",
+);
+const CreatePost = lazyNamedPage(
+  () => import("../pages/CreatePost"),
+  "CreatePost",
+);
+const Profile = lazyNamedPage(() => import("../pages/Profile"), "Profile");
+const ProfileAttended = lazyNamedPage(
+  () => import("../pages/ProfileAttended"),
+  "ProfileAttended",
+);
+const MembersPage = lazyNamedPage(
+  () => import("../pages/MembersPage"),
+  "MembersPage",
+);
+const MapPage = lazyNamedPage(() => import("../pages/MapPage"), "MapPage");
+const MemberDetail = lazyNamedPage(
+  () => import("../pages/MemberDetail"),
+  "MemberDetail",
+);
+const MemberAttended = lazyNamedPage(
+  () => import("../pages/MemberAttended"),
+  "MemberAttended",
+);
+const CreateMember = lazyNamedPage(
+  () => import("../pages/CreateMember"),
+  "CreateMember",
+);
+const LodgesPage = lazyNamedPage(
+  () => import("../pages/LodgesPage"),
+  "LodgesPage",
+);
+const LodgeDetail = lazyNamedPage(
+  () => import("../pages/LodgeDetail"),
+  "LodgeDetail",
+);
+const EventDetail = lazyNamedPage(
+  () => import("../pages/EventDetail"),
+  "EventDetail",
+);
+const EventsPage = lazyNamedPage(
+  () => import("../pages/EventsPage"),
+  "EventsPage",
+);
+const CreateEvent = lazyNamedPage(
+  () => import("../pages/CreateEvent"),
+  "CreateEvent",
+);
+const MembershipPage = lazyNamedPage(
+  () => import("../pages/MembershipPage"),
+  "MembershipPage",
+);
+const RevisionsPage = lazyNamedPage(
+  () => import("../pages/RevisionsPage"),
+  "RevisionsPage",
+);
+const DocumentsPage = lazyNamedPage(
+  () => import("../pages/DocumentsPage"),
+  "DocumentsPage",
+);
+const UploadRevisions = lazyNamedPage(
+  () => import("../pages/UploadRevisions"),
+  "UploadRevisions",
+);
+const UploadDocument = lazyNamedPage(
+  () => import("../pages/UploadDocument"),
+  "UploadDocument",
+);
+const Regalia = lazyNamedPage(() => import("../pages/Regalia"), "Regalia");
 
 const routes = [
   {
@@ -38,229 +129,133 @@ const routes = [
     children: [
       {
         path: "/",
-        element: <HomePage />,
+        element: renderPage(HomePage),
       },
       {
         path: "about",
-        element: <AboutPage />,
+        element: renderPage(AboutPage),
       },
       {
         path: "gdpr",
-        element: <GdprPage />,
+        element: renderPage(GdprPage),
       },
       {
         path: "contact",
-        element: <ContactPage />,
+        element: renderPage(ContactPage),
       },
       {
         path: "login",
-        element: <LoginPage />,
+        element: renderPage(LoginPage),
       },
       {
         path: "lodges",
-        element: <LodgesPage />,
+        element: renderPage(LodgesPage),
       },
       {
         path: "lodges/:id",
-        element: <LodgeDetail />,
+        element: renderPage(LodgeDetail),
       },
       // Protected routes
       {
         path: "posts",
-        element: (
-          <AuthGuard>
-            <NewsPage />
-          </AuthGuard>
-        ),
+        element: renderProtectedPage(NewsPage),
       },
       {
         path: "posts/create",
-        element: (
-          <AuthGuard roles={["Admin", "Editor"]}>
-            <CreatePost />
-          </AuthGuard>
-        ),
+        element: renderProtectedPage(CreatePost, ["Admin", "Editor"]),
       },
       {
         path: "members",
-        element: (
-          <AuthGuard>
-            <MembersPage />
-          </AuthGuard>
-        ),
+        element: renderProtectedPage(MembersPage),
       },
       {
         path: "members/create",
-        element: (
-          <AuthGuard roles={["Admin", "Editor"]}>
-            <CreateMember />
-          </AuthGuard>
-        ),
+        element: renderProtectedPage(CreateMember, ["Admin", "Editor"]),
       },
       {
         path: "members/:matrikelnummer",
-        element: (
-          <AuthGuard>
-            <MemberDetail />
-          </AuthGuard>
-        ),
+        element: renderProtectedPage(MemberDetail),
       },
       {
         path: "members/:matrikelnummer/edit",
-        element: (
-          <AuthGuard roles={["Admin", "Editor"]}>
-            <MemberDetail />
-          </AuthGuard>
-        ),
+        element: renderProtectedPage(MemberDetail, ["Admin", "Editor"]),
       },
       {
         path: "members/:matrikelnummer/attended",
-        element: (
-          <AuthGuard>
-            <MemberAttended />
-          </AuthGuard>
-        ),
+        element: renderProtectedPage(MemberAttended),
       },
       {
         path: "profile",
-        element: (
-          <AuthGuard>
-            <Profile />
-          </AuthGuard>
-        ),
+        element: renderProtectedPage(Profile),
       },
       {
         path: "profile/edit",
-        element: (
-          <AuthGuard>
-            <Profile />
-          </AuthGuard>
-        ),
+        element: renderProtectedPage(Profile),
       },
       {
         path: "profile/memberships",
-        element: (
-          <AuthGuard>
-            <MembershipPage />
-          </AuthGuard>
-        ),
+        element: renderProtectedPage(MembershipPage),
       },
       {
         path: "profile/attended",
-        element: (
-          <AuthGuard>
-            <ProfileAttended />
-          </AuthGuard>
-        ),
+        element: renderProtectedPage(ProfileAttended),
       },
       {
         path: "posts/:id/edit",
-        element: (
-          <AuthGuard roles={["Admin", "Editor"]}>
-            <PostDetail />
-          </AuthGuard>
-        ),
+        element: renderProtectedPage(PostDetail, ["Admin", "Editor"]),
       },
       {
         path: "posts/:id",
-        element: (
-          <AuthGuard>
-            <PostDetail />
-          </AuthGuard>
-        ),
+        element: renderProtectedPage(PostDetail),
       },
       {
         path: "lodges/:id/edit",
-        element: (
-          <AuthGuard roles={["Admin", "Editor"]}>
-            <LodgeDetail />
-          </AuthGuard>
-        ),
+        element: renderProtectedPage(LodgeDetail, ["Admin", "Editor"]),
       },
       {
         path: "events",
-        element: (
-          <AuthGuard>
-            <EventsPage />
-          </AuthGuard>
-        ),
+        element: renderProtectedPage(EventsPage),
       },
       {
         path: "events/:id",
-        element: (
-          <AuthGuard>
-            <EventDetail />
-          </AuthGuard>
-        ),
+        element: renderProtectedPage(EventDetail),
       },
       {
         path: "events/:id/edit",
-        element: (
-          <AuthGuard roles={["Admin", "Editor"]}>
-            <EventDetail />
-          </AuthGuard>
-        ),
+        element: renderProtectedPage(EventDetail, ["Admin", "Editor"]),
       },
       {
         path: "events/create",
-        element: (
-          <AuthGuard roles={["Admin", "Editor"]}>
-            <CreateEvent />
-          </AuthGuard>
-        ),
+        element: renderProtectedPage(CreateEvent, ["Admin", "Editor"]),
       },
       {
         path: "revisions",
-        element: (
-          <AuthGuard>
-            <RevisionsPage />
-          </AuthGuard>
-        ),
+        element: renderProtectedPage(RevisionsPage),
       },
       {
         path: "revisions/create",
-        element: (
-          <AuthGuard roles={["Admin", "Editor"]}>
-            <UploadRevisions />
-          </AuthGuard>
-        ),
+        element: renderProtectedPage(UploadRevisions, ["Admin", "Editor"]),
       },
       {
         path: "documents",
-        element: (
-          <AuthGuard>
-            <DocumentsPage />
-          </AuthGuard>
-        ),
+        element: renderProtectedPage(DocumentsPage),
       },
       {
         path: "documents/create",
-        element: (
-          <AuthGuard roles={["Admin", "Editor"]}>
-            <UploadDocument />
-          </AuthGuard>
-        ),
+        element: renderProtectedPage(UploadDocument, ["Admin", "Editor"]),
       },
       {
         path: "regalia",
-        element: (
-          <AuthGuard >
-            <Regalia />
-          </AuthGuard>
-        ),
+        element: renderProtectedPage(Regalia),
       },
       {
         path: "map",
-        element: (
-          <AuthGuard>
-            <MapPage />
-          </AuthGuard>
-        ),
+        element: renderProtectedPage(MapPage),
       },
       //*! Not Found Route *!//
       {
         path: "*",
-        element: <NotFound />,
+        element: renderPage(NotFound),
       },
     ],
   },
