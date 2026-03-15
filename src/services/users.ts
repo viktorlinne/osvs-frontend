@@ -46,6 +46,8 @@ export type ListUsersFilters = {
   lodgeId?: number | null;
   officialId?: number | null;
   accommodationAvailable?: boolean | null;
+  page?: number;
+  pageSize?: number;
 };
 
 export type PublicUserDetailResponse = {
@@ -54,6 +56,14 @@ export type PublicUserDetailResponse = {
   allergies: Allergy[];
   officials: Official[];
   officialHistory: OfficialHistoryItem[];
+};
+
+export type PaginatedUsersResponse = {
+  users: PublicUser[];
+  page: number;
+  pageSize: number;
+  total: number;
+  totalPages: number;
 };
 
 function parseMutationResult(source: unknown): UserMutationResult {
@@ -186,9 +196,7 @@ export async function uploadUserPicture(
   };
 }
 
-export async function listUsers(
-  filters?: ListUsersFilters,
-): Promise<PublicUser[]> {
+function buildListUsersSearch(filters?: ListUsersFilters) {
   const search = new URLSearchParams();
   if (filters?.name) search.set("name", filters.name);
   if (filters?.achievementId != null) {
@@ -203,10 +211,57 @@ export async function listUsers(
   if (filters?.accommodationAvailable === true) {
     search.set("accommodationAvailable", "1");
   }
+  if (typeof filters?.page === "number" && Number.isFinite(filters.page)) {
+    search.set("page", String(filters.page));
+  }
+  if (typeof filters?.pageSize === "number" && Number.isFinite(filters.pageSize)) {
+    search.set("pageSize", String(filters.pageSize));
+  }
+  return search;
+}
+
+function parsePaginatedUsersResponse(source: unknown): PaginatedUsersResponse {
+  const users = readArrayField<PublicUser>(source, "users");
+  const page = Math.max(1, readNumberField(source, "page") ?? 1);
+  const pageSize = Math.max(1, readNumberField(source, "pageSize") ?? 24);
+  const total = Math.max(0, readNumberField(source, "total") ?? users.length);
+  const totalPages = Math.max(
+    0,
+    readNumberField(source, "totalPages") ?? Math.ceil(total / pageSize),
+  );
+
+  return {
+    users,
+    page,
+    pageSize,
+    total,
+    totalPages,
+  };
+}
+
+export async function listUsersPage(
+  filters?: ListUsersFilters,
+): Promise<PaginatedUsersResponse> {
+  const search = buildListUsersSearch(filters);
   const query = search.toString();
   const url = query ? `/users?${query}` : "/users";
   const res = await fetchData(api.get(url));
-  return readArrayField<PublicUser>(res, "users");
+  return parsePaginatedUsersResponse(res);
+}
+
+export async function listUsers(
+  filters?: Omit<ListUsersFilters, "page" | "pageSize">,
+): Promise<PublicUser[]> {
+  const pageSize = 100;
+  const firstPage = await listUsersPage({ ...filters, page: 1, pageSize });
+  const users = [...firstPage.users];
+
+  for (let page = 2; page <= firstPage.totalPages; page += 1) {
+    const nextPage = await listUsersPage({ ...filters, page, pageSize });
+    users.push(...nextPage.users);
+  }
+
+  return users;
 }
 
 export async function listUsersMapPins(): Promise<UserMapPin[]> {
@@ -315,6 +370,7 @@ export default {
   adminUpdateUser,
   uploadMyPicture,
   uploadUserPicture,
+  listUsersPage,
   listUsers,
   listUsersMapPins,
   getPublicUserById,

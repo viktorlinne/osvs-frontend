@@ -6,11 +6,17 @@ import useFetch from "../hooks/useFetch";
 import { listAchievements } from "../services/achievements";
 import { listLodges } from "../services/lodges";
 import { listOfficials } from "../services/officials";
-import { listUsers as listUsersService } from "../services/users";
+import {
+  listUsersPage as listUsersService,
+  type PaginatedUsersResponse,
+} from "../services/users";
 import type { PublicUser } from "../types";
 
+const MEMBERS_PAGE_SIZE = 24;
+
 export const MembersPage = () => {
-  const { run, data: members } = useFetch<PublicUser[]>();
+  const { run, data: membersPage, loading } =
+    useFetch<PaginatedUsersResponse>();
   const { run: runAchievements, data: achievements } =
     useFetch<Array<{ id: number; title: string }>>();
   const { run: runLodges, data: lodges } =
@@ -24,6 +30,7 @@ export const MembersPage = () => {
   const [lodgeId, setLodgeId] = useState<number | null>(null);
   const [officialId, setOfficialId] = useState<number | null>(null);
   const [accommodationOnly, setAccommodationOnly] = useState(false);
+  const [page, setPage] = useState(1);
 
   useEffect(() => {
     runAchievements(() => listAchievements()).catch(() => {
@@ -46,6 +53,8 @@ export const MembersPage = () => {
           lodgeId,
           officialId,
           accommodationAvailable: accommodationOnly ? true : null,
+          page,
+          pageSize: MEMBERS_PAGE_SIZE,
         }),
       ),
     [
@@ -55,6 +64,7 @@ export const MembersPage = () => {
       lodgeId,
       officialId,
       accommodationOnly,
+      page,
     ],
   );
 
@@ -65,9 +75,39 @@ export const MembersPage = () => {
   }, [doFetch]);
 
   useEffect(() => {
-    const t = setTimeout(() => setDebouncedQuery(query), 1000);
+    const t = setTimeout(() => {
+      setDebouncedQuery(query);
+      setPage(1);
+    }, 400);
     return () => clearTimeout(t);
   }, [query]);
+
+  const members = membersPage?.users ?? [];
+  const total = membersPage?.total ?? 0;
+  const totalPages = membersPage?.totalPages ?? 0;
+  const currentPageSize = membersPage?.pageSize ?? MEMBERS_PAGE_SIZE;
+  const from = total === 0 ? 0 : (page - 1) * currentPageSize + 1;
+  const to = total === 0 ? 0 : Math.min(page * currentPageSize, total);
+
+  function handleAchievementChange(value: string) {
+    setAchievementId(value ? Number(value) : null);
+    setPage(1);
+  }
+
+  function handleLodgeChange(value: string) {
+    setLodgeId(value ? Number(value) : null);
+    setPage(1);
+  }
+
+  function handleOfficialChange(value: string) {
+    setOfficialId(value ? Number(value) : null);
+    setPage(1);
+  }
+
+  function handleAccommodationChange(checked: boolean) {
+    setAccommodationOnly(checked);
+    setPage(1);
+  }
 
   return (
     <PageContainer size="xl" className="ui-page">
@@ -97,9 +137,7 @@ export const MembersPage = () => {
           id="achievementFilter"
           name="achievementFilter"
           value={achievementId ?? ""}
-          onChange={(e) =>
-            setAchievementId(e.target.value ? Number(e.target.value) : null)
-          }
+          onChange={(e) => handleAchievementChange(e.target.value)}
           className={selectClass}
         >
           <option value="">Alla grader</option>
@@ -113,9 +151,7 @@ export const MembersPage = () => {
           id="lodgeFilter"
           name="lodgeFilter"
           value={lodgeId ?? ""}
-          onChange={(e) =>
-            setLodgeId(e.target.value ? Number(e.target.value) : null)
-          }
+          onChange={(e) => handleLodgeChange(e.target.value)}
           className={selectClass}
         >
           <option value="">Alla loger</option>
@@ -129,9 +165,7 @@ export const MembersPage = () => {
           id="officialFilter"
           name="officialFilter"
           value={officialId ?? ""}
-          onChange={(e) =>
-            setOfficialId(e.target.value ? Number(e.target.value) : null)
-          }
+          onChange={(e) => handleOfficialChange(e.target.value)}
           className={selectClass}
         >
           <option value="">Alla tjänster</option>
@@ -150,14 +184,31 @@ export const MembersPage = () => {
             name="accommodationFilter"
             type="checkbox"
             checked={accommodationOnly}
-            onChange={(event) => setAccommodationOnly(event.target.checked)}
+            onChange={(event) => handleAccommodationChange(event.target.checked)}
             className="h-4 w-4 rounded border-neutral-300 text-primary-600 focus-visible:ring-primary-600"
           />
           <span>Tillgängligt boende</span>
         </label>
       </div>
 
-      {Array.isArray(members) && (
+      {!loading ? (
+        <div className="mb-4 flex flex-col gap-2 text-sm text-neutral-600 sm:flex-row sm:items-center sm:justify-between">
+          <span>
+            {total > 0
+              ? `Visar ${from}-${to} av ${total} medlemmar`
+              : "Inga medlemmar hittades"}
+          </span>
+          {totalPages > 1 ? <span>{`Sida ${page} av ${totalPages}`}</span> : null}
+        </div>
+      ) : null}
+
+      {loading ? (
+        <div className="ui-card text-neutral-600">Laddar medlemmar...</div>
+      ) : members.length === 0 ? (
+        <div className="ui-card text-neutral-600">
+          Ingen medlem matchar de valda filtren.
+        </div>
+      ) : (
         <div className="grid w-full grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
           {members.map((member: PublicUser) => (
             <Link
@@ -169,6 +220,8 @@ export const MembersPage = () => {
                 src={member.pictureUrl}
                 alt={`${member.firstname} ${member.lastname}`}
                 className="h-16 w-16 shrink-0 rounded-full"
+                loading="lazy"
+                decoding="async"
               />
               <div className="min-w-0">
                 <div className="truncate font-semibold text-neutral-900">
@@ -182,6 +235,32 @@ export const MembersPage = () => {
           ))}
         </div>
       )}
+
+      {totalPages > 1 ? (
+        <div className="mt-6 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+          <div className="text-sm text-neutral-600">{`Sida ${page} av ${totalPages}`}</div>
+          <div className="flex gap-2">
+            <Button
+              type="button"
+              variant="secondary"
+              disabled={loading || page <= 1}
+              onClick={() => setPage((current) => Math.max(1, current - 1))}
+            >
+              Föregående
+            </Button>
+            <Button
+              type="button"
+              variant="secondary"
+              disabled={loading || page >= totalPages}
+              onClick={() =>
+                setPage((current) => Math.min(totalPages, current + 1))
+              }
+            >
+              Nästa
+            </Button>
+          </div>
+        </div>
+      ) : null}
     </PageContainer>
   );
 };
