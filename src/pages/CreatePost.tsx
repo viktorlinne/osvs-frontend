@@ -209,11 +209,9 @@ export const CreatePost = () => {
           >
             Skapa
           </Button>
-          <Button className="ui-btn ui-btn-secondary">
-            <Link to=".." relative="path">
-              Avbryt
-            </Link>
-          </Button>
+          <Link to=".." relative="path" className="ui-btn ui-btn-secondary">
+            Avbryt
+          </Link>
         </div>
       </form>
     </PageContainer>

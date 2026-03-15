@@ -153,7 +153,7 @@ export const Profile = () => {
             await run(() => setMemberOfficials(userId, selectedOfficialIds));
           }
         } catch {
-          setGlobalError("Misslyckades att uppdatera tjänster");
+          setGlobalError("Misslyckades att uppdatera tjÃ¤nster");
         }
 
         try {
@@ -173,7 +173,7 @@ export const Profile = () => {
             setAwardDate("");
           }
         } catch {
-          setGlobalError("Misslyckades att tilldela utmärkelse");
+          setGlobalError("Misslyckades att tilldela utmÃ¤rkelse");
         }
 
         try {
@@ -205,22 +205,22 @@ export const Profile = () => {
     <PageContainer size="xl" className="ui-page">
       <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <Link to=".." relative="path" className="ui-link">
-          ← Tillbaka
+          â† Tillbaka
         </Link>
         <div className="flex flex-col gap-2 sm:flex-row">
-          {user && !isEditRoute && (
-            <Button className="ui-btn-primary">
-              <Link to="/profile/edit">Redigera</Link>
-            </Button>
-          )}
-          {user && (
-            <Button className="ui-btn-primary">
-              <Link to="/profile/attended">Närvaro</Link>
-            </Button>
-          )}
-          <Button className="ui-btn-primary">
-            <Link to="/profile/memberships">Medlemskap</Link>
-          </Button>
+          {user && !isEditRoute ? (
+            <Link to="/profile/edit" className="ui-btn ui-btn-primary">
+              Redigera
+            </Link>
+          ) : null}
+          {user ? (
+            <Link to="/profile/attended" className="ui-btn ui-btn-primary">
+              Närvaro
+            </Link>
+          ) : null}
+          <Link to="/profile/memberships" className="ui-btn ui-btn-primary">
+            Medlemskap
+          </Link>
         </div>
       </div>
       <h2 className="ui-page-title mb-4 mt-4">Din profil</h2>
@@ -303,11 +303,15 @@ export const Profile = () => {
             >
               {saving ? "Sparar..." : "Spara"}
             </Button>
-            <Button className="ui-btn-secondary" disabled={saving}>
-              <Link to=".." relative="path">
-                Avbryt
-              </Link>
-            </Button>
+            <Link
+              to=".."
+              relative="path"
+              className={`ui-btn ui-btn-secondary ${saving ? "pointer-events-none opacity-60" : ""}`}
+              aria-disabled={saving}
+              onClick={saving ? (event) => event.preventDefault() : undefined}
+            >
+              Avbryt
+            </Link>
           </div>
         ) : null}
       </form>

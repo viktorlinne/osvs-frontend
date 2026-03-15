@@ -354,13 +354,19 @@ export const MemberDetail = () => {
         {!isEditRoute && (
           <div className="flex flex-col gap-2 sm:flex-row">
             {canEdit && (
-              <Button className="ui-btn-primary">
-                <Link to={`/members/${matrikelnummer}/edit`}>Redigera</Link>
-              </Button>
+              <Link
+                to={`/members/${matrikelnummer}/edit`}
+                className="ui-btn ui-btn-primary"
+              >
+                Redigera
+              </Link>
             )}
-            <Button className="ui-btn-primary">
-              <Link to={`/members/${matrikelnummer}/attended`}>Närvaro</Link>
-            </Button>
+            <Link
+              to={`/members/${matrikelnummer}/attended`}
+              className="ui-btn ui-btn-primary"
+            >
+              Närvaro
+            </Link>
           </div>
         )}
       </div>
@@ -481,11 +487,9 @@ export const MemberDetail = () => {
               >
                 {saving ? "Sparar..." : "Spara"}
               </Button>
-              <Button className="ui-btn-secondary">
-                <Link to=".." relative="path">
-                  Avbryt
-                </Link>
-              </Button>
+              <Link to=".." relative="path" className="ui-btn ui-btn-secondary">
+                Avbryt
+              </Link>
             </div>
           ) : null}
         </form>

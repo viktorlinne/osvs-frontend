@@ -204,6 +204,7 @@ export function EventDetailEditForm({
 
       <div className="flex flex-col gap-2 py-2 sm:flex-row">
         <Button
+          type="button"
           className="ui-btn-primary"
           onClick={onSave}
           disabled={saving || !canSubmit}
@@ -212,6 +213,7 @@ export function EventDetailEditForm({
         </Button>
         {isAdmin && onDelete && (
           <Button
+            type="button"
             className="ui-btn-danger"
             onClick={onDelete}
             disabled={saving}
@@ -219,11 +221,9 @@ export function EventDetailEditForm({
             Radera
           </Button>
         )}
-        <Button className="ui-btn-secondary">
-          <Link to=".." relative="path">
-            Avbryt
-          </Link>
-        </Button>
+        <Link to=".." relative="path" className="ui-btn ui-btn-secondary">
+          Avbryt
+        </Link>
       </div>
     </div>
   );

@@ -100,9 +100,9 @@ export const LodgeDetail = () => {
           ← Tillbaka
         </Link>
         {canEdit && !isEditRoute && (
-          <Button className="ui-btn-primary">
-            <Link to={`/lodges/${id}/edit`}>Redigera</Link>
-          </Button>
+          <Link to={`/lodges/${id}/edit`} className="ui-btn ui-btn-primary">
+            Redigera
+          </Link>
         )}
       </div>
 
@@ -188,17 +188,16 @@ export const LodgeDetail = () => {
               </div>
               <div className="flex flex-col gap-2 py-2 sm:flex-row">
                 <Button
+                  type="button"
                   className="ui-btn-primary"
                   onClick={handleSave}
                   disabled={saving || !canSave}
                 >
                   {saving ? "Sparar..." : "Spara"}
                 </Button>
-                <Button className="ui-btn-secondary">
-                  <Link to=".." relative="path">
-                    Avbryt
-                  </Link>
-                </Button>
+                <Link to=".." relative="path" className="ui-btn ui-btn-secondary">
+                  Avbryt
+                </Link>
               </div>
             </div>
           ) : (

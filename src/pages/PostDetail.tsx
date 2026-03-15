@@ -181,9 +181,9 @@ export const PostDetail = () => {
           ← Tillbaka
         </Link>
         {canEdit && post && !isEditRoute && (
-          <Button className="ui-btn-primary">
-            <Link to={`/posts/${post.id}/edit`}>Redigera</Link>
-          </Button>
+          <Link to={`/posts/${post.id}/edit`} className="ui-btn ui-btn-primary">
+            Redigera
+          </Link>
         )}
       </div>
 
@@ -299,11 +299,9 @@ export const PostDetail = () => {
                 Radera
               </Button>
             )}
-            <Button className="ui-btn-secondary">
-              <Link to=".." relative="path">
-                Avbryt
-              </Link>
-            </Button>
+            <Link to=".." relative="path" className="ui-btn ui-btn-secondary">
+              Avbryt
+            </Link>
           </div>
         </form>
       )}

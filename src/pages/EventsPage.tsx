@@ -124,6 +124,7 @@ export const EventsPage = () => {
 
         <div className="flex flex-wrap gap-2">
           <Button
+            type="button"
             onClick={prevMonth}
             className="ui-btn-secondary"
             aria-label="Previous month"
@@ -131,6 +132,7 @@ export const EventsPage = () => {
             Förra
           </Button>
           <Button
+            type="button"
             onClick={jumpToToday}
             className="ui-btn-secondary"
             aria-label="Jump to current month"
@@ -138,6 +140,7 @@ export const EventsPage = () => {
             Idag
           </Button>
           <Button
+            type="button"
             onClick={nextMonth}
             className="ui-btn-secondary"
             aria-label="Next month"
@@ -146,9 +149,9 @@ export const EventsPage = () => {
           </Button>
           {user &&
             (user.roles ?? []).some((r) => ["Admin", "Editor"].includes(r)) && (
-              <Button>
-                <Link to="/events/create">Skapa</Link>
-              </Button>
+              <Link to="/events/create" className="ui-btn ui-btn-primary">
+                Skapa
+              </Link>
             )}
         </div>
       </div>

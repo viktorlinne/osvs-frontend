@@ -2,7 +2,7 @@
 import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
 import { EventDetailEditForm, EventDetailView } from "../components/events";
 import type { EventFormState } from "../components/events/EventDetailEditForm";
-import { Button, PageContainer } from "../components";
+import { PageContainer } from "../components";
 import { useAuth, useError } from "../context";
 import useFetch from "../hooks/useFetch";
 import {
@@ -401,9 +401,9 @@ export const EventDetail = () => {
           ← Tillbaka
         </Link>
         {canEdit && !isEditRoute && (
-          <Button className="ui-btn-primary">
-            <Link to={`/events/${id}/edit`}>Redigera</Link>
-          </Button>
+          <Link to={`/events/${id}/edit`} className="ui-btn ui-btn-primary">
+            Redigera
+          </Link>
         )}
       </div>
 

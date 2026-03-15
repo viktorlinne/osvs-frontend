@@ -115,11 +115,9 @@ export const MembersPage = () => {
         <h2 className="ui-page-title">Medlemmar</h2>
         {user &&
           (user.roles ?? []).some((r) => ["Admin", "Editor"].includes(r)) && (
-            <Button className="ui-btn-primary">
-              <Link to="/members/create">
-                Skapa
-              </Link>
-            </Button>
+            <Link to="/members/create" className="ui-btn ui-btn-primary">
+              Skapa
+            </Link>
           )}
       </div>
 
