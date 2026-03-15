@@ -18,15 +18,20 @@ import lodgesService from "../services/lodges";
 import { setMemberOfficials } from "../services/officials";
 import {
   adminUpdateUser,
+  type AchievementMutationResult,
   getPublicUserById,
+  type PictureUploadResult,
   getUserLodge,
   getUserRoles,
   postAchievement,
   setRoles,
   setUserLodge,
   uploadUserPicture,
+  type UserMutationResult,
 } from "../services/users";
 import type { UserLodgeResponse } from "../services/users";
+import type { MemberAllergiesResponse } from "../services/allergies";
+import type { MemberOfficialsResponse } from "../services/officials";
 import type {
   Achievement,
   Allergy,
@@ -40,47 +45,32 @@ import type {
 import { toUserProfileUpdatePayload } from "../utils/userProfileForm";
 import { applyApiFieldErrors } from "../utils/apiErrors";
 import { validateImageFile } from "../utils/formValidation";
-function mapRolesResponseToList(value: unknown): Role[] {
-  const raw = value as { roles?: unknown } | null | undefined;
-  const items = Array.isArray(value)
-    ? value
-    : Array.isArray(raw?.roles)
-      ? raw.roles
-      : [];
 
-  return items
-    .map((item) => {
-      const record = item as Record<string, unknown>;
-      const id = Number(record.id);
-      const name = String(record.name ?? record.role ?? record.roleName ?? "");
-      return Number.isFinite(id) && name ? { id, name } : null;
-    })
-    .filter((role): role is { id: number; name: string } => Boolean(role));
-}
+type MemberDetailUser = PublicUser & {
+  roles?: string[];
+};
 
-function mapMemberRoleNames(member: PublicUser | null): string[] {
-  if (!member) return [];
-  const roles = (member as { roles?: unknown }).roles;
-  if (!Array.isArray(roles)) return [];
+type MemberActionResult =
+  | PublicUser
+  | null
+  | UserMutationResult
+  | PictureUploadResult
+  | AchievementMutationResult
+  | MemberAllergiesResponse
+  | MemberOfficialsResponse;
 
-  return roles
-    .map((roleItem) => {
-      if (typeof roleItem === "string") return roleItem;
-      if (!roleItem || typeof roleItem !== "object") return "";
-      const role = roleItem as Record<string, unknown>;
-      return String(role.name ?? role.role ?? role.id ?? "");
-    })
-    .filter((name): name is string => Boolean(name));
+function readMemberRoleNames(member: MemberDetailUser | null): string[] {
+  return Array.isArray(member?.roles) ? member.roles : [];
 }
 
 export const MemberDetail = () => {
   const { matrikelnummer } = useParams<{ matrikelnummer: string }>();
-  const { run, data: member } = useFetch<PublicUser | null>();
+  const { run, data: member } = useFetch<MemberDetailUser | null>();
   const { run: runAvailable } = useFetch<Achievement[]>();
   const { run: runLodges } = useFetch<Lodge[]>();
-  const { run: runRoles } = useFetch<unknown>();
+  const { run: runRoles } = useFetch<Role[]>();
   const { run: runUserLodge } = useFetch<UserLodgeResponse>();
-  const { run: runAction } = useFetch<unknown>();
+  const { run: runAction } = useFetch<MemberActionResult>();
 
   const { setError: setGlobalError, clearError: clearGlobalError } = useError();
   const { user: authUser } = useAuth();
@@ -162,20 +152,14 @@ export const MemberDetail = () => {
       Array.isArray(detail.officialHistory) ? detail.officialHistory : [],
     );
 
-    let userObj: PublicUser | null = detail.user
-      ? (detail.user as PublicUser)
-      : null;
-    if (
-      shouldLoadRoleData &&
-      userObj &&
-      !Array.isArray((userObj as { roles?: unknown }).roles)
-    ) {
+    let userObj: MemberDetailUser | null = detail.user ? { ...detail.user } : null;
+    if (shouldLoadRoleData && userObj && !Array.isArray(userObj.roles)) {
       try {
         const roles = await getUserRoles(matrikelnummer);
         userObj = {
-          ...(userObj as Record<string, unknown>),
+          ...userObj,
           roles,
-        } as unknown as PublicUser;
+        };
       } catch {
         // Fallback to payload user without explicit roles.
       }
@@ -208,7 +192,7 @@ export const MemberDetail = () => {
 
     if (shouldLoadRoleData) {
       runRoles(() => listRoles())
-        .then((response) => setRolesList(mapRolesResponseToList(response)))
+        .then((roles) => setRolesList(roles))
         .catch(() => {
           // useFetch handles global error
         });
@@ -236,9 +220,13 @@ export const MemberDetail = () => {
   useEffect(() => {
     if (!member || rolesList.length === 0) return;
 
-    const memberRoles = mapMemberRoleNames(member);
+    const memberRoles = readMemberRoleNames(member);
     const ids = memberRoles
-      .map((roleName) => rolesList.find((role) => role.name === roleName)?.id)
+      .map(
+        (roleName) =>
+          rolesList.find((role) => (role.name ?? role.role ?? "") === roleName)
+            ?.id,
+      )
       .filter((value): value is number => typeof value === "number");
 
     setSelectedRoleIds(ids);

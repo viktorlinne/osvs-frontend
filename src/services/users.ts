@@ -1,5 +1,6 @@
 import api, { fetchData } from "./api";
 import type {
+  AddAchievementBody,
   Achievement,
   Allergy,
   AttendedEvent,
@@ -8,11 +9,36 @@ import type {
   Official,
   OfficialHistoryItem,
   PublicUser,
+  SetLodgeBody,
+  SetRolesBody,
+  UpdateUserProfileBody,
   UserMapPin,
 } from "../types";
 import { parseAllergies, parseOfficialHistory } from "./parsers/userMetadata";
+import {
+  readArrayField,
+  readBooleanField,
+  readNullableStringField,
+  readNumberField,
+  readObjectField,
+  readStringField,
+} from "./parsers/response";
 
 export type UserLodgeResponse = { lodge: Lodge | null } | null;
+
+export type UserMutationResult = {
+  success: boolean;
+};
+
+export type PictureUploadResult = {
+  pictureKey: string | null;
+  pictureUrl: string | null;
+};
+
+export type AchievementMutationResult = UserMutationResult & {
+  id: number | null;
+  awardedAt: string | null;
+};
 
 export type ListUsersFilters = {
   name?: string;
@@ -29,6 +55,12 @@ export type PublicUserDetailResponse = {
   officials: Official[];
   officialHistory: OfficialHistoryItem[];
 };
+
+function parseMutationResult(source: unknown): UserMutationResult {
+  return {
+    success: readBooleanField(source, "success") ?? false,
+  };
+}
 
 type AttendedEventPayload = {
   id?: unknown;
@@ -116,30 +148,42 @@ function parseUserMapPins(value: unknown): UserMapPin[] {
     );
 }
 
-export async function updateMe(payload: Record<string, unknown>) {
-  return fetchData(api.put("/users/me", payload));
+export async function updateMe(
+  payload: UpdateUserProfileBody,
+): Promise<PublicUser | null> {
+  const response = await fetchData(api.put("/users/me", payload));
+  return (readObjectField(response, "user") as PublicUser | null) ?? null;
 }
 
 export async function adminUpdateUser(
   matrikelnummer: number | string,
-  payload: Record<string, unknown>,
-) {
-  return fetchData(api.put(`/users/${matrikelnummer}`, payload));
+  payload: UpdateUserProfileBody,
+): Promise<PublicUser | null> {
+  const response = await fetchData(api.put(`/users/${matrikelnummer}`, payload));
+  return (readObjectField(response, "user") as PublicUser | null) ?? null;
 }
 
-export async function uploadMyPicture(file: File) {
+export async function uploadMyPicture(file: File): Promise<PictureUploadResult> {
   const fd = new FormData();
   fd.append("picture", file);
-  return fetchData(api.post("/users/me/picture", fd));
+  const response = await fetchData(api.post("/users/me/picture", fd));
+  return {
+    pictureKey: readStringField(response, "pictureKey"),
+    pictureUrl: readStringField(response, "pictureUrl"),
+  };
 }
 
 export async function uploadUserPicture(
   matrikelnummer: number | string,
   file: File,
-) {
+): Promise<PictureUploadResult> {
   const fd = new FormData();
   fd.append("picture", file);
-  return fetchData(api.post(`/users/${matrikelnummer}/picture`, fd));
+  const response = await fetchData(api.post(`/users/${matrikelnummer}/picture`, fd));
+  return {
+    pictureKey: readStringField(response, "pictureKey"),
+    pictureUrl: readStringField(response, "pictureUrl"),
+  };
 }
 
 export async function listUsers(
@@ -162,39 +206,28 @@ export async function listUsers(
   const query = search.toString();
   const url = query ? `/users?${query}` : "/users";
   const res = await fetchData(api.get(url));
-  return ((res as { users?: PublicUser[] })?.users ?? []) as PublicUser[];
+  return readArrayField<PublicUser>(res, "users");
 }
 
 export async function listUsersMapPins(): Promise<UserMapPin[]> {
   const res = await fetchData(api.get("/users/map"));
-  return parseUserMapPins((res as { users?: unknown })?.users);
+  return parseUserMapPins(readArrayField<unknown>(res, "users"));
 }
 
 export async function getPublicUserById(
   matrikelnummer: number | string,
 ): Promise<PublicUserDetailResponse> {
   const res = await fetchData(api.get(`/users/${matrikelnummer}`));
-  const payload = res as {
-    user?: PublicUser | null;
-    achievements?: Achievement[];
-    allergies?: Allergy[];
-    officials?: Official[];
-    officialHistory?: OfficialHistoryItem[];
-  };
-  const allergies = Array.isArray(payload?.allergies)
-    ? parseAllergies(payload.allergies)
-    : [];
-  const officialHistory = Array.isArray(payload?.officialHistory)
-    ? parseOfficialHistory(payload.officialHistory)
-    : [];
+  const allergies = parseAllergies(readArrayField<unknown>(res, "allergies"));
+  const officialHistory = parseOfficialHistory(
+    readArrayField<unknown>(res, "officialHistory"),
+  );
 
   return {
-    user: payload?.user ?? null,
-    achievements: Array.isArray(payload?.achievements)
-      ? payload.achievements
-      : [],
+    user: (readObjectField(res, "user") as PublicUser | null) ?? null,
+    achievements: readArrayField<Achievement>(res, "achievements"),
     allergies,
-    officials: Array.isArray(payload?.officials) ? payload.officials : [],
+    officials: readArrayField<Official>(res, "officials"),
     officialHistory,
   };
 }
@@ -203,9 +236,9 @@ export async function getUserRoles(
   matrikelnummer: number | string,
 ): Promise<string[]> {
   const res = await fetchData(api.get(`/users/${matrikelnummer}/roles`));
-  const roles = (res as { roles?: unknown[] })?.roles;
-  if (!Array.isArray(roles)) return [];
-  return roles.filter((role): role is string => typeof role === "string");
+  return readArrayField<unknown>(res, "roles").filter(
+    (role): role is string => typeof role === "string",
+  );
 }
 
 export async function getUserLodge(
@@ -217,35 +250,52 @@ export async function getUserLodge(
 export async function setUserLodge(
   matrikelnummer: number | string,
   lodgeId: number | null,
-) {
-  return fetchData(api.post(`/users/${matrikelnummer}/lodges`, { lodgeId }));
+): Promise<UserMutationResult> {
+  const payload: SetLodgeBody = { lodgeId };
+  return parseMutationResult(
+    await fetchData(api.post(`/users/${matrikelnummer}/lodges`, payload)),
+  );
 }
 
 export async function setUserLocation(
   matrikelnummer: number | string,
   payload: { lat: number; lng: number },
-) {
-  return fetchData(api.put(`/users/${matrikelnummer}/location`, payload));
+): Promise<UserMutationResult> {
+  return parseMutationResult(
+    await fetchData(api.put(`/users/${matrikelnummer}/location`, payload)),
+  );
 }
 
 export async function clearUserLocationOverride(
   matrikelnummer: number | string,
-) {
-  return fetchData(api.delete(`/users/${matrikelnummer}/location-override`));
+): Promise<UserMutationResult> {
+  return parseMutationResult(
+    await fetchData(api.delete(`/users/${matrikelnummer}/location-override`)),
+  );
 }
 
 export async function setRoles(
   matrikelnummer: number | string,
   roleIds: number[],
-) {
-  return fetchData(api.post(`/users/${matrikelnummer}/roles`, { roleIds }));
+): Promise<UserMutationResult> {
+  const payload: SetRolesBody = { roleIds };
+  return parseMutationResult(
+    await fetchData(api.post(`/users/${matrikelnummer}/roles`, payload)),
+  );
 }
 
 export async function postAchievement(
   matrikelnummer: number | string,
-  payload: { achievementId: number; awardedAt?: string },
-) {
-  return fetchData(api.post(`/users/${matrikelnummer}/achievements`, payload));
+  payload: AddAchievementBody,
+): Promise<AchievementMutationResult> {
+  const response = await fetchData(
+    api.post(`/users/${matrikelnummer}/achievements`, payload),
+  );
+  return {
+    ...parseMutationResult(response),
+    id: readNumberField(response, "id"),
+    awardedAt: readNullableStringField(response, "awardedAt"),
+  };
 }
 
 export async function getMyAttendedEvents(): Promise<AttendedEventsResponse> {

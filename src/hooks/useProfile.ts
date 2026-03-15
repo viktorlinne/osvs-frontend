@@ -51,29 +51,13 @@ export const useProfile = ({ isEditRoute }: { isEditRoute: boolean }) => {
         }
 
         try {
-          const r = await listRoles();
-          let items: Array<Record<string, unknown>> = [];
-          const raw = r as Record<string, unknown> | undefined;
-          if (Array.isArray(r)) items = r as Array<Record<string, unknown>>;
-          else if (raw && Array.isArray(raw.roles))
-            items = raw.roles as Array<Record<string, unknown>>;
-
-          const rolesArray = items.map((item) => ({
-            id: Number(item.id),
-            name: String(item.name ?? item.role ?? item.roleName ?? ""),
-          }));
+          const rolesArray = await listRoles();
           if (mounted) setRolesList(rolesArray);
 
           const ids = (user?.roles ?? [])
             .map((rn) => {
-              const rnName =
-                typeof rn === "string"
-                  ? rn
-                  : ((): string => {
-                      const rec = rn as Record<string, unknown>;
-                      return String(rec["name"] ?? rec["role"] ?? rec["id"] ?? "");
-                    })();
-              return rolesArray.find((x) => x.name === rnName)?.id;
+              const rnName = typeof rn === "string" ? rn : "";
+              return rolesArray.find((x) => (x.name ?? x.role ?? "") === rnName)?.id;
             })
             .filter((v): v is number => Boolean(v));
           if (mounted) setSelectedRoleIds(ids);
