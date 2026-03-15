@@ -14,6 +14,7 @@ import { useAuth, useError } from "../context";
 import useFetch from "../hooks/useFetch";
 import { normalizeLodgeIds } from "../components/lodgeSelectionUtils";
 import { deletePost, getPost, listLodges, updatePost } from "../services";
+import type { PostMutationResult } from "../services/posts";
 import type { Lodge, Post, UpdatePostForm } from "../types";
 import { applyApiFieldErrors, getApiErrorMessage } from "../utils/apiErrors";
 import {
@@ -26,7 +27,7 @@ export const PostDetail = () => {
   const { id } = useParams<{ id: string }>();
   const { setError: setGlobalError, clearError: clearGlobalError } = useError();
   const { data: post, run } = useFetch<Post | null>();
-  const { run: runSubmit, loading: submitting } = useFetch<unknown>();
+  const { run: runSubmit, loading: submitting } = useFetch<PostMutationResult>();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -139,9 +140,7 @@ export const PostDetail = () => {
     }
 
     try {
-      await runSubmit(() =>
-        updatePost(id as string, fd as unknown as Record<string, unknown>),
-      );
+      await runSubmit(() => updatePost(id as string, fd));
       try {
         await run(() => getPost(id as string));
       } catch {

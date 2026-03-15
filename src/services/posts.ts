@@ -1,5 +1,11 @@
 import api, { fetchData } from "./api";
 import type { Post } from "../types";
+import {
+  readArrayField,
+  readBooleanField,
+  readNumberField,
+  readObjectField,
+} from "./parsers/response";
 
 type ListPostsParams = {
   lodgeIds?: Array<number | string>;
@@ -13,6 +19,20 @@ export type PublicumPostListItem = {
   description: string;
   pictureUrl: string;
 };
+
+export type PostMutationResult = {
+  success: boolean;
+};
+
+export type CreatePostResult = PostMutationResult & {
+  id: number | null;
+};
+
+function parseMutationResult(source: unknown): PostMutationResult {
+  return {
+    success: readBooleanField(source, "success") ?? false,
+  };
+}
 
 function normalizeOptionalBoolean(value: unknown): boolean | undefined {
   if (typeof value === "boolean") return value;
@@ -65,16 +85,14 @@ export async function listPosts(params?: ListPostsParams): Promise<Post[]> {
   const query = search.toString();
   const url = query ? `/posts?${query}` : "/posts";
   const res = await fetchData(api.get(url));
-  const raw = (res as { posts: Post[] })?.posts;
-  if (!Array.isArray(raw)) return [];
+  const raw = readArrayField<Post>(res, "posts");
   const normalized = raw.map(normalizePost).filter(Boolean) as Post[];
   return normalized;
 }
 
 export async function listPublicumPosts(): Promise<PublicumPostListItem[]> {
   const res = await fetchData(api.get("/posts/publicum"));
-  const raw = (res as { posts?: PublicumPostListItem[] })?.posts;
-  if (!Array.isArray(raw)) return [];
+  const raw = readArrayField<PublicumPostListItem>(res, "posts");
   return raw
     .map((item) => ({
       id: Number(item?.id),
@@ -93,26 +111,30 @@ export async function listPublicumPosts(): Promise<PublicumPostListItem[]> {
 
 export async function getPost(id: number | string): Promise<Post | null> {
   const res = await fetchData(api.get(`/posts/${id}`));
-  const raw = (res as { post: Post })?.post;
+  const raw = (readObjectField(res, "post") as Post | null) ?? null;
   if (!raw) return null;
   return normalizePost(raw);
 }
 
-export async function createPost(payload: Record<string, unknown>) {
-  return fetchData(api.post("/posts", payload));
+export async function createPost(payload: FormData): Promise<CreatePostResult> {
+  const response = await fetchData(api.post("/posts", payload));
+  return {
+    ...parseMutationResult(response),
+    id: readNumberField(response, "id"),
+  };
 }
 
 export async function updatePost(
   id: number | string,
-  payload: Record<string, unknown>
-) {
-  return fetchData(api.put(`/posts/${id}`, payload));
+  payload: FormData,
+): Promise<PostMutationResult> {
+  return parseMutationResult(await fetchData(api.put(`/posts/${id}`, payload)));
 }
 
 export async function deletePost(
   id: number | string,
-): Promise<{ success?: boolean } | unknown> {
-  return fetchData<{ success?: boolean }>(api.delete(`/posts/${id}`));
+): Promise<PostMutationResult> {
+  return parseMutationResult(await fetchData(api.delete(`/posts/${id}`)));
 }
 
 export default {

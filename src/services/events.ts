@@ -8,6 +8,41 @@ import type {
   EventAttendanceRow,
   PatchEventAttendanceBody,
 } from "../types";
+import {
+  readArrayField,
+  readBooleanField,
+  readNullableStringField,
+  readNumberField,
+  readObjectField,
+} from "./parsers/response";
+
+export type EventMutationResult = {
+  success: boolean;
+};
+
+export type CreateEventResult = EventMutationResult & {
+  id: number | null;
+};
+
+export type SetRsvpResult = EventMutationResult & {
+  status: string | null;
+};
+
+export type EventFoodResponse = {
+  bookFood: boolean | null;
+};
+
+export type SetFoodResult = EventMutationResult & EventFoodResponse;
+
+export type PatchEventAttendanceResult = EventMutationResult & {
+  row: EventAttendanceRow | null;
+};
+
+function parseMutationResult(source: unknown): EventMutationResult {
+  return {
+    success: readBooleanField(source, "success") ?? false,
+  };
+}
 
 export async function listEvents(): Promise<{ events: EventRecord[] }> {
   return fetchData<{ events: EventRecord[] }>(api.get("/events"));
@@ -23,8 +58,9 @@ export async function listUpcomingEvents(
 
 export async function getEvent(
   id: number | string,
-): Promise<{ event?: EventRecord | null } | unknown> {
-  return fetchData<{ event?: EventRecord | null }>(api.get(`/events/${id}`));
+): Promise<EventRecord | null> {
+  const response = await fetchData(api.get(`/events/${id}`));
+  return (readObjectField(response, "event") as EventRecord | null) ?? null;
 }
 
 export async function listMyEvents(): Promise<{ events: EventRecord[] }> {
@@ -33,99 +69,109 @@ export async function listMyEvents(): Promise<{ events: EventRecord[] }> {
 
 export async function createEvent(
   payload: CreateEventBody,
-): Promise<{ success?: boolean; id?: number } | unknown> {
-  return fetchData<{ success?: boolean; id?: number }>(
-    api.post(`/events`, payload),
-  );
+): Promise<CreateEventResult> {
+  const response = await fetchData(api.post(`/events`, payload));
+  return {
+    ...parseMutationResult(response),
+    id: readNumberField(response, "id"),
+  };
 }
 
 export async function updateEvent(
   id: number | string,
   payload: UpdateEventBody,
-): Promise<{ success?: boolean } | unknown> {
-  return fetchData<{ success?: boolean }>(api.put(`/events/${id}`, payload));
+): Promise<EventMutationResult> {
+  return parseMutationResult(await fetchData(api.put(`/events/${id}`, payload)));
 }
 
 export async function deleteEvent(
   id: number | string,
-): Promise<{ success?: boolean } | unknown> {
-  return fetchData<{ success?: boolean }>(api.delete(`/events/${id}`));
+): Promise<EventMutationResult> {
+  return parseMutationResult(await fetchData(api.delete(`/events/${id}`)));
 }
 
 export async function linkLodgeEvent(
   eventId: number | string,
   lodgeId: number | string,
-): Promise<{ success?: boolean } | unknown> {
-  return fetchData<{ success?: boolean }>(
-    api.post(`/events/${eventId}/lodges`, { lodgeId }),
+): Promise<EventMutationResult> {
+  return parseMutationResult(
+    await fetchData(api.post(`/events/${eventId}/lodges`, { lodgeId })),
   );
 }
 
 export async function unlinkLodgeEvent(
   eventId: number | string,
   lodgeId: number | string,
-): Promise<{ success?: boolean } | unknown> {
-  return fetchData(
+): Promise<EventMutationResult> {
+  return parseMutationResult(await fetchData(
     api.delete<{ success?: boolean }>(`/events/${eventId}/lodges`, {
       data: { lodgeId },
     }),
-  );
+  ));
 }
 
 export async function listEventLodges(
   eventId: number | string,
-): Promise<{ lodges: Lodge[] } | unknown> {
-  return fetchData<{ lodges: Lodge[] }>(api.get(`/events/${eventId}/lodges`));
+): Promise<Lodge[]> {
+  const response = await fetchData(api.get(`/events/${eventId}/lodges`));
+  return readArrayField<Lodge>(response, "lodges");
 }
 
 export async function setRsvp(
   eventId: number | string,
   status: RsvpApiStatus,
-): Promise<{ success?: boolean; status?: string } | unknown> {
-  return fetchData<{ success?: boolean; status?: string }>(
-    api.post(`/events/${eventId}/rsvp`, { status }),
-  );
+): Promise<SetRsvpResult> {
+  const response = await fetchData(api.post(`/events/${eventId}/rsvp`, { status }));
+  return {
+    ...parseMutationResult(response),
+    status: readNullableStringField(response, "status"),
+  };
 }
 
 export async function getRsvp(
   eventId: number | string,
-): Promise<{ rsvp: string | null } | unknown> {
-  return fetchData<{ rsvp: string | null }>(api.get(`/events/${eventId}/rsvp`));
+): Promise<string | null> {
+  const response = await fetchData(api.get(`/events/${eventId}/rsvp`));
+  return readNullableStringField(response, "rsvp");
 }
 
 export async function getFood(
   eventId: number | string,
-): Promise<{ bookFood: boolean | null } | unknown> {
-  return fetchData<{ bookFood: boolean | null }>(
-    api.get(`/events/${eventId}/food`),
-  );
+): Promise<boolean | null> {
+  const response = await fetchData(api.get(`/events/${eventId}/food`));
+  return readBooleanField(response, "bookFood");
 }
 
 export async function setFood(
   eventId: number | string,
   bookFood: boolean,
-): Promise<{ success?: boolean; bookFood?: boolean } | unknown> {
-  return fetchData<{ success?: boolean; bookFood?: boolean }>(
-    api.post(`/events/${eventId}/food`, { bookFood }),
-  );
+): Promise<SetFoodResult> {
+  const response = await fetchData(api.post(`/events/${eventId}/food`, { bookFood }));
+  return {
+    ...parseMutationResult(response),
+    bookFood: readBooleanField(response, "bookFood"),
+  };
 }
 
 export async function listEventAttendances(
   eventId: number | string,
-): Promise<{ attendances: EventAttendanceRow[] } | unknown> {
-  return fetchData<{ attendances: EventAttendanceRow[] }>(
-    api.get(`/events/${eventId}/attendances`),
-  );
+): Promise<EventAttendanceRow[]> {
+  const response = await fetchData(api.get(`/events/${eventId}/attendances`));
+  return readArrayField<EventAttendanceRow>(response, "attendances");
 }
 
 export async function patchEventAttendance(
   eventId: number | string,
   uid: number | string,
   payload: PatchEventAttendanceBody,
-): Promise<{ success?: boolean; row?: EventAttendanceRow } | unknown> {
-  return fetchData<{ success?: boolean; row?: EventAttendanceRow }>(
+): Promise<PatchEventAttendanceResult> {
+  const response = await fetchData(
     api.patch(`/events/${eventId}/attendances/${uid}`, payload),
   );
+  return {
+    ...parseMutationResult(response),
+    row: (readObjectField(response, "row") as EventAttendanceRow | null) ?? null,
+  };
 }
 
 export default {

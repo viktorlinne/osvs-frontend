@@ -14,6 +14,7 @@ import { useError } from "../context";
 import useFetch from "../hooks/useFetch";
 import { normalizeLodgeIds } from "../components/lodgeSelectionUtils";
 import { createPost, listLodges } from "../services";
+import type { CreatePostResult } from "../services/posts";
 import type { CreatePostForm, Lodge } from "../types";
 import { applyApiFieldErrors, getApiErrorMessage } from "../utils/apiErrors";
 import {
@@ -23,7 +24,7 @@ import {
 
 export const CreatePost = () => {
   const { clearError: clearGlobalError, setError: setGlobalError } = useError();
-  const { run, loading } = useFetch<{ success: boolean; id?: number }>();
+  const { run, loading } = useFetch<CreatePostResult>();
   const navigate = useNavigate();
 
   const [picture, setPicture] = useState<File | null>(null);
@@ -99,9 +100,7 @@ export const CreatePost = () => {
     fd.append("picture", picture);
 
     try {
-      const res = await run(() =>
-        createPost(fd as unknown as Record<string, unknown>),
-      );
+      const res = await run(() => createPost(fd));
       const id = res?.id ?? null;
       if (id) navigate(`/posts/${id}`);
       else navigate("/posts");

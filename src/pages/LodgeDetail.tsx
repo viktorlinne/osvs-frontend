@@ -11,6 +11,7 @@ import {
 import { useAuth, useError } from "../context";
 import useFetch from "../hooks/useFetch";
 import { getLodge, updateLodge } from "../services/lodges";
+import type { LodgeMutationResult } from "../services/lodges";
 import type { Lodge } from "../types";
 import { getApiErrorMessage, getApiFieldErrors } from "../utils/apiErrors";
 import { getLodgeFormErrors } from "../utils/formValidation";
@@ -18,7 +19,7 @@ import { getLodgeFormErrors } from "../utils/formValidation";
 export const LodgeDetail = () => {
   const { id } = useParams<{ id: string }>();
   const { run, data: lodge } = useFetch<Lodge | null>();
-  const { run: runAction, loading: saving } = useFetch<unknown>();
+  const { run: runAction, loading: saving } = useFetch<LodgeMutationResult>();
   const { setError: setGlobalError, clearError: clearGlobalError } = useError();
   const { user } = useAuth();
   const location = useLocation();
@@ -50,11 +51,7 @@ export const LodgeDetail = () => {
 
   useEffect(() => {
     if (!id) return setGlobalError("Saknar loge-id");
-    void run(async () => {
-      const resp = await getLodge(id);
-      const l = (resp as { lodge?: Lodge })?.lodge ?? null;
-      return l as Lodge | null;
-    }).catch(() => {});
+    void run(() => getLodge(id)).catch(() => {});
   }, [id, run, setGlobalError]);
 
   useEffect(() => {
@@ -83,11 +80,7 @@ export const LodgeDetail = () => {
         email: form.email.trim() || undefined,
       };
       await runAction(() => updateLodge(id, payload));
-      await run(async () => {
-        const resp = await getLodge(id);
-        const l = (resp as { lodge?: Lodge })?.lodge ?? null;
-        return l as Lodge | null;
-      });
+      await run(() => getLodge(id));
       navigate(`/lodges/${id}`);
     } catch (error: unknown) {
       const fields = getApiFieldErrors(error);

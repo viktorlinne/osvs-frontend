@@ -27,23 +27,54 @@ import {
   unlinkLodgeEvent,
   updateEvent,
 } from "../services/events";
+import type {
+  EventMutationResult,
+  PatchEventAttendanceResult,
+  SetFoodResult,
+  SetRsvpResult,
+} from "../services/events";
 import { listLodges } from "../services/lodges";
-import type { Event as EventRecord, EventAttendanceRow, Lodge } from "../types";
+import type {
+  Event as EventRecord,
+  EventAttendanceRow,
+  Lodge,
+  UpdateEventPayload,
+} from "../types";
 
 type AttendanceField = "rsvp" | "bookFood" | "attended" | "paymentPaid";
+
+function hasBookFoodResult(
+  value:
+    | EventMutationResult
+    | SetRsvpResult
+    | SetFoodResult
+    | PatchEventAttendanceResult
+    | void,
+): value is SetFoodResult {
+  return Boolean(value && typeof value === "object" && "bookFood" in value);
+}
+
+function hasAttendanceRowResult(
+  value:
+    | EventMutationResult
+    | SetRsvpResult
+    | SetFoodResult
+    | PatchEventAttendanceResult
+    | void,
+): value is PatchEventAttendanceResult {
+  return Boolean(value && typeof value === "object" && "row" in value);
+}
 
 export const EventDetail = () => {
   const { id } = useParams<{ id: string }>();
   const { run, data: event } = useFetch<EventRecord | null>();
-  const { run: runAction, loading: saving } = useFetch<unknown>();
+  const { run: runAction, loading: saving } = useFetch<
+    EventMutationResult | SetRsvpResult | SetFoodResult | PatchEventAttendanceResult | void
+  >();
   const { run: runLodges, data: lodges } = useFetch<Lodge[]>();
   const { run: runLinked } = useFetch<Lodge[]>();
-  const { run: runRsvpFetch, loading: rsvpLoading } = useFetch<{
-    rsvp: string | null;
-  }>();
-  const { run: runFoodFetch, loading: foodLoading } = useFetch<{
-    bookFood: boolean | null;
-  }>();
+  const { run: runRsvpFetch, loading: rsvpLoading } = useFetch<string | null>();
+  const { run: runFoodFetch, loading: foodLoading } = useFetch<boolean | null>();
   const {
     run: runAttendances,
     data: attendances,
@@ -116,8 +147,7 @@ export const EventDetail = () => {
     }
 
     run(async () => {
-      const response = await getEvent(id);
-      const fetchedEvent = (response as { event?: EventRecord })?.event ?? null;
+      const fetchedEvent = await getEvent(id);
       if (fetchedEvent) {
         setForm({
           title: fetchedEvent.title ?? "",
@@ -140,39 +170,29 @@ export const EventDetail = () => {
     const eventId = Number(event.id);
     if (!Number.isFinite(eventId)) return;
 
-    const requests: Promise<unknown>[] = [
+    const requests: Array<Promise<unknown>> = [
       runLodges(() => listLodges()).catch(() => {
         // useFetch handles global error presentation
       }),
       runLinked(async () => {
-        const linkedResp = await listEventLodges(eventId);
-        const linked =
-          (linkedResp as { lodges?: Lodge[] })?.lodges ?? linkedResp ?? [];
-        const linkedArray = Array.isArray(linked) ? linked : [];
-        const parsedIds = linkedArray
+        const linked = await listEventLodges(eventId);
+        const parsedIds = linked
           .map((lodge) => Number(lodge.id))
           .filter((value) => Number.isFinite(value));
         setOriginalLinkedIds(parsedIds);
         setLinkedIds(parsedIds);
-        return linkedArray;
+        return linked;
       }).catch(() => {
         // useFetch handles global error presentation
       }),
       runRsvpFetch(async () => {
-        const response = await getRsvp(eventId);
-        const payload = response as { rsvp: string | null };
-        setRsvpStatus(payload.rsvp ?? null);
-        return payload;
+        const status = await getRsvp(eventId);
+        setRsvpStatus(status);
+        return status;
       }).catch(() => {
         // useFetch handles global error presentation
       }),
-      runAttendances(async () => {
-        const response = await listEventAttendances(eventId);
-        const rows =
-          (response as { attendances?: EventAttendanceRow[] })?.attendances ??
-          [];
-        return Array.isArray(rows) ? rows : [];
-      }).catch(() => {
+      runAttendances(() => listEventAttendances(eventId)).catch(() => {
         // useFetch handles global error presentation
       }),
     ];
@@ -180,10 +200,9 @@ export const EventDetail = () => {
     if (event.food) {
       requests.push(
         runFoodFetch(async () => {
-          const response = await getFood(eventId);
-          const payload = response as { bookFood: boolean | null };
-          setBookFoodStatus(payload.bookFood ?? null);
-          return payload;
+          const bookFood = await getFood(eventId);
+          setBookFoodStatus(bookFood);
+          return bookFood;
         }).catch(() => {
           // useFetch handles global error presentation
         }),
@@ -215,7 +234,7 @@ export const EventDetail = () => {
     }
 
     try {
-      const payload: Record<string, unknown> = {
+      const payload: UpdateEventPayload = {
         title: form.title,
         description: form.description,
         startDate: form.startDate || null,
@@ -243,9 +262,7 @@ export const EventDetail = () => {
       }
 
       await run(async () => {
-        const response = await getEvent(id);
-        const fetchedEvent =
-          (response as { event?: EventRecord }).event ?? null;
+        const fetchedEvent = await getEvent(id);
         if (fetchedEvent) {
           setForm({
             title: fetchedEvent.title ?? "",
@@ -303,13 +320,7 @@ export const EventDetail = () => {
       await runAction(() => setRsvp(eventId, status));
       setRsvpStatus(status);
       if (status !== "going") setBookFoodStatus(false);
-      await runAttendances(async () => {
-        const response = await listEventAttendances(eventId);
-        const rows =
-          (response as { attendances?: EventAttendanceRow[] })?.attendances ??
-          [];
-        return Array.isArray(rows) ? rows : [];
-      });
+      await runAttendances(() => listEventAttendances(eventId));
     } catch {
       setGlobalError("Misslyckades att uppdatera osa");
     }
@@ -322,17 +333,12 @@ export const EventDetail = () => {
 
     try {
       const response = await runAction(() => setFood(eventId, value));
-      const payload = response as { bookFood?: boolean };
       setBookFoodStatus(
-        typeof payload.bookFood === "boolean" ? payload.bookFood : value,
+        hasBookFoodResult(response) && typeof response.bookFood === "boolean"
+          ? response.bookFood
+          : value,
       );
-      await runAttendances(async () => {
-        const rowsResp = await listEventAttendances(eventId);
-        const rows =
-          (rowsResp as { attendances?: EventAttendanceRow[] })?.attendances ??
-          [];
-        return Array.isArray(rows) ? rows : [];
-      });
+      await runAttendances(() => listEventAttendances(eventId));
     } catch {
       setGlobalError("Misslyckades att uppdatera matbokningen");
     }
@@ -369,30 +375,18 @@ export const EventDetail = () => {
       const response = await runAction(() =>
         patchEventAttendance(eventId, uid, payload),
       );
-      const row = (response as { row?: EventAttendanceRow })?.row;
+      const row = hasAttendanceRowResult(response) ? response.row : null;
       if (row) {
         setAttendancesData((prev) => {
           if (!Array.isArray(prev)) return prev;
           return prev.map((item) => (item.uid === uid ? row : item));
         });
       } else {
-        await runAttendances(async () => {
-          const rowsResp = await listEventAttendances(eventId);
-          const rows =
-            (rowsResp as { attendances?: EventAttendanceRow[] })?.attendances ??
-            [];
-          return Array.isArray(rows) ? rows : [];
-        });
+        await runAttendances(() => listEventAttendances(eventId));
       }
     } catch {
       setGlobalError("Misslyckades att uppdatera närvaron");
-      await runAttendances(async () => {
-        const rowsResp = await listEventAttendances(eventId);
-        const rows =
-          (rowsResp as { attendances?: EventAttendanceRow[] })?.attendances ??
-          [];
-        return Array.isArray(rows) ? rows : [];
-      }).catch(() => {
+      await runAttendances(() => listEventAttendances(eventId)).catch(() => {
         // useFetch handles global error presentation
       });
     } finally {

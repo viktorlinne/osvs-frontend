@@ -12,6 +12,7 @@ import {
 import { useAuth, useError } from "../context";
 import useFetch from "../hooks/useFetch";
 import { createEvent as createEventSvc } from "../services";
+import type { CreateEventResult } from "../services/events";
 import { listLodges } from "../services/lodges";
 import type { CreateEventPayload, Lodge } from "../types";
 import { getApiErrorMessage, getApiFieldErrors } from "../utils/apiErrors";
@@ -27,7 +28,7 @@ export const CreateEvent = () => {
   );
 
   const { run: runLodges, data: lodges } = useFetch<Lodge[]>();
-  const { run: runSubmit, loading: saving } = useFetch<unknown>();
+  const { run: runSubmit, loading: saving } = useFetch<CreateEventResult>();
 
   const [form, setForm] = useState({
     title: "",
@@ -94,20 +95,8 @@ export const CreateEvent = () => {
       };
 
       const resp = await runSubmit(() => createEventSvc(payload));
-      const raw = (resp as Record<string, unknown> | null) ?? null;
-      const maybeId = raw
-        ? (raw.id ?? (raw.event as Record<string, unknown> | undefined)?.id)
-        : null;
-      let createdIdNum: number | null = null;
-      if (typeof maybeId === "number" && Number.isFinite(maybeId)) {
-        createdIdNum = maybeId;
-      } else if (typeof maybeId === "string" && maybeId.trim() !== "") {
-        const parsed = Number(maybeId);
-        if (Number.isFinite(parsed)) createdIdNum = parsed;
-      }
-
-      if (createdIdNum !== null) {
-        navigate(`/events/${createdIdNum}`);
+      if (resp.id !== null) {
+        navigate(`/events/${resp.id}`);
       } else {
         navigate("/events");
       }
