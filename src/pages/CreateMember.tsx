@@ -11,8 +11,10 @@ import {
 } from "../components";
 import useError from "../context/useError";
 import useFetch from "../hooks/useFetch";
-import { setMemberAllergies } from "../services/allergies";
-import { registerMember } from "../services/auth";
+import {
+  registerMember,
+  type RegisterMemberResponse,
+} from "../services/auth";
 import { listLodges } from "../services/lodges";
 import type { Lodge, RegisterForm } from "../types";
 import { applyApiFieldErrors, getApiErrorMessage } from "../utils/apiErrors";
@@ -21,19 +23,14 @@ import {
   validateImageFile,
 } from "../utils/formValidation";
 
-type RegisterResponse = {
-  user?: { matrikelnummer?: unknown };
-};
-
 export const CreateMember = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [picture, setPicture] = useState<File | null>(null);
-  const [createdUserId, setCreatedUserId] = useState<number | null>(null);
   const [selectedAllergyIds, setSelectedAllergyIds] = useState<number[]>([]);
   const [lodges, setLodges] = useState<Lodge[]>([]);
   const { run: runLodges, loading: lodgesLoading } = useFetch<Lodge[]>();
-  const { run: runSubmit } = useFetch<unknown>();
+  const { run: runSubmit } = useFetch<RegisterMemberResponse>();
 
   const { setError } = useError();
 
@@ -62,73 +59,45 @@ export const CreateMember = () => {
     },
   });
 
-  const pictureError =
-    createdUserId === null
-      ? validateImageFile(picture, { required: true })
-      : null;
+  const pictureError = validateImageFile(picture, { required: true });
 
   async function onSubmit(values: RegisterForm) {
     setError(null);
     clearErrors();
     setLoading(true);
+
     try {
-      let userId = createdUserId;
-      if (userId === null) {
-        const picErr = validateImageFile(picture, { required: true });
-        if (picErr) {
-          setFieldError("picture", {
-            type: "manual",
-            message: picErr,
-          });
-          return;
-        }
-
-        const fd = new FormData();
-        fd.append("email", String(values.email ?? "").trim());
-        fd.append("password", String(values.password ?? ""));
-        fd.append("firstname", String(values.firstname ?? "").trim());
-        fd.append("lastname", String(values.lastname ?? "").trim());
-        fd.append("dateOfBirth", String(values.dateOfBirth ?? ""));
-        if (values.work) fd.append("work", String(values.work));
-        if (values.homeNumber) {
-          fd.append("homeNumber", String(values.homeNumber).trim());
-        }
-        fd.append("mobile", String(values.mobile ?? "").trim());
-        fd.append("city", String(values.city ?? "").trim());
-        fd.append("address", String(values.address ?? "").trim());
-        fd.append("zipcode", String(values.zipcode ?? "").trim());
-        if (values.lodgeId) fd.append("lodgeId", String(Number(values.lodgeId)));
-        fd.append("notes", String(values.notes ?? "").trim());
-        if (picture) fd.append("picture", picture);
-
-        const registerResponse = (await runSubmit(() =>
-          registerMember(fd),
-        )) as RegisterResponse;
-
-        const parsedId = Number(registerResponse?.user?.matrikelnummer);
-        if (!Number.isFinite(parsedId)) {
-          navigate("/members");
-          return;
-        }
-
-        userId = parsedId;
-        setCreatedUserId(parsedId);
-      }
-
-      if (userId === null) return;
-
-      try {
-        await runSubmit(() =>
-          setMemberAllergies(
-            userId,
-            Array.isArray(selectedAllergyIds) ? selectedAllergyIds : [],
-          ),
-        );
-      } catch {
-        setError(`Användare skapad (ID ${userId}) men allergier kunde inte sparas.`);
+      const picErr = validateImageFile(picture, { required: true });
+      if (picErr) {
+        setFieldError("picture", {
+          type: "manual",
+          message: picErr,
+        });
         return;
       }
 
+      const fd = new FormData();
+      fd.append("email", String(values.email ?? "").trim());
+      fd.append("password", String(values.password ?? ""));
+      fd.append("firstname", String(values.firstname ?? "").trim());
+      fd.append("lastname", String(values.lastname ?? "").trim());
+      fd.append("dateOfBirth", String(values.dateOfBirth ?? ""));
+      if (values.work) fd.append("work", String(values.work));
+      if (values.homeNumber) {
+        fd.append("homeNumber", String(values.homeNumber).trim());
+      }
+      fd.append("mobile", String(values.mobile ?? "").trim());
+      fd.append("city", String(values.city ?? "").trim());
+      fd.append("address", String(values.address ?? "").trim());
+      fd.append("zipcode", String(values.zipcode ?? "").trim());
+      if (values.lodgeId) fd.append("lodgeId", String(Number(values.lodgeId)));
+      if (values.notes) fd.append("notes", String(values.notes).trim());
+      if (selectedAllergyIds.length > 0) {
+        fd.append("allergyIds", selectedAllergyIds.join(","));
+      }
+      if (picture) fd.append("picture", picture);
+
+      await runSubmit(() => registerMember(fd));
       navigate("/members");
     } catch (error: unknown) {
       if (applyApiFieldErrors(error, setFieldError)) {
@@ -267,7 +236,9 @@ export const CreateMember = () => {
         <AllergiesManager
           isEditRoute
           selectedIds={selectedAllergyIds}
-          setSelectedIds={(ids) => setSelectedAllergyIds(Array.isArray(ids) ? ids : [])}
+          setSelectedIds={(ids) =>
+            setSelectedAllergyIds(Array.isArray(ids) ? ids : [])
+          }
         />
 
         <label className="ui-label">
@@ -307,19 +278,10 @@ export const CreateMember = () => {
         <div className="flex flex-col gap-2 py-4 sm:flex-row">
           <button
             type="submit"
-            disabled={
-              loading ||
-              (createdUserId === null && (!isValid || Boolean(pictureError)))
-            }
+            disabled={loading || !isValid || Boolean(pictureError)}
             className="ui-btn ui-btn-primary"
           >
-            {loading
-              ? createdUserId !== null
-                ? "Sparar..."
-                : "Skapar..."
-              : createdUserId !== null
-                ? "Spara allergier"
-                : "Skapa"}
+            {loading ? "Skapar..." : "Skapa"}
           </button>
         </div>
       </form>

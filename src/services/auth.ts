@@ -15,6 +15,14 @@ export type AuthState = {
   session: SessionInfo | null;
 };
 
+export type RegisterMemberResponse = {
+  user?: {
+    matrikelnummer?: unknown;
+    pictureUrl?: unknown;
+  };
+  roles?: unknown;
+};
+
 let restoreSessionPromise: Promise<AuthState> | null = null;
 
 function readSessionInfo(res: unknown): SessionInfo {
@@ -115,8 +123,13 @@ export async function login({
   return fetchCurrentAuthUser();
 }
 
-export async function registerMember(payload: FormData) {
-  return fetchData(api.post("/auth/register", payload));
+export async function registerMember(
+  payload: FormData,
+): Promise<RegisterMemberResponse> {
+  const res = await fetchData(api.post("/auth/register", payload));
+  return res && typeof res === "object"
+    ? (res as RegisterMemberResponse)
+    : {};
 }
 
 export async function restoreSession(): Promise<AuthState> {

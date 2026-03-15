@@ -103,4 +103,5 @@ export type RegisterBody = {
   zipcode?: string;
   notes?: string | null;
   lodgeId?: string | number | null;
+  allergyIds?: Array<number | string> | string;
 };

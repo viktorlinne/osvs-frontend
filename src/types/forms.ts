@@ -26,6 +26,7 @@ export type RegisterForm = {
   email?: string;
   password?: string;
   picture?: string;
+  allergyIds?: string;
   firstname?: string;
   lastname?: string;
   dateOfBirth?: string;
