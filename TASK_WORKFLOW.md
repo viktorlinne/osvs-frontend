@@ -1,147 +1,94 @@
-# Frontend Task Workflow (Codex / Agent Operating Procedure)
+# Frontend Task Workflow
 
-This is the standard procedure for implementing features safely and consistently in this frontend repo.
+This document defines the default workflow for work in `osvs-frontend`.
 
-## Standard Workflow (Always Follow)
-
-### Step 0 - Identify Impact
+## Step 0 - Identify Impact
 
 Before coding:
 
-- Identify affected pages in `src/pages/*`
-- Identify affected services in `src/services/*`
-- Confirm whether routing changes are needed in `src/Router.tsx`
-- Confirm whether auth / roles apply (`AuthGuard` and existing role-gating patterns)
-- Confirm whether backend `message` / `details.fields` handling affects the UI
+- identify affected pages in `src/pages/*`
+- identify affected services in `src/services/*`
+- check whether routing changes are needed in `src/routes/Router.tsx`
+- check whether auth or role gating is involved in `src/routes/AuthGuard.tsx`
+- check whether backend `message` or `details.fields` handling affects the UI
 
 Output:
 
-- Short plan:
-  - files to change
-  - API endpoints involved
-  - UI states impacted
-  - verification steps
+- short plan
+- files to change
+- API endpoints involved
+- UI states impacted
+- verification steps
 
----
+## Step 1 - Service Boundary First
 
-### Step 1 - API First (Frontend Perspective)
+If API behavior or payloads change:
 
-If an endpoint or payload changes:
+1. update the relevant `src/services/*` module
+2. keep transport concerns inside the service layer
+3. preserve backend `details.fields`
+4. avoid page-level direct Axios calls
 
-- Prefer updating or adding a service method in `src/services/*`
-- Ensure it goes through `fetchData` / shared Axios in `src/services/api.ts`
-- Avoid adding any new page-level Axios calls
-- Preserve backend field errors from `details.fields`
+## Step 2 - UI Implementation
 
-Output:
+Implement UI changes in pages and components while preserving:
 
-- Service method signature + endpoint + DTO shape
+- loading
+- error
+- empty
+- success
 
----
+For forms:
 
-### Step 2 - UI Implementation
+- map backend field errors inline
+- keep the global banner for non-field failures
+- avoid invalid button or link nesting
+- use explicit button types when the action is not submission
 
-- Implement UI changes in pages / components
-- Use existing component patterns and styling conventions
-- Ensure all relevant UI states exist:
-  - loading
-  - error (global + local)
-  - empty
-  - success
+For data loading:
 
-If forms are involved:
+- prefer `useFetch` unless the feature already follows a better local pattern
 
-- map backend `details.fields` inline with `applyApiFieldErrors(...)`
-- keep field validation errors inside the form
-- use the global banner only for non-field failures
+## Step 3 - Auth and Routing
 
-If data fetching is needed:
+- protected routes must keep using `AuthGuard`
+- role-gated routes should follow current Admin/Editor patterns
+- preserve current unauthorized flow unless the task explicitly changes it
 
-- Prefer `useFetch` unless there is a better existing pattern in that feature area
+## Step 4 - Type Safety
 
-Output:
+- prefer typed DTOs and normalized service returns
+- avoid broad casts like `as unknown as`
+- if backend data is uncertain, add narrow runtime checks in the service layer
 
-- UI behavior summary per state
+## Step 5 - Verification
 
----
+Current frontend verification relies on:
 
-### Step 3 - Auth and Authorization
+```bash
+npm run lint
+npm run build
+```
 
-- Protected routes must use existing `AuthGuard` patterns
-- Role-gated pages must follow existing role gate patterns
-- Ensure unauthorized behavior stays consistent with the shared auth flow
+CI exists, but there is still no automated frontend test suite.
 
-Output:
+Always provide a manual checklist covering:
 
-- Auth / role behavior notes
+- happy path
+- loading state
+- empty state when relevant
+- non-field error behavior
+- inline field error behavior for forms
+- role or auth behavior when relevant
 
----
+## Output Format
 
-### Step 4 - Type Safety Rules
+Use:
 
-- Do not weaken types by adding broad casts
-- Prefer explicit DTO types in services
-- If backend contract is uncertain:
-  - add narrow runtime checks in the service normalization layer
-  - produce a clear error message
-- If the backend returns `details.fields`, preserve that shape so forms can render the errors inline
-
-Output:
-
-- Types added / updated and where they live
-
----
-
-### Step 5 - Verification
-
-Since there is no test suite:
-
-- Always run:
-  - `npm run lint`
-  - `npm run build` (or `npm.cmd run build` if PowerShell blocks `npm.ps1`)
-- Provide a manual verification checklist:
-  - steps
-  - expected UI behavior
-  - edge cases (unauthorized, missing data, validation errors)
-  - confirm field errors render inline instead of only in the global banner
-
-Output:
-
-- Commands + manual checklist
-
----
-
-## How to Split Work Into "Specialists"
-
-When a change spans multiple concerns, treat it as tracks:
-
-1. API / service track
-
-- service module updates, DTO normalization, `ApiError` handling
-
-2. UI track
-
-- pages / components changes + UI states
-
-3. Routing / auth track
-
-- router changes, guard / role-gating updates
-
-4. Verification track
-
-- lint / build + manual steps
-
-Merge in this order:
-1 -> 2 -> 3 -> 4 -> 5
-
----
-
-## Output Format (Use Every Time)
-
-PLAN
-CHANGES (by file)
-API NOTES (endpoints + payloads)
-UI STATES (loading/error/empty/success)
-AUTH NOTES (if applicable)
-VERIFICATION (commands + manual checklist)
-RISKS / NOTES
+- `PLAN`
+- `CHANGES`
+- `API NOTES`
+- `UI STATES`
+- `AUTH NOTES` when relevant
+- `VERIFICATION`
+- `RISKS / NOTES`

@@ -1,71 +1,85 @@
-# Frontend Agent Rules (osvs-frontend)
+# Frontend Agent Rules
 
-This repository is the frontend for a full-stack application.
+This repository is the frontend for the OSVS application.
 
-Tech stack:
+## Tech Stack
 
 - React + TypeScript
 - Vite
+- React Router
 - Axios
 - react-hook-form
 
 ## Architecture Map
 
-- Entrypoint: `src/main.tsx` (wraps `RouterProvider` with `ErrorProvider` + `AuthProvider`)
-- App shell/layout: `src/components/layout/AppLayout.tsx` (Navbar + Outlet + Footer)
-- Routing: `src/Router.tsx` using `createBrowserRouter`
-- Auth guard: `src/components/auth/AuthGuard.tsx`
-- Global error UI/state: `src/context/ErrorProvider.tsx`
-- Auth state: `src/context/AuthProvider.tsx`
-- Shared async pattern: `src/hooks/useFetch.ts`
-- Axios + interceptors + error normalization: `src/services/api.ts`
-- Service modules: `src/services/*` (users/events/posts/etc.)
-- Pages: `src/pages/*`
-- UI primitives: `src/components/ui/*`
+- entrypoint: `src/main.tsx`
+- app shell: `src/app/AppLayout.tsx`
+- routing: `src/routes/Router.tsx`
+- auth guard: `src/routes/AuthGuard.tsx`
+- auth state: `src/context/AuthProvider.tsx`
+- global non-field error state: `src/context/ErrorProvider.tsx`
+- async fetch helper: `src/hooks/useFetch.ts`
+- shared API layer: `src/services/api.ts`
+- global styles: `src/styles/index.css`
 
-## Project Conventions (Follow These)
+## Current Conventions
 
-1. Prefer existing patterns. Do not introduce Redux/Zustand/React Query unless explicitly requested.
-2. API calls must go through the shared axios layer in `src/services/api.ts` and service modules in `src/services/*`.
-   - Do not add page-level direct axios calls. If found, refactor into a service function.
-3. Maintain consistent UI states on data-fetch pages:
-   - loading / error / empty / success
-     Use `useFetch` where applicable and the global error banner via `ErrorProvider` for non-field errors.
-4. Form/API error handling is standardized:
-   - backend field errors come as `details.fields`
-   - form pages should map them inline with `applyApiFieldErrors(...)`
-   - reserve the global banner for non-field failures
-5. Keep auth behavior consistent:
-   - protected routes use `AuthGuard`
-   - role-gated routes follow existing role guard usage (Admin/Editor on create/edit flows)
-6. Type safety:
-   - Avoid `as unknown as` casting and broad unions unless unavoidable.
-   - Prefer defining/using typed DTOs from service modules.
-   - If backend contract is unclear, add a narrow runtime check and log a clear error.
-7. Language:
-   - User facing hardcoded texts in pages,components,server messages and errors should be swedish localized.
-   - Make sure usage of å,ä,ö is properly applied and not replaced with o, alt codes, special characters or other placeholders
+1. Prefer existing patterns. Do not introduce Redux, Zustand, React Query, or
+   new UI/state frameworks unless explicitly requested.
+2. API calls must go through `src/services/*` and `src/services/api.ts`.
+   Do not add page-level direct Axios usage.
+3. Preserve the current UI state model:
+   - loading
+   - error
+   - empty
+   - success
+4. Preserve backend field errors from `details.fields` and map them inline in
+   forms.
+5. Reserve the global error banner for non-field failures.
+6. Keep auth behavior consistent with `AuthGuard`.
+7. Avoid invalid interactive nesting such as links inside buttons.
+   Use button-styled links for navigation actions.
+8. Avoid weakening types with broad casts.
+
+## Routing Rules
+
+- public and protected routes are defined in `src/routes/Router.tsx`
+- routes are lazy-loaded with suspense fallbacks
+- role-gated create and edit routes should keep following the existing
+  Admin/Editor patterns
 
 ## API Rules
 
-- Base API prefix is `/api` (dev proxied via Vite; prod uses `VITE_BACKEND_URL`).
-- Axios must use `withCredentials` and rely on the existing 401 unauthorized reporting/interceptor flow in `src/services/api.ts`.
-- New endpoints or payload changes should be reflected in the service modules (and OpenAPI if maintained on backend).
+- in dev, requests go to `/api` through the Vite proxy
+- in production, `VITE_BACKEND_URL` is used
+- `withCredentials` must remain enabled
+- unauthorized responses flow through the shared auth reporting logic in
+  `src/services/api.ts`
 
-## Build / Verification
+## Build and Verification
 
-- Commands:
-  - `npm run lint`
-  - `npm run build` (runs `tsc -b && vite build`)
-- Note: In some PowerShell setups, use `npm.cmd run ...` if `npm.ps1` is blocked.
-- Provide a manual verification checklist for every feature (steps + expected UI behavior).
+Always run:
+
+```bash
+npm run lint
+npm run build
+```
+
+CI exists in:
+
+- `.github/workflows/ci.yml`
+
+There is still no automated frontend test suite, so manual verification remains
+required for UI changes.
 
 ## Output Format
 
-For each task, respond with:
-PLAN
-CHANGES (by file)
-API NOTES (endpoints + payloads)
-UI STATES (loading/error/empty/success)
-VERIFICATION (commands + manual checklist)
-RISKS / NOTES
+Use:
+
+- `PLAN`
+- `CHANGES`
+- `API NOTES`
+- `UI STATES`
+- `AUTH NOTES` when relevant
+- `VERIFICATION`
+- `RISKS / NOTES`

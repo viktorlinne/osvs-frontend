@@ -1,73 +1,100 @@
-# React + TypeScript + Vite
+# OSVS Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+React + TypeScript frontend for the OSVS platform.
 
-Currently, two official plugins are available:
+## Stack
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- React
+- TypeScript
+- Vite
+- React Router
+- Axios
+- react-hook-form
+- Tailwind-based utility styling
 
-## React Compiler
+## Key Commands
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+npm install
+npm run dev
+npm run lint
+npm run build
+npm run preview
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## Environment
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+Frontend env template:
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+- [.env.example](./.env.example)
+
+Current values:
+
+- `VITE_BACKEND_URL`
+- `VITE_SUPABASE_ANON_KEY`
+
+Notes:
+
+- in local development, Vite proxies `/api` to `http://localhost:4000`
+- in production builds, API requests use `VITE_BACKEND_URL`
+
+## Architecture
+
+Important files:
+
+- `src/main.tsx`
+- `src/routes/Router.tsx`
+- `src/routes/AuthGuard.tsx`
+- `src/context/AuthProvider.tsx`
+- `src/context/ErrorProvider.tsx`
+- `src/services/api.ts`
+- `src/styles/index.css`
+
+Key frontend rules:
+
+- page-level API calls should go through `src/services/*`
+- protected routes go through `AuthGuard`
+- field errors come from backend `details.fields`
+- non-field failures go through the global error banner
+
+## Routing
+
+The router uses route-level lazy loading and suspense fallbacks from:
+
+- [`src/routes/Router.tsx`](./src/routes/Router.tsx)
+
+Protected routes are wrapped by:
+
+- [`src/routes/AuthGuard.tsx`](./src/routes/AuthGuard.tsx)
+
+## Verification
+
+Local verification:
+
+```bash
+npm run lint
+npm run build
 ```
+
+CI workflow:
+
+- [`.github/workflows/ci.yml`](./.github/workflows/ci.yml)
+
+There is currently no automated frontend test suite, so regressions are still
+caught through lint, build, and manual verification.
+
+## Development Notes
+
+- global styles live in [`src/styles/index.css`](./src/styles/index.css)
+- the shared axios layer is in [`src/services/api.ts`](./src/services/api.ts)
+- the global error banner lives in
+  [`src/context/ErrorProvider.tsx`](./src/context/ErrorProvider.tsx)
+- `AuthGuard` currently redirects both unauthenticated and unauthorized users to
+  `/login`
+
+## Current Gaps
+
+- no automated frontend tests yet
+- some legacy localized strings still contain encoding issues
+- date and time handling remains a risk area
+- `MapPage` is still the largest lazy-loaded chunk

@@ -1,129 +1,99 @@
-# Frontend Architecture (osvs-frontend)
+# Frontend Architecture
 
 ## Overview
 
-This frontend is a React + TypeScript Single Page Application built with Vite.
+`osvs-frontend` is a React + TypeScript SPA built with Vite.
 
-Key characteristics:
+Core characteristics:
 
-- SPA routing via React Router (`createBrowserRouter`)
-- Auth handled through context providers and route guards
-- Global non-field errors handled through `ErrorProvider`
-- Forms use `react-hook-form`
-- API requests go through shared Axios helpers in `src/services/api.ts`
-- Backend validation errors are rendered inline from `details.fields`
+- routing via React Router
+- auth and session state via context providers
+- route-level lazy loading
+- shared Axios API layer
+- form handling with react-hook-form
+- global non-field error banner plus inline field errors
 
----
-
-## Bootstrapping
+## Entry Point
 
 ### `src/main.tsx`
 
-- Creates the root React tree
-- Wraps the router with:
-  - `ErrorProvider` from `src/context/ErrorProvider.tsx`
-  - `AuthProvider` from `src/context/AuthProvider.tsx`
+- loads `src/styles/index.css`
+- wraps the router with `ErrorProvider` and `AuthProvider`
+- renders `RouterProvider`
 
----
+## Layout and Routing
 
-## Layout and Navigation
+### `src/app/AppLayout.tsx`
 
-### `src/components/layout/AppLayout.tsx`
+- application shell
+- navbar, outlet, footer
 
-- Provides the app shell:
-  - Navbar
-  - Outlet
-  - Footer
-- Participates in global auth / unauthorized handling registration
+### `src/routes/Router.tsx`
 
----
+- defines public and protected routes
+- uses lazy-loaded route pages
+- provides a suspense fallback for route transitions
 
-## Routing
+### `src/routes/AuthGuard.tsx`
 
-### `src/Router.tsx`
-
-- Defines routes with `createBrowserRouter`
-- Public routes include `/`, `/about`, `/gdpr`, `/contact`, `/login`, `/lodges`, `/lodges/:id`
-- Most application routes are protected with `AuthGuard`
-- Create/edit flows use existing role-gating patterns for Admin / Editor access
-
-### `src/components/auth/AuthGuard.tsx`
-
-- Waits for auth state to resolve before rendering protected routes
-- Redirects unauthenticated users to `/login`
-
----
+- waits for auth state
+- redirects unauthenticated users to `/login`
+- currently redirects role failures to `/login` as well
+- runs session heartbeat logic for active sessions
 
 ## State Management
 
-- Local state: `useState`, `useEffect`, component state
-- Form state: `react-hook-form`
-- Global state:
-  - `src/context/AuthProvider.tsx`
-  - `src/context/ErrorProvider.tsx`
-- Shared async lifecycle: `src/hooks/useFetch.ts`
-
----
+- local component state with React hooks
+- form state with react-hook-form
+- auth state in `src/context/AuthProvider.tsx`
+- global non-field errors in `src/context/ErrorProvider.tsx`
+- shared async loading flow in `src/hooks/useFetch.ts`
 
 ## API Layer
 
 ### `src/services/api.ts`
 
-- Hosts the shared Axios instance
-- Sets `baseURL`, `withCredentials`, and request timeout
-- Reports unauthorized responses through the shared auth flow
-- `fetchData(...)` unwraps successful responses and normalizes failures to the shared `ApiError` shape
-
-### `src/types/api.ts`
-
-- Defines the frontend error contract:
-  - `status`
-  - `message`
-  - optional `details.fields`
+- hosts the shared Axios instance
+- uses `withCredentials`
+- uses `/api` in dev and `VITE_BACKEND_URL` in production
+- reports unauthorized responses through the shared auth flow
 
 ### `src/services/*`
 
-- Service modules are the transport boundary
-- Pages and components should call services, not Axios directly
+- service modules are the transport boundary
+- pages should call services, not Axios directly
 
----
+## Error Handling
 
-## Error Handling Flow
+- backend returns `{ message, details?: { fields } }`
+- service and helper code preserve `details.fields`
+- forms render field errors inline
+- `ErrorProvider` displays non-field errors as a dismissible accessible alert
 
-- Backend returns `{ message, details?: { fields } }`
-- `src/services/api.ts` converts transport failures into `ApiError`
-- `src/hooks/useFetch.ts` handles default global display for non-field errors
-- `src/utils/apiErrors.ts` extracts `details.fields` for inline form errors
-- Form pages should keep validation errors inside the form and reserve the global banner for non-field failures
+## Styling
 
----
-
-## UI Structure
-
-- Pages: `src/pages/*`
-- Shared components: `src/components/*`
-- UI primitives: `src/components/ui/*`
-- Shared validators/helpers: `src/utils/*`
-- Global styles: `src/index.css`
-
----
+- global styles live in `src/styles/index.css`
+- reusable UI primitives live in `src/components/ui/*`
+- button-styled links are used for navigation actions where appropriate
 
 ## Build and Tooling
 
-Scripts in `package.json`:
+Local commands:
 
-- `dev`
-- `build` (`tsc -b && vite build`)
-- `lint`
-- `preview`
+- `npm run dev`
+- `npm run lint`
+- `npm run build`
+- `npm run preview`
 
-Vite handles local dev serving and proxying, and TypeScript runs in strict mode.
+CI workflow:
 
----
+- `.github/workflows/ci.yml`
 
-## Known Risks / Improvement Areas
+There is still no automated frontend test suite.
 
-- Some pages still need service-layer cleanup if they bypass the shared API pattern
-- Large initial bundle; no route-level code splitting yet
-- No automated test suite; regressions rely on lint + build + manual checks
-- Time/date logic remains a likely source of edge-case bugs
+## Current Constraints
+
+- no automated frontend tests yet
+- some older localized strings still contain encoding artifacts
+- date and time handling remains sensitive
+- `MapPage` is still the heaviest lazy-loaded route chunk
