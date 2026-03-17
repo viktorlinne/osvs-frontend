@@ -10,6 +10,16 @@ import {
 type ListPostsParams = {
   lodgeIds?: Array<number | string>;
   title?: string;
+  page?: number;
+  pageSize?: number;
+};
+
+export type PaginatedPostsResponse = {
+  posts: Post[];
+  page: number;
+  pageSize: number;
+  total: number;
+  totalPages: number;
 };
 
 export type PublicumPostListItem = {
@@ -71,7 +81,7 @@ function normalizePost(raw: Post): Post | null {
   };
 }
 
-export async function listPosts(params?: ListPostsParams): Promise<Post[]> {
+export async function listPosts(params?: ListPostsParams): Promise<PaginatedPostsResponse> {
   const search = new URLSearchParams();
   if (Array.isArray(params?.lodgeIds)) {
     for (const value of params.lodgeIds) {
@@ -82,12 +92,22 @@ export async function listPosts(params?: ListPostsParams): Promise<Post[]> {
   if (typeof params?.title === "string" && params.title.trim().length > 0) {
     search.set("title", params.title.trim());
   }
+  if (typeof params?.page === "number" && Number.isFinite(params.page)) {
+    search.set("page", String(params.page));
+  }
+  if (typeof params?.pageSize === "number" && Number.isFinite(params.pageSize)) {
+    search.set("pageSize", String(params.pageSize));
+  }
   const query = search.toString();
   const url = query ? `/posts?${query}` : "/posts";
   const res = await fetchData(api.get(url));
   const raw = readArrayField<Post>(res, "posts");
-  const normalized = raw.map(normalizePost).filter(Boolean) as Post[];
-  return normalized;
+  const posts = raw.map(normalizePost).filter(Boolean) as Post[];
+  const page = Math.max(1, readNumberField(res, "page") ?? 1);
+  const pageSize = Math.max(1, readNumberField(res, "pageSize") ?? 24);
+  const total = Math.max(0, readNumberField(res, "total") ?? posts.length);
+  const totalPages = Math.max(0, readNumberField(res, "totalPages") ?? Math.ceil(total / pageSize));
+  return { posts, page, pageSize, total, totalPages };
 }
 
 export async function listPublicumPosts(): Promise<PublicumPostListItem[]> {
