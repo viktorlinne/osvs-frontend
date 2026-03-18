@@ -40,32 +40,7 @@ Notes:
 
 ## Architecture
 
-Important files:
-
-- `src/main.tsx`
-- `src/routes/Router.tsx`
-- `src/routes/AuthGuard.tsx`
-- `src/context/AuthProvider.tsx`
-- `src/context/ErrorProvider.tsx`
-- `src/services/api.ts`
-- `src/styles/index.css`
-
-Key frontend rules:
-
-- page-level API calls should go through `src/services/*`
-- protected routes go through `AuthGuard`
-- field errors come from backend `details.fields`
-- non-field failures go through the global error banner
-
-## Routing
-
-The router uses route-level lazy loading and suspense fallbacks from:
-
-- [`src/routes/Router.tsx`](./src/routes/Router.tsx)
-
-Protected routes are wrapped by:
-
-- [`src/routes/AuthGuard.tsx`](./src/routes/AuthGuard.tsx)
+See ARCHITECTURE.md for detailed architecture.
 
 ## Verification
 

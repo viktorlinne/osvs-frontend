@@ -2,7 +2,7 @@
 
 This document defines the default workflow for work in `osvs-frontend`.
 
-## Step 0 - Identify Impact
+## Step 0 - Identify Impact [sequential, required]
 
 Before coding:
 
@@ -20,7 +20,11 @@ Output:
 - UI states impacted
 - verification steps
 
-## Step 1 - Service Boundary First
+## Steps 1-3 - Implementation [parallelizable tracks]
+
+The following can be treated as independent tracks for large features:
+
+### Track A — Service boundary (Step 1)
 
 If API behavior or payloads change:
 
@@ -29,7 +33,7 @@ If API behavior or payloads change:
 3. preserve backend `details.fields`
 4. avoid page-level direct Axios calls
 
-## Step 2 - UI Implementation
+### Track B — UI implementation (Step 2)
 
 Implement UI changes in pages and components while preserving:
 
@@ -48,12 +52,16 @@ For forms:
 For data loading:
 
 - prefer `useFetch` unless the feature already follows a better local pattern
+- Depends on: Track A service signatures
 
-## Step 3 - Auth and Routing
+### Track C — Auth and routing (Step 3)
 
 - protected routes must keep using `AuthGuard`
 - role-gated routes should follow current Admin/Editor patterns
 - preserve current unauthorized flow unless the task explicitly changes it
+- Independent of A and B if no new service calls needed
+
+Track A and C can run in parallel. Track B waits for Track A.
 
 ## Step 4 - Type Safety
 
@@ -61,12 +69,12 @@ For data loading:
 - avoid broad casts like `as unknown as`
 - if backend data is uncertain, add narrow runtime checks in the service layer
 
-## Step 5 - Verification
+## Step 5 - Verification [parallel commands]
 
-Current frontend verification relies on:
+Run simultaneously:
 
 ```bash
-npm run lint
+npm run lint &
 npm run build
 ```
 

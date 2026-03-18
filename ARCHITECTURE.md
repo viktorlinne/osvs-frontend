@@ -90,10 +90,3 @@ CI workflow:
 - `.github/workflows/ci.yml`
 
 There is still no automated frontend test suite.
-
-## Current Constraints
-
-- no automated frontend tests yet
-- some older localized strings still contain encoding artifacts
-- date and time handling remains sensitive
-- `MapPage` is still the heaviest lazy-loaded route chunk

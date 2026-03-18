@@ -2,25 +2,10 @@
 
 This repository is the frontend for the OSVS application.
 
-## Tech Stack
+## Tech Stack, Architecture, and Commands
 
-- React + TypeScript
-- Vite
-- React Router
-- Axios
-- react-hook-form
-
-## Architecture Map
-
-- entrypoint: `src/main.tsx`
-- app shell: `src/app/AppLayout.tsx`
-- routing: `src/routes/Router.tsx`
-- auth guard: `src/routes/AuthGuard.tsx`
-- auth state: `src/context/AuthProvider.tsx`
-- global non-field error state: `src/context/ErrorProvider.tsx`
-- async fetch helper: `src/hooks/useFetch.ts`
-- shared API layer: `src/services/api.ts`
-- global styles: `src/styles/index.css`
+See README.md for stack and commands. See ARCHITECTURE.md for structure, routing,
+and architecture map.
 
 ## Current Conventions
 
@@ -41,13 +26,6 @@ This repository is the frontend for the OSVS application.
    Use button-styled links for navigation actions.
 8. Avoid weakening types with broad casts.
 
-## Routing Rules
-
-- public and protected routes are defined in `src/routes/Router.tsx`
-- routes are lazy-loaded with suspense fallbacks
-- role-gated create and edit routes should keep following the existing
-  Admin/Editor patterns
-
 ## API Rules
 
 - in dev, requests go to `/api` through the Vite proxy
@@ -58,17 +36,7 @@ This repository is the frontend for the OSVS application.
 
 ## Build and Verification
 
-Always run:
-
-```bash
-npm run lint
-npm run build
-```
-
-CI exists in:
-
-- `.github/workflows/ci.yml`
-
+See README.md for build commands and CI configuration.
 There is still no automated frontend test suite, so manual verification remains
 required for UI changes.
 
