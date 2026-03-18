@@ -55,7 +55,7 @@ export function PublicumList({ onSelect }: PublicumListProps) {
         <li key={post.id} className="border-b border-neutral-200 pb-2">
           <button
             type="button"
-            className="w-full rounded-md p-1 text-left transition hover:bg-neutral-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-600 focus-visible:ring-offset-2"
+            className="w-full rounded-md text-left transition hover:bg-neutral-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-600 focus-visible:ring-offset-2"
             onClick={() => onSelect?.(post)}
           >
             <p className="text-sm italic text-neutral-600">{formatYear(post.createdAt)}</p>
