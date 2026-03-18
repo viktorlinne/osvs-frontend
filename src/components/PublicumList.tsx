@@ -50,7 +50,7 @@ export function PublicumList({ onSelect }: PublicumListProps) {
   if (!posts.length) return <p className="text-sm text-neutral-600">Inga publicum-inlagg</p>;
 
   return (
-    <ul className="space-y-2">
+    <ul className="max-h-[40rem] space-y-2 overflow-y-auto">
       {posts.map((post) => (
         <li key={post.id} className="border-b border-neutral-200 pb-2">
           <button
