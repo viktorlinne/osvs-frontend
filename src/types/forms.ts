@@ -10,6 +10,7 @@ export type UpdateUserForm = {
   address?: string;
   zipcode?: string;
   accommodationAvailable?: boolean | null;
+  archive?: "Avliden" | "Urgången" | "" | null;
 };
 
 export type CreatePostForm = {

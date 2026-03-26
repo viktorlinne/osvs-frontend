@@ -132,6 +132,7 @@ export const MemberDetail = () => {
       address: "",
       zipcode: "",
       accommodationAvailable: null,
+      archive: "",
     },
   });
 
@@ -249,6 +250,7 @@ export const MemberDetail = () => {
       address: member.address ?? "",
       zipcode: member.zipcode ?? "",
       accommodationAvailable: member.accommodationAvailable ?? null,
+      archive: member.archive ?? "",
     });
     setPictureFile(null);
     void trigger();
@@ -477,6 +479,7 @@ export const MemberDetail = () => {
             setPictureFile={setPictureFile}
             pictureError={pictureError}
             saving={saving}
+            showArchive={isEditRoute}
           />
 
           {isEditRoute ? (

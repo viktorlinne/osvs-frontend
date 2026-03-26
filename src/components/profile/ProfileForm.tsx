@@ -1,5 +1,5 @@
 import type { FieldErrors, UseFormRegister } from "react-hook-form";
-import { errorTextClass, inputClass, labelClass } from "../ui";
+import { errorTextClass, inputClass, labelClass, selectClass } from "../ui";
 import type { PublicUser, UpdateUserForm } from "../../types";
 import { updateUserFormRules } from "../../utils/formValidation";
 
@@ -10,6 +10,7 @@ export const ProfileForm = ({
   isEditRoute,
   setPictureFile,
   pictureError,
+  showArchive = false,
 }: {
   user?: PublicUser | null;
   register: UseFormRegister<UpdateUserForm>;
@@ -18,6 +19,7 @@ export const ProfileForm = ({
   setPictureFile: (f: File | null) => void;
   pictureError?: string | null;
   saving: boolean;
+  showArchive?: boolean;
 }) => {
   return (
     <>
@@ -237,6 +239,23 @@ export const ProfileForm = ({
           <p className={errorTextClass}>{errors.accommodationAvailable.message}</p>
         ) : null}
       </div>
+
+      {showArchive ? (
+        <div className="mb-4">
+          <label htmlFor="archive" className={labelClass}>
+            Arkiv
+          </label>
+          <select
+            id="archive"
+            {...register("archive")}
+            className={selectClass}
+          >
+            <option value="">— Ingen —</option>
+            <option value="Avliden">Avliden</option>
+            <option value="Urgången">Urgången</option>
+          </select>
+        </div>
+      ) : null}
 
       {isEditRoute ? (
         <div className="mb-4">

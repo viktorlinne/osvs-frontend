@@ -30,7 +30,7 @@ export type User = {
   achievements?: Achievement[] | null;
   allergies?: Allergy[] | null;
   officialHistory?: OfficialHistoryItem[] | null;
-  archive?: "Deceased" | "Retired" | "Removed" | null;
+  archive?: "Avliden" | "Urgången" | null;
   firstname: string;
   lastname: string;
   dateOfBirth: string;

@@ -25,6 +25,10 @@ export function toUserProfileUpdatePayload(
       typeof values.accommodationAvailable === "boolean"
         ? values.accommodationAvailable
         : null,
+    archive:
+      values.archive === "Avliden" || values.archive === "Urgången"
+        ? values.archive
+        : null,
   };
 }
 
