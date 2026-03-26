@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
-import type { Lodge } from "../../types";
+import type { Group, Lodge, PublicUser } from "../../types";
 import { Button, errorTextClass } from "../ui";
+import { EventAudienceFields } from "./EventAudienceFields";
 
 export type EventFormState = {
   title: string;
@@ -15,8 +16,15 @@ type Props = {
   form: EventFormState;
   setForm: React.Dispatch<React.SetStateAction<EventFormState>>;
   lodges: Lodge[] | null | undefined;
-  linkedIds: number[];
-  setLinkedIds: React.Dispatch<React.SetStateAction<number[]>>;
+  groups: Group[] | null | undefined;
+  users: PublicUser[] | null | undefined;
+  lodgeUsers: PublicUser[] | null | undefined;
+  selectedLodgeIds: string[];
+  setSelectedLodgeIds: React.Dispatch<React.SetStateAction<string[]>>;
+  selectedGroupIds: string[];
+  setSelectedGroupIds: React.Dispatch<React.SetStateAction<string[]>>;
+  selectedUserIds: string[];
+  setSelectedUserIds: React.Dispatch<React.SetStateAction<string[]>>;
   onSave: () => void | Promise<void>;
   onDelete?: () => void | Promise<void>;
   isAdmin: boolean;
@@ -24,14 +32,24 @@ type Props = {
   errors: Record<string, string>;
   canSubmit: boolean;
   clearServerField: (field: string) => void;
+  lodgesLoading?: boolean;
+  groupsLoading?: boolean;
+  usersLoading?: boolean;
 };
 
 export function EventDetailEditForm({
   form,
   setForm,
   lodges,
-  linkedIds,
-  setLinkedIds,
+  groups,
+  users,
+  lodgeUsers,
+  selectedLodgeIds,
+  setSelectedLodgeIds,
+  selectedGroupIds,
+  setSelectedGroupIds,
+  selectedUserIds,
+  setSelectedUserIds,
   onSave,
   onDelete,
   isAdmin,
@@ -39,6 +57,9 @@ export function EventDetailEditForm({
   errors,
   canSubmit,
   clearServerField,
+  lodgesLoading = false,
+  groupsLoading = false,
+  usersLoading = false,
 }: Props) {
   const foodPreview =
     Number.isFinite(Number(form.price)) && Number(form.price) > 0 ? 1 : 0;
@@ -62,38 +83,24 @@ export function EventDetailEditForm({
         {errors.title ? <p className={errorTextClass}>{errors.title}</p> : null}
       </div>
 
-      <div>
-        <label className="ui-label">Kopplade loger</label>
-        <div className="grid max-h-40 grid-cols-1 gap-2 overflow-auto rounded-md border border-neutral-200 p-2 sm:grid-cols-2">
-          {Array.isArray(lodges) && lodges.length > 0 ? (
-            lodges.map((l) => (
-              <label
-                key={l.id}
-                className="inline-flex items-center gap-2 rounded-md border border-neutral-200 px-3 py-2 text-sm text-neutral-700"
-              >
-                <input
-                  type="checkbox"
-                  checked={linkedIds.includes(l.id)}
-                  className="h-4 w-4 rounded border-neutral-300 text-primary-600 focus-visible:ring-primary-600"
-                  onChange={(e) => {
-                    clearServerField("lodgeId");
-                    clearServerField("lodgeIds");
-                    const checked = e.target.checked;
-                    setLinkedIds((prev) =>
-                      checked
-                        ? Array.from(new Set([...prev, l.id]))
-                        : prev.filter((x) => x !== l.id),
-                    );
-                  }}
-                />
-                <span>{l.name}</span>
-              </label>
-            ))
-          ) : (
-            <div className="text-sm text-neutral-600">Inga loger att välja</div>
-          )}
-        </div>
-      </div>
+      <EventAudienceFields
+        lodges={lodges}
+        groups={groups}
+        users={users}
+        lodgeUsers={lodgeUsers}
+        selectedLodgeIds={selectedLodgeIds}
+        selectedGroupIds={selectedGroupIds}
+        selectedUserIds={selectedUserIds}
+        onLodgeChange={setSelectedLodgeIds}
+        onGroupChange={setSelectedGroupIds}
+        onUserChange={setSelectedUserIds}
+        clearServerField={clearServerField}
+        errors={errors}
+        disabled={saving}
+        lodgesLoading={lodgesLoading}
+        groupsLoading={groupsLoading}
+        usersLoading={usersLoading}
+      />
 
       <div>
         <label htmlFor="description" className="ui-label">

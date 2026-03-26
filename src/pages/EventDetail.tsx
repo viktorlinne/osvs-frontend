@@ -1,4 +1,4 @@
-﻿import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
 import { EventDetailEditForm, EventDetailView } from "../components/events";
 import type { EventFormState } from "../components/events/EventDetailEditForm";
@@ -18,13 +18,10 @@ import {
   getEvent,
   getFood,
   getRsvp,
-  linkLodgeEvent,
   listEventAttendances,
-  listEventLodges,
   patchEventAttendance,
   setFood,
   setRsvp,
-  unlinkLodgeEvent,
   updateEvent,
 } from "../services/events";
 import type {
@@ -33,15 +30,40 @@ import type {
   SetFoodResult,
   SetRsvpResult,
 } from "../services/events";
+import { listGroups } from "../services/groups";
 import { listLodges } from "../services/lodges";
+import { listUsers } from "../services/users";
 import type {
   Event as EventRecord,
   EventAttendanceRow,
+  Group,
   Lodge,
+  PublicUser,
   UpdateEventPayload,
 } from "../types";
 
 type AttendanceField = "rsvp" | "bookFood" | "attended" | "paymentPaid";
+
+function normalizeSelection(values?: number[] | null): string[] {
+  return Array.from(
+    new Set(
+      (values ?? [])
+        .map((value) => String(value))
+        .filter((value) => value.trim().length > 0),
+    ),
+  );
+}
+
+function normalizeNumericIds(values: string[]): number[] {
+  return Array.from(
+    new Set(
+      values
+        .map((value) => Number(value))
+        .filter((value) => Number.isFinite(value))
+        .map((value) => Math.floor(value)),
+    ),
+  );
+}
 
 function hasBookFoodResult(
   value:
@@ -71,8 +93,26 @@ export const EventDetail = () => {
   const { run: runAction, loading: saving } = useFetch<
     EventMutationResult | SetRsvpResult | SetFoodResult | PatchEventAttendanceResult | void
   >();
-  const { run: runLodges, data: lodges } = useFetch<Lodge[]>();
-  const { run: runLinked } = useFetch<Lodge[]>();
+  const {
+    run: runLodges,
+    data: lodges,
+    loading: lodgesLoading,
+  } = useFetch<Lodge[]>();
+  const {
+    run: runGroups,
+    data: groups,
+    loading: groupsLoading,
+  } = useFetch<Group[]>();
+  const {
+    run: runUsers,
+    data: users,
+    loading: usersLoading,
+  } = useFetch<PublicUser[]>();
+  const {
+    run: runLodgeUsers,
+    data: lodgeUsers,
+    setData: setLodgeUsers,
+  } = useFetch<PublicUser[]>();
   const { run: runRsvpFetch, loading: rsvpLoading } = useFetch<string | null>();
   const { run: runFoodFetch, loading: foodLoading } = useFetch<boolean | null>();
   const {
@@ -103,8 +143,9 @@ export const EventDetail = () => {
     price: "",
     lodgeMeeting: false,
   });
-  const [originalLinkedIds, setOriginalLinkedIds] = useState<number[]>([]);
-  const [linkedIds, setLinkedIds] = useState<number[]>([]);
+  const [selectedLodgeIds, setSelectedLodgeIds] = useState<string[]>([]);
+  const [selectedGroupIds, setSelectedGroupIds] = useState<string[]>([]);
+  const [selectedUserIds, setSelectedUserIds] = useState<string[]>([]);
   const [serverErrors, setServerErrors] = useState<Record<string, string>>({});
   const [rsvpStatus, setRsvpStatus] = useState<string | null>(null);
   const [bookFoodStatus, setBookFoodStatus] = useState<boolean | null>(null);
@@ -115,6 +156,11 @@ export const EventDetail = () => {
   const formErrors = { ...serverErrors, ...clientErrors };
   const canSave = Object.keys(clientErrors).length === 0;
   const hasStarted = isEventStartedNowStockholm(event?.startDate);
+  const selectedLodgeId = useMemo(() => {
+    const firstValue = selectedLodgeIds[0];
+    const parsed = Number(firstValue);
+    return Number.isFinite(parsed) ? parsed : null;
+  }, [selectedLodgeIds]);
 
   const canRsvp = isMoreThan48HoursFromNowStockholm(event?.startDate);
   const authUserId = Number(user?.matrikelnummer);
@@ -157,6 +203,9 @@ export const EventDetail = () => {
           price: fetchedEvent.price != null ? String(fetchedEvent.price) : "",
           lodgeMeeting: Boolean(fetchedEvent.lodgeMeeting),
         });
+        setSelectedLodgeIds(normalizeSelection(fetchedEvent.lodgeIds));
+        setSelectedGroupIds(normalizeSelection(fetchedEvent.groupIds));
+        setSelectedUserIds(normalizeSelection(fetchedEvent.userIds));
       }
       return fetchedEvent;
     }).catch(() => {
@@ -174,17 +223,6 @@ export const EventDetail = () => {
       runLodges(() => listLodges()).catch(() => {
         // useFetch handles global error presentation
       }),
-      runLinked(async () => {
-        const linked = await listEventLodges(eventId);
-        const parsedIds = linked
-          .map((lodge) => Number(lodge.id))
-          .filter((value) => Number.isFinite(value));
-        setOriginalLinkedIds(parsedIds);
-        setLinkedIds(parsedIds);
-        return linked;
-      }).catch(() => {
-        // useFetch handles global error presentation
-      }),
       runRsvpFetch(async () => {
         const status = await getRsvp(eventId);
         setRsvpStatus(status);
@@ -196,6 +234,17 @@ export const EventDetail = () => {
         // useFetch handles global error presentation
       }),
     ];
+
+    if (isEditRoute && canEdit) {
+      requests.push(
+        runGroups(() => listGroups()).catch(() => {
+          // useFetch handles global error presentation
+        }),
+        runUsers(() => listUsers()).catch(() => {
+          // useFetch handles global error presentation
+        }),
+      );
+    }
 
     if (event.food) {
       requests.push(
@@ -212,7 +261,34 @@ export const EventDetail = () => {
     }
 
     void Promise.all(requests);
-  }, [event, runAttendances, runFoodFetch, runLinked, runLodges, runRsvpFetch]);
+  }, [
+    canEdit,
+    event,
+    isEditRoute,
+    runAttendances,
+    runFoodFetch,
+    runGroups,
+    runLodges,
+    runRsvpFetch,
+    runUsers,
+  ]);
+
+  useEffect(() => {
+    if (!isEditRoute || !canEdit || !selectedLodgeId) {
+      setLodgeUsers([]);
+      return;
+    }
+
+    runLodgeUsers(() => listUsers({ lodgeId: selectedLodgeId })).catch(() => {
+      // useFetch handles global error presentation
+    });
+  }, [
+    canEdit,
+    isEditRoute,
+    runLodgeUsers,
+    selectedLodgeId,
+    setLodgeUsers,
+  ]);
 
   async function handleSave() {
     if (!id) {
@@ -241,25 +317,12 @@ export const EventDetail = () => {
         endDate: form.endDate || null,
         price: form.price ? Number(form.price) : undefined,
         lodgeMeeting: form.lodgeMeeting,
+        lodgeIds: normalizeNumericIds(selectedLodgeIds),
+        groupIds: normalizeNumericIds(selectedGroupIds),
+        userIds: normalizeNumericIds(selectedUserIds),
       };
 
       await runAction(() => updateEvent(id, payload));
-
-      const toAdd = linkedIds.filter(
-        (lodgeId) => !originalLinkedIds.includes(lodgeId),
-      );
-      const toRemove = originalLinkedIds.filter(
-        (lodgeId) => !linkedIds.includes(lodgeId),
-      );
-
-      if (toAdd.length > 0 || toRemove.length > 0) {
-        await runAction(async () => {
-          await Promise.all([
-            ...toAdd.map((lodgeId) => linkLodgeEvent(eventId, lodgeId)),
-            ...toRemove.map((lodgeId) => unlinkLodgeEvent(eventId, lodgeId)),
-          ]);
-        });
-      }
 
       await run(async () => {
         const fetchedEvent = await getEvent(id);
@@ -272,11 +335,14 @@ export const EventDetail = () => {
             price: fetchedEvent.price != null ? String(fetchedEvent.price) : "",
             lodgeMeeting: Boolean(fetchedEvent.lodgeMeeting),
           });
+          setSelectedLodgeIds(normalizeSelection(fetchedEvent.lodgeIds));
+          setSelectedGroupIds(normalizeSelection(fetchedEvent.groupIds));
+          setSelectedUserIds(normalizeSelection(fetchedEvent.userIds));
         }
         return fetchedEvent;
       });
 
-      navigate(`/events/${id}`);
+      navigate(`/events/${eventId}`);
     } catch (error: unknown) {
       const fields = getApiFieldErrors(error);
       if (fields) {
@@ -396,7 +462,7 @@ export const EventDetail = () => {
 
   return (
     <PageContainer size="xl" className="ui-page">
-      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between mb-4">
+      <div className="flex flex-col gap-2 mb-4 sm:flex-row sm:items-center sm:justify-between">
         <Link to=".." relative="path" className="ui-link">
           ← Tillbaka
         </Link>
@@ -414,8 +480,15 @@ export const EventDetail = () => {
               form={form}
               setForm={setForm}
               lodges={lodges}
-              linkedIds={linkedIds}
-              setLinkedIds={setLinkedIds}
+              groups={groups}
+              users={users}
+              lodgeUsers={lodgeUsers}
+              selectedLodgeIds={selectedLodgeIds}
+              setSelectedLodgeIds={setSelectedLodgeIds}
+              selectedGroupIds={selectedGroupIds}
+              setSelectedGroupIds={setSelectedGroupIds}
+              selectedUserIds={selectedUserIds}
+              setSelectedUserIds={setSelectedUserIds}
               onSave={handleSave}
               onDelete={handleDeleteEvent}
               isAdmin={isAdmin}
@@ -423,6 +496,9 @@ export const EventDetail = () => {
               errors={formErrors}
               canSubmit={canSave}
               clearServerField={clearServerField}
+              lodgesLoading={lodgesLoading}
+              groupsLoading={groupsLoading}
+              usersLoading={usersLoading}
             />
           ) : (
             <EventDetailView
@@ -438,7 +514,7 @@ export const EventDetail = () => {
               bookFoodStatus={bookFoodStatus}
               formatDisplayDate={formatEventDisplayDate}
               lodges={lodges}
-              originalLinkedIds={originalLinkedIds}
+              eventLodgeIds={event.lodgeIds ?? []}
               isAdmin={isAdmin}
               attendancesLoading={attendancesLoading}
               attendances={attendances}

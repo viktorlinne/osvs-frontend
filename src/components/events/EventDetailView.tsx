@@ -17,7 +17,7 @@ type Props = {
   bookFoodStatus: boolean | null;
   formatDisplayDate: (value?: string) => string;
   lodges: Lodge[] | null | undefined;
-  originalLinkedIds: number[];
+  eventLodgeIds: number[];
   isAdmin: boolean;
   attendancesLoading: boolean;
   attendances: EventAttendanceRow[] | null | undefined;
@@ -43,7 +43,7 @@ export function EventDetailView({
   bookFoodStatus,
   formatDisplayDate,
   lodges,
-  originalLinkedIds,
+  eventLodgeIds,
   isAdmin,
   attendancesLoading,
   attendances,
@@ -122,10 +122,10 @@ export function EventDetailView({
 
       <div className="mb-2 text-neutral-700">
         <strong className="text-neutral-900">Associerade loger:</strong>
-        {Array.isArray(lodges) && originalLinkedIds.length > 0 ? (
+        {Array.isArray(lodges) && eventLodgeIds.length > 0 ? (
           <div className="mt-1 flex flex-wrap gap-2 py-2">
             {lodges
-              .filter((l) => originalLinkedIds.includes(l.id))
+              .filter((l) => eventLodgeIds.includes(l.id))
               .map((l) => (
                 <Link key={l.id} to={`/lodges/${l.id}`} className="ui-link text-sm">
                   {l.name}

@@ -13,6 +13,13 @@ export type Lodge = {
   picture?: string | null;
 };
 
+export type Group = {
+  id: number;
+  name: string;
+  description?: string | null;
+  userIds: number[];
+};
+
 export type User = {
   matrikelnummer: number;
   email: string;
@@ -68,6 +75,9 @@ export type Event = {
   price: number;
   startDate: string;
   endDate: string;
+  lodgeIds?: number[];
+  groupIds?: number[];
+  userIds?: number[];
 };
 
 export type AttendedEvent = {

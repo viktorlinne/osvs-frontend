@@ -1,4 +1,4 @@
-export function normalizeLodgeIds(
+export function normalizeSelectionIds(
   input?: Array<string | number> | string | number | null,
 ): string[] {
   if (input == null) return [];
@@ -10,4 +10,10 @@ export function normalizeLodgeIds(
         .filter((value) => value.length > 0),
     ),
   );
+}
+
+export function normalizeLodgeIds(
+  input?: Array<string | number> | string | number | null,
+): string[] {
+  return normalizeSelectionIds(input);
 }

@@ -1,7 +1,8 @@
 import type { Lodge } from "../types";
+import { normalizeSelectionIds } from "./lodgeSelectionUtils";
 import { AudienceSelection } from "./AudienceSelection";
 
-export type LodgeSelectionProps = {
+export type SingleLodgeSelectionProps = {
   lodges?: Lodge[] | null;
   selectedIds?: Array<string | number> | null;
   onChange: (ids: string[]) => void;
@@ -12,31 +13,37 @@ export type LodgeSelectionProps = {
   loading?: boolean;
 };
 
-export function LodgeSelection({
+export function SingleLodgeSelection({
   lodges,
   selectedIds,
   onChange,
-  label = "Associera loger",
-  name = "lodge-selection",
+  label = "Välj loge",
+  name = "single-lodge-selection",
   disabled = false,
   emptyLabel = "Inga loger",
   loading = false,
-}: LodgeSelectionProps) {
+}: SingleLodgeSelectionProps) {
+  const normalizedSelected = normalizeSelectionIds(selectedIds);
+
   return (
     <AudienceSelection
       items={(lodges ?? []).map((lodge) => ({
         id: lodge.id,
         label: lodge.name,
+        disabled:
+          normalizedSelected.length > 0 &&
+          !normalizedSelected.includes(String(lodge.id)),
       }))}
-      selectedIds={selectedIds}
+      selectedIds={normalizedSelected}
       onChange={onChange}
       label={label}
       name={name}
       disabled={disabled}
       emptyLabel={emptyLabel}
       loading={loading}
+      single
     />
   );
 }
 
-export default LodgeSelection;
+export default SingleLodgeSelection;

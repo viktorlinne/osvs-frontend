@@ -1,8 +1,8 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
   Button,
-  LodgeSelection,
+  EventAudienceFields,
   PageContainer,
   errorTextClass,
   inputClass,
@@ -13,10 +13,23 @@ import { useAuth, useError } from "../context";
 import useFetch from "../hooks/useFetch";
 import { createEvent as createEventSvc } from "../services";
 import type { CreateEventResult } from "../services/events";
+import { listGroups } from "../services/groups";
 import { listLodges } from "../services/lodges";
-import type { CreateEventPayload, Lodge } from "../types";
+import { listUsers } from "../services/users";
+import type { CreateEventPayload, Group, Lodge, PublicUser } from "../types";
 import { getApiErrorMessage, getApiFieldErrors } from "../utils/apiErrors";
 import { getEventFormErrors } from "../utils/formValidation";
+
+function normalizeNumericIds(values: string[]): number[] {
+  return Array.from(
+    new Set(
+      values
+        .map((value) => Number(value))
+        .filter((value) => Number.isFinite(value))
+        .map((value) => Math.floor(value)),
+    ),
+  );
+}
 
 export const CreateEvent = () => {
   const navigate = useNavigate();
@@ -27,7 +40,26 @@ export const CreateEvent = () => {
       (user.roles ?? []).some((r: string) => ["Admin", "Editor"].includes(r)),
   );
 
-  const { run: runLodges, data: lodges } = useFetch<Lodge[]>();
+  const {
+    run: runLodges,
+    data: lodges,
+    loading: lodgesLoading,
+  } = useFetch<Lodge[]>();
+  const {
+    run: runGroups,
+    data: groups,
+    loading: groupsLoading,
+  } = useFetch<Group[]>();
+  const {
+    run: runUsers,
+    data: users,
+    loading: usersLoading,
+  } = useFetch<PublicUser[]>();
+  const {
+    run: runLodgeUsers,
+    data: lodgeUsers,
+    setData: setLodgeUsers,
+  } = useFetch<PublicUser[]>();
   const { run: runSubmit, loading: saving } = useFetch<CreateEventResult>();
 
   const [form, setForm] = useState({
@@ -39,12 +71,19 @@ export const CreateEvent = () => {
     lodgeMeeting: false,
   });
   const [selectedLodgeIds, setSelectedLodgeIds] = useState<string[]>([]);
+  const [selectedGroupIds, setSelectedGroupIds] = useState<string[]>([]);
+  const [selectedUserIds, setSelectedUserIds] = useState<string[]>([]);
   const [serverErrors, setServerErrors] = useState<Record<string, string>>({});
   const foodPreview =
     Number.isFinite(Number(form.price)) && Number(form.price) > 0 ? 1 : 0;
   const clientErrors = getEventFormErrors(form);
   const formErrors = { ...serverErrors, ...clientErrors };
   const canSubmit = canCreate && Object.keys(clientErrors).length === 0;
+  const selectedLodgeId = useMemo(() => {
+    const firstValue = selectedLodgeIds[0];
+    const parsed = Number(firstValue);
+    return Number.isFinite(parsed) ? parsed : null;
+  }, [selectedLodgeIds]);
 
   function clearServerField(field: string) {
     setServerErrors((prev) => {
@@ -56,10 +95,29 @@ export const CreateEvent = () => {
   }
 
   useEffect(() => {
-    void runLodges(() => listLodges()).catch(() => {
-      /* swallow; useFetch handles errors */
+    void Promise.all([
+      runLodges(() => listLodges()).catch(() => {
+        /* useFetch handles errors */
+      }),
+      runGroups(() => listGroups()).catch(() => {
+        /* useFetch handles errors */
+      }),
+      runUsers(() => listUsers()).catch(() => {
+        /* useFetch handles errors */
+      }),
+    ]);
+  }, [runGroups, runLodges, runUsers]);
+
+  useEffect(() => {
+    if (!selectedLodgeId) {
+      setLodgeUsers([]);
+      return;
+    }
+
+    runLodgeUsers(() => listUsers({ lodgeId: selectedLodgeId })).catch(() => {
+      /* useFetch handles errors */
     });
-  }, [runLodges]);
+  }, [runLodgeUsers, selectedLodgeId, setLodgeUsers]);
 
   async function handleCreate(e?: React.FormEvent) {
     e?.preventDefault();
@@ -74,14 +132,9 @@ export const CreateEvent = () => {
     if (Object.keys(clientErrors).length > 0) return;
 
     try {
-      const normalizedLodgeIds = Array.from(
-        new Set(
-          selectedLodgeIds
-            .map((value) => Number(value))
-            .filter((value) => Number.isFinite(value))
-            .map((value) => Math.floor(value)),
-        ),
-      );
+      const normalizedLodgeIds = normalizeNumericIds(selectedLodgeIds);
+      const normalizedGroupIds = normalizeNumericIds(selectedGroupIds);
+      const normalizedUserIds = normalizeNumericIds(selectedUserIds);
 
       const payload: CreateEventPayload = {
         title: form.title.trim(),
@@ -90,8 +143,9 @@ export const CreateEvent = () => {
         endDate: form.endDate || null,
         price: form.price ? Number(form.price) : undefined,
         lodgeMeeting: form.lodgeMeeting,
-        lodgeIds:
-          normalizedLodgeIds.length > 0 ? normalizedLodgeIds : undefined,
+        lodgeIds: normalizedLodgeIds,
+        groupIds: normalizedGroupIds,
+        userIds: normalizedUserIds,
       };
 
       const resp = await runSubmit(() => createEventSvc(payload));
@@ -143,6 +197,25 @@ export const CreateEvent = () => {
             <p className={errorTextClass}>{formErrors.title}</p>
           ) : null}
         </div>
+
+        <EventAudienceFields
+          lodges={lodges}
+          groups={groups}
+          users={users}
+          lodgeUsers={lodgeUsers}
+          selectedLodgeIds={selectedLodgeIds}
+          selectedGroupIds={selectedGroupIds}
+          selectedUserIds={selectedUserIds}
+          onLodgeChange={setSelectedLodgeIds}
+          onGroupChange={setSelectedGroupIds}
+          onUserChange={setSelectedUserIds}
+          clearServerField={clearServerField}
+          errors={formErrors}
+          disabled={saving}
+          lodgesLoading={lodgesLoading}
+          groupsLoading={groupsLoading}
+          usersLoading={usersLoading}
+        />
 
         <div>
           <label htmlFor="description" className={labelClass}>
@@ -255,20 +328,6 @@ export const CreateEvent = () => {
             Logemöte
           </label>
         </div>
-
-        <LodgeSelection
-          lodges={lodges}
-          selectedIds={selectedLodgeIds}
-          onChange={(ids) => {
-            clearServerField("lodgeId");
-            clearServerField("lodgeIds");
-            setSelectedLodgeIds(ids);
-          }}
-          label="Associera loger"
-          disabled={saving}
-          loading={!lodges}
-          name="associateLodges"
-        />
 
         <div className="flex flex-col gap-2 py-2 sm:flex-row">
           <Button
