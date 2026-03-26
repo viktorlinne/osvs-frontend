@@ -16,6 +16,9 @@ export default {
         '2xl': '72rem',
       },
     },
+    fontFamily: {
+      sans: ['"EB Garamond"', 'Georgia', 'serif'],
+    },
     extend: {
       colors: {
         primary: {
