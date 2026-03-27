@@ -40,7 +40,7 @@ export function GroupSelection({
           id: group.id,
           label: group.name,
           readOnly: isReadOnly,
-          note: isReadOnly ? "via annat val" : null,
+          note: isReadOnly ? "via logesel" : null,
         };
       })}
       selectedIds={mergedSelectedIds}

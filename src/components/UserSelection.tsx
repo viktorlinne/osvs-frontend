@@ -113,10 +113,10 @@ export function UserSelection({
                   <span className="flex items-center gap-2 text-xs text-neutral-500">
                     {selectedInGroup > 0 && (
                       <span className="rounded-full bg-primary-100 px-2 py-0.5 font-medium text-primary-700">
-                        {selectedInGroup} vald{selectedInGroup !== 1 ? "a" : ""}
+                        {selectedInGroup} Vald{selectedInGroup !== 1 ? "a" : ""}
                       </span>
                     )}
-                    <span>{isOpen ? "▲" : "▼"}</span>
+                    <span>{isOpen ? "↓" : "↑"}</span>
                   </span>
                 </button>
 

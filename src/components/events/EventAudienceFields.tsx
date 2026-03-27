@@ -47,72 +47,87 @@ export function EventAudienceFields({
     () => new Set(normalizeSelectionIds(selectedGroupIds)),
     [selectedGroupIds],
   );
-  const explicitUserIds = useMemo(
+
+  const individualSet = useMemo(
     () => new Set(normalizeSelectionIds(selectedUserIds)),
     [selectedUserIds],
   );
-  const selectedLodgeUserIds = useMemo(() => {
-    return new Set(
-      (lodgeUsers ?? [])
-        .map((user) => String(user.matrikelnummer))
-        .filter((value) => value.length > 0),
-    );
-  }, [lodgeUsers]);
 
-  const explicitGroupUserIds = useMemo(() => {
+  // Users belonging to the currently selected lodge
+  const lodgeUserSet = useMemo(
+    () => new Set((lodgeUsers ?? []).map((u) => String(u.matrikelnummer))),
+    [lodgeUsers],
+  );
+
+  // Users belonging to any explicitly selected group
+  const groupUserSet = useMemo(() => {
     const covered = new Set<string>();
     for (const group of groups ?? []) {
       if (!explicitGroupIds.has(String(group.id))) continue;
-      for (const userId of group.userIds) {
-        covered.add(String(userId));
-      }
+      for (const uid of group.userIds) covered.add(String(uid));
     }
     return covered;
   }, [explicitGroupIds, groups]);
 
-  const derivedGroupIds = useMemo(() => {
-    return (groups ?? [])
-      .filter((group) => {
-        const groupId = String(group.id);
-        if (explicitGroupIds.has(groupId) || group.userIds.length === 0) {
-          return false;
-        }
+  // Per-lodge user sets built from the lodgeId field on PublicUser
+  const lodgeUsersById = useMemo(() => {
+    const map = new Map<string, Set<string>>();
+    for (const user of users ?? []) {
+      if (user.lodgeId == null) continue;
+      const lid = String(user.lodgeId);
+      if (!map.has(lid)) map.set(lid, new Set());
+      map.get(lid)!.add(String(user.matrikelnummer));
+    }
+    return map;
+  }, [users]);
 
-        const coveredByOtherSelections = new Set<string>([
-          ...selectedLodgeUserIds,
-          ...explicitUserIds,
-        ]);
+  // Auto-derive a lodge when no lodge is explicitly selected but all of a lodge's
+  // members are already covered by the combination of groups + individual users.
+  const autoLodgeId = useMemo(() => {
+    if (selectedLodgeIds.length > 0) return null;
+    for (const lodge of lodges ?? []) {
+      const lodgeUids = lodgeUsersById.get(String(lodge.id));
+      if (!lodgeUids || lodgeUids.size === 0) continue;
+      if ([...lodgeUids].every((uid) => groupUserSet.has(uid) || individualSet.has(uid))) {
+        return String(lodge.id);
+      }
+    }
+    return null;
+  }, [selectedLodgeIds, lodges, lodgeUsersById, groupUserSet, individualSet]);
 
-        for (const otherGroup of groups ?? []) {
-          const otherGroupId = String(otherGroup.id);
-          if (otherGroupId === groupId || !explicitGroupIds.has(otherGroupId)) {
-            continue;
-          }
-          for (const userId of otherGroup.userIds) {
-            coveredByOtherSelections.add(String(userId));
-          }
-        }
+  const effectiveLodgeIds = useMemo(
+    () => (selectedLodgeIds.length > 0 ? selectedLodgeIds : autoLodgeId ? [autoLodgeId] : []),
+    [selectedLodgeIds, autoLodgeId],
+  );
 
-        return group.userIds.every((userId) =>
-          coveredByOtherSelections.has(String(userId)),
-        );
-      })
-      .map((group) => String(group.id));
-  }, [explicitGroupIds, explicitUserIds, groups, selectedLodgeUserIds]);
+  // Groups whose every member is covered by the lodge → locked, cannot be deselected.
+  // Groups covered only by individual user selections are NOT locked.
+  const lockedGroupIds = useMemo(
+    () =>
+      (groups ?? [])
+        .filter(
+          (g) =>
+            g.userIds.length > 0 &&
+            g.userIds.every((uid) => lodgeUserSet.has(String(uid))),
+        )
+        .map((g) => String(g.id)),
+    [groups, lodgeUserSet],
+  );
 
+  // Users to show as read-only in UserSelection:
+  // - covered by lodge (always read-only)
+  // - covered by a group but NOT individually selected
+  // Users who are both group-covered AND individually selected remain interactive so
+  // the individual selection can be removed to re-lock a group if needed.
   const derivedUserIds = useMemo(() => {
-    const coveredByOtherSelections = new Set<string>([
-      ...selectedLodgeUserIds,
-      ...explicitGroupUserIds,
-    ]);
-
     return (users ?? [])
-      .map((user) => String(user.matrikelnummer))
+      .map((u) => String(u.matrikelnummer))
       .filter(
-        (userId) =>
-          coveredByOtherSelections.has(userId) && !explicitUserIds.has(userId),
+        (uid) =>
+          lodgeUserSet.has(uid) ||
+          (groupUserSet.has(uid) && !individualSet.has(uid)),
       );
-  }, [explicitGroupUserIds, explicitUserIds, selectedLodgeUserIds, users]);
+  }, [lodgeUserSet, groupUserSet, individualSet, users]);
 
   return (
     <div className="space-y-2">
@@ -120,7 +135,7 @@ export function EventAudienceFields({
 
       <SingleLodgeSelection
         lodges={lodges}
-        selectedIds={selectedLodgeIds}
+        selectedIds={effectiveLodgeIds}
         onChange={(ids) => {
           clearServerField("audience");
           clearServerField("lodgeId");
@@ -137,11 +152,13 @@ export function EventAudienceFields({
       <GroupSelection
         groups={groups}
         selectedIds={selectedGroupIds}
-        derivedSelectedIds={derivedGroupIds}
+        derivedSelectedIds={lockedGroupIds}
         onChange={(ids) => {
           clearServerField("audience");
           clearServerField("groupIds");
-          onGroupChange(ids);
+          // Strip locked group IDs — they're not an explicit user choice
+          const nonLocked = ids.filter((id) => !lockedGroupIds.includes(id));
+          onGroupChange(nonLocked);
         }}
         disabled={disabled}
         loading={groupsLoading}
