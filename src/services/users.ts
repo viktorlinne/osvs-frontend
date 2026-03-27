@@ -98,6 +98,8 @@ function parseAttendedEventsResponse(value: unknown): AttendedEventsResponse {
     sinceLastAchievementCount?: unknown;
     lastAchievementAt?: unknown;
     totalMeetingsCount?: unknown;
+    meetingsAfterGrade8Count?: unknown;
+    createdAt?: unknown;
   };
   const events = parseAttendedEvents(payload?.events);
   return {
@@ -115,6 +117,13 @@ function parseAttendedEventsResponse(value: unknown): AttendedEventsResponse {
     totalMeetingsCount: Number.isFinite(Number(payload?.totalMeetingsCount))
       ? Number(payload?.totalMeetingsCount)
       : events.length,
+    meetingsAfterGrade8Count: Number.isFinite(Number(payload?.meetingsAfterGrade8Count))
+      ? Number(payload?.meetingsAfterGrade8Count)
+      : 0,
+    createdAt:
+      typeof payload?.createdAt === "string" && payload.createdAt.length > 0
+        ? payload.createdAt
+        : null,
   };
 }
 

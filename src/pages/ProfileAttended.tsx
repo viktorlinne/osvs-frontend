@@ -1,4 +1,4 @@
-﻿import { useEffect } from "react";
+﻿import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { PageContainer } from "../components";
 import useFetch from "../hooks/useFetch";
@@ -7,6 +7,7 @@ import type { AttendedEventsResponse } from "../types";
 import { formatEventDisplayDate } from "./events/dateUtils";
 
 export const ProfileAttended = () => {
+  const [now] = useState(() => Date.now());
   const { run, data, loading } = useFetch<AttendedEventsResponse>();
 
   useEffect(() => {
@@ -18,6 +19,11 @@ export const ProfileAttended = () => {
   const events = data?.events ?? [];
   const sinceLastAchievementCount = data?.sinceLastAchievementCount ?? 0;
   const totalMeetingsCount = data?.totalMeetingsCount ?? 0;
+  const meetingsAfterGrade8Count = data?.meetingsAfterGrade8Count ?? 0;
+  const yearsSinceCreated = data?.createdAt
+    ? Math.floor((now - new Date(data.createdAt).getTime()) / (365.25 * 24 * 60 * 60 * 1000))
+    : 0;
+  const score = yearsSinceCreated + totalMeetingsCount + meetingsAfterGrade8Count;
 
   return (
     <PageContainer size="md" className="ui-page">
@@ -27,7 +33,7 @@ export const ProfileAttended = () => {
 
       <h2 className="ui-page-title mb-4 mt-4">Min närvaro</h2>
 
-      <div className="mb-4 grid gap-4 sm:grid-cols-2">
+      <div className="mb-4 grid gap-4 sm:grid-cols-3">
         <div className="ui-card">
           <p className="text-sm text-neutral-600">Möten sedan senaste utmärkelse</p>
           <p className="mt-1 text-3xl font-bold text-neutral-900">{sinceLastAchievementCount}</p>
@@ -35,6 +41,10 @@ export const ProfileAttended = () => {
         <div className="ui-card">
           <p className="text-sm text-neutral-600">Totalt deltagna möten</p>
           <p className="mt-1 text-3xl font-bold text-neutral-900">{totalMeetingsCount}</p>
+        </div>
+        <div className="ui-card">
+          <p className="text-sm text-neutral-600">Poängräknare</p>
+          <p className="mt-1 text-3xl font-bold text-neutral-900">{score}</p>
         </div>
       </div>
 
