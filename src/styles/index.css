@@ -23,7 +23,7 @@
   }
 
   .ui-page-title {
-    @apply text-2xl font-bold text-neutral-900 md:text-3xl;
+    @apply text-2xl font-bold text-primary-600 md:text-3xl;
   }
 
   .ui-section-title {
