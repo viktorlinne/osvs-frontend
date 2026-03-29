@@ -9,14 +9,14 @@ export const AboutPage = () => {
           <div className="flex h-56 w-full items-center justify-center overflow-hidden rounded-md border border-neutral-200 bg-white">
             <img
               src="https://kmxmlfhkojdbuoktavul.supabase.co/storage/v1/object/public/static/info.png"
-              alt="osvs"
+              alt="OSVS informative image"
             />
           </div>
           <p className="text-sm text-neutral-600">
             Ordenssamfundet VS är en sluten orden med för samtliga loger
             gemensamma ordningsregler och grader.
           </p>
-          <h3 className="text-xl font-medium text-primary-600">Samfundet består av:</h3>
+          <h3 className="ui-section-title text-primary-600">Samfundet består av:</h3>
           <ul className="list-inside list-disc space-y-1 text-sm text-neutral-600">
             <li>Stamlogen i Karskrona bildad 7 september 1924</li>
             <li>Logen Stella Polaris i Helsingborg 21 mars 1931</li>
@@ -55,7 +55,7 @@ export const AboutPage = () => {
         </section>
 
         <section className="space-y-6 text-sm text-neutral-700">
-          <h2 className="ui-section-title text-primary-600">Varförför bara män?</h2>
+          <h2 className="ui-section-title text-primary-600">Varför bara män?</h2>
           <p>
             I vår tid, när jämställdheten mellan man och kvinna är en
             självklarhet, kan det verka egendomligt att Ordern är öppen endast

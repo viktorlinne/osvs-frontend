@@ -9,7 +9,7 @@ export const ContactPage = () => {
           <div className="flex h-auto w-full items-center justify-center overflow-hidden rounded-md border border-neutral-200 bg-white">
             <img
               src="https://kmxmlfhkojdbuoktavul.supabase.co/storage/v1/object/public/static/contact.png"
-              alt="osvs"
+              alt="OSVS kontaktinformation"
             />
           </div>
         </section>

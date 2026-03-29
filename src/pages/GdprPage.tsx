@@ -29,7 +29,7 @@ export const GdprPage = () => {
         >
           <img
             src={imgSrc}
-            alt="GDPR fullscreen"
+            alt="GDPR information fullskärmsvy"
             className="max-w-full max-h-full object-contain"
           />
         </div>
