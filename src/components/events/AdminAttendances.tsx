@@ -28,8 +28,10 @@ export function AdminAttendances({
   const canEdit = isAdmin && typeof onToggle === "function";
 
   return (
+    
     <div className="mt-4">
-      <div className="rounded-md border border-neutral-200 bg-white p-2">
+      <strong>Alla inbjudna</strong>
+      <div className="rounded-md border border-neutral-200 bg-white p-2 mt-4">
         {loading ? (
           <div className="py-2 text-sm text-neutral-600">Läser deltagare...</div>
         ) : Array.isArray(rows) && rows.length > 0 ? (

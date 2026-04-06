@@ -1,5 +1,10 @@
 ﻿import { Link } from "react-router-dom";
-import type { Event as EventRecord, EventAttendanceRow, Lodge } from "../../types";
+import type {
+  Event as EventRecord,
+  EventAttendanceRow,
+  Group,
+  Lodge,
+} from "../../types";
 import { AdminAttendances } from "./AdminAttendances";
 
 type AttendanceField = "rsvp" | "bookFood" | "attended" | "paymentPaid";
@@ -18,6 +23,8 @@ type Props = {
   formatDisplayDate: (value?: string) => string;
   lodges: Lodge[] | null | undefined;
   eventLodgeIds: number[];
+  groups: Group[] | null | undefined;
+  eventGroupIds: number[];
   isAdmin: boolean;
   attendancesLoading: boolean;
   attendances: EventAttendanceRow[] | null | undefined;
@@ -44,6 +51,8 @@ export function EventDetailView({
   formatDisplayDate,
   lodges,
   eventLodgeIds,
+  groups,
+  eventGroupIds,
   isAdmin,
   attendancesLoading,
   attendances,
@@ -98,42 +107,63 @@ export function EventDetailView({
         </div>
       )}
 
+      <div className="ui-page-title">{event.title}</div>
+      <div className="mb-2 text-neutral-700">{event.description}</div>
       <div className="mb-2 text-neutral-700">
-        <strong className="text-neutral-900">Titel:</strong> {event.title}
+        {formatDisplayDate(event.startDate)}
       </div>
       <div className="mb-2 text-neutral-700">
-        <strong className="text-neutral-900">Beskrivning:</strong> {event.description}
+        {formatDisplayDate(event.endDate)}
       </div>
+      <div className="mb-2 text-neutral-700"> {event.price} kr</div>
+      <div className="mb-2 text-neutral-700">{event.food ? "Ja" : "Nej"}</div>
       <div className="mb-2 text-neutral-700">
-        <strong className="text-neutral-900">Startdatum:</strong> {formatDisplayDate(event.startDate)}
-      </div>
-      <div className="mb-2 text-neutral-700">
-        <strong className="text-neutral-900">Slutdatum:</strong> {formatDisplayDate(event.endDate)}
-      </div>
-      <div className="mb-2 text-neutral-700">
-        <strong className="text-neutral-900">Pris:</strong> {event.price} kr
-      </div>
-      <div className="mb-2 text-neutral-700">
-        <strong className="text-neutral-900">Mat:</strong> {event.food ? "Ja" : "Nej"}
-      </div>
-      <div className="mb-2 text-neutral-700">
-        <strong className="text-neutral-900">Logemöte:</strong> {event.lodgeMeeting ? "Ja" : "Nej"}
+        {event.lodgeMeeting ? "Ja" : "Nej"}
       </div>
 
       <div className="mb-2 text-neutral-700">
-        <strong className="text-neutral-900">Associerade loger:</strong>
+        <strong className="text-neutral-900">Inbjudna loger:</strong>
         {Array.isArray(lodges) && eventLodgeIds.length > 0 ? (
           <div className="mt-1 flex flex-wrap gap-2 py-2">
             {lodges
               .filter((l) => eventLodgeIds.includes(l.id))
               .map((l) => (
-                <Link key={l.id} to={`/lodges/${l.id}`} className="ui-link text-sm">
+                <Link
+                  key={l.id}
+                  to={`/lodges/${l.id}`}
+                  className="ui-link text-sm"
+                >
                   {l.name}
                 </Link>
               ))}
           </div>
         ) : (
-          <div className="mt-1 text-sm text-neutral-600">Inga kopplade loger</div>
+          <div className="mt-1 text-sm text-neutral-600">
+            Inga loger inbjudna
+          </div>
+        )}
+      </div>
+
+      <div className="mb-2 text-neutral-700">
+        <strong className="text-neutral-900">Inbjudna grupper:</strong>
+        {Array.isArray(groups) && eventGroupIds.length > 0 ? (
+          <div className="mt-1 flex flex-wrap gap-2 py-2">
+            {groups
+              .filter((g) => eventGroupIds.includes(g.id))
+              .map((g) => (
+                <Link
+                  key={g.id}
+                  to={`/groups/${g.id}`}
+                  className="ui-link text-sm"
+                >
+                  {g.name}
+                </Link>
+              ))}
+          </div>
+        ) : (
+          <div className="mt-1 text-sm text-neutral-600">
+            Inga grupper inbjudna
+          </div>
         )}
       </div>
 

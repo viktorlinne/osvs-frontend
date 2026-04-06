@@ -223,6 +223,9 @@ export const EventDetail = () => {
       runLodges(() => listLodges()).catch(() => {
         // useFetch handles global error presentation
       }),
+      runGroups(() => listGroups()).catch(() => {
+        // useFetch handles global error presentation
+      }),
       runRsvpFetch(async () => {
         const status = await getRsvp(eventId);
         setRsvpStatus(status);
@@ -237,9 +240,6 @@ export const EventDetail = () => {
 
     if (isEditRoute && canEdit) {
       requests.push(
-        runGroups(() => listGroups()).catch(() => {
-          // useFetch handles global error presentation
-        }),
         runUsers(() => listUsers()).catch(() => {
           // useFetch handles global error presentation
         }),
@@ -515,6 +515,8 @@ export const EventDetail = () => {
               formatDisplayDate={formatEventDisplayDate}
               lodges={lodges}
               eventLodgeIds={event.lodgeIds ?? []}
+              groups={groups}
+              eventGroupIds={event.groupIds ?? []}
               isAdmin={isAdmin}
               attendancesLoading={attendancesLoading}
               attendances={attendances}

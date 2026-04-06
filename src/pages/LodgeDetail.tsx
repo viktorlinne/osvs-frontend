@@ -216,11 +216,9 @@ export const LodgeDetail = () => {
                 <div className="italic">{lodge.city}</div>
               </div>
               <div className="mb-2 text-neutral-700">
-                <strong className="text-neutral-900">Historia:</strong>{" "}
                 {lodge.description}
               </div>
               <div className="mb-2 text-neutral-700">
-                <strong className="text-neutral-900">Kontakt:</strong>{" "}
                 <a className="ui-link" href={`mailto:${lodge.email}`}>
                   {lodge.email}
                 </a>
