@@ -1,3 +1,4 @@
+import { useLayoutEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import type { Group, Lodge, PublicUser } from "../../types";
 import { Button, errorTextClass } from "../ui";
@@ -63,6 +64,15 @@ export function EventDetailEditForm({
 }: Props) {
   const foodPreview =
     Number.isFinite(Number(form.price)) && Number(form.price) > 0 ? 1 : 0;
+  const descriptionRef = useRef<HTMLTextAreaElement | null>(null);
+
+  useLayoutEffect(() => {
+    const textarea = descriptionRef.current;
+    if (!textarea) return;
+
+    textarea.style.height = "auto";
+    textarea.style.height = `${textarea.scrollHeight}px`;
+  }, [form.description]);
 
   return (
     <div className="space-y-4">
@@ -107,6 +117,7 @@ export function EventDetailEditForm({
           Beskrivning
         </label>
         <textarea
+          ref={descriptionRef}
           id="description"
           name="description"
           value={form.description}
@@ -114,7 +125,7 @@ export function EventDetailEditForm({
             clearServerField("description");
             setForm({ ...form, description: e.target.value });
           }}
-          className="ui-textarea"
+          className="ui-textarea resize-none overflow-hidden"
         />
         {errors.description ? (
           <p className={errorTextClass}>{errors.description}</p>

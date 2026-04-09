@@ -28,17 +28,21 @@ export function AdminAttendances({
   const canEdit = isAdmin && typeof onToggle === "function";
 
   return (
-    
-    <div className="mt-4">
-      <strong>Alla inbjudna</strong>
-      <div className="rounded-md border border-neutral-200 bg-white p-2 mt-4">
+    <div>
+      <div className="mb-2">
+        <strong>Inbjudna medlemmar</strong>
+      </div>
+
+      <div className="rounded-md border border-neutral-200 bg-white p-2">
         {loading ? (
-          <div className="py-2 text-sm text-neutral-600">Läser deltagare...</div>
+          <div className="py-2 text-sm text-neutral-600">
+            Läser deltagare...
+          </div>
         ) : Array.isArray(rows) && rows.length > 0 ? (
           <div className="max-h-80 overflow-y-auto overflow-x-hidden">
             <table className="w-full text-sm">
               <thead className="sticky top-0 bg-white">
-                <tr className="border-b border-neutral-200 text-left text-neutral-700">
+                <tr className="border-b border-neutral-200 text-left text-neutral-600">
                   <th className="py-2 pr-3 font-medium">Namn</th>
                   <th className="py-2 pr-3 font-medium">RSVP</th>
                   <th className="py-2 pr-3 font-medium">Boka mat</th>
@@ -55,7 +59,10 @@ export function AdminAttendances({
                   const disableBookFood =
                     disableBase || !row.rsvp || !canEditRsvpAndBookFood;
                   return (
-                    <tr key={row.uid} className="border-b border-neutral-200 last:border-b-0">
+                    <tr
+                      key={row.uid}
+                      className="border-b border-neutral-200 last:border-b-0"
+                    >
                       <td className="py-2 pr-3 break-words">
                         {row.firstname} {row.lastname}
                       </td>
@@ -77,12 +84,17 @@ export function AdminAttendances({
                           disabled={disableBookFood}
                           className="h-4 w-4 rounded border-neutral-300 text-primary-600 focus-visible:ring-primary-600"
                           onChange={(event) =>
-                            onToggle?.(row.uid, "bookFood", event.target.checked)
+                            onToggle?.(
+                              row.uid,
+                              "bookFood",
+                              event.target.checked,
+                            )
                           }
                         />
                       </td>
                       <td className="py-2 pr-3 break-words">
-                        {Array.isArray(row.allergies) && row.allergies.length > 0
+                        {Array.isArray(row.allergies) &&
+                        row.allergies.length > 0
                           ? row.allergies.join(", ")
                           : "-"}
                       </td>
@@ -93,7 +105,11 @@ export function AdminAttendances({
                           disabled={disableBase || !canEditAttended}
                           className="h-4 w-4 rounded border-neutral-300 text-primary-600 focus-visible:ring-primary-600"
                           onChange={(event) =>
-                            onToggle?.(row.uid, "attended", event.target.checked)
+                            onToggle?.(
+                              row.uid,
+                              "attended",
+                              event.target.checked,
+                            )
                           }
                         />
                       </td>
@@ -119,7 +135,9 @@ export function AdminAttendances({
             </table>
           </div>
         ) : (
-          <div className="py-2 text-sm text-neutral-600">Inga inbjudna deltagare</div>
+          <div className="py-2 text-sm text-neutral-600">
+            Inga inbjudna deltagare
+          </div>
         )}
       </div>
     </div>

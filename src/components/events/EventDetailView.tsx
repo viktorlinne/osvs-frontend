@@ -62,69 +62,71 @@ export function EventDetailView({
 }: Props) {
   const canEditRsvpAndBookFood = !hasStarted;
   const canEditAttended = hasStarted;
+  const showBookFoodButtons = event.food;
+  const disableBookFoodButtons = saving || foodLoading || !userCanBookFood;
 
   return (
     <div>
-      {userCanRsvp && (
-        <div className="mb-4">
-          <div className="mb-2 flex flex-col gap-2 sm:flex-row">
-            <button
-              className={`ui-btn ui-btn-sm ${rsvpStatus === "going" ? "ui-btn-primary" : "ui-btn-secondary"}`}
-              onClick={() => onRsvp("going")}
-              disabled={saving || rsvpLoading}
-            >
-              Kommer
-            </button>
-            <button
-              className={`ui-btn ui-btn-sm ${rsvpStatus === "not-going" ? "ui-btn-danger" : "ui-btn-secondary"}`}
-              onClick={() => onRsvp("not-going")}
-              disabled={saving || rsvpLoading}
-            >
-              Kommer inte
-            </button>
-          </div>
-        </div>
-      )}
-
-      {event.food && userCanBookFood && (
-        <div className="mb-4">
-          <div className="mb-2 flex flex-col gap-2 sm:flex-row">
-            <button
-              className={`ui-btn ui-btn-sm ${bookFoodStatus ? "ui-btn-primary" : "ui-btn-secondary"}`}
-              onClick={() => onBookFood(true)}
-              disabled={saving || foodLoading}
-            >
-              Boka mat
-            </button>
-            <button
-              className={`ui-btn ui-btn-sm ${bookFoodStatus === false ? "ui-btn-danger" : "ui-btn-secondary"}`}
-              onClick={() => onBookFood(false)}
-              disabled={saving || foodLoading}
-            >
-              Boka inte mat
-            </button>
-          </div>
-        </div>
-      )}
-
-      <div className="ui-page-title">{event.title}</div>
-      <div className="mb-2 text-neutral-700">{event.description}</div>
-      <div className="mb-2 text-neutral-700">
-        {formatDisplayDate(event.startDate)}
+        <div className="ui-page-title mb-2">{event.title}</div>
+        <div className="text-neutral-600 underline mb-2">
+          {event.lodgeMeeting
+            ? "Detta är ett logemöte"
+            : "Detta är inte ett logemöte"}
       </div>
-      <div className="mb-2 text-neutral-700">
+      <div className="mb-2 text-neutral-600 italic">
+        {formatDisplayDate(event.startDate)} -{" "}
         {formatDisplayDate(event.endDate)}
       </div>
-      <div className="mb-2 text-neutral-700"> {event.price} kr</div>
-      <div className="mb-2 text-neutral-700">{event.food ? "Ja" : "Nej"}</div>
-      <div className="mb-2 text-neutral-700">
-        {event.lodgeMeeting ? "Ja" : "Nej"}
+      <div className="mb-2 whitespace-pre-line text-neutral-600">
+        {event.description}
       </div>
+      {(userCanRsvp || showBookFoodButtons) && (
+        <div className="flex flex-col gap-2 lg:ml-auto lg:items-start">
+          {userCanRsvp && (
+            <div className="flex flex-col gap-2 mb-2 sm:flex-row">
+              <button
+                className={`ui-btn ui-btn-sm ${rsvpStatus === "going" ? "ui-btn-primary" : "ui-btn-secondary"}`}
+                onClick={() => onRsvp("going")}
+                disabled={saving || rsvpLoading}
+              >
+                Kommer
+              </button>
+              <button
+                className={`ui-btn ui-btn-sm ${rsvpStatus === "not-going" ? "ui-btn-danger" : "ui-btn-secondary"}`}
+                onClick={() => onRsvp("not-going")}
+                disabled={saving || rsvpLoading}
+              >
+                Kommer inte
+              </button>
+            </div>
+          )}
 
-      <div className="mb-2 text-neutral-700">
+          {showBookFoodButtons && (
+            <div className="flex flex-col gap-2 sm:flex-row">
+              <button
+                className={`ui-btn ui-btn-sm ${bookFoodStatus ? "ui-btn-primary" : "ui-btn-secondary"}`}
+                onClick={() => onBookFood(true)}
+                disabled={disableBookFoodButtons}
+              >
+                Boka mat
+              </button>
+              <button
+                className={`ui-btn ui-btn-sm ${bookFoodStatus === false ? "ui-btn-danger" : "ui-btn-secondary"}`}
+                onClick={() => onBookFood(false)}
+                disabled={disableBookFoodButtons}
+              >
+                Boka inte mat
+              </button>
+            </div>
+          )}
+        </div>
+      )}
+      <div className="mb-2 text-neutral-600"> {event.price > 0 ? `${event.price} kr` : ""}</div>
+
+      <div className="mb-2">
         <strong className="text-neutral-900">Inbjudna loger:</strong>
         {Array.isArray(lodges) && eventLodgeIds.length > 0 ? (
-          <div className="mt-1 flex flex-wrap gap-2 py-2">
+          <div className="flex flex-wrap gap-2">
             {lodges
               .filter((l) => eventLodgeIds.includes(l.id))
               .map((l) => (
@@ -138,16 +140,16 @@ export function EventDetailView({
               ))}
           </div>
         ) : (
-          <div className="mt-1 text-sm text-neutral-600">
+          <div className="text-sm text-neutral-600">
             Inga loger inbjudna
           </div>
         )}
       </div>
 
-      <div className="mb-2 text-neutral-700">
+      <div className="mb-2">
         <strong className="text-neutral-900">Inbjudna grupper:</strong>
         {Array.isArray(groups) && eventGroupIds.length > 0 ? (
-          <div className="mt-1 flex flex-wrap gap-2 py-2">
+          <div className="flex flex-wrap gap-2">
             {groups
               .filter((g) => eventGroupIds.includes(g.id))
               .map((g) => (
@@ -161,7 +163,7 @@ export function EventDetailView({
               ))}
           </div>
         ) : (
-          <div className="mt-1 text-sm text-neutral-600">
+          <div className="text-sm text-neutral-600">
             Inga grupper inbjudna
           </div>
         )}
