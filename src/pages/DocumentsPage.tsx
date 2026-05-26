@@ -1,6 +1,6 @@
-﻿import { useEffect } from "react";
+﻿import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { PageContainer } from "../components";
+import { PageContainer, inputClass, labelClass } from "../components";
 import { useAuth } from "../context";
 import useFetch from "../hooks/useFetch";
 import { listDocuments } from "../services";
@@ -12,12 +12,17 @@ export const DocumentsPage = () => {
     user && (user.roles ?? []).some((r) => ["Admin", "Editor"].includes(r)),
   );
   const { run, data: documents, loading } = useFetch<SiteDocument[]>();
+  const [titleQuery, setTitleQuery] = useState("");
 
   useEffect(() => {
     run(() => listDocuments()).catch(() => {
       // handled by useFetch
     });
   }, [run]);
+
+  const filtered = (documents ?? []).filter((d) =>
+    d.title.toLowerCase().includes(titleQuery.toLowerCase()),
+  );
 
   return (
     <PageContainer size="xl" className="ui-page">
@@ -30,8 +35,23 @@ export const DocumentsPage = () => {
         )}
       </div>
 
+      <div className="mb-6">
+        <label className={labelClass} htmlFor="titleSearch">
+          Sök på titel
+          <input
+            id="titleSearch"
+            name="titleSearch"
+            type="search"
+            value={titleQuery}
+            onChange={(e) => setTitleQuery(e.target.value)}
+            placeholder="Sök dokumenttitel"
+            className={inputClass}
+          />
+        </label>
+      </div>
+
       <div className="grid w-full gap-4">
-        {(documents ?? []).map((document) => (
+        {filtered.map((document) => (
           <a
             key={document.id}
             href={document.pictureUrl ?? "#"}
@@ -44,7 +64,7 @@ export const DocumentsPage = () => {
         ))}
       </div>
 
-      {!loading && (documents ?? []).length === 0 && (
+      {!loading && filtered.length === 0 && (
         <p className="mt-6 text-neutral-600">Inga dokument hittades.</p>
       )}
     </PageContainer>
