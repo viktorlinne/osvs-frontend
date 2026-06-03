@@ -13,12 +13,15 @@ export const Footer: React.FC = () => {
           <div className="text-center md:text-left">
             <NavLink
               to="/"
-              className="text-lg font-bold text-primary-600 transition hover:text-primary-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-600 focus-visible:ring-offset-2"
+              className="text-base font-semibold tracking-widest text-primary-600 transition-colors duration-150 hover:text-primary-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-600 focus-visible:ring-offset-2"
             >
               OSVS
             </NavLink>
-            <p className="mt-2 text-sm">
-              &copy; {new Date().getFullYear()} Ordensamfundet VS
+            <p className="mt-1.5 text-xs tracking-wide text-neutral-600">
+              Ordensamfundet VS &mdash; est. 1924
+            </p>
+            <p className="mt-1 text-xs text-neutral-600">
+              &copy; {new Date().getFullYear()}
             </p>
           </div>
 
@@ -76,7 +79,7 @@ export const Footer: React.FC = () => {
               info@osvs.se
             </a>
             <a
-              href="http://www.osvs.se"
+              href="https://www.osvs.se"
               className="mt-2 block text-sm transition hover:text-primary-700 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-600 focus-visible:ring-offset-2"
             >
               osvs.se

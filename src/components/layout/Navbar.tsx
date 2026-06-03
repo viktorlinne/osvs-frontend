@@ -21,10 +21,10 @@ function formatSessionCountdown(expiresAt: string, nowMs: number) {
 }
 
 const navButtonBase =
-  "block rounded-md px-3 py-2 text-sm font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-600 focus-visible:ring-offset-2";
+  "block rounded-md px-3 py-2 text-sm font-medium tracking-wide transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-600 focus-visible:ring-offset-2";
 
 const dropdownButtonBase =
-  "inline-flex items-center rounded-md px-3 py-2 text-sm font-medium text-neutral-700 transition hover:bg-neutral-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-600 focus-visible:ring-offset-2";
+  "inline-flex items-center rounded-md px-3 py-2 text-sm font-medium tracking-wide text-neutral-700 transition-colors duration-150 hover:bg-neutral-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-600 focus-visible:ring-offset-2";
 
 const NavButton: React.FC<NavButtonProps> = ({ to, children, onClick }) => (
   <NavLink
@@ -33,7 +33,7 @@ const NavButton: React.FC<NavButtonProps> = ({ to, children, onClick }) => (
     className={({ isActive }) =>
       `${navButtonBase} ${
         isActive
-          ? "bg-primary-600 text-white"
+          ? "bg-primary-50 text-primary-700 font-semibold"
           : "text-neutral-700 hover:bg-neutral-100"
       }`
     }
@@ -78,7 +78,8 @@ const Dropdown: React.FC<DropdownProps> = ({
       >
         {label}
         <svg
-          className="ml-2 h-4 w-4"
+          className="ml-2 h-4 w-4 transition-transform duration-200"
+          style={{ transform: isOpen ? "rotate(180deg)" : "rotate(0deg)" }}
           xmlns="http://www.w3.org/2000/svg"
           viewBox="0 0 20 20"
           fill="currentColor"
@@ -93,7 +94,7 @@ const Dropdown: React.FC<DropdownProps> = ({
       </button>
 
       {isOpen && (
-        <div className="absolute left-0 top-full z-30 w-52 rounded-md border border-neutral-200 bg-white shadow-card">
+        <div className="absolute left-0 top-full z-30 w-52 rounded-md border border-neutral-200 bg-white py-1 shadow-card-hover">
           <div
             onClick={closeAllMenus}
             className="max-h-[70vh] overflow-y-auto overflow-x-hidden"
@@ -177,7 +178,7 @@ export const Navbar: React.FC = () => {
               <NavLink
                 to="/"
                 onClick={closeAllMenus}
-                className="text-2xl font-bold text-primary-600 transition hover:text-primary-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-600 focus-visible:ring-offset-2"
+                className="text-xl font-semibold tracking-widest text-primary-600 transition-colors duration-150 hover:text-primary-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-600 focus-visible:ring-offset-2"
               >
                 OSVS
               </NavLink>
@@ -261,8 +262,8 @@ export const Navbar: React.FC = () => {
                 ) : (
                   <>
                     {countdown ? (
-                      <span className="rounded-md bg-neutral-100 px-3 py-2 text-sm text-neutral-700">
-                        Utloggning om {countdown}
+                      <span className="rounded-md bg-neutral-100 px-3 py-1.5 text-xs font-medium tracking-wide text-neutral-600 tabular-nums">
+                        {countdown}
                       </span>
                     ) : null}
                     <NavButton to="/profile" onClick={closeAllMenus}>
@@ -368,8 +369,8 @@ export const Navbar: React.FC = () => {
                 ) : (
                   <>
                     {countdown ? (
-                      <p className="px-3 py-2 text-sm text-neutral-600">
-                        Utloggning om {countdown}
+                      <p className="px-3 py-1.5 text-xs font-medium tracking-wide text-neutral-600 tabular-nums">
+                        {countdown}
                       </p>
                     ) : null}
                     <NavButton to="/profile" onClick={closeAllMenus}>

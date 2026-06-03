@@ -5,6 +5,8 @@
 @layer base {
   body {
     @apply bg-neutral-50 text-neutral-900 antialiased;
+    line-height: 1.65;
+    font-feature-settings: 'kern' 1, 'liga' 1;
   }
 
   h1,
@@ -14,68 +16,70 @@
   h5,
   h6 {
     @apply tracking-tight text-neutral-900;
+    font-feature-settings: 'kern' 1, 'liga' 1, 'onum' 1;
+    line-height: 1.25;
   }
 }
 
 @layer components {
   .ui-page {
-    @apply w-full py-6 md:py-8;
+    @apply w-full py-8 md:py-12;
   }
 
   .ui-page-title {
-    @apply text-2xl font-bold text-primary-600 md:text-3xl;
+    @apply text-3xl font-semibold tracking-tight text-primary-600 md:text-4xl;
   }
 
   .ui-section-title {
-    @apply text-xl font-semibold text-neutral-900 md:text-2xl;
+    @apply text-xl font-semibold tracking-tight text-neutral-900 md:text-2xl;
   }
 
   .ui-card {
-    @apply rounded-card border border-neutral-200 bg-white p-4 shadow-card;
+    @apply rounded-card border border-neutral-200 bg-white p-5 shadow-card;
   }
 
   .ui-card-hover {
-    @apply transition-shadow hover:shadow-card-hover;
+    @apply transition-shadow duration-200 hover:shadow-card-hover;
   }
 
   .ui-label {
-    @apply mb-1 block text-sm font-medium text-neutral-700;
+    @apply mb-1.5 block text-xs font-semibold uppercase tracking-widest text-neutral-600;
   }
 
   .ui-input {
-    @apply w-full rounded-md border border-neutral-200 bg-white px-3 py-2 text-sm text-neutral-900 shadow-sm placeholder:text-neutral-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-600 focus-visible:ring-offset-2;
+    @apply w-full rounded-md border border-neutral-200 bg-white px-3 py-2.5 text-sm text-neutral-900 shadow-sm placeholder:text-neutral-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-600 focus-visible:ring-offset-2 focus-visible:ring-offset-neutral-50;
   }
 
   .ui-select {
-    @apply w-full rounded-md border border-neutral-200 bg-white px-3 py-2 text-sm text-neutral-900 shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-600 focus-visible:ring-offset-2;
+    @apply w-full rounded-md border border-neutral-200 bg-white px-3 py-2.5 text-sm text-neutral-900 shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-600 focus-visible:ring-offset-2 focus-visible:ring-offset-neutral-50;
   }
 
   .ui-textarea {
-    @apply w-full rounded-md border border-neutral-200 bg-white px-3 py-2 text-sm text-neutral-900 shadow-sm placeholder:text-neutral-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-600 focus-visible:ring-offset-2;
+    @apply w-full rounded-md border border-neutral-200 bg-white px-3 py-2.5 text-sm text-neutral-900 shadow-sm placeholder:text-neutral-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-600 focus-visible:ring-offset-2 focus-visible:ring-offset-neutral-50;
   }
 
   .ui-error {
-    @apply mt-1 text-sm text-danger-600;
+    @apply mt-1 text-xs text-danger-600 tracking-wide;
   }
 
   .ui-btn {
-    @apply inline-flex min-h-10 items-center justify-center rounded-md px-4 py-2 text-sm font-medium transition disabled:cursor-not-allowed disabled:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-600 focus-visible:ring-offset-2;
+    @apply inline-flex min-h-11 cursor-pointer items-center justify-center rounded-md px-4 py-2 text-sm font-medium tracking-wide transition-colors duration-150 disabled:cursor-not-allowed disabled:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-600 focus-visible:ring-offset-2 focus-visible:ring-offset-neutral-50;
   }
 
   .ui-btn-sm {
-    @apply min-h-9 px-3 py-2 text-sm;
+    @apply min-h-10 px-3 py-1.5 text-xs tracking-widest;
   }
 
   .ui-btn-primary {
-    @apply bg-primary-600 text-white hover:bg-primary-700;
+    @apply bg-primary-600 text-white hover:bg-primary-700 active:bg-primary-800;
   }
 
   .ui-btn-secondary {
-    @apply border border-neutral-200 bg-white text-neutral-700 hover:bg-neutral-100;
+    @apply border border-neutral-200 bg-white text-neutral-700 hover:bg-neutral-50 hover:border-neutral-300 active:bg-neutral-100;
   }
 
   .ui-btn-danger {
-    @apply bg-danger-600 text-white hover:bg-danger-700;
+    @apply bg-danger-600 text-white hover:bg-danger-700 active:bg-danger-700;
   }
 
   .ui-link {
@@ -89,4 +93,3 @@
     -webkit-line-clamp: 2;
   }
 }
-

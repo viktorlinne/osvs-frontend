@@ -217,7 +217,7 @@ export const MembersPage = () => {
               <img
                 src={member.pictureUrl}
                 alt={`${member.firstname} ${member.lastname}`}
-                className="h-16 w-16 shrink-0 rounded-full"
+                className="h-16 w-16 shrink-0 rounded-full object-cover object-top ring-2 ring-neutral-100"
                 loading="lazy"
                 decoding="async"
               />
