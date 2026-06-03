@@ -1,4 +1,4 @@
-﻿import { PageContainer } from "../components";
+import { PageContainer } from "../components";
 
 export const AboutPage = () => {
   return (
@@ -8,8 +8,9 @@ export const AboutPage = () => {
           <h2 className="ui-section-title text-primary-600">Om Ordensamfundet VS</h2>
           <div className="flex h-56 w-full items-center justify-center overflow-hidden rounded-md border border-neutral-200 bg-white">
             <img
-              src="https://kmxmlfhkojdbuoktavul.supabase.co/storage/v1/object/public/static/info.png"
+              src="/info.png"
               alt="OSVS informative image"
+              className="h-full w-full object-contain"
             />
           </div>
           <p className="text-sm text-neutral-600">

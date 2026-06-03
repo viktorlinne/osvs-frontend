@@ -12,6 +12,7 @@ import useFetch from "../hooks/useFetch";
 import { listLodges, listPosts } from "../services";
 import type { PaginatedPostsResponse } from "../services/posts";
 import type { Lodge } from "../types";
+import { mediaPlaceholderUrl } from "../utils/media";
 
 const POSTS_PAGE_SIZE = 24;
 
@@ -146,7 +147,7 @@ export const NewsPage = () => {
             className="ui-card ui-card-hover flex flex-col p-0"
           >
             <img
-              src={p.pictureUrl ?? ""}
+              src={p.pictureUrl || mediaPlaceholderUrl("post")}
               alt={p.title}
               className="h-48 w-full rounded-t-card object-cover md:h-56"
             />

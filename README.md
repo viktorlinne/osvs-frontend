@@ -31,7 +31,6 @@ Frontend env template:
 Current values:
 
 - `VITE_BACKEND_URL`
-- `VITE_SUPABASE_ANON_KEY`
 
 Notes:
 

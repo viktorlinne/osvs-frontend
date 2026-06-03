@@ -1,4 +1,4 @@
-﻿import { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
 import { useForm, useWatch } from "react-hook-form";
 import {
@@ -21,6 +21,7 @@ import {
   postFormRules,
   validateOptionalPostImage,
 } from "../utils/formValidation";
+import { mediaPlaceholderUrl } from "../utils/media";
 
 export const PostDetail = () => {
   const { user } = useAuth();
@@ -192,8 +193,7 @@ export const PostDetail = () => {
           <div className="md:col-span-1">
             <img
               src={
-                post.pictureUrl ??
-                "https://kmxmlfhkojdbuoktavul.supabase.co/storage/v1/object/public/posts/postPlaceholder.png"
+                post.pictureUrl ?? mediaPlaceholderUrl("post")
               }
               alt={post.title}
               className="h-64 w-full rounded-md object-cover md:h-full"

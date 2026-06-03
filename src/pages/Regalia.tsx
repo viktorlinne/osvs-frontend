@@ -9,92 +9,77 @@ type RegaliaItem = {
 const regaliaItems: RegaliaItem[] = [
     {
         title: "I:a",
-        imageUrl:
-            "https://kmxmlfhkojdbuoktavul.supabase.co/storage/v1/object/public/achievements/grade_1.jpg",
+        imageUrl: "/achievements/grade_1.jpg",
         description: "Bär Ordensstjärna på bröstets vänstra sida."
     },
     {
         title: "II:a",
-        imageUrl:
-            "https://kmxmlfhkojdbuoktavul.supabase.co/storage/v1/object/public/achievements/grade_2.jpg",
+        imageUrl: "/achievements/grade_2.jpg",
         description: "Bär om halsen en lyra i grönt band med brun kant."
     },
     {
         title: "III:e",
-        imageUrl:
-            "https://kmxmlfhkojdbuoktavul.supabase.co/storage/v1/object/public/achievements/grade_3.jpg",
+        imageUrl: "/achievements/grade_3.jpg",
         description: "Bär om halsen sköld med kors i svartvitt band."
     },
     {
         title: "IV:e",
-        imageUrl:
-            "https://kmxmlfhkojdbuoktavul.supabase.co/storage/v1/object/public/achievements/grade_4.jpg",
+        imageUrl: "/achievements/grade_4.jpg",
         description: "Bär över höger axel rött vattrat band med vidhängande triangel."
     },
     {
         title: "V:e",
-        imageUrl:
-            "https://kmxmlfhkojdbuoktavul.supabase.co/storage/v1/object/public/achievements/grade_5.jpg",
+        imageUrl: "/achievements/grade_5.jpg",
         description: "Bär över höger axel grönt vattrat band med vidhängande sköld."
     },
     {
         title: "VI:e",
-        imageUrl:
-            "https://kmxmlfhkojdbuoktavul.supabase.co/storage/v1/object/public/achievements/grade_6.jpg",
+        imageUrl: "/achievements/grade_6.jpg",
         description: "Bär över höger axel ljusblått vattrat band med vidhängande svärd."
     },
     {
         title: "VII:e",
-        imageUrl:
-            "https://kmxmlfhkojdbuoktavul.supabase.co/storage/v1/object/public/achievements/grade_7.jpg",
+        imageUrl: "/achievements/grade_7.jpg",
         description: "Bär över höger axel rosafärgat vattrat band med sexuddig stjärna."
     },
     {
         title: "VIII:e",
-        imageUrl:
-            "https://kmxmlfhkojdbuoktavul.supabase.co/storage/v1/object/public/achievements/grade_8.jpg",
+        imageUrl: "/achievements/grade_8.jpg",
         description: "Bär över höger axel grönvitt vattrat band, vidhängande åttauddig stjärna."
     },
     {
         title: "IX:e",
-        imageUrl:
-            "https://kmxmlfhkojdbuoktavul.supabase.co/storage/v1/object/public/achievements/grade_9.jpg",
+        imageUrl: "/achievements/grade_9.jpg",
         description: "Bär om halsen stjärna i rött vattrat band samt VIII:e gr band."
     },
     {
         title: "X:e",
-        imageUrl:
-            "https://kmxmlfhkojdbuoktavul.supabase.co/storage/v1/object/public/achievements/grade_10.jpg",
+        imageUrl: "/achievements/grade_10.jpg",
         description: "Bär om halsen stjärna omgiven med kedja i rött vattrat band, VIII:e gr. band."
     },
     {
         title: "Förtjänstmedalj",
-        imageUrl:
-            "https://kmxmlfhkojdbuoktavul.supabase.co/storage/v1/object/public/achievements/fortjanstmedalj.jpg",
+        imageUrl: "/achievements/fortjanstmedalj.jpg",
         description: ""
     },
     {
         title: "Stiftarband",
-        imageUrl:
-            "https://kmxmlfhkojdbuoktavul.supabase.co/storage/v1/object/public/achievements/stiftarband.jpg",
+        imageUrl: "/achievements/stiftarband.jpg",
         description: ""
     },
     {
         title: "Ordensknapp",
-        imageUrl:
-            "https://kmxmlfhkojdbuoktavul.supabase.co/storage/v1/object/public/achievements/ordensknapp.jpg",
+        imageUrl: "/achievements/ordensknapp.jpg",
         description: ""
     },
     {
         title: "Jubileumsknapp",
-        imageUrl:
-            "https://kmxmlfhkojdbuoktavul.supabase.co/storage/v1/object/public/achievements/jubileumsknapp.jpg",
+        imageUrl: "/achievements/jubileumsknapp.jpg",
         description: ""
     },
     {
         title: "Veteran 25 år",
-        imageUrl:
-            "https://kmxmlfhkojdbuoktavul.supabase.co/storage/v1/object/public/achievements/veteran_25.jpg",
+        imageUrl: "/achievements/veteran_25.jpg",
         description: ""
     },
 ];

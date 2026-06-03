@@ -1,6 +1,5 @@
 import { useState } from "react";
 import {
-  BannerCarousel,
   EventList,
   PageContainer,
   PublicumDisplay,
@@ -10,8 +9,7 @@ import type { PublicumPostListItem } from "../services/posts";
 
 const DEFAULT_PUBLICUM = {
   title: "Ordensamfundet VS",
-  imageUrl:
-    "https://kmxmlfhkojdbuoktavul.supabase.co/storage/v1/object/public/static/stamlogen.jpg",
+  imageUrl: "/stamlogen.jpg",
   description: "",
 };
 
@@ -28,7 +26,6 @@ export const HomePage = () => {
 
   return (
     <div className="ui-page">
-      <BannerCarousel />
       <PageContainer size="xl" className="pt-8 md:pt-10">
         <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
           <section className="space-y-3">

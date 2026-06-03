@@ -1,4 +1,4 @@
-﻿import { PageContainer } from "../components";
+import { PageContainer } from "../components";
 
 export const ContactPage = () => {
   return (
@@ -8,8 +8,9 @@ export const ContactPage = () => {
           <h2 className="ui-section-title text-primary-600">Kontakt</h2>
           <div className="flex h-auto w-full items-center justify-center overflow-hidden rounded-md border border-neutral-200 bg-white">
             <img
-              src="https://kmxmlfhkojdbuoktavul.supabase.co/storage/v1/object/public/static/contact.png"
+              src="/contact.png"
               alt="OSVS kontaktinformation"
+              className="h-auto w-full object-contain"
             />
           </div>
         </section>
