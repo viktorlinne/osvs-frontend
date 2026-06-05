@@ -1,4 +1,4 @@
-﻿import { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import {
   listPublicumPosts,
   type PublicumPostListItem,
@@ -16,9 +16,10 @@ function formatYear(value?: string): string {
 
 type PublicumListProps = {
   onSelect?: (post: PublicumPostListItem) => void;
+  selectedId?: string | number | null;
 };
 
-export function PublicumList({ onSelect }: PublicumListProps) {
+export function PublicumList({ onSelect, selectedId }: PublicumListProps) {
   const [posts, setPosts] = useState<PublicumPostListItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [failed, setFailed] = useState(false);
@@ -45,25 +46,46 @@ export function PublicumList({ onSelect }: PublicumListProps) {
     };
   }, []);
 
-  if (loading) return <p className="text-sm text-neutral-600">Laddar publicum...</p>;
-  if (failed) return <p className="text-sm text-danger-600">Kunde inte hamta publicum</p>;
-  if (!posts.length) return <p className="text-sm text-neutral-600">Inga publicum-inlagg</p>;
+  if (loading)
+    return <p className="text-sm text-neutral-600">Laddar publicum...</p>;
+  if (failed)
+    return (
+      <p className="text-sm text-danger-600">Kunde inte hämta publicum</p>
+    );
+  if (!posts.length)
+    return (
+      <p className="text-sm text-neutral-600">Inga publicum-inlägg</p>
+    );
 
   return (
-    <ul className="max-h-[40rem] space-y-2 overflow-y-auto">
-      {posts.map((post) => (
-        <li key={post.id} className="border-b border-neutral-200 pb-2">
-          <button
-            type="button"
-            className="w-full rounded-md text-left transition hover:bg-neutral-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-600 focus-visible:ring-offset-2"
-            onClick={() => onSelect?.(post)}
-          >
-            <p className="text-sm italic text-neutral-600">{formatYear(post.createdAt)}</p>
-            <p className="text-neutral-900">{post.title}</p>
-          </button>
-        </li>
-      ))}
-    </ul>
+    <div className="relative">
+      <ul className="max-h-[40rem] overflow-y-auto pb-6">
+        {posts.map((post) => {
+          const isSelected = selectedId != null && post.id === selectedId;
+          return (
+            <li key={post.id} className="ui-entry">
+              <button
+                type="button"
+                className={`flex w-full items-baseline gap-4 rounded px-1 py-0.5 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-600 focus-visible:ring-offset-2 focus-visible:ring-offset-neutral-50 ${
+                  isSelected
+                    ? "bg-primary-50 text-primary-700"
+                    : "hover:bg-neutral-100"
+                }`}
+                onClick={() => onSelect?.(post)}
+              >
+                <span className="w-12 shrink-0 tabular-nums text-xs text-neutral-600">
+                  {formatYear(post.createdAt)}
+                </span>
+                <span className={`text-sm ${isSelected ? "text-primary-700" : "text-neutral-900"}`}>
+                  {post.title}
+                </span>
+              </button>
+            </li>
+          );
+        })}
+      </ul>
+      <div className="pointer-events-none absolute bottom-0 left-0 right-0 h-6 bg-gradient-to-t from-neutral-50 to-transparent" />
+    </div>
   );
 }
 

@@ -89,7 +89,7 @@ function hasAttendanceRowResult(
 
 export const EventDetail = () => {
   const { id } = useParams<{ id: string }>();
-  const { run, data: event } = useFetch<EventRecord | null>();
+  const { run, data: event, loading: eventLoading } = useFetch<EventRecord | null>();
   const { run: runAction, loading: saving } = useFetch<
     EventMutationResult | SetRsvpResult | SetFoodResult | PatchEventAttendanceResult | void
   >();
@@ -315,7 +315,7 @@ export const EventDetail = () => {
         description: form.description,
         startDate: form.startDate || null,
         endDate: form.endDate || null,
-        price: form.price ? Number(form.price) : undefined,
+        price: form.price !== "" && Number.isFinite(Number(form.price)) ? Number(form.price) : undefined,
         lodgeMeeting: form.lodgeMeeting,
         lodgeIds: normalizeNumericIds(selectedLodgeIds),
         groupIds: normalizeNumericIds(selectedGroupIds),
@@ -462,19 +462,35 @@ export const EventDetail = () => {
 
   return (
     <PageContainer size="xl" className="ui-page">
-      <div className="flex flex-col gap-2 mb-4 sm:flex-row sm:items-center sm:justify-between">
-        <Link to=".." relative="path" className="ui-link">
-          ← Tillbaka
-        </Link>
-        {canEdit && !isEditRoute && (
-          <Link to={`/events/${id}/edit`} className="ui-btn ui-btn-primary">
-            Redigera
+      {!isEditRoute && (
+        <div className="flex flex-col gap-2 mb-4 sm:flex-row sm:items-center sm:justify-between">
+          <Link to=".." relative="path" className="ui-link">
+            ← Tillbaka
           </Link>
-        )}
-      </div>
+          {canEdit && (
+            <Link to={`/events/${id}/edit`} className="ui-btn ui-btn-primary">
+              Redigera
+            </Link>
+          )}
+        </div>
+      )}
 
-      {event ? (
-        <div className="ui-card">
+      <p className="sr-only" aria-live="polite" aria-atomic="true">
+        {eventLoading ? "Laddar händelse" : event ? "Händelse laddad" : "Händelsen hittades inte"}
+      </p>
+
+      {eventLoading ? (
+        <div className="ui-card" aria-busy="true" aria-label="Laddar händelse">
+          <div className="h-8 w-3/5 rounded skeleton-shimmer" />
+          <div className="mt-3 h-4 w-44 rounded skeleton-shimmer" />
+          <div className="mt-4 space-y-2">
+            <div className="h-4 w-full rounded skeleton-shimmer" />
+            <div className="h-4 w-5/6 rounded skeleton-shimmer" />
+            <div className="h-4 w-2/3 rounded skeleton-shimmer" />
+          </div>
+        </div>
+      ) : event ? (
+        <div className="ui-card animate-step-in">
           {isEditRoute && canEdit ? (
             <EventDetailEditForm
               form={form}
@@ -527,7 +543,7 @@ export const EventDetail = () => {
           )}
         </div>
       ) : (
-        <div className="text-neutral-600">Ingen mötesdata</div>
+        <div className="text-neutral-600">Händelsen hittades inte</div>
       )}
     </PageContainer>
   );

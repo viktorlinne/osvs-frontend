@@ -1,4 +1,4 @@
-﻿import { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useForm, useWatch } from "react-hook-form";
 import {
@@ -49,7 +49,7 @@ export const CreatePost = () => {
     },
   });
   const watchedLodges = useWatch({ control, name: "lodgeIds" }) ?? [];
-  const pictureError = validateOptionalPostImage(picture, { required: true });
+  const pictureError = validateOptionalPostImage(picture);
 
   useEffect(() => {
     register("lodgeIds");
@@ -85,7 +85,6 @@ export const CreatePost = () => {
       });
       return;
     }
-    if (!picture) return;
 
     const fd = new FormData();
     fd.append("title", values.title.trim());
@@ -97,7 +96,9 @@ export const CreatePost = () => {
     } else {
       selectedLodges.forEach((id) => fd.append("lodgeIds", id));
     }
-    fd.append("picture", picture);
+    if (picture) {
+      fd.append("picture", picture);
+    }
 
     try {
       const res = await run(() => createPost(fd));
@@ -117,10 +118,15 @@ export const CreatePost = () => {
 
   return (
     <PageContainer size="xl" className="ui-page">
+      <div className="mx-auto max-w-2xl animate-step-in">
       <Link to=".." relative="path" className="ui-link">
         ← Tillbaka
       </Link>
-      <h2 className="ui-page-title mb-4 mt-4">Skapa inlägg</h2>
+      <h2 className="ui-page-title mb-2 mt-4">Skapa inlägg</h2>
+      <p className="mb-4 text-sm text-neutral-600">
+        Inlägget publiceras på logens sida och är synligt för bröder i valda
+        loger.
+      </p>
       <form onSubmit={handleSubmit(onSubmit)} className="ui-card">
         <div className="mb-4">
           <label htmlFor="title" className={labelClass}>
@@ -159,12 +165,16 @@ export const CreatePost = () => {
             id="picture"
             type="file"
             accept="image/*"
+            aria-describedby="picture-hint"
             className={inputClass}
             onChange={(e) => {
               clearErrors("picture");
               setPicture(e.target.files ? e.target.files[0] : null);
             }}
           />
+          <p id="picture-hint" className="mt-1 text-xs text-neutral-500">
+            JPEG, PNG, GIF eller WebP, max 5 MB
+          </p>
           {errors.picture?.message ? (
             <div className={errorTextClass}>{errors.picture.message}</div>
           ) : pictureError ? (
@@ -172,19 +182,21 @@ export const CreatePost = () => {
           ) : null}
         </div>
 
-        <div className="mb-4 flex items-center gap-3">
-          <input
-            id="publicum"
-            type="checkbox"
-            {...register("publicum")}
-            className="h-4 w-4 rounded border-neutral-300 text-primary-600 focus-visible:ring-primary-600"
-          />
-          <label
-            htmlFor="publicum"
-            className="text-sm font-medium text-neutral-700"
-          >
-            Publicum
-          </label>
+        <div className="mb-4">
+          <div className="flex items-center gap-3">
+            <input
+              id="publicum"
+              type="checkbox"
+              {...register("publicum")}
+              className="h-4 w-4 rounded border-neutral-300 text-primary-600 focus-visible:ring-primary-600"
+            />
+            <label htmlFor="publicum" className={labelClass + " mb-0"}>
+              Publicum
+            </label>
+          </div>
+          <p className="mt-1 text-xs text-neutral-500">
+            Inlägget visas för gäster och icke-bröder utanför ordenssällskapet.
+          </p>
         </div>
 
         <LodgeSelection
@@ -203,17 +215,17 @@ export const CreatePost = () => {
           <Button
             type="submit"
             className="ui-btn-primary"
-            disabled={
-              loading || lodgesLoading || !isValid || Boolean(pictureError)
-            }
+            loading={loading}
+            disabled={loading || lodgesLoading || !isValid || Boolean(pictureError)}
           >
-            Skapa
+            {loading ? "Skapar..." : "Skapa"}
           </Button>
           <Link to=".." relative="path" className="ui-btn ui-btn-secondary">
             Avbryt
           </Link>
         </div>
       </form>
+      </div>
     </PageContainer>
   );
 };

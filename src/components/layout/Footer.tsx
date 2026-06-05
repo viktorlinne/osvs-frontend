@@ -4,7 +4,7 @@ import { useAuth } from "../../context";
 export const Footer: React.FC = () => {
   const { user } = useAuth();
   const footerLinkClass =
-    "rounded-md px-3 py-1 text-sm text-neutral-700 transition hover:bg-neutral-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-600 focus-visible:ring-offset-2";
+    "rounded px-2 py-1 text-xs font-semibold uppercase tracking-widest text-neutral-600 transition-colors hover:bg-neutral-100 hover:text-neutral-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-600 focus-visible:ring-offset-2";
 
   return (
     <footer className="border-t border-neutral-200 bg-white">
@@ -13,14 +13,14 @@ export const Footer: React.FC = () => {
           <div className="text-center md:text-left">
             <NavLink
               to="/"
-              className="text-base font-semibold tracking-widest text-primary-600 transition-colors duration-150 hover:text-primary-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-600 focus-visible:ring-offset-2"
+              className="text-xs font-semibold uppercase tracking-widest text-neutral-700 transition-colors duration-150 hover:text-neutral-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-600 focus-visible:ring-offset-2"
             >
-              OSVS
+              Ordensamfundet VS
             </NavLink>
-            <p className="mt-1.5 text-xs tracking-wide text-neutral-600">
-              Ordensamfundet VS &mdash; est. 1924
+            <p className="mt-1.5 text-[10px] font-medium uppercase tracking-widest text-neutral-400">
+              est. MCMXXIV
             </p>
-            <p className="mt-1 text-xs text-neutral-600">
+            <p className="mt-1 text-xs text-neutral-500">
               &copy; {new Date().getFullYear()}
             </p>
           </div>

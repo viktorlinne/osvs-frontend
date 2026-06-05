@@ -4,6 +4,7 @@ import { Link, useNavigate } from "react-router-dom";
 import {
   Button,
   PageContainer,
+  PdfFileInput,
   errorTextClass,
   inputClass,
   labelClass,
@@ -29,6 +30,7 @@ export const UploadDocument = () => {
   const { run, loading } = useFetch<{ success?: boolean; id?: number }>();
 
   const [file, setFile] = useState<File | null>(null);
+  const [fileTouched, setFileTouched] = useState(false);
   const {
     register,
     handleSubmit,
@@ -78,7 +80,7 @@ export const UploadDocument = () => {
       <Link to=".." relative="path" className="ui-link">
         ← Tillbaka
       </Link>
-      <h2 className="ui-page-title mb-4 mt-4">Lägg till dokument</h2>
+      <h1 className="ui-page-title mb-4 mt-4">Lägg till dokument</h1>
 
       <form onSubmit={handleSubmit(onSubmit)} className="ui-card">
         <div className="mb-4">
@@ -94,39 +96,35 @@ export const UploadDocument = () => {
             autoComplete="off"
           />
           {errors.title?.message ? (
-            <div className={errorTextClass}>{errors.title.message}</div>
+            <p className={errorTextClass}>{errors.title.message}</p>
           ) : null}
         </div>
 
         <div className="mb-4">
           <label htmlFor="document-file" className={labelClass}>
-            Fil (PDF)
+            Fil
           </label>
-          <input
+          <PdfFileInput
             id="document-file"
-            type="file"
-            accept=".pdf,application/pdf"
-            className={inputClass}
-            onChange={(e) => {
-              clearErrors("file");
-              const nextFile =
-                e.target.files && e.target.files[0] ? e.target.files[0] : null;
+            value={file}
+            onChange={(nextFile) => {
+              setFileTouched(true);
               setFile(nextFile);
+              clearErrors("file");
             }}
+            error={
+              errors.file?.message ??
+              (fileTouched && fileError ? fileError : undefined)
+            }
           />
-          {errors.file?.message ? (
-            <div className={errorTextClass}>{errors.file.message}</div>
-          ) : fileError ? (
-            <div className={errorTextClass}>{fileError}</div>
-          ) : null}
         </div>
 
         <Button
           type="submit"
-          disabled={loading || !isValid || Boolean(fileError)}
-          className="ui-btn-primary"
+          loading={loading}
+          disabled={!isValid || Boolean(fileError)}
         >
-          {loading ? "Sparar..." : "Skapa"}
+          {loading ? "Sparar…" : "Skapa"}
         </Button>
       </form>
     </PageContainer>

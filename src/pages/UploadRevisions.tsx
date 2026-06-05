@@ -4,6 +4,7 @@ import { Link, useNavigate } from "react-router-dom";
 import {
   Button,
   PageContainer,
+  PdfFileInput,
   errorTextClass,
   inputClass,
   labelClass,
@@ -24,12 +25,12 @@ type UploadRevisionForm = {
   title: string;
   year: string;
   lodgeId: string;
-  file: string;
+  file?: string;
 };
 
 function validateRevisionYear(value: string): true | string {
   const parsedYear = Number(value);
-  if (!Number.isInteger(parsedYear) || parsedYear < 1900 || parsedYear > 3000) {
+  if (!Number.isInteger(parsedYear) || parsedYear < 1924 || parsedYear > 3000) {
     return "År måste vara ett giltigt år";
   }
   return true;
@@ -50,6 +51,7 @@ export const UploadRevisions = () => {
   const { run: runLodges, data: lodges } = useFetch<Lodge[]>();
 
   const [file, setFile] = useState<File | null>(null);
+  const [fileTouched, setFileTouched] = useState(false);
   const {
     register,
     handleSubmit,
@@ -62,7 +64,6 @@ export const UploadRevisions = () => {
       title: "",
       year: String(new Date().getFullYear()),
       lodgeId: "",
-      file: "",
     },
   });
   const fileError = validatePdfFile(file, { required: true });
@@ -116,7 +117,10 @@ export const UploadRevisions = () => {
       <Link to=".." relative="path" className="ui-link">
         ← Tillbaka
       </Link>
-      <h2 className="ui-page-title mb-4 mt-4">Lägg till revision</h2>
+      <h2 className="ui-page-title mb-2 mt-4">Lägg till revision</h2>
+      <p className="mb-4 text-sm text-neutral-600">
+        Revisionen sparas i logens dokumentarkiv och är tillgänglig för bröder i vald loge.
+      </p>
 
       <form onSubmit={handleSubmit(onSubmit)} className="ui-card">
         <div className="mb-4">
@@ -166,13 +170,20 @@ export const UploadRevisions = () => {
               validate: validateRevisionLodge,
             })}
             className={selectClass}
+            disabled={lodges === null}
           >
-            <option value="">Välj loge</option>
-            {(lodges ?? []).map((lodge) => (
-              <option key={lodge.id} value={String(lodge.id)}>
-                {lodge.name}
-              </option>
-            ))}
+            {lodges === null ? (
+              <option value="">Laddar loger...</option>
+            ) : (
+              <>
+                <option value="">Välj loge</option>
+                {lodges.map((lodge) => (
+                  <option key={lodge.id} value={String(lodge.id)}>
+                    {lodge.name}
+                  </option>
+                ))}
+              </>
+            )}
           </select>
           {errors.lodgeId?.message ? (
             <div className={errorTextClass}>{errors.lodgeId.message}</div>
@@ -183,32 +194,31 @@ export const UploadRevisions = () => {
           <label htmlFor="revision-file" className={labelClass}>
             Fil (PDF)
           </label>
-          <input
+          <PdfFileInput
             id="revision-file"
-            type="file"
-            accept=".pdf,application/pdf"
-            className={inputClass}
-            onChange={(e) => {
+            value={file}
+            onChange={(f) => {
               clearErrors("file");
-              const nextFile =
-                e.target.files && e.target.files[0] ? e.target.files[0] : null;
-              setFile(nextFile);
+              setFileTouched(true);
+              setFile(f);
             }}
+            error={errors.file?.message ?? (fileTouched ? fileError ?? undefined : undefined)}
           />
-          {errors.file?.message ? (
-            <div className={errorTextClass}>{errors.file.message}</div>
-          ) : fileError ? (
-            <div className={errorTextClass}>{fileError}</div>
-          ) : null}
         </div>
 
-        <Button
-          type="submit"
-          disabled={loading || !isValid || Boolean(fileError)}
-          className="ui-btn-primary"
-        >
-          {loading ? "Sparar..." : "Skapa"}
-        </Button>
+        <div className="flex flex-col gap-2 py-2 sm:flex-row">
+          <Button
+            type="submit"
+            variant="primary"
+            loading={loading}
+            disabled={loading || !isValid || Boolean(fileError)}
+          >
+            {loading ? "Skapar..." : "Skapa"}
+          </Button>
+          <Link to=".." relative="path" className="ui-btn ui-btn-secondary">
+            Avbryt
+          </Link>
+        </div>
       </form>
     </PageContainer>
   );

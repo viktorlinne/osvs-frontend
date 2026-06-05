@@ -1,4 +1,4 @@
-﻿import { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { listAllergies } from "../../services/allergies";
 import type { PublicUser } from "../../types";
 
@@ -68,14 +68,14 @@ export const AllergiesManager = ({
   }
 
   return (
-    <div className="mb-4 w-full text-center">
+    <div className="w-full">
       <fieldset className="w-full">
-        <legend className="ui-label text-center">Allergier</legend>
+        <legend className="ui-label">Allergier</legend>
         {isEditRoute ? (
-          <div className="flex w-full flex-col items-center gap-2 py-2">
+          <div className="mt-1.5 flex w-full flex-col gap-2">
             {allergies.length > 0 ? (
-              <div className="mx-auto max-h-48 w-full overflow-y-auto rounded-md border border-neutral-200 bg-white px-3 py-2 md:w-[28rem]">
-                <div className="flex flex-col gap-2 text-left">
+              <div className="max-h-48 overflow-y-auto rounded-md border border-neutral-200 bg-white px-3 py-2">
+                <div className="flex flex-col gap-2">
                   {allergies.map((allergy) => (
                     <label
                       key={allergy.id}
@@ -99,21 +99,18 @@ export const AllergiesManager = ({
                 </div>
               </div>
             ) : (
-              <div className="py-2 text-sm text-neutral-600">Inga allergier</div>
+              <p className="py-1 text-sm text-neutral-600">Inga allergier</p>
             )}
           </div>
         ) : (
-          <div className="mb-4 py-2 text-center text-sm text-neutral-700">
+          <p className="mt-0.5 text-sm text-neutral-900">
             {effectiveSelected && effectiveSelected.length > 0
               ? effectiveSelected
-                  .map(
-                    (id) =>
-                      allergies.find((allergy) => allergy.id === id)?.title ?? "",
-                  )
+                  .map((id) => allergies.find((a) => a.id === id)?.title ?? "")
                   .filter(Boolean)
                   .join(", ")
               : "Ingen allergi"}
-          </div>
+          </p>
         )}
       </fieldset>
     </div>

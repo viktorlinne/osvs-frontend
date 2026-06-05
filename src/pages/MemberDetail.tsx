@@ -1,7 +1,8 @@
-﻿import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { Button, PageContainer } from "../components";
+import { MemberDetailSkeleton } from "../components/MemberDetailSkeleton";
 import {
   AchievementsPanel,
   AllergiesManager,
@@ -65,7 +66,7 @@ function readMemberRoleNames(member: MemberDetailUser | null): string[] {
 
 export const MemberDetail = () => {
   const { matrikelnummer } = useParams<{ matrikelnummer: string }>();
-  const { run, data: member } = useFetch<MemberDetailUser | null>();
+  const { run, data: member, loading: memberLoading } = useFetch<MemberDetailUser | null>();
   const { run: runAvailable } = useFetch<Achievement[]>();
   const { run: runLodges } = useFetch<Lodge[]>();
   const { run: runRoles } = useFetch<Role[]>();
@@ -157,10 +158,7 @@ export const MemberDetail = () => {
     if (shouldLoadRoleData && userObj && !Array.isArray(userObj.roles)) {
       try {
         const roles = await getUserRoles(matrikelnummer);
-        userObj = {
-          ...userObj,
-          roles,
-        };
+        userObj = { ...userObj, roles };
       } catch {
         // Fallback to payload user without explicit roles.
       }
@@ -347,9 +345,11 @@ export const MemberDetail = () => {
     }
   });
 
+  const currentLodge = lodges.find((l) => l.id === selectedLid) ?? null;
+
   return (
     <PageContainer size="xl" className="ui-page">
-      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between mb-4">
+      <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <Link to=".." relative="path" className="ui-link">
           ← Tillbaka
         </Link>
@@ -365,7 +365,7 @@ export const MemberDetail = () => {
             )}
             <Link
               to={`/members/${matrikelnummer}/attended`}
-              className="ui-btn ui-btn-primary"
+              className="ui-btn ui-btn-secondary"
             >
               Närvaro
             </Link>
@@ -373,117 +373,131 @@ export const MemberDetail = () => {
         )}
       </div>
 
-      {member && (
-        <form onSubmit={handleMemberSave} className="ui-card">
-          <AchievementsPanel
-            user={member}
-            achievements={achievements}
-            available={available}
-            lodge={lodges.find((lodge) => lodge.id === selectedLid) ?? null}
-            lodges={lodges}
-            selectedLid={selectedLid}
-            setSelectedLid={setSelectedLid}
-            onSaveLodge={async (
-              targetUserId: number,
-              lodgeId: number | null,
-            ) => {
-              if (!targetUserId) throw new Error("Invalid target");
-              clearGlobalError();
-              setSaving(true);
-              try {
-                await runAction(() =>
-                  setUserLodge(
-                    String(targetUserId),
-                    lodgeId === null ? null : Number(lodgeId),
-                  ),
-                );
-                await run(loadMember);
-              } catch {
-                setGlobalError("Misslyckades att uppdatera loge");
-              } finally {
-                setSaving(false);
-              }
-            }}
-            isEditRoute={isEditRoute}
-            selectedAid={selectedAid}
-            setSelectedAid={setSelectedAid}
-            awardDate={awardDate}
-            setAwardDate={setAwardDate}
-            canAward={canAward}
-            assignAchievement={async (
-              targetUserId: number,
-              achievementId: number,
-              awardedAt?: string,
-            ) => {
-              if (!targetUserId) throw new Error("Invalid target");
-              clearGlobalError();
-              setSaving(true);
-              try {
-                await runAction(() =>
-                  postAchievement(String(targetUserId), {
-                    achievementId,
-                    awardedAt,
-                  }),
-                );
-                await run(loadMember);
-              } finally {
-                setSaving(false);
-              }
-            }}
-          />
+      {memberLoading && !member ? (
+        <MemberDetailSkeleton />
+      ) : member ? (
+        <form onSubmit={handleMemberSave} className="flex flex-col gap-4 animate-step-in">
+          {/* Profile header */}
+          <div className="ui-card">
+            <AchievementsPanel
+              user={member}
+              achievements={achievements}
+              available={available}
+              lodge={currentLodge}
+              lodges={lodges}
+              selectedLid={selectedLid}
+              setSelectedLid={setSelectedLid}
+              onSaveLodge={async (
+                targetUserId: number,
+                lodgeId: number | null,
+              ) => {
+                if (!targetUserId) throw new Error("Invalid target");
+                clearGlobalError();
+                setSaving(true);
+                try {
+                  await runAction(() =>
+                    setUserLodge(
+                      String(targetUserId),
+                      lodgeId === null ? null : Number(lodgeId),
+                    ),
+                  );
+                  await run(loadMember);
+                } catch {
+                  setGlobalError("Misslyckades att uppdatera loge");
+                } finally {
+                  setSaving(false);
+                }
+              }}
+              isEditRoute={isEditRoute}
+              selectedAid={selectedAid}
+              setSelectedAid={setSelectedAid}
+              awardDate={awardDate}
+              setAwardDate={setAwardDate}
+              canAward={canAward}
+              assignAchievement={async (
+                targetUserId: number,
+                achievementId: number,
+                awardedAt?: string,
+              ) => {
+                if (!targetUserId) throw new Error("Invalid target");
+                clearGlobalError();
+                setSaving(true);
+                try {
+                  await runAction(() =>
+                    postAchievement(String(targetUserId), {
+                      achievementId,
+                      awardedAt,
+                    }),
+                  );
+                  await run(loadMember);
+                } finally {
+                  setSaving(false);
+                }
+              }}
+            />
+          </div>
 
-          <RolesManager
-            userId={member?.matrikelnummer}
-            rolesList={rolesList}
-            selectedRoleIds={selectedRoleIds}
-            setSelectedRoleIds={setSelectedRoleIds}
-            canEditRoles={canEdit}
-            isEditRoute={isEditRoute}
-            saveRoles={async (targetUserId: number, roleIds: number[]) => {
-              if (!targetUserId) throw new Error("Invalid target");
-              clearGlobalError();
-              setSaving(true);
-              try {
-                await runAction(() => setRoles(String(targetUserId), roleIds));
-                await run(loadMember);
-              } finally {
-                setSaving(false);
-              }
-            }}
-            setGlobalError={setGlobalError}
-            setSaving={setSaving}
-          />
+          {/* Two-column body */}
+          <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+            {/* Personal info */}
+            <div className="ui-card flex flex-col gap-5">
+              <h2 className="ui-chapter">Personuppgifter</h2>
+              <ProfileForm
+                user={member}
+                register={register}
+                errors={errors}
+                isEditRoute={isEditRoute}
+                setPictureFile={setPictureFile}
+                pictureError={pictureError}
+                showArchive={isEditRoute}
+              />
+            </div>
 
-          <OfficialsManager
-            user={member}
-            assignedOfficials={memberOfficials}
-            historyEntries={memberOfficialHistory}
-            isEditRoute={isEditRoute}
-            selectedIds={selectedOfficialIds ?? undefined}
-            setSelectedIds={setSelectedOfficialIds}
-          />
-
-          <AllergiesManager
-            user={member}
-            assignedAllergies={memberAllergies}
-            isEditRoute={isEditRoute}
-            selectedIds={selectedAllergyIds ?? undefined}
-            setSelectedIds={setSelectedAllergyIds}
-          />
-
-          <ProfileForm
-            user={member}
-            register={register}
-            errors={errors}
-            isEditRoute={isEditRoute}
-            setPictureFile={setPictureFile}
-            pictureError={pictureError}
-            saving={saving}
-            showArchive={isEditRoute}
-          />
+            {/* Membership info */}
+            <div className="ui-card flex flex-col gap-5">
+              <h2 className="ui-chapter">Medlemskap</h2>
+              <RolesManager
+                userId={member?.matrikelnummer}
+                rolesList={rolesList}
+                selectedRoleIds={selectedRoleIds}
+                setSelectedRoleIds={setSelectedRoleIds}
+                canEditRoles={canEdit}
+                isEditRoute={isEditRoute}
+                viewModeRoles={readMemberRoleNames(member)}
+                saveRoles={async (targetUserId: number, roleIds: number[]) => {
+                  if (!targetUserId) throw new Error("Invalid target");
+                  clearGlobalError();
+                  setSaving(true);
+                  try {
+                    await runAction(() => setRoles(String(targetUserId), roleIds));
+                    await run(loadMember);
+                  } finally {
+                    setSaving(false);
+                  }
+                }}
+                setGlobalError={setGlobalError}
+                setSaving={setSaving}
+              />
+              <OfficialsManager
+                user={member}
+                assignedOfficials={memberOfficials}
+                historyEntries={memberOfficialHistory}
+                isEditRoute={isEditRoute}
+                selectedIds={selectedOfficialIds ?? undefined}
+                setSelectedIds={setSelectedOfficialIds}
+              />
+              <AllergiesManager
+                user={member}
+                assignedAllergies={memberAllergies}
+                isEditRoute={isEditRoute}
+                selectedIds={selectedAllergyIds ?? undefined}
+                setSelectedIds={setSelectedAllergyIds}
+              />
+            </div>
+          </div>
 
           {isEditRoute ? (
-            <div className="flex flex-col gap-2 py-4 sm:flex-row">
+            <div className="flex flex-col gap-2 sm:flex-row">
               <Button
                 type="submit"
                 disabled={saving || !isValid || Boolean(pictureError)}
@@ -496,6 +510,10 @@ export const MemberDetail = () => {
             </div>
           ) : null}
         </form>
+      ) : (
+        <div className="ui-card">
+          <p className="text-sm text-neutral-600">Broder hittades inte.</p>
+        </div>
       )}
     </PageContainer>
   );

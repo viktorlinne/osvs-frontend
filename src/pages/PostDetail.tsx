@@ -27,7 +27,7 @@ export const PostDetail = () => {
   const { user } = useAuth();
   const { id } = useParams<{ id: string }>();
   const { setError: setGlobalError, clearError: clearGlobalError } = useError();
-  const { data: post, run } = useFetch<Post | null>();
+  const { data: post, loading: postLoading, notFound: postNotFound, run } = useFetch<Post | null>();
   const { run: runSubmit, loading: submitting } = useFetch<PostMutationResult>();
   const navigate = useNavigate();
   const location = useLocation();
@@ -43,6 +43,7 @@ export const PostDetail = () => {
   const [picture, setPicture] = useState<File | null>(null);
   const [lodges, setLodges] = useState<Lodge[]>([]);
   const [lodgesLoading, setLodgesLoading] = useState(true);
+  const [confirmDelete, setConfirmDelete] = useState(false);
 
   const {
     register,
@@ -159,18 +160,13 @@ export const PostDetail = () => {
     }
   }
 
-  async function handleDeletePost() {
+  async function handleConfirmDelete() {
     if (!id || !isAdmin) return;
-
-    const confirmed = window.confirm(
-      "Är du säker på att du vill radera inlägget?",
-    );
-    if (!confirmed) return;
-
     try {
       await runSubmit(() => deletePost(id));
       navigate("/posts");
     } catch {
+      setConfirmDelete(false);
       setGlobalError("Misslyckades att radera inlägget");
     }
   }
@@ -188,20 +184,69 @@ export const PostDetail = () => {
         )}
       </div>
 
-      {post && !isEditRoute && (
+      {postLoading && (
         <div className="ui-card grid gap-4 md:grid-cols-3">
           <div className="md:col-span-1">
+            <div className="h-64 w-full rounded-md skeleton-shimmer md:h-full md:min-h-48" />
+          </div>
+          <div className="md:col-span-2 flex flex-col gap-3">
+            <div className="h-7 w-2/3 rounded skeleton-shimmer" />
+            <div className="space-y-2">
+              <div className="h-4 w-full rounded skeleton-shimmer" />
+              <div className="h-4 w-5/6 rounded skeleton-shimmer" />
+              <div className="h-4 w-4/5 rounded skeleton-shimmer" />
+            </div>
+            <div className="mt-auto flex gap-2 pt-2 border-t border-neutral-100">
+              <div className="h-5 w-16 rounded skeleton-shimmer" />
+              <div className="h-5 w-20 rounded skeleton-shimmer" />
+            </div>
+          </div>
+        </div>
+      )}
+
+      {!postLoading && postNotFound && (
+        <div className="ui-card flex flex-col items-center gap-3 py-10 text-center">
+          <h1 className="ui-page-title">Inlägget hittades inte</h1>
+          <p className="text-neutral-600 text-sm">
+            Kontrollera länken eller gå tillbaka till inläggslistan.
+          </p>
+          <Link to="/posts" className="ui-btn ui-btn-primary mt-2">
+            Till inläggslistan
+          </Link>
+        </div>
+      )}
+
+      {post && !isEditRoute && (
+        <div className="ui-card animate-step-in grid gap-4 md:grid-cols-3">
+          <div className="md:col-span-1">
             <img
-              src={
-                post.pictureUrl ?? mediaPlaceholderUrl("post")
-              }
+              src={post.pictureUrl ?? mediaPlaceholderUrl("post")}
               alt={post.title}
-              className="h-64 w-full rounded-md object-cover md:h-full"
+              className="h-64 w-full rounded-md object-cover md:h-full md:min-h-48"
             />
           </div>
-          <div className="md:col-span-2">
-            <h1 className="ui-section-title mb-2">{post.title}</h1>
-            <p className="text-neutral-700">{post.description}</p>
+          <div className="md:col-span-2 flex flex-col gap-3">
+            <h1 className="ui-section-title">{post.title}</h1>
+            <p className="text-neutral-900">{post.description}</p>
+            <div className="mt-auto flex flex-wrap items-center gap-2 pt-2 border-t border-neutral-100">
+              {post.publicum ? (
+                <span className="ui-chapter rounded px-2 py-0.5 bg-primary-50 text-primary-700">
+                  Publicum
+                </span>
+              ) : (
+                <span className="ui-chapter rounded px-2 py-0.5 bg-neutral-100 text-neutral-600">
+                  Logeexklusivt
+                </span>
+              )}
+              {(post.lodges ?? []).map((lodge) => (
+                <span
+                  key={lodge.id}
+                  className="ui-chapter rounded px-2 py-0.5 bg-neutral-100 text-neutral-600"
+                >
+                  {lodge.name}
+                </span>
+              ))}
+            </div>
           </div>
         </div>
       )}
@@ -257,13 +302,10 @@ export const PostDetail = () => {
               id="publicum"
               type="checkbox"
               {...register("publicum")}
-              className="h-4 w-4 rounded border-neutral-300 text-primary-600 focus-visible:ring-primary-600"
+              className="h-4 w-4 rounded border-neutral-300 text-primary-600 focus-visible:ring-2 focus-visible:ring-primary-600 focus-visible:ring-offset-2"
             />
-            <label
-              htmlFor="publicum"
-              className="text-sm font-medium text-neutral-700"
-            >
-              Publicum
+            <label htmlFor="publicum" className={labelClass}>
+              Publicum (synligt utanför logen)
             </label>
           </div>
 
@@ -279,7 +321,7 @@ export const PostDetail = () => {
             name="edit-lodge-selection"
           />
 
-          <div className="flex flex-col gap-2 py-2 sm:flex-row">
+          <div className="flex flex-col gap-2 py-2 sm:flex-row sm:items-center">
             <Button
               type="submit"
               className="ui-btn-primary"
@@ -287,21 +329,42 @@ export const PostDetail = () => {
                 submitting || lodgesLoading || !isValid || Boolean(pictureError)
               }
             >
-              {submitting ? "Sparar..." : "Spara"}
+              {submitting && !confirmDelete ? "Sparar..." : "Spara"}
             </Button>
-            {isAdmin && (
+            <Link to=".." relative="path" className="ui-btn ui-btn-secondary">
+              Avbryt
+            </Link>
+            {isAdmin && !confirmDelete && (
               <Button
                 type="button"
-                className="ui-btn-danger"
-                onClick={handleDeletePost}
+                className="ui-btn-danger sm:ml-auto"
+                onClick={() => setConfirmDelete(true)}
                 disabled={submitting}
               >
                 Radera
               </Button>
             )}
-            <Link to=".." relative="path" className="ui-btn ui-btn-secondary">
-              Avbryt
-            </Link>
+            {isAdmin && confirmDelete && (
+              <div className="flex items-center gap-2 sm:ml-auto">
+                <span className="text-sm text-danger-700">Radera permanent?</span>
+                <Button
+                  type="button"
+                  className="ui-btn-danger"
+                  onClick={handleConfirmDelete}
+                  disabled={submitting}
+                >
+                  {submitting ? "Raderar..." : "Ja"}
+                </Button>
+                <Button
+                  type="button"
+                  className="ui-btn-secondary"
+                  onClick={() => setConfirmDelete(false)}
+                  disabled={submitting}
+                >
+                  Nej
+                </Button>
+              </div>
+            )}
           </div>
         </form>
       )}

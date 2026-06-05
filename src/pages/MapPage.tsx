@@ -1,4 +1,4 @@
-﻿import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import L from "leaflet";
 import { MapContainer, Marker, Popup, TileLayer, useMap } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
@@ -43,8 +43,8 @@ const GRADE_COLOR_PALETTE: Record<number, GradeColorPair> = {
 };
 
 const NO_GRADE_COLOR: GradeColorPair = {
-  center: "#94A3B8",
-  outline: "#334155",
+  center: "#b5aa9e",
+  outline: "#3c3028",
 };
 
 const GRADE_ROMAN_LABELS: Record<number, string> = {
@@ -78,12 +78,12 @@ function toRomanGrade(rank: number | null): string | null {
 
 function buildMarkerIcon(color: GradeColorPair, selected: boolean): L.DivIcon {
   const glow = selected
-    ? '<div style="position:absolute;inset:0;border-radius:9999px;box-shadow:0 0 0 3px rgba(14,165,233,0.45);"></div>'
+    ? '<div style="position:absolute;inset:0;border-radius:9999px;box-shadow:0 0 0 3px rgba(32,143,68,0.45);"></div>'
     : "";
   const html = [
     '<div style="position:relative;width:24px;height:24px;">',
     glow,
-    `<div style="position:absolute;inset:${selected ? 4 : 2}px;border-radius:9999px;background:${color.outline};box-shadow:0 1px 4px rgba(0,0,0,0.4);"></div>`,
+    `<div style="position:absolute;inset:${selected ? 4 : 2}px;border-radius:9999px;background:${color.outline};box-shadow:0 1px 4px rgba(28,22,16,0.4);"></div>`,
     `<div style="position:absolute;inset:${selected ? 8 : 6}px;border-radius:9999px;background:${color.center};border:1px solid rgba(255,255,255,0.9);"></div>`,
     "</div>",
   ].join("");
@@ -109,9 +109,11 @@ function getMarkerIcon(rank: number | null, selected: boolean): L.DivIcon {
 
 function FitToPins({ pins }: { pins: UserMapPin[] }) {
   const map = useMap();
+  const fitted = useRef(false);
 
   useEffect(() => {
-    if (!pins.length) return;
+    if (!pins.length || fitted.current) return;
+    fitted.current = true;
     const bounds = L.latLngBounds(
       pins.map((pin) => [pin.lat, pin.lng] as [number, number]),
     );
@@ -139,10 +141,14 @@ export const MapPage = () => {
   const [draftLocationsByUserId, setDraftLocationsByUserId] = useState<
     Record<number, { lat: number; lng: number }>
   >({});
+  const [isEditing, setIsEditing] = useState(false);
+  const [actionStatus, setActionStatus] = useState<"idle" | "saved" | "removed">("idle");
+  const [pendingReset, setPendingReset] = useState(false);
+  const statusTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const canEditOthers = Boolean(
     authUser &&
-    (authUser.roles ?? []).some((role) => role === "Admin" || role === "Editor"),
+      (authUser.roles ?? []).some((role) => role === "Admin" || role === "Editor"),
   );
 
   const refreshPins = useCallback(
@@ -172,7 +178,8 @@ export const MapPage = () => {
 
     if (!authUser) return [];
 
-    const ownName = `${String(authUser.firstname ?? "").trim()} ${String(authUser.lastname ?? "").trim()}`.trim();
+    const ownName =
+      `${String(authUser.firstname ?? "").trim()} ${String(authUser.lastname ?? "").trim()}`.trim();
     return [
       {
         id: Number(authUser.matrikelnummer),
@@ -226,36 +233,57 @@ export const MapPage = () => {
     [effectiveSelectedUserId],
   );
 
+  const scheduleStatusReset = useCallback(() => {
+    if (statusTimeoutRef.current) clearTimeout(statusTimeoutRef.current);
+    statusTimeoutRef.current = setTimeout(() => setActionStatus("idle"), 4000);
+  }, []);
+
   const handleSave = async () => {
     if (effectiveSelectedUserId === null || !currentDraftLocation) return;
-
-    await runAction(() =>
-      setUserLocation(effectiveSelectedUserId, {
-        lat: currentDraftLocation.lat,
-        lng: currentDraftLocation.lng,
-      }),
-    );
-
-    await refreshPins();
+    try {
+      await runAction(() =>
+        setUserLocation(effectiveSelectedUserId, {
+          lat: currentDraftLocation.lat,
+          lng: currentDraftLocation.lng,
+        }),
+      );
+      await refreshPins();
+      setActionStatus("saved");
+      setIsEditing(false);
+      scheduleStatusReset();
+    } catch {
+      // error surfaced via global error banner
+    }
   };
 
   const handleReset = async () => {
     if (effectiveSelectedUserId === null) return;
-
-    await runAction(() => clearUserLocationOverride(effectiveSelectedUserId));
-    setDraftLocationsByUserId((prev) => {
-      const next = { ...prev };
-      delete next[effectiveSelectedUserId];
-      return next;
-    });
-    await refreshPins();
+    try {
+      await runAction(() => clearUserLocationOverride(effectiveSelectedUserId));
+      setDraftLocationsByUserId((prev) => {
+        const next = { ...prev };
+        delete next[effectiveSelectedUserId];
+        return next;
+      });
+      await refreshPins();
+      setPendingReset(false);
+      setActionStatus("removed");
+      setIsEditing(false);
+      scheduleStatusReset();
+    } catch {
+      setPendingReset(false);
+    }
   };
+
+  const hasExistingPin =
+    effectiveSelectedUserId !== null && pinByUserId.has(effectiveSelectedUserId);
 
   return (
     <PageContainer size="xl" className="ui-page">
       <h2 className="ui-page-title mb-4">Medlemskarta</h2>
 
-      <div className="grid gap-4 lg:grid-cols-3">
+      <div className="animate-step-in grid gap-4 lg:grid-cols-3">
+        {/* Main map */}
         <div className="ui-card lg:col-span-2">
           <MapContainer
             center={SWEDEN_CENTER}
@@ -287,7 +315,11 @@ export const MapPage = () => {
                   <div className="text-sm">
                     <div className="font-semibold">{pin.name}</div>
                     <div>{`Tillhör ${pin.lodgeName ?? "Ingen loge"}`}</div>
-                    <div>{`Med graden ${toRomanGrade(pin.highestGradeRank) ?? "Ingen grad"}`}</div>
+                    <div>
+                      {toRomanGrade(pin.highestGradeRank)
+                        ? `Grad ${toRomanGrade(pin.highestGradeRank)}`
+                        : "Ingen grad"}
+                    </div>
                   </div>
                 </Popup>
               </Marker>
@@ -296,7 +328,7 @@ export const MapPage = () => {
 
           <div className="mt-4">
             <p className="text-sm font-medium text-neutral-700">Gradfärger</p>
-            <div className="mt-2 grid grid-cols-2 gap-2 sm:grid-cols-3 xl:grid-cols-4">
+            <div className="mt-2 flex flex-wrap gap-x-4 gap-y-2">
               {gradeLegendItems.map((entry) => {
                 const color = getColorPairByRank(entry.rank);
                 return (
@@ -312,8 +344,9 @@ export const MapPage = () => {
                         borderRadius: "9999px",
                         backgroundColor: color.center,
                         border: `3px solid ${color.outline}`,
-                        boxShadow: "0 1px 2px rgba(0,0,0,0.2)",
+                        boxShadow: "0 1px 2px rgba(28, 22, 16, 0.2)",
                         display: "inline-block",
+                        flexShrink: 0,
                       }}
                     />
                     <span>{entry.label}</span>
@@ -324,75 +357,151 @@ export const MapPage = () => {
           </div>
         </div>
 
+        {/* Position controls */}
         <div className="ui-card">
-          <label htmlFor="mapTargetUser" className="ui-label">
-            Medlem för manuell position
-          </label>
-          <select
-            id="mapTargetUser"
-            className={selectClass}
-            value={effectiveSelectedUserId ?? ""}
-            onChange={(event) =>
-              setSelectedUserId(
-                event.target.value ? Number(event.target.value) : null,
-              )
-            }
-            disabled={editableUsers.length === 0}
-          >
-            {editableUsers.map((entry) => (
-              <option key={entry.id} value={entry.id}>
-                {entry.name}
-              </option>
-            ))}
-          </select>
+          {canEditOthers && (
+            <>
+              <label htmlFor="mapTargetUser" className="ui-label">
+                Välj broder
+              </label>
+              <select
+                id="mapTargetUser"
+                className={selectClass}
+                value={effectiveSelectedUserId ?? ""}
+                onChange={(event) => {
+                  setSelectedUserId(
+                    event.target.value ? Number(event.target.value) : null,
+                  );
+                  setIsEditing(false);
+                  setPendingReset(false);
+                }}
+                disabled={editableUsers.length === 0}
+              >
+                {editableUsers.map((entry) => (
+                  <option key={entry.id} value={entry.id}>
+                    {entry.name}
+                  </option>
+                ))}
+              </select>
+            </>
+          )}
 
-          {!canEditOthers ? (
-            <p className="mt-2 text-sm text-neutral-600">
-              Du kan endast ändra din egen position.
+          {actionStatus !== "idle" && (
+            <p
+              role="status"
+              className={`text-sm font-medium text-success-600${canEditOthers ? " mt-3" : ""}`}
+            >
+              {actionStatus === "saved"
+                ? "Position sparad."
+                : "Manuell position borttagen."}
             </p>
-          ) : null}
+          )}
 
-          <div className="mt-4">
-            <ManualLocationPicker
-              value={currentDraftLocation}
-              onChange={setDraftForCurrentUser}
-              disabled={effectiveSelectedUserId === null}
-            />
-          </div>
+          {!isEditing ? (
+            <div className={canEditOthers ? "mt-4" : actionStatus !== "idle" ? "mt-3" : undefined}>
+              <p className="text-sm text-neutral-600">
+                {hasExistingPin
+                  ? "Position registrerad."
+                  : "Ingen position registrerad."}
+              </p>
+              <button
+                type="button"
+                className="ui-btn ui-btn-secondary mt-3 w-full"
+                disabled={effectiveSelectedUserId === null}
+                onClick={() => {
+                  setIsEditing(true);
+                  setActionStatus("idle");
+                  setPendingReset(false);
+                }}
+              >
+                {hasExistingPin ? "Ändra position" : "Ange position manuellt"}
+              </button>
+            </div>
+          ) : (
+            <div className={canEditOthers ? "mt-4" : undefined}>
+              {!canEditOthers && (
+                <p className="mb-3 text-sm text-neutral-600">
+                  Du kan endast ändra din egen position.
+                </p>
+              )}
 
-          <div className="mt-3 text-sm text-neutral-700">
-            {currentDraftLocation
-              ? `Vald position: ${currentDraftLocation.lat.toFixed(6)}, ${currentDraftLocation.lng.toFixed(6)}`
-              : "Klicka i kartan för att välja position"}
-          </div>
+              <p className="mb-2 text-sm text-neutral-700">
+                Klicka i kartan för att markera positionen.
+              </p>
 
-          <div className="mt-4 flex flex-col gap-2">
-            <button
-              type="button"
-              className="ui-btn ui-btn-primary"
-              disabled={
-                actionLoading ||
-                effectiveSelectedUserId === null ||
-                currentDraftLocation === null
-              }
-              onClick={() => {
-                void handleSave();
-              }}
-            >
-              {actionLoading ? "Sparar..." : "Spara manuell position"}
-            </button>
+              <ManualLocationPicker
+                value={currentDraftLocation}
+                onChange={setDraftForCurrentUser}
+                disabled={effectiveSelectedUserId === null}
+              />
 
-            <button
-              type="button"
-              className="ui-btn ui-btn-secondary"
-              disabled={actionLoading || effectiveSelectedUserId === null}
-              onClick={() => {
-                void handleReset();
-              }}
-            >
-              Återställ till auto-geokodning
-            </button>
-          </div>
+              <div className="mt-4 flex flex-col gap-2">
+                <button
+                  type="button"
+                  className="ui-btn ui-btn-primary"
+                  disabled={
+                    actionLoading ||
+                    effectiveSelectedUserId === null ||
+                    currentDraftLocation === null
+                  }
+                  onClick={() => {
+                    void handleSave();
+                  }}
+                >
+                  {actionLoading && !pendingReset ? "Sparar..." : "Spara position"}
+                </button>
+
+                {!pendingReset ? (
+                  <button
+                    type="button"
+                    className="ui-btn ui-btn-secondary"
+                    disabled={actionLoading || effectiveSelectedUserId === null}
+                    onClick={() => setPendingReset(true)}
+                  >
+                    Ta bort manuell position
+                  </button>
+                ) : (
+                  <div className="rounded-md border border-neutral-200 p-3">
+                    <p className="mb-2 text-sm text-neutral-700">
+                      Positionen tas bort. Är du säker?
+                    </p>
+                    <div className="flex gap-2">
+                      <button
+                        type="button"
+                        className="ui-btn ui-btn-sm ui-btn-danger flex-1"
+                        disabled={actionLoading}
+                        onClick={() => {
+                          void handleReset();
+                        }}
+                      >
+                        {actionLoading ? "Tar bort..." : "Bekräfta"}
+                      </button>
+                      <button
+                        type="button"
+                        className="ui-btn ui-btn-sm ui-btn-secondary flex-1"
+                        disabled={actionLoading}
+                        onClick={() => setPendingReset(false)}
+                      >
+                        Avbryt
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                <button
+                  type="button"
+                  className="ui-btn ui-btn-secondary"
+                  disabled={actionLoading}
+                  onClick={() => {
+                    setIsEditing(false);
+                    setPendingReset(false);
+                  }}
+                >
+                  Avbryt redigering
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </PageContainer>
@@ -400,4 +509,3 @@ export const MapPage = () => {
 };
 
 export default MapPage;
-

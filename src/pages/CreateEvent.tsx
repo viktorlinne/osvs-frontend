@@ -74,11 +74,10 @@ export const CreateEvent = () => {
   const [selectedGroupIds, setSelectedGroupIds] = useState<string[]>([]);
   const [selectedUserIds, setSelectedUserIds] = useState<string[]>([]);
   const [serverErrors, setServerErrors] = useState<Record<string, string>>({});
-  const foodPreview =
-    Number.isFinite(Number(form.price)) && Number(form.price) > 0 ? 1 : 0;
   const clientErrors = getEventFormErrors(form);
   const formErrors = { ...serverErrors, ...clientErrors };
   const canSubmit = canCreate && Object.keys(clientErrors).length === 0;
+  const hasFoodFromPrice = Number.isFinite(Number(form.price)) && Number(form.price) > 0;
   const selectedLodgeId = useMemo(() => {
     const firstValue = selectedLodgeIds[0];
     const parsed = Number(firstValue);
@@ -169,177 +168,201 @@ export const CreateEvent = () => {
 
   return (
     <PageContainer size="xl" className="ui-page">
-      <div className="mb-4 flex items-center justify-between">
+      <div className="mb-4">
         <Link to=".." relative="path" className="ui-link">
           ← Tillbaka
         </Link>
       </div>
 
-      <h2 className="ui-page-title mb-4">Skapa möte</h2>
+      <h2 className="ui-page-title mb-6">Skapa möte</h2>
 
-      <form onSubmit={handleCreate} className="ui-card space-y-4">
-        <div>
-          <label htmlFor="title" className={labelClass}>
-            Titel
-          </label>
-          <input
-            id="title"
-            name="title"
-            value={form.title}
-            onChange={(e) => {
-              clearServerField("title");
-              setForm({ ...form, title: e.target.value });
-            }}
-            className={inputClass}
-            required
-          />
-          {formErrors.title ? (
-            <p className={errorTextClass}>{formErrors.title}</p>
+      <form onSubmit={handleCreate} className="ui-card">
+        <div className="divide-y divide-neutral-200">
+          {/* What: title and description */}
+          <div className="space-y-4 pb-5">
+            <div>
+              <label htmlFor="title" className={labelClass}>
+                Titel
+              </label>
+              <input
+                id="title"
+                name="title"
+                value={form.title}
+                onChange={(e) => {
+                  clearServerField("title");
+                  setForm({ ...form, title: e.target.value });
+                }}
+                className={inputClass}
+                required
+                autoFocus
+              />
+              {formErrors.title ? (
+                <p className={errorTextClass}>{formErrors.title}</p>
+              ) : null}
+            </div>
+            <div>
+              <label htmlFor="description" className={labelClass}>
+                Beskrivning
+              </label>
+              <textarea
+                id="description"
+                name="description"
+                rows={4}
+                value={form.description}
+                onChange={(e) => {
+                  clearServerField("description");
+                  setForm({ ...form, description: e.target.value });
+                }}
+                className={textareaClass}
+              />
+              {formErrors.description ? (
+                <p className={errorTextClass}>{formErrors.description}</p>
+              ) : null}
+            </div>
+          </div>
+
+          {/* When: start and end date */}
+          <div className="grid grid-cols-1 gap-4 py-5 sm:grid-cols-2">
+            <div>
+              <label htmlFor="startDate" className={labelClass}>
+                Startdatum
+              </label>
+              <input
+                id="startDate"
+                name="startDate"
+                type="datetime-local"
+                value={form.startDate}
+                onChange={(e) => {
+                  clearServerField("startDate");
+                  setForm({ ...form, startDate: e.target.value });
+                }}
+                className={inputClass}
+                required
+              />
+              {formErrors.startDate ? (
+                <p className={errorTextClass}>{formErrors.startDate}</p>
+              ) : null}
+            </div>
+            <div>
+              <label htmlFor="endDate" className={labelClass}>
+                Slutdatum
+              </label>
+              <input
+                id="endDate"
+                name="endDate"
+                type="datetime-local"
+                value={form.endDate}
+                onChange={(e) => {
+                  clearServerField("endDate");
+                  setForm({ ...form, endDate: e.target.value });
+                }}
+                className={inputClass}
+                required
+              />
+              {formErrors.endDate ? (
+                <p className={errorTextClass}>{formErrors.endDate}</p>
+              ) : null}
+            </div>
+          </div>
+
+          {/* Who: audience targeting */}
+          <div className="py-5">
+            <p className="ui-chapter mb-1.5">Målgrupp</p>
+            <p className="mb-3 text-xs text-neutral-600">
+              Välj loge, grupper eller enskilda bröder.
+            </p>
+            <EventAudienceFields
+              lodges={lodges}
+              groups={groups}
+              users={users}
+              lodgeUsers={lodgeUsers}
+              selectedLodgeIds={selectedLodgeIds}
+              selectedGroupIds={selectedGroupIds}
+              selectedUserIds={selectedUserIds}
+              onLodgeChange={setSelectedLodgeIds}
+              onGroupChange={setSelectedGroupIds}
+              onUserChange={setSelectedUserIds}
+              clearServerField={clearServerField}
+              errors={formErrors}
+              disabled={saving}
+              lodgesLoading={lodgesLoading}
+              groupsLoading={groupsLoading}
+              usersLoading={usersLoading}
+            />
+          </div>
+
+          {/* Details: price and meeting type */}
+          <div className="space-y-4 py-5">
+            <div>
+              <label htmlFor="price" className={labelClass}>
+                Pris
+              </label>
+              <input
+                id="price"
+                name="price"
+                type="number"
+                min="0"
+                step="1"
+                inputMode="numeric"
+                value={form.price}
+                onChange={(e) => {
+                  clearServerField("price");
+                  setForm({ ...form, price: e.target.value });
+                }}
+                className={inputClass}
+                aria-describedby={hasFoodFromPrice ? "price-food-hint" : undefined}
+              />
+              {hasFoodFromPrice ? (
+                <p id="price-food-hint" className="mt-1.5 text-xs text-neutral-600">
+                  Matbokning aktiveras.
+                </p>
+              ) : null}
+              {formErrors.price ? (
+                <p className={errorTextClass}>{formErrors.price}</p>
+              ) : null}
+            </div>
+            <label
+              htmlFor="lodgeMeeting"
+              className="inline-flex cursor-pointer items-center gap-2 text-xs font-semibold uppercase tracking-widest text-neutral-600"
+            >
+              <input
+                id="lodgeMeeting"
+                type="checkbox"
+                checked={form.lodgeMeeting}
+                className="h-4 w-4 rounded border-neutral-300 text-primary-600 focus-visible:ring-primary-600"
+                onChange={(e) => {
+                  clearServerField("lodgeMeeting");
+                  setForm({ ...form, lodgeMeeting: e.target.checked });
+                }}
+              />
+              Logemöte
+            </label>
+          </div>
+
+          {/* Actions */}
+          <div className="flex flex-col gap-2 pt-5 sm:flex-row">
+            <Button
+              type="submit"
+              className="ui-btn-primary"
+              disabled={saving || !canSubmit}
+            >
+              {saving ? "Skapar..." : "Skapa"}
+            </Button>
+            <Link
+              to=".."
+              relative="path"
+              className={`ui-btn ui-btn-secondary${saving ? " pointer-events-none opacity-60" : ""}`}
+              aria-disabled={saving || undefined}
+              tabIndex={saving ? -1 : undefined}
+            >
+              Avbryt
+            </Link>
+          </div>
+          {user && !canCreate ? (
+            <p className="mt-3 text-xs text-danger-600">
+              Du saknar behörighet att skapa möten.
+            </p>
           ) : null}
-        </div>
-
-        <EventAudienceFields
-          lodges={lodges}
-          groups={groups}
-          users={users}
-          lodgeUsers={lodgeUsers}
-          selectedLodgeIds={selectedLodgeIds}
-          selectedGroupIds={selectedGroupIds}
-          selectedUserIds={selectedUserIds}
-          onLodgeChange={setSelectedLodgeIds}
-          onGroupChange={setSelectedGroupIds}
-          onUserChange={setSelectedUserIds}
-          clearServerField={clearServerField}
-          errors={formErrors}
-          disabled={saving}
-          lodgesLoading={lodgesLoading}
-          groupsLoading={groupsLoading}
-          usersLoading={usersLoading}
-        />
-
-        <div>
-          <label htmlFor="description" className={labelClass}>
-            Beskrivning
-          </label>
-          <textarea
-            id="description"
-            name="description"
-            value={form.description}
-            onChange={(e) => {
-              clearServerField("description");
-              setForm({ ...form, description: e.target.value });
-            }}
-            className={textareaClass}
-            required
-          />
-          {formErrors.description ? (
-            <p className={errorTextClass}>{formErrors.description}</p>
-          ) : null}
-        </div>
-
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <div>
-            <label htmlFor="startDate" className={labelClass}>
-              Startdatum
-            </label>
-            <input
-              id="startDate"
-              name="startDate"
-              type="datetime-local"
-              value={form.startDate}
-              onChange={(e) => {
-                clearServerField("startDate");
-                setForm({ ...form, startDate: e.target.value });
-              }}
-              className={inputClass}
-              required
-            />
-            {formErrors.startDate ? (
-              <p className={errorTextClass}>{formErrors.startDate}</p>
-            ) : null}
-          </div>
-          <div>
-            <label htmlFor="endDate" className={labelClass}>
-              Slutdatum
-            </label>
-            <input
-              id="endDate"
-              name="endDate"
-              type="datetime-local"
-              value={form.endDate}
-              onChange={(e) => {
-                clearServerField("endDate");
-                setForm({ ...form, endDate: e.target.value });
-              }}
-              className={inputClass}
-              required
-            />
-            {formErrors.endDate ? (
-              <p className={errorTextClass}>{formErrors.endDate}</p>
-            ) : null}
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-          <div>
-            <label htmlFor="price" className={labelClass}>
-              Pris
-            </label>
-            <input
-              id="price"
-              name="price"
-              value={form.price}
-              onChange={(e) => {
-                clearServerField("price");
-                setForm({ ...form, price: e.target.value });
-              }}
-              className={inputClass}
-            />
-            {formErrors.price ? (
-              <p className={errorTextClass}>{formErrors.price}</p>
-            ) : null}
-          </div>
-          <div>
-            <label htmlFor="foodPreview" className={labelClass}>
-              Mat (auto)
-            </label>
-            <input
-              id="foodPreview"
-              name="foodPreview"
-              value={String(foodPreview)}
-              className={`${inputClass} bg-neutral-100`}
-              readOnly
-            />
-          </div>
-          <label
-            htmlFor="lodgeMeeting"
-            className="mt-2 inline-flex items-center gap-2 text-sm text-neutral-700"
-          >
-            <input
-              id="lodgeMeeting"
-              type="checkbox"
-              checked={form.lodgeMeeting}
-              className="h-4 w-4 rounded border-neutral-300 text-primary-600 focus-visible:ring-primary-600"
-              onChange={(e) => {
-                clearServerField("lodgeMeeting");
-                setForm({ ...form, lodgeMeeting: e.target.checked });
-              }}
-            />
-            Logemöte
-          </label>
-        </div>
-
-        <div className="flex flex-col gap-2 py-2 sm:flex-row">
-          <Button
-            type="submit"
-            className="ui-btn-primary"
-            disabled={saving || !canSubmit}
-          >
-            {saving ? "Skapar..." : "Skapa"}
-          </Button>
-          <Link to=".." relative="path" className="ui-btn ui-btn-secondary">
-            Avbryt
-          </Link>
         </div>
       </form>
     </PageContainer>

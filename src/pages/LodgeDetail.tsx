@@ -1,5 +1,5 @@
-﻿import { useEffect, useState } from "react";
-import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
+import { useEffect, useRef, useState } from "react";
+import { Link, useBlocker, useLocation, useNavigate, useParams } from "react-router-dom";
 import {
   Button,
   PageContainer,
@@ -18,7 +18,7 @@ import { getLodgeFormErrors } from "../utils/formValidation";
 
 export const LodgeDetail = () => {
   const { id } = useParams<{ id: string }>();
-  const { run, data: lodge } = useFetch<Lodge | null>();
+  const { run, data: lodge, loading, notFound } = useFetch<Lodge | null>();
   const { run: runAction, loading: saving } = useFetch<LodgeMutationResult>();
   const { setError: setGlobalError, clearError: clearGlobalError } = useError();
   const { user } = useAuth();
@@ -35,10 +35,18 @@ export const LodgeDetail = () => {
     description: "",
     email: "",
   });
+  const initialFormRef = useRef({ name: "", city: "", description: "", email: "" });
   const [serverErrors, setServerErrors] = useState<Record<string, string>>({});
+  const [showSavedNotice, setShowSavedNotice] = useState(
+    Boolean((location.state as { saved?: boolean } | null)?.saved),
+  );
+
   const clientErrors = getLodgeFormErrors(form);
   const formErrors = { ...serverErrors, ...clientErrors };
   const canSave = canEdit && Object.keys(clientErrors).length === 0;
+  const isDirty = isEditRoute && JSON.stringify(form) !== JSON.stringify(initialFormRef.current);
+
+  const blocker = useBlocker(isDirty);
 
   function clearServerField(field: string) {
     setServerErrors((prev) => {
@@ -56,15 +64,25 @@ export const LodgeDetail = () => {
 
   useEffect(() => {
     if (!lodge) return;
-    Promise.resolve().then(() =>
-      setForm({
+    Promise.resolve().then(() => {
+      const next = {
         name: lodge.name ?? "",
         city: lodge.city ?? "",
         description: lodge.description ?? "",
         email: lodge.email ?? "",
-      }),
-    );
-  }, [lodge, isEditRoute]);
+      };
+      initialFormRef.current = next;
+      setForm(next);
+    });
+  }, [lodge]);
+
+  useEffect(() => {
+    if (!lodge?.name) return;
+    document.title = `${lodge.name} — OSVS`;
+    return () => {
+      document.title = "OSVS";
+    };
+  }, [lodge?.name]);
 
   async function handleSave() {
     if (!id) return setGlobalError("Saknar loge-id");
@@ -81,7 +99,7 @@ export const LodgeDetail = () => {
       };
       await runAction(() => updateLodge(id, payload));
       await run(() => getLodge(id));
-      navigate(`/lodges/${id}`);
+      navigate(`/lodges/${id}`, { state: { saved: true } });
     } catch (error: unknown) {
       const fields = getApiFieldErrors(error);
       if (fields) {
@@ -106,8 +124,52 @@ export const LodgeDetail = () => {
         )}
       </div>
 
-      {lodge ? (
+      {blocker.state === "blocked" && (
+        <div className="mb-4 rounded-md border border-warning bg-warning-pale px-4 py-3 text-sm">
+          <p className="text-ink-mid mb-3">Du har osparade ändringar. Vill du lämna ändå?</p>
+          <div className="flex gap-2">
+            <button
+              type="button"
+              className="ui-btn ui-btn-secondary"
+              onClick={() => blocker.reset?.()}
+            >
+              Stanna kvar
+            </button>
+            <button
+              type="button"
+              className="ui-btn"
+              onClick={() => blocker.proceed?.()}
+            >
+              Lämna utan att spara
+            </button>
+          </div>
+        </div>
+      )}
+
+      {loading ? (
         <div className="ui-card">
+          <div className="space-y-4">
+            <div className="h-28 w-28 rounded-lg skeleton-shimmer md:h-40 md:w-40" />
+            <div className="h-6 w-48 rounded skeleton-shimmer" />
+            <div className="h-4 w-24 rounded skeleton-shimmer" />
+            <div className="space-y-2">
+              <div className="h-4 w-full rounded skeleton-shimmer" />
+              <div className="h-4 w-3/4 rounded skeleton-shimmer" />
+            </div>
+          </div>
+        </div>
+      ) : notFound ? (
+        <div className="ui-card flex flex-col items-center gap-3 py-10 text-center">
+          <h1 className="ui-page-title">Logen hittades inte</h1>
+          <p className="text-ink-secondary text-sm">
+            Kontrollera länken eller gå tillbaka till logelistan.
+          </p>
+          <Link to="/lodges" className="ui-btn ui-btn-primary mt-2">
+            Till logelistan
+          </Link>
+        </div>
+      ) : lodge ? (
+        <div className="ui-card animate-step-in">
           {isEditRoute && canEdit ? (
             <div className="space-y-4">
               <div>
@@ -195,40 +257,68 @@ export const LodgeDetail = () => {
                 >
                   {saving ? "Sparar..." : "Spara"}
                 </Button>
-                <Link to=".." relative="path" className="ui-btn ui-btn-secondary">
+                <button
+                  type="button"
+                  className="ui-btn ui-btn-secondary"
+                  onClick={() => {
+                    setForm(initialFormRef.current);
+                    navigate("..", { relative: "path" });
+                  }}
+                >
                   Avbryt
-                </Link>
+                </button>
               </div>
             </div>
           ) : (
-            <div>
-              <div>
+            <div className="space-y-4">
+              {showSavedNotice && (
+                <div className="flex items-center justify-between rounded-md border border-ordensgreen-pale bg-ordensgreen-faint px-4 py-3 text-sm text-ink-secondary">
+                  <span>Logen sparad.</span>
+                  <button
+                    type="button"
+                    onClick={() => setShowSavedNotice(false)}
+                    className="text-ink-secondary hover:text-ink-mid ml-4"
+                    aria-label="Stäng"
+                  >
+                    ×
+                  </button>
+                </div>
+              )}
+              {lodge.picture ? (
                 <img
-                  className="mb-2 h-28 w-28 rounded-full object-cover md:h-40 md:w-40"
-                  src={lodge?.picture ?? undefined}
-                  alt={`${lodge?.city}s vapensköld`}
+                  className="h-28 w-28 rounded-lg object-cover md:h-40 md:w-40"
+                  src={lodge.picture}
+                  alt={lodge.city ? `${lodge.city}s vapensköld` : "Vapensköld"}
+                  onError={(e) => {
+                    (e.currentTarget as HTMLImageElement).style.display = "none";
+                  }}
                 />
-              </div>
-              <div>
-                <h1 className="ui-page-title">{lodge.name}</h1>
-              </div>
-              <div className="mb-2 text-neutral-700">
-                <div className="italic">{lodge.city}</div>
-              </div>
-              <div className="mb-2 text-neutral-700">
-                {lodge.description}
-              </div>
-              <div className="mb-2 text-neutral-700">
-                <a className="ui-link" href={`mailto:${lodge.email}`}>
-                  {lodge.email}
-                </a>
-              </div>
+              ) : null}
+              <h1 className="ui-page-title">{lodge.name}</h1>
+              {lodge.city && (
+                <div>
+                  <p className={labelClass}>Stad</p>
+                  <p className="text-ink-secondary">{lodge.city}</p>
+                </div>
+              )}
+              {lodge.description && (
+                <div>
+                  <p className={labelClass}>Beskrivning</p>
+                  <p className="text-ink-secondary whitespace-pre-line">{lodge.description}</p>
+                </div>
+              )}
+              {lodge.email && (
+                <div>
+                  <p className={labelClass}>E-post</p>
+                  <a className="ui-link" href={`mailto:${lodge.email}`}>
+                    {lodge.email}
+                  </a>
+                </div>
+              )}
             </div>
           )}
         </div>
-      ) : (
-        <div className="text-neutral-600">Ingen logedata</div>
-      )}
+      ) : null}
     </PageContainer>
   );
 };

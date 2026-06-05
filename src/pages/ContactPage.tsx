@@ -1,94 +1,72 @@
 import { PageContainer } from "../components";
 
+const roles = [
+  {
+    title: "Förtroenderådet",
+    description: "Består av Logernas Logemästare, Logekansler och Logesekreterare",
+  },
+  {
+    title: "Ordensmästare",
+    description: "Benämning på ordförande i förtroenderådet",
+  },
+  {
+    title: "Ordenssekreterare",
+    description: "Benämning på sekreteraren i förtroenderådet",
+  },
+];
+
+const lodges = [
+  { name: "Stamlogen", city: "Karlskrona", email: "stamlogen@osvs.se" },
+  { name: "Logen Stella Polaris", city: "Helsingborg", email: "stellapolaris@osvs.se" },
+  { name: "Logen Regulus", city: "Ängelholm", email: "regulus@osvs.se" },
+  { name: "Logen Orion", city: "Göteborg", email: "orion@osvs.se" },
+  { name: "Logen Capella", city: "Halmstad", email: "capella@osvs.se" },
+];
+
 export const ContactPage = () => {
   return (
     <PageContainer size="xl" className="ui-page">
-      <div className="grid w-full grid-cols-1 gap-8 lg:grid-cols-3">
+      <div className="grid w-full grid-cols-1 gap-8 lg:grid-cols-[1fr_2fr]">
+
         <section className="space-y-4">
-          <h2 className="ui-section-title text-primary-600">Kontakt</h2>
-          <div className="flex h-auto w-full items-center justify-center overflow-hidden rounded-md border border-neutral-200 bg-white">
+          <h2 className="ui-section-title">Kontakt</h2>
+          <div className="overflow-hidden rounded-md border border-neutral-200">
             <img
               src="/contact.png"
-              alt="OSVS kontaktinformation"
-              className="h-auto w-full object-contain"
+              alt="Ordensamfundet VS, tidigare bröder"
+              className="h-auto w-full object-cover"
             />
           </div>
         </section>
 
-        <section className="space-y-6 text-sm text-neutral-700">
-          <h2 className="ui-section-title text-primary-600">Organisation</h2>
-          <hr className="border-neutral-200" />
-          <h3 className="text-xl font-semibold text-primary-600">Förtroenderådet</h3>
-          <p>Består av Logernas Logemästare, Logekansler och Logesekreterare</p>
-          <hr className="border-neutral-200" />
+        <div className="grid grid-cols-1 gap-8 sm:grid-cols-2">
 
-          <h3 className="text-xl font-semibold text-primary-600">Ordensmästare</h3>
-          <p>Benämning på ordförande i förtroenderådet</p>
-          <hr className="border-neutral-200" />
+          <section>
+            <h2 className="ui-section-title mb-4">Organisation</h2>
+            <div>
+              {roles.map(({ title, description }) => (
+                <div key={title} className="ui-entry">
+                  <p className="ui-chapter mb-1">{title}</p>
+                  <p className="text-sm text-neutral-700">{description}</p>
+                </div>
+              ))}
+            </div>
+          </section>
 
-          <h3 className="text-xl font-semibold text-primary-600">Ordenssekreterare</h3>
-          <p>Benämning på sekreteraren i förtroenderådet</p>
-          <hr className="border-neutral-200" />
-        </section>
+          <section>
+            <h2 className="ui-section-title mb-4">Logernas Kontakt</h2>
+            <div>
+              {lodges.map(({ name, city, email }) => (
+                <div key={name} className="ui-entry">
+                  <p className="ui-chapter mb-0.5">{name}</p>
+                  <p className="text-sm text-neutral-700">{city}</p>
+                  <a className="ui-link" href={`mailto:${email}`}>{email}</a>
+                </div>
+              ))}
+            </div>
+          </section>
 
-        <section className="space-y-6 text-sm text-neutral-700">
-          <h2 className="ui-section-title text-primary-600">Logernas Kontakt</h2>
-          <hr className="border-neutral-200" />
-          <h3 className="text-xl font-semibold text-primary-600">Stamlogen</h3>
-          <div className="flex flex-col">
-            <p>Karlskrona</p>
-            <p>
-              E-post:{" "}
-              <a className="ui-link" href="mailto:stamlogen@osvs.se">
-                stamlogen@osvs.se
-              </a>
-            </p>
-          </div>
-
-          <h3 className="text-xl font-semibold text-primary-600">Logen Stella Polaris</h3>
-          <div className="flex flex-col">
-            <p>Helsingborg</p>
-            <p>
-              E-post:{" "}
-              <a className="ui-link" href="mailto:stellapolaris@osvs.se">
-                stellapolaris@osvs.se
-              </a>
-            </p>
-          </div>
-
-          <h3 className="text-xl font-semibold text-primary-600">Logen Regulus</h3>
-          <div className="flex flex-col">
-            <p>Ängelholm</p>
-            <p>
-              E-post:{" "}
-              <a className="ui-link" href="mailto:regulus@osvs.se">
-                regulus@osvs.se
-              </a>
-            </p>
-          </div>
-
-          <h3 className="text-xl font-semibold text-primary-600">Logen Orion</h3>
-          <div className="flex flex-col">
-            <p>Göteborg</p>
-            <p>
-              E-post:{" "}
-              <a className="ui-link" href="mailto:orion@osvs.se">
-                orion@osvs.se
-              </a>
-            </p>
-          </div>
-
-          <h3 className="text-xl font-semibold text-primary-600">Capella</h3>
-          <div className="flex flex-col">
-            <p>Halmstad</p>
-            <p>
-              E-post:{" "}
-              <a className="ui-link" href="mailto:capella@osvs.se">
-                capella@osvs.se
-              </a>
-            </p>
-          </div>
-        </section>
+        </div>
       </div>
     </PageContainer>
   );

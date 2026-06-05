@@ -1,7 +1,17 @@
 import type { FieldErrors, UseFormRegister } from "react-hook-form";
-import { errorTextClass, inputClass, labelClass, selectClass } from "../ui";
+import {
+  errorTextClass,
+  inputClass,
+  labelClass,
+  selectClass,
+  textareaClass,
+} from "../ui";
 import type { PublicUser, UpdateUserForm } from "../../types";
 import { updateUserFormRules } from "../../utils/formValidation";
+
+function FieldValue({ value }: { value: string | null | undefined }) {
+  return <dd className="mt-0.5 text-sm text-neutral-900">{value || "—"}</dd>;
+}
 
 export const ProfileForm = ({
   user,
@@ -18,9 +28,79 @@ export const ProfileForm = ({
   isEditRoute: boolean;
   setPictureFile: (f: File | null) => void;
   pictureError?: string | null;
-  saving: boolean;
   showArchive?: boolean;
 }) => {
+  if (!isEditRoute) {
+    return (
+      <dl className="grid grid-cols-1 gap-x-8 gap-y-4 sm:grid-cols-2">
+        <div>
+          <dt className={labelClass}>Matrikelnummer</dt>
+          <FieldValue value={user?.matrikelnummer != null ? String(user.matrikelnummer) : null} />
+        </div>
+        <div>
+          <dt className={labelClass}>E-post</dt>
+          <FieldValue value={user?.email} />
+        </div>
+        <div>
+          <dt className={labelClass}>Förnamn</dt>
+          <FieldValue value={user?.firstname} />
+        </div>
+        <div>
+          <dt className={labelClass}>Efternamn</dt>
+          <FieldValue value={user?.lastname} />
+        </div>
+        <div>
+          <dt className={labelClass}>Födelsedatum</dt>
+          <FieldValue
+            value={
+              user?.dateOfBirth
+                ? new Date(user.dateOfBirth).toLocaleDateString("sv-SE")
+                : null
+            }
+          />
+        </div>
+        <div>
+          <dt className={labelClass}>Registrerad</dt>
+          <FieldValue
+            value={
+              user?.createdAt
+                ? new Date(user.createdAt).toLocaleDateString("sv-SE")
+                : null
+            }
+          />
+        </div>
+        <div>
+          <dt className={labelClass}>Mobilnummer</dt>
+          <FieldValue value={user?.mobile} />
+        </div>
+        <div>
+          <dt className={labelClass}>Hemnummer</dt>
+          <FieldValue value={user?.homeNumber} />
+        </div>
+        <div className="sm:col-span-2">
+          <dt className={labelClass}>Adress</dt>
+          <dd className="mt-0.5 text-sm text-neutral-900">
+            {[user?.address, user?.zipcode, user?.city].filter(Boolean).join(", ") || "—"}
+          </dd>
+        </div>
+        <div>
+          <dt className={labelClass}>Jobb</dt>
+          <FieldValue value={user?.work} />
+        </div>
+        <div>
+          <dt className={labelClass}>Noteringar</dt>
+          <FieldValue value={user?.notes} />
+        </div>
+        <div>
+          <dt className={labelClass}>Tillgängligt boende</dt>
+          <dd className="mt-0.5 text-sm text-neutral-900">
+            {user?.accommodationAvailable === true ? "Ja" : user?.accommodationAvailable === false ? "Nej" : "—"}
+          </dd>
+        </div>
+      </dl>
+    );
+  }
+
   return (
     <>
       <div className="mb-4 grid grid-cols-1 gap-4 md:grid-cols-2">
@@ -52,6 +132,23 @@ export const ProfileForm = ({
         </div>
       </div>
 
+      <div className="mb-4">
+        <label htmlFor="profilePicture" className={labelClass}>
+          Profilbild
+        </label>
+        <input
+          id="profilePicture"
+          name="profilePicture"
+          type="file"
+          accept="image/*"
+          className={inputClass}
+          onChange={(e) =>
+            setPictureFile(e.target.files ? e.target.files[0] : null)
+          }
+        />
+        {pictureError ? <p className={errorTextClass}>{pictureError}</p> : null}
+      </div>
+
       <div className="mb-4 grid grid-cols-1 gap-4 md:grid-cols-2">
         <div>
           <label htmlFor="firstname" className={labelClass}>
@@ -60,8 +157,7 @@ export const ProfileForm = ({
           <input
             id="firstname"
             {...register("firstname", updateUserFormRules.firstname)}
-            readOnly={!isEditRoute}
-            className={`${inputClass} ${isEditRoute ? "" : "bg-neutral-100"}`}
+            className={inputClass}
           />
           {errors.firstname ? (
             <p className={errorTextClass}>{errors.firstname.message}</p>
@@ -74,8 +170,7 @@ export const ProfileForm = ({
           <input
             id="lastname"
             {...register("lastname", updateUserFormRules.lastname)}
-            readOnly={!isEditRoute}
-            className={`${inputClass} ${isEditRoute ? "" : "bg-neutral-100"}`}
+            className={inputClass}
           />
           {errors.lastname ? (
             <p className={errorTextClass}>{errors.lastname.message}</p>
@@ -92,8 +187,7 @@ export const ProfileForm = ({
             id="dateOfBirth"
             type="date"
             {...register("dateOfBirth", updateUserFormRules.dateOfBirth)}
-            readOnly={!isEditRoute}
-            className={`${inputClass} ${isEditRoute ? "" : "bg-neutral-100"}`}
+            className={inputClass}
           />
           {errors.dateOfBirth ? (
             <p className={errorTextClass}>{errors.dateOfBirth.message}</p>
@@ -106,7 +200,11 @@ export const ProfileForm = ({
           <input
             id="createdAt"
             name="createdAt"
-            value={user?.createdAt ? new Date(user.createdAt).toLocaleDateString() : ""}
+            value={
+              user?.createdAt
+                ? new Date(user.createdAt).toLocaleDateString("sv-SE")
+                : ""
+            }
             readOnly
             className={`${inputClass} bg-neutral-100`}
           />
@@ -123,8 +221,7 @@ export const ProfileForm = ({
             type="text"
             inputMode="tel"
             {...register("mobile", updateUserFormRules.mobile)}
-            readOnly={!isEditRoute}
-            className={`${inputClass} ${isEditRoute ? "" : "bg-neutral-100"}`}
+            className={inputClass}
           />
           {errors.mobile ? (
             <p className={errorTextClass}>{errors.mobile.message}</p>
@@ -139,8 +236,7 @@ export const ProfileForm = ({
             type="text"
             inputMode="tel"
             {...register("homeNumber", updateUserFormRules.homeNumber)}
-            readOnly={!isEditRoute}
-            className={`${inputClass} ${isEditRoute ? "" : "bg-neutral-100"}`}
+            className={inputClass}
           />
           {errors.homeNumber ? (
             <p className={errorTextClass}>{errors.homeNumber.message}</p>
@@ -157,8 +253,7 @@ export const ProfileForm = ({
             id="address"
             {...register("address", updateUserFormRules.address)}
             autoComplete="off"
-            readOnly={!isEditRoute}
-            className={`${inputClass} ${isEditRoute ? "" : "bg-neutral-100"}`}
+            className={inputClass}
           />
           {errors.address ? (
             <p className={errorTextClass}>{errors.address.message}</p>
@@ -173,8 +268,7 @@ export const ProfileForm = ({
             type="text"
             inputMode="numeric"
             {...register("zipcode", updateUserFormRules.zipcode)}
-            readOnly={!isEditRoute}
-            className={`${inputClass} ${isEditRoute ? "" : "bg-neutral-100"}`}
+            className={inputClass}
           />
           {errors.zipcode ? (
             <p className={errorTextClass}>{errors.zipcode.message}</p>
@@ -187,8 +281,7 @@ export const ProfileForm = ({
           <input
             id="city"
             {...register("city", updateUserFormRules.city)}
-            readOnly={!isEditRoute}
-            className={`${inputClass} ${isEditRoute ? "" : "bg-neutral-100"}`}
+            className={inputClass}
           />
           {errors.city ? (
             <p className={errorTextClass}>{errors.city.message}</p>
@@ -200,41 +293,42 @@ export const ProfileForm = ({
         <label htmlFor="work" className={labelClass}>
           Jobb
         </label>
-        <input
+        <textarea
           id="work"
-          type="text"
+          rows={2}
           {...register("work")}
-          readOnly={!isEditRoute}
-          className={`${inputClass} ${isEditRoute ? "" : "bg-neutral-100"}`}
+          className={textareaClass}
         />
-        {errors.work ? <p className={errorTextClass}>{errors.work.message}</p> : null}
+        {errors.work ? (
+          <p className={errorTextClass}>{errors.work.message}</p>
+        ) : null}
       </div>
 
       <div className="mb-4">
         <label htmlFor="notes" className={labelClass}>
           Noteringar
         </label>
-        <input
+        <textarea
           id="notes"
-          type="text"
+          rows={3}
           {...register("notes")}
-          readOnly={!isEditRoute}
-          className={`${inputClass} ${isEditRoute ? "" : "bg-neutral-100"}`}
+          className={textareaClass}
         />
-        {errors.notes ? <p className={errorTextClass}>{errors.notes.message}</p> : null}
+        {errors.notes ? (
+          <p className={errorTextClass}>{errors.notes.message}</p>
+        ) : null}
       </div>
 
-      <div className="mb-4">
-        <label htmlFor="accommodationAvailable" className={labelClass}>
-          Tillgängligt boende
-        </label>
+      <div className="mb-4 flex items-center gap-3">
         <input
           id="accommodationAvailable"
           type="checkbox"
           {...register("accommodationAvailable")}
-          disabled={!isEditRoute}
           className="h-4 w-4 rounded border-neutral-300 text-primary-600 focus-visible:ring-primary-600"
         />
+        <label htmlFor="accommodationAvailable" className="text-sm text-neutral-700">
+          Tillgängligt boende
+        </label>
         {errors.accommodationAvailable ? (
           <p className={errorTextClass}>{errors.accommodationAvailable.message}</p>
         ) : null}
@@ -245,34 +339,17 @@ export const ProfileForm = ({
           <label htmlFor="archive" className={labelClass}>
             Arkiv
           </label>
-          <select
-            id="archive"
-            {...register("archive")}
-            className={selectClass}
-          >
-            <option value="">— Ingen —</option>
+          <select id="archive" {...register("archive")} className={selectClass}>
+            <option value="">— Aktiv —</option>
             <option value="Avliden">Avliden</option>
             <option value="Urgången">Urgången</option>
           </select>
+          <p className="mt-1.5 text-xs text-neutral-500">
+            Arkivering döljer medlemmen från aktiva listor. Välj tomt för att återaktivera.
+          </p>
         </div>
       ) : null}
 
-      {isEditRoute ? (
-        <div className="mb-4">
-          <label htmlFor="profilePicture" className={labelClass}>
-            Uppdatera Profilbild
-          </label>
-          <input
-            id="profilePicture"
-            name="profilePicture"
-            type="file"
-            accept="image/*"
-            className={inputClass}
-            onChange={(e) => setPictureFile(e.target.files ? e.target.files[0] : null)}
-          />
-          {pictureError ? <p className={errorTextClass}>{pictureError}</p> : null}
-        </div>
-      ) : null}
     </>
   );
 };

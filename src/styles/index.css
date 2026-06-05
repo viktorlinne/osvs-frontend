@@ -5,6 +5,7 @@
 @layer base {
   body {
     @apply bg-neutral-50 text-neutral-900 antialiased;
+    font-family: 'EB Garamond', Georgia, serif;
     line-height: 1.65;
     font-feature-settings: 'kern' 1, 'liga' 1;
   }
@@ -22,18 +23,35 @@
 }
 
 @layer components {
+  /* ── Page structure ── */
   .ui-page {
     @apply w-full py-8 md:py-12;
   }
 
   .ui-page-title {
-    @apply text-3xl font-semibold tracking-tight text-primary-600 md:text-4xl;
+    @apply text-4xl font-semibold tracking-tight text-primary-600 md:text-5xl;
   }
 
   .ui-section-title {
     @apply text-xl font-semibold tracking-tight text-neutral-900 md:text-2xl;
   }
 
+  /* Chapter heading — column/section label, like a printed register */
+  .ui-chapter {
+    @apply text-xs font-semibold uppercase tracking-widest text-neutral-600;
+  }
+
+  /* Nav item — used in the flat institutional navigation bar */
+  .ui-nav-item {
+    @apply block rounded px-2.5 py-1.5 text-xs font-semibold uppercase tracking-widest transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-600 focus-visible:ring-offset-2;
+  }
+
+  /* Registry entry — list item alternative to cards */
+  .ui-entry {
+    @apply border-b border-neutral-200 py-3.5 first:pt-0 last:border-b-0 last:pb-0;
+  }
+
+  /* ── Surface ── */
   .ui-card {
     @apply rounded-card border border-neutral-200 bg-white p-5 shadow-card;
   }
@@ -42,6 +60,7 @@
     @apply transition-shadow duration-200 hover:shadow-card-hover;
   }
 
+  /* ── Form ── */
   .ui-label {
     @apply mb-1.5 block text-xs font-semibold uppercase tracking-widest text-neutral-600;
   }
@@ -62,6 +81,7 @@
     @apply mt-1 text-xs text-danger-600 tracking-wide;
   }
 
+  /* ── Buttons ── */
   .ui-btn {
     @apply inline-flex min-h-11 cursor-pointer items-center justify-center rounded-md px-4 py-2 text-sm font-medium tracking-wide transition-colors duration-150 disabled:cursor-not-allowed disabled:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-600 focus-visible:ring-offset-2 focus-visible:ring-offset-neutral-50;
   }
@@ -75,7 +95,7 @@
   }
 
   .ui-btn-secondary {
-    @apply border border-neutral-200 bg-white text-neutral-700 hover:bg-neutral-50 hover:border-neutral-300 active:bg-neutral-100;
+    @apply border border-neutral-200 bg-white text-neutral-700 hover:bg-neutral-100 hover:border-neutral-300 active:bg-neutral-100;
   }
 
   .ui-btn-danger {
@@ -86,10 +106,74 @@
     @apply text-sm font-medium text-primary-600 underline-offset-2 transition hover:text-primary-700 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-600 focus-visible:ring-offset-2;
   }
 
-  .line-clamp-2 {
+  .leaflet-popup-content {
+  font-family: 'EB Garamond', Georgia, serif;
+  font-size: 0.875rem;
+  line-height: 1.65;
+}
+
+.line-clamp-2 {
     display: -webkit-box;
     overflow: hidden;
     -webkit-box-orient: vertical;
     -webkit-line-clamp: 2;
+  }
+}
+
+@keyframes step-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-step-in {
+  animation: step-in 0.18s ease-out;
+}
+
+@keyframes skeleton-shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+/* Warm parchment shimmer — base matches neutral-200 (#e3dcd2) */
+.skeleton-shimmer {
+  background-image: linear-gradient(
+    90deg,
+    oklch(88.5% 0.019 65) 0%,
+    oklch(94% 0.010 65) 45%,
+    oklch(94% 0.010 65) 55%,
+    oklch(88.5% 0.019 65) 100%
+  );
+  background-size: 300% 100%;
+  animation: skeleton-shimmer 1.8s ease-in-out infinite;
+}
+
+/* Green-tinted shimmer — base matches primary-100 (#d3eedd) */
+.skeleton-shimmer-circle {
+  background-image: linear-gradient(
+    90deg,
+    oklch(93% 0.042 149) 0%,
+    oklch(97% 0.018 149) 45%,
+    oklch(97% 0.018 149) 55%,
+    oklch(93% 0.042 149) 100%
+  );
+  background-size: 300% 100%;
+  animation: skeleton-shimmer 1.8s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-step-in,
+  .skeleton-shimmer,
+  .skeleton-shimmer-circle {
+    animation: none;
   }
 }

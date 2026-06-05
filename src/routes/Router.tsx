@@ -1,7 +1,6 @@
 import { Suspense, lazy, type ComponentType } from "react";
 import { createBrowserRouter } from "react-router";
 import { AppLayout } from "../app/AppLayout";
-import { PageContainer } from "../components";
 import AuthGuard from "./AuthGuard";
 
 function lazyNamedPage(
@@ -18,19 +17,9 @@ function lazyNamedPage(
   });
 }
 
-function RouteLoadingFallback() {
-  return (
-    <PageContainer size="xl" className="ui-page">
-      <div className="ui-card py-12 text-center text-neutral-600">
-        Laddar sida...
-      </div>
-    </PageContainer>
-  );
-}
-
 function renderPage(Page: ComponentType) {
   return (
-    <Suspense fallback={<RouteLoadingFallback />}>
+    <Suspense fallback={null}>
       <Page />
     </Suspense>
   );
@@ -42,13 +31,19 @@ function renderProtectedPage(Page: ComponentType, roles?: string[]) {
 
 const NotFound = lazyNamedPage(() => import("../pages/NotFound"), "NotFound");
 const HomePage = lazyNamedPage(() => import("../pages/HomePage"), "HomePage");
-const AboutPage = lazyNamedPage(() => import("../pages/AboutPage"), "AboutPage");
+const AboutPage = lazyNamedPage(
+  () => import("../pages/AboutPage"),
+  "AboutPage",
+);
 const GdprPage = lazyNamedPage(() => import("../pages/GdprPage"), "GdprPage");
 const ContactPage = lazyNamedPage(
   () => import("../pages/ContactPage"),
   "ContactPage",
 );
-const LoginPage = lazyNamedPage(() => import("../pages/LoginPage"), "LoginPage");
+const LoginPage = lazyNamedPage(
+  () => import("../pages/LoginPage"),
+  "LoginPage",
+);
 const NewsPage = lazyNamedPage(() => import("../pages/PostsPage"), "NewsPage");
 const PostDetail = lazyNamedPage(
   () => import("../pages/PostDetail"),

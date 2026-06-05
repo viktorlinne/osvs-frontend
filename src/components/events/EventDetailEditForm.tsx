@@ -62,8 +62,6 @@ export function EventDetailEditForm({
   groupsLoading = false,
   usersLoading = false,
 }: Props) {
-  const foodPreview =
-    Number.isFinite(Number(form.price)) && Number(form.price) > 0 ? 1 : 0;
   const descriptionRef = useRef<HTMLTextAreaElement | null>(null);
 
   useLayoutEffect(() => {
@@ -173,7 +171,7 @@ export function EventDetailEditForm({
         </div>
       </div>
 
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
         <div>
           <label htmlFor="price" className="ui-label">
             Pris
@@ -181,6 +179,10 @@ export function EventDetailEditForm({
           <input
             id="price"
             name="price"
+            type="number"
+            min="0"
+            step="1"
+            inputMode="numeric"
             value={form.price}
             onChange={(e) => {
               clearServerField("price");
@@ -189,22 +191,13 @@ export function EventDetailEditForm({
             className="ui-input"
           />
           {errors.price ? <p className={errorTextClass}>{errors.price}</p> : null}
-        </div>
-        <div>
-          <label htmlFor="foodPreview" className="ui-label">
-            Mat (auto)
-          </label>
-          <input
-            id="foodPreview"
-            name="foodPreview"
-            value={String(foodPreview)}
-            className="ui-input bg-neutral-100"
-            readOnly
-          />
+          {Number(form.price) > 0 && Number.isFinite(Number(form.price)) && (
+            <p className="mt-1 text-xs text-neutral-600">Matbokning aktiveras</p>
+          )}
         </div>
         <label
           htmlFor="lodgeMeeting"
-          className="mt-2 inline-flex items-center gap-2 text-sm text-neutral-700"
+          className="inline-flex cursor-pointer items-center gap-2 text-xs font-semibold uppercase tracking-widest text-neutral-600"
         >
           <input
             id="lodgeMeeting"

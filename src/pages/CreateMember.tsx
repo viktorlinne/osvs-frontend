@@ -1,13 +1,14 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
-import type { FieldError } from "react-hook-form";
 import {
   AllergiesManager,
+  Button,
   PageContainer,
   errorTextClass,
   inputClass,
   selectClass,
+  textareaClass,
 } from "../components";
 import useError from "../context/useError";
 import useFetch from "../hooks/useFetch";
@@ -23,23 +24,41 @@ import {
   validateImageFile,
 } from "../utils/formValidation";
 
+const STEPS = [
+  "Konto",
+  "Personuppgifter",
+  "Kontaktuppgifter",
+  "Loge & övrigt",
+] as const;
+
+type StepIndex = 0 | 1 | 2 | 3;
+
+const STEP_FIELDS: Record<StepIndex, Array<keyof RegisterForm>> = {
+  0: ["email", "password"],
+  1: ["firstname", "lastname", "dateOfBirth"],
+  2: ["mobile", "homeNumber", "city", "address", "zipcode"],
+  3: [],
+};
+
 export const CreateMember = () => {
   const navigate = useNavigate();
+  const [step, setStep] = useState<StepIndex>(0);
   const [loading, setLoading] = useState(false);
   const [picture, setPicture] = useState<File | null>(null);
+  const [pictureTouched, setPictureTouched] = useState(false);
   const [selectedAllergyIds, setSelectedAllergyIds] = useState<number[]>([]);
   const [lodges, setLodges] = useState<Lodge[]>([]);
   const { run: runLodges, loading: lodgesLoading } = useFetch<Lodge[]>();
   const { run: runSubmit } = useFetch<RegisterMemberResponse>();
-
   const { setError } = useError();
 
   const {
     register,
     handleSubmit,
+    trigger,
     clearErrors,
     setError: setFieldError,
-    formState: { errors, isValid },
+    formState: { errors },
   } = useForm<RegisterForm>({
     mode: "onChange",
     defaultValues: {
@@ -59,7 +78,15 @@ export const CreateMember = () => {
     },
   });
 
-  const pictureError = validateImageFile(picture, { required: true });
+  const pictureError = pictureTouched
+    ? validateImageFile(picture, { required: true })
+    : null;
+
+  async function advance() {
+    const fields = STEP_FIELDS[step];
+    const valid = fields.length === 0 || (await trigger(fields));
+    if (valid) setStep((s) => (s + 1) as StepIndex);
+  }
 
   async function onSubmit(values: RegisterForm) {
     setError(null);
@@ -69,10 +96,8 @@ export const CreateMember = () => {
     try {
       const picErr = validateImageFile(picture, { required: true });
       if (picErr) {
-        setFieldError("picture", {
-          type: "manual",
-          message: picErr,
-        });
+        setPictureTouched(true);
+        setFieldError("picture", { type: "manual", message: picErr });
         return;
       }
 
@@ -100,11 +125,8 @@ export const CreateMember = () => {
       await runSubmit(() => registerMember(fd));
       navigate("/members");
     } catch (error: unknown) {
-      if (applyApiFieldErrors(error, setFieldError)) {
-        return;
-      }
-
-      setError(getApiErrorMessage(error) ?? "Kunde inte skapa användare");
+      if (applyApiFieldErrors(error, setFieldError)) return;
+      setError(getApiErrorMessage(error) ?? "Kunde inte registrera ledamoten");
     } finally {
       setLoading(false);
     }
@@ -112,177 +134,362 @@ export const CreateMember = () => {
 
   useEffect(() => {
     runLodges(() => listLodges())
-      .then((data) => {
-        setLodges(data);
-      })
-      .catch(() => {
-        // ignore; validation will catch missing lodge
-      });
+      .then((data) => setLodges(data))
+      .catch(() => {});
   }, [runLodges]);
 
   return (
     <PageContainer size="md" className="ui-page">
-      <div className="mb-4 flex w-full items-center justify-between">
+      <div className="mb-4">
         <Link to=".." relative="path" className="ui-link">
           ← Tillbaka
         </Link>
       </div>
-      <h2 className="ui-page-title mb-4">Skapa användare</h2>
 
-      {Object.keys(errors).length > 0 && (
-        <div className={`${errorTextClass} mb-2`}>
-          <ul className="list-disc pl-5">
-            {(Object.keys(errors) as Array<keyof RegisterForm>).map((key) => {
-              const fieldErr = errors[key] as FieldError | undefined;
-              const msg = fieldErr?.message;
-              return msg ? (
-                <li key={String(key)}>{`${String(key)}: ${msg}`}</li>
-              ) : null;
-            })}
-          </ul>
+      <h2 className="ui-page-title mb-2">Registrera ledamot</h2>
+
+      <div className="mb-6 flex items-center gap-3">
+        <p className="ui-chapter">
+          Steg {step + 1} av {STEPS.length}: {STEPS[step]}
+        </p>
+        <div className="flex gap-1.5" aria-hidden="true">
+          {STEPS.map((_, i) => (
+            <span
+              key={i}
+              className={`block h-1.5 w-6 rounded-full transition-colors duration-200 ${
+                i < step
+                  ? "bg-primary-600"
+                  : i === step
+                    ? "bg-primary-400"
+                    : "bg-neutral-200"
+              }`}
+            />
+          ))}
         </div>
-      )}
+      </div>
 
-      <form onSubmit={handleSubmit(onSubmit)} className="ui-card space-y-3">
-        <input
-          placeholder="Email"
-          {...register("email", registerFormRules.email)}
-          className={inputClass}
-        />
+      <form onSubmit={handleSubmit(onSubmit)} noValidate>
+        <div className="ui-card">
+          <div key={step} className="animate-step-in space-y-5">
 
-        <input
-          placeholder="Lösenord"
-          type="password"
-          {...register("password", registerFormRules.password)}
-          className={inputClass}
-          autoComplete="off"
-        />
+            {step === 0 && (
+              <>
+                <div>
+                  <label htmlFor="email" className="ui-label">
+                    E-post{" "}
+                    <span className="text-danger-600" aria-hidden="true">*</span>
+                  </label>
+                  <input
+                    id="email"
+                    type="email"
+                    autoComplete="email"
+                    aria-required="true"
+                    {...register("email", registerFormRules.email)}
+                    className={inputClass}
+                  />
+                  {errors.email && (
+                    <p className={errorTextClass}>{errors.email.message}</p>
+                  )}
+                </div>
 
-        <input
-          placeholder="Förnamn"
-          type="text"
-          {...register("firstname", registerFormRules.firstname)}
-          className={inputClass}
-        />
+                <div>
+                  <label htmlFor="password" className="ui-label">
+                    Lösenord{" "}
+                    <span className="text-danger-600" aria-hidden="true">*</span>
+                  </label>
+                  <input
+                    id="password"
+                    type="password"
+                    autoComplete="new-password"
+                    aria-required="true"
+                    {...register("password", registerFormRules.password)}
+                    className={inputClass}
+                  />
+                  {errors.password ? (
+                    <p className={errorTextClass}>{errors.password.message}</p>
+                  ) : (
+                    <p className="mt-1.5 text-xs text-neutral-500">
+                      Minst 6 tecken. Ledamoten kan ändra lösenordet efter inloggning.
+                    </p>
+                  )}
+                </div>
+              </>
+            )}
 
-        <input
-          placeholder="Efternamn"
-          type="text"
-          {...register("lastname", registerFormRules.lastname)}
-          className={inputClass}
-        />
+            {step === 1 && (
+              <>
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                  <div>
+                    <label htmlFor="firstname" className="ui-label">
+                      Förnamn{" "}
+                      <span className="text-danger-600" aria-hidden="true">*</span>
+                    </label>
+                    <input
+                      id="firstname"
+                      type="text"
+                      autoComplete="given-name"
+                      aria-required="true"
+                      {...register("firstname", registerFormRules.firstname)}
+                      className={inputClass}
+                    />
+                    {errors.firstname && (
+                      <p className={errorTextClass}>{errors.firstname.message}</p>
+                    )}
+                  </div>
 
-        <label className="ui-label">
-          Födelsedatum
-          <input
-            type="date"
-            {...register("dateOfBirth", registerFormRules.dateOfBirth)}
-            className={inputClass}
-          />
-        </label>
+                  <div>
+                    <label htmlFor="lastname" className="ui-label">
+                      Efternamn{" "}
+                      <span className="text-danger-600" aria-hidden="true">*</span>
+                    </label>
+                    <input
+                      id="lastname"
+                      type="text"
+                      autoComplete="family-name"
+                      aria-required="true"
+                      {...register("lastname", registerFormRules.lastname)}
+                      className={inputClass}
+                    />
+                    {errors.lastname && (
+                      <p className={errorTextClass}>{errors.lastname.message}</p>
+                    )}
+                  </div>
+                </div>
 
-        <input
-          placeholder="Jobb eller tidigare sysselsättning"
-          type="text"
-          {...register("work")}
-          className={inputClass}
-        />
+                <div>
+                  <label htmlFor="dateOfBirth" className="ui-label">
+                    Födelsedatum{" "}
+                    <span className="text-danger-600" aria-hidden="true">*</span>
+                  </label>
+                  <input
+                    id="dateOfBirth"
+                    type="date"
+                    aria-required="true"
+                    {...register("dateOfBirth", registerFormRules.dateOfBirth)}
+                    className={inputClass}
+                  />
+                  {errors.dateOfBirth && (
+                    <p className={errorTextClass}>{errors.dateOfBirth.message}</p>
+                  )}
+                </div>
 
-        <input
-          placeholder="Mobilnummer"
-          type="text"
-          inputMode="tel"
-          {...register("mobile", registerFormRules.mobile)}
-          className={inputClass}
-        />
+                <div>
+                  <label htmlFor="work" className="ui-label">Yrke</label>
+                  <input
+                    id="work"
+                    type="text"
+                    autoComplete="organization-title"
+                    {...register("work")}
+                    className={inputClass}
+                  />
+                </div>
+              </>
+            )}
 
-        <input
-          placeholder="Hemnummer"
-          type="text"
-          inputMode="tel"
-          {...register("homeNumber", registerFormRules.homeNumber)}
-          className={inputClass}
-        />
+            {step === 2 && (
+              <>
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                  <div>
+                    <label htmlFor="mobile" className="ui-label">
+                      Mobilnummer{" "}
+                      <span className="text-danger-600" aria-hidden="true">*</span>
+                    </label>
+                    <input
+                      id="mobile"
+                      type="text"
+                      inputMode="tel"
+                      autoComplete="tel-national"
+                      aria-required="true"
+                      {...register("mobile", registerFormRules.mobile)}
+                      className={inputClass}
+                    />
+                    {errors.mobile && (
+                      <p className={errorTextClass}>{errors.mobile.message}</p>
+                    )}
+                  </div>
 
-        <input
-          placeholder="Stad"
-          type="text"
-          {...register("city", registerFormRules.city)}
-          className={inputClass}
-        />
+                  <div>
+                    <label htmlFor="homeNumber" className="ui-label">
+                      Hemnummer
+                    </label>
+                    <input
+                      id="homeNumber"
+                      type="text"
+                      inputMode="tel"
+                      autoComplete="tel"
+                      {...register("homeNumber", registerFormRules.homeNumber)}
+                      className={inputClass}
+                    />
+                    {errors.homeNumber && (
+                      <p className={errorTextClass}>{errors.homeNumber.message}</p>
+                    )}
+                  </div>
+                </div>
 
-        <input
-          placeholder="Adress"
-          type="text"
-          {...register("address", registerFormRules.address)}
-          className={inputClass}
-        />
+                <div>
+                  <label htmlFor="address" className="ui-label">
+                    Adress{" "}
+                    <span className="text-danger-600" aria-hidden="true">*</span>
+                  </label>
+                  <input
+                    id="address"
+                    type="text"
+                    autoComplete="street-address"
+                    aria-required="true"
+                    {...register("address", registerFormRules.address)}
+                    className={inputClass}
+                  />
+                  {errors.address && (
+                    <p className={errorTextClass}>{errors.address.message}</p>
+                  )}
+                </div>
 
-        <input
-          placeholder="Postnummer"
-          type="text"
-          inputMode="numeric"
-          {...register("zipcode", registerFormRules.zipcode)}
-          className={inputClass}
-        />
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                  <div>
+                    <label htmlFor="zipcode" className="ui-label">
+                      Postnummer{" "}
+                      <span className="text-danger-600" aria-hidden="true">*</span>
+                    </label>
+                    <input
+                      id="zipcode"
+                      type="text"
+                      inputMode="numeric"
+                      autoComplete="postal-code"
+                      aria-required="true"
+                      {...register("zipcode", registerFormRules.zipcode)}
+                      className={inputClass}
+                    />
+                    {errors.zipcode && (
+                      <p className={errorTextClass}>{errors.zipcode.message}</p>
+                    )}
+                  </div>
 
-        <input
-          placeholder="Noteringar"
-          type="text"
-          {...register("notes")}
-          className={inputClass}
-        />
+                  <div>
+                    <label htmlFor="city" className="ui-label">
+                      Stad{" "}
+                      <span className="text-danger-600" aria-hidden="true">*</span>
+                    </label>
+                    <input
+                      id="city"
+                      type="text"
+                      autoComplete="address-level2"
+                      aria-required="true"
+                      {...register("city", registerFormRules.city)}
+                      className={inputClass}
+                    />
+                    {errors.city && (
+                      <p className={errorTextClass}>{errors.city.message}</p>
+                    )}
+                  </div>
+                </div>
+              </>
+            )}
 
-        <AllergiesManager
-          isEditRoute
-          selectedIds={selectedAllergyIds}
-          setSelectedIds={(ids) =>
-            setSelectedAllergyIds(Array.isArray(ids) ? ids : [])
-          }
-        />
+            {step === 3 && (
+              <>
+                <div>
+                  <label htmlFor="lodgeId" className="ui-label">Loge</label>
+                  {lodgesLoading ? (
+                    <p className="py-2 text-sm text-neutral-500">Laddar loger…</p>
+                  ) : (
+                    <select
+                      id="lodgeId"
+                      {...register("lodgeId")}
+                      className={selectClass}
+                    >
+                      <option value="">Välj loge…</option>
+                      {lodges.map((lodge) => (
+                        <option key={lodge.id} value={String(lodge.id)}>
+                          {lodge.name}
+                        </option>
+                      ))}
+                    </select>
+                  )}
+                </div>
 
-        <label className="ui-label">
-          Loge
-          {lodgesLoading ? (
-            <div className="py-2 text-neutral-600">Laddar loger…</div>
-          ) : (
-            <select {...register("lodgeId")} className={selectClass}>
-              <option value="">Välj loge...</option>
-              {lodges.map((lodge) => (
-                <option key={lodge.id} value={String(lodge.id)}>
-                  {lodge.name}
-                </option>
-              ))}
-            </select>
-          )}
-        </label>
+                <AllergiesManager
+                  isEditRoute
+                  selectedIds={selectedAllergyIds}
+                  setSelectedIds={(ids) =>
+                    setSelectedAllergyIds(Array.isArray(ids) ? ids : [])
+                  }
+                />
 
-        <label className="ui-label">
-          Profilbild
-          <input
-            type="file"
-            accept="image/*"
-            onChange={(e) => {
-              clearErrors("picture");
-              setPicture(e.target.files?.[0] ?? null);
-            }}
-            className={inputClass}
-          />
-          {errors.picture?.message ? (
-            <p className={errorTextClass}>{errors.picture.message}</p>
-          ) : pictureError ? (
-            <p className={errorTextClass}>{pictureError}</p>
-          ) : null}
-        </label>
+                <div>
+                  <label htmlFor="notes" className="ui-label">Noteringar</label>
+                  <textarea
+                    id="notes"
+                    rows={3}
+                    {...register("notes")}
+                    className={textareaClass}
+                  />
+                </div>
 
-        <div className="flex flex-col gap-2 py-4 sm:flex-row">
-          <button
-            type="submit"
-            disabled={loading || !isValid || Boolean(pictureError)}
-            className="ui-btn ui-btn-primary"
-          >
-            {loading ? "Skapar..." : "Skapa"}
-          </button>
+                <div>
+                  <label htmlFor="picture" className="ui-label">
+                    Profilbild{" "}
+                    <span className="text-danger-600" aria-hidden="true">*</span>
+                  </label>
+                  <input
+                    id="picture"
+                    type="file"
+                    accept="image/*"
+                    aria-required="true"
+                    onChange={(e) => {
+                      clearErrors("picture");
+                      setPictureTouched(true);
+                      setPicture(e.target.files?.[0] ?? null);
+                    }}
+                    className={inputClass}
+                  />
+                  {errors.picture?.message ? (
+                    <p className={errorTextClass}>{errors.picture.message}</p>
+                  ) : pictureError ? (
+                    <p className={errorTextClass}>{pictureError}</p>
+                  ) : (
+                    <p className="mt-1.5 text-xs text-neutral-500">
+                      JPEG, PNG, GIF eller WebP, max 5 MB
+                    </p>
+                  )}
+                </div>
+              </>
+            )}
+
+          </div>
+
+          <div className="mt-5 flex items-center justify-between gap-3 border-t border-neutral-200 pt-5">
+            {step === 0 ? (
+              <Link
+                to=".."
+                relative="path"
+                className="ui-btn ui-btn-secondary"
+              >
+                Avbryt
+              </Link>
+            ) : (
+              <button
+                type="button"
+                onClick={() => setStep((s) => (s - 1) as StepIndex)}
+                className="ui-btn ui-btn-secondary"
+              >
+                ← Föregående
+              </button>
+            )}
+
+            {step < 3 ? (
+              <button
+                type="button"
+                onClick={advance}
+                className="ui-btn ui-btn-primary"
+              >
+                Nästa →
+              </button>
+            ) : (
+              <Button type="submit" loading={loading} disabled={loading}>
+                Registrera
+              </Button>
+            )}
+          </div>
         </div>
       </form>
     </PageContainer>

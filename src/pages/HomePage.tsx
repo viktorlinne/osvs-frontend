@@ -15,8 +15,10 @@ const DEFAULT_PUBLICUM = {
 
 export const HomePage = () => {
   const [displayedPublicum, setDisplayedPublicum] = useState(DEFAULT_PUBLICUM);
+  const [selectedId, setSelectedId] = useState<string | number | null>(null);
 
   const handlePublicumSelect = (post: PublicumPostListItem) => {
+    setSelectedId(post.id);
     setDisplayedPublicum({
       title: post.title,
       imageUrl: post.pictureUrl,
@@ -26,12 +28,10 @@ export const HomePage = () => {
 
   return (
     <div className="ui-page">
-      <PageContainer size="xl" className="pt-8 md:pt-10">
-        <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
+      <PageContainer as="div" size="xl" className="pt-8 md:pt-10">
+        <div className="grid grid-cols-1 gap-8 lg:grid-cols-[1fr_2fr_1fr]">
           <section className="space-y-3">
-            <h3 className="ui-section-title text-primary-600">
-              Ordenskalender
-            </h3>
+            <h2 className="ui-chapter">Ordenskalender</h2>
             <EventList />
           </section>
           <PublicumDisplay
@@ -40,8 +40,8 @@ export const HomePage = () => {
             description={displayedPublicum.description}
           />
           <section className="space-y-3">
-            <h3 className="ui-section-title text-primary-600">Publicum</h3>
-            <PublicumList onSelect={handlePublicumSelect} />
+            <h2 className="ui-chapter">Publicum</h2>
+            <PublicumList selectedId={selectedId} onSelect={handlePublicumSelect} />
           </section>
         </div>
       </PageContainer>

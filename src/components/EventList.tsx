@@ -31,22 +31,25 @@ export function EventList() {
     };
   }, []);
 
-  if (loading) return <p className="text-sm text-neutral-600">Laddar möten...</p>;
-  if (failed) {
-    return <p className="text-sm text-danger-600">Kunde inte hämta kommande möten</p>;
-  }
-  if (!events.length) {
+  if (loading)
+    return <p className="text-sm text-neutral-600">Laddar möten...</p>;
+  if (failed)
+    return (
+      <p className="text-sm text-danger-600">
+        Kunde inte hämta kommande möten
+      </p>
+    );
+  if (!events.length)
     return <p className="text-sm text-neutral-600">Inga kommande möten</p>;
-  }
 
   return (
-    <ul className="space-y-2">
+    <ul>
       {events.map((event) => (
-        <li key={event.id} className="border-b border-neutral-200 pb-2">
-          <p className="text-sm italic text-neutral-600">
+        <li key={event.id} className="ui-entry flex items-baseline gap-4">
+          <span className="w-32 shrink-0 text-xs tabular-nums text-neutral-600">
             {formatEventDisplayDate(event.startDate)}
-          </p>
-          <p className="text-neutral-900">{event.title}</p>
+          </span>
+          <span className="text-sm text-neutral-900">{event.title}</span>
         </li>
       ))}
     </ul>

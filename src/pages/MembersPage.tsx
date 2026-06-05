@@ -1,6 +1,7 @@
-﻿import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { Button, PageContainer, inputClass, selectClass } from "../components";
+import { SkeletonCircle, SkeletonLabel, SkeletonText } from "../components/PageSkeleton";
 import { useAuth } from "../context";
 import useFetch from "../hooks/useFetch";
 import { listAchievements } from "../services/achievements";
@@ -33,15 +34,9 @@ export const MembersPage = () => {
   const [page, setPage] = useState(1);
 
   useEffect(() => {
-    runAchievements(() => listAchievements()).catch(() => {
-      // handled by useFetch
-    });
-    runLodges(() => listLodges()).catch(() => {
-      // handled by useFetch
-    });
-    runOfficials(() => listOfficials()).catch(() => {
-      // handled by useFetch
-    });
+    runAchievements(() => listAchievements()).catch(() => {});
+    runLodges(() => listLodges()).catch(() => {});
+    runOfficials(() => listOfficials()).catch(() => {});
   }, [runAchievements, runLodges, runOfficials]);
 
   const doFetch = useCallback(
@@ -57,21 +52,11 @@ export const MembersPage = () => {
           pageSize: MEMBERS_PAGE_SIZE,
         }),
       ),
-    [
-      run,
-      debouncedQuery,
-      achievementId,
-      lodgeId,
-      officialId,
-      accommodationOnly,
-      page,
-    ],
+    [run, debouncedQuery, achievementId, lodgeId, officialId, accommodationOnly, page],
   );
 
   useEffect(() => {
-    doFetch().catch(() => {
-      // handled by useFetch
-    });
+    doFetch().catch(() => {});
   }, [doFetch]);
 
   useEffect(() => {
@@ -88,6 +73,17 @@ export const MembersPage = () => {
   const currentPageSize = membersPage?.pageSize ?? MEMBERS_PAGE_SIZE;
   const from = total === 0 ? 0 : (page - 1) * currentPageSize + 1;
   const to = total === 0 ? 0 : Math.min(page * currentPageSize, total);
+
+  const hasActiveFilters = !!(query || achievementId || lodgeId || officialId || accommodationOnly);
+
+  function handleClearFilters() {
+    setQuery("");
+    setAchievementId(null);
+    setLodgeId(null);
+    setOfficialId(null);
+    setAccommodationOnly(false);
+    setPage(1);
+  }
 
   function handleAchievementChange(value: string) {
     setAchievementId(value ? Number(value) : null);
@@ -111,29 +107,33 @@ export const MembersPage = () => {
 
   return (
     <PageContainer size="xl" className="ui-page">
-      <div className="mb-4 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+      <div className="mb-6 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
         <h2 className="ui-page-title">Medlemmar</h2>
         {user &&
           (user.roles ?? []).some((r) => ["Admin", "Editor"].includes(r)) && (
             <Link to="/members/create" className="ui-btn ui-btn-primary">
-              Skapa
+              Ny broder
             </Link>
           )}
       </div>
 
-      <div className="mb-4 grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-5">
-        <input
-          id="search"
-          name="search"
-          type="search"
-          placeholder="Sök..."
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          className={inputClass}
-        />
+      <div className="mb-2 grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-5">
+        <div className="relative">
+          <label htmlFor="search" className="sr-only">Sök på namn</label>
+          <input
+            id="search"
+            name="search"
+            type="search"
+            placeholder="Sök på namn..."
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            className={inputClass}
+          />
+        </div>
         <select
           id="achievementFilter"
           name="achievementFilter"
+          aria-label="Filtrera efter grad"
           value={achievementId ?? ""}
           onChange={(e) => handleAchievementChange(e.target.value)}
           className={selectClass}
@@ -148,6 +148,7 @@ export const MembersPage = () => {
         <select
           id="lodgeFilter"
           name="lodgeFilter"
+          aria-label="Filtrera efter loge"
           value={lodgeId ?? ""}
           onChange={(e) => handleLodgeChange(e.target.value)}
           className={selectClass}
@@ -162,6 +163,7 @@ export const MembersPage = () => {
         <select
           id="officialFilter"
           name="officialFilter"
+          aria-label="Filtrera efter tjänst"
           value={officialId ?? ""}
           onChange={(e) => handleOfficialChange(e.target.value)}
           className={selectClass}
@@ -175,7 +177,7 @@ export const MembersPage = () => {
         </select>
         <label
           htmlFor="accommodationFilter"
-          className="flex items-center gap-2 rounded-md border border-neutral-200 bg-white px-3 py-2 text-sm text-neutral-700"
+          className="flex min-h-11 items-center gap-2 rounded-md border border-neutral-200 bg-white px-3 py-2.5 text-sm text-neutral-700"
         >
           <input
             id="accommodationFilter"
@@ -189,47 +191,62 @@ export const MembersPage = () => {
         </label>
       </div>
 
-      {!loading ? (
-        <div className="mb-4 flex flex-col gap-2 text-sm text-neutral-600 sm:flex-row sm:items-center sm:justify-between">
-          <span>
-            {total > 0
-              ? `Visar ${from}-${to} av ${total} medlemmar`
-              : "Inga medlemmar hittades"}
+      {hasActiveFilters && (
+        <div className="mb-4 flex items-center gap-2">
+          <span className="text-xs font-semibold uppercase tracking-widest text-neutral-600">
+            Filter aktiva
           </span>
-          {totalPages > 1 ? <span>{`Sida ${page} av ${totalPages}`}</span> : null}
+          <button
+            type="button"
+            onClick={handleClearFilters}
+            className="ui-link text-xs"
+          >
+            Rensa filter
+          </button>
+        </div>
+      )}
+
+      {!loading ? (
+        <div
+          className="mb-4 text-sm text-neutral-600"
+          aria-live="polite"
+          aria-atomic="true"
+        >
+          {total > 0
+            ? `Visar ${from}–${to} av ${total} medlemmar`
+            : "Inga medlemmar hittades"}
         </div>
       ) : null}
 
       {loading ? (
-        <div className="ui-card text-neutral-600">Laddar medlemmar...</div>
+        <div className="grid w-full grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3">
+          {Array.from({ length: 6 }, (_, i) => (
+            <div key={i} className="ui-card flex items-center gap-4">
+              <SkeletonCircle className="h-14 w-14 shrink-0" />
+              <div className="flex min-w-0 flex-col gap-2">
+                <SkeletonText width="w-28" />
+                <SkeletonLabel width="w-20" />
+              </div>
+            </div>
+          ))}
+        </div>
       ) : members.length === 0 ? (
-        <div className="ui-card text-neutral-600">
-          Ingen medlem matchar de valda filtren.
+        <div className="ui-card flex flex-col gap-3 text-neutral-600 sm:flex-row sm:items-center sm:justify-between">
+          <span>Ingen broder matchar de valda filtren.</span>
+          {hasActiveFilters && (
+            <button
+              type="button"
+              onClick={handleClearFilters}
+              className="ui-btn ui-btn-secondary ui-btn-sm shrink-0"
+            >
+              Rensa filter
+            </button>
+          )}
         </div>
       ) : (
-        <div className="grid w-full grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+        <div className="animate-step-in grid w-full grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3">
           {members.map((member: PublicUser) => (
-            <Link
-              to={`/members/${member.matrikelnummer}`}
-              key={member.matrikelnummer}
-              className="ui-card ui-card-hover flex items-center gap-4"
-            >
-              <img
-                src={member.pictureUrl}
-                alt={`${member.firstname} ${member.lastname}`}
-                className="h-16 w-16 shrink-0 rounded-full object-cover object-top ring-2 ring-neutral-100"
-                loading="lazy"
-                decoding="async"
-              />
-              <div className="min-w-0">
-                <div className="truncate font-semibold text-neutral-900">
-                  {member.firstname} {member.lastname}
-                </div>
-                <div className="truncate text-sm text-neutral-600">
-                  {member.email}
-                </div>
-              </div>
-            </Link>
+            <MemberCard key={member.matrikelnummer} member={member} />
           ))}
         </div>
       )}
@@ -262,3 +279,44 @@ export const MembersPage = () => {
     </PageContainer>
   );
 };
+
+function MemberCard({ member }: { member: PublicUser }) {
+  const [imgFailed, setImgFailed] = useState(false);
+  const initials = `${member.firstname[0] ?? ""}${member.lastname[0] ?? ""}`.toUpperCase();
+  const subtitle = member.lodgeName ?? member.city ?? null;
+
+  return (
+    <Link
+      to={`/members/${member.matrikelnummer}`}
+      className="ui-card ui-card-hover flex items-center gap-4"
+      aria-label={`Visa profil för ${member.firstname} ${member.lastname}`}
+    >
+      <div className="relative h-14 w-14 shrink-0">
+        {!imgFailed && member.pictureUrl ? (
+          <img
+            src={member.pictureUrl}
+            alt=""
+            className="h-14 w-14 rounded-full object-cover object-top ring-2 ring-primary-100"
+            loading="lazy"
+            decoding="async"
+            onError={() => setImgFailed(true)}
+          />
+        ) : (
+          <div className="flex h-14 w-14 items-center justify-center rounded-full bg-primary-100 ring-2 ring-primary-100">
+            <span className="text-sm font-semibold text-primary-700">{initials}</span>
+          </div>
+        )}
+      </div>
+      <div className="min-w-0">
+        <div className="truncate font-semibold text-neutral-900">
+          {member.firstname} {member.lastname}
+        </div>
+        {subtitle ? (
+          <div className="truncate text-xs font-semibold uppercase tracking-widest text-neutral-600">
+            {subtitle}
+          </div>
+        ) : null}
+      </div>
+    </Link>
+  );
+}

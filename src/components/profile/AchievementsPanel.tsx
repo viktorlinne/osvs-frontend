@@ -1,4 +1,5 @@
-﻿import type { Achievement, Lodge, PublicUser } from "../../types";
+import { useState } from "react";
+import type { Achievement, Lodge, PublicUser } from "../../types";
 
 export const AchievementsPanel = ({
   user,
@@ -35,25 +36,36 @@ export const AchievementsPanel = ({
   onSaveLodge?: (targetUserId: number, lodgeId: number | null) => Promise<void>;
   isEditRoute?: boolean;
 }) => {
+  const [imgFailed, setImgFailed] = useState(false);
+  const initials =
+    `${user?.firstname?.[0] ?? ""}${user?.lastname?.[0] ?? ""}`.toUpperCase() || "?";
+
   return (
-    <div className="mb-4 flex w-full flex-col gap-4">
-      <div className="flex flex-col items-center">
-        <img
-          className="mb-1 h-28 w-28 rounded-full object-cover md:h-40 md:w-40"
-          src={user?.pictureUrl}
-          alt={`${user?.firstname} ${user?.lastname}`}
-        />
-
-        <div className="mb-4 text-left">
-          <div className="text-sm italic text-neutral-700">
-            {user?.firstname} {user?.lastname}
+    <div className="flex flex-col gap-5 sm:flex-row sm:items-start sm:gap-6">
+      <div className="mx-auto shrink-0 sm:mx-0">
+        {!imgFailed && user?.pictureUrl ? (
+          <img
+            src={user.pictureUrl}
+            alt={`${user?.firstname ?? ""} ${user?.lastname ?? ""}`}
+            className="h-28 w-28 rounded-full object-cover object-top ring-2 ring-primary-100 sm:h-32 sm:w-32"
+            onError={() => setImgFailed(true)}
+          />
+        ) : (
+          <div className="flex h-28 w-28 items-center justify-center rounded-full bg-primary-100 ring-2 ring-primary-100 sm:h-32 sm:w-32">
+            <span className="text-2xl font-semibold text-primary-700">{initials}</span>
           </div>
-        </div>
+        )}
+      </div>
 
-        <fieldset className="mb-1 w-full text-center">
-          <legend className="ui-label text-center">Loge</legend>
+      <div className="min-w-0 flex-1 text-center sm:text-left">
+        <p className="text-2xl font-semibold tracking-tight text-neutral-900">
+          {user?.firstname} {user?.lastname}
+        </p>
+
+        <div className="mt-2">
           {isEditRoute && lodges && setSelectedLid ? (
-            <div className="flex flex-col items-center justify-center gap-2 py-2 md:flex-row">
+            <div>
+              <label htmlFor="lodge" className="ui-label">Loge</label>
               <select
                 id="lodge"
                 name="lodge"
@@ -61,8 +73,9 @@ export const AchievementsPanel = ({
                 onChange={(e) =>
                   setSelectedLid(e.target.value ? Number(e.target.value) : null)
                 }
-                className="ui-select w-full md:w-auto"
+                className="ui-select"
               >
+                <option value="">— Ingen loge —</option>
                 {lodges.map((l) => (
                   <option key={l.id} value={l.id}>
                     {l.name}
@@ -71,29 +84,39 @@ export const AchievementsPanel = ({
               </select>
             </div>
           ) : (
-            <div className="mb-4 text-sm text-neutral-700">{lodge?.name ?? "Ingen loge"}</div>
+            <p className="ui-chapter">
+              {lodge?.name ?? "Ingen loge"}
+            </p>
           )}
-        </fieldset>
+        </div>
 
-        <div className="mb-1 text-center">
-          <label htmlFor="achievementsList" className="ui-label text-center">Utmärkelser</label>
-          {achievements && achievements.length > 0 ? (
-            <select id="achievementsList" name="achievementsList" className="ui-select w-auto">
+        <div className="mt-4">
+          <p className="ui-label">Utmärkelser</p>
+          {achievements.length > 0 ? (
+            <ul className="mt-1.5 flex flex-wrap justify-center gap-2 sm:justify-start">
               {achievements.map((a) => (
-                <option key={a.id} value={a.id}>
-                  {a.title} - {a.awardedAt ? new Date(a.awardedAt).toLocaleDateString() : ""}
-                </option>
+                <li
+                  key={a.id}
+                  className="rounded border border-primary-200 bg-primary-50 px-2.5 py-1 text-xs text-primary-800"
+                >
+                  {a.title}
+                  {a.awardedAt ? (
+                    <span className="ml-1.5 text-primary-700">
+                      {new Date(a.awardedAt).toLocaleDateString("sv-SE")}
+                    </span>
+                  ) : null}
+                </li>
               ))}
-            </select>
+            </ul>
           ) : (
-            <div className="mb-4 text-sm text-neutral-600">Inga utmärkelser</div>
+            <p className="mt-1 text-sm text-neutral-500">Inga utmärkelser</p>
           )}
         </div>
 
         {isEditRoute && canAward ? (
-          <div className="mb-1 text-center">
-            <label htmlFor="awardSelect" className="ui-label text-center">Tilldela ny utmärkelse</label>
-            <div className="flex flex-col gap-2 md:flex-row">
+          <div className="mt-4">
+            <label htmlFor="awardSelect" className="ui-label">Tilldela ny utmärkelse</label>
+            <div className="mt-1.5 flex flex-col gap-2 sm:flex-row">
               <select
                 id="awardSelect"
                 name="award"
@@ -101,7 +124,7 @@ export const AchievementsPanel = ({
                 onChange={(e) =>
                   setSelectedAid(e.target.value ? Number(e.target.value) : null)
                 }
-                className="ui-select w-full"
+                className="ui-select"
               >
                 <option value="">Välj utmärkelse</option>
                 {available.map((opt) => (
@@ -110,14 +133,17 @@ export const AchievementsPanel = ({
                   </option>
                 ))}
               </select>
-              <input
-                id="awardDate"
-                name="awardDate"
-                type="date"
-                value={awardDate}
-                onChange={(e) => setAwardDate(e.target.value)}
-                className="ui-input w-full"
-              />
+              <div className="sm:shrink-0">
+                <label htmlFor="awardDate" className="ui-label">Datum</label>
+                <input
+                  id="awardDate"
+                  name="awardDate"
+                  type="date"
+                  value={awardDate}
+                  onChange={(e) => setAwardDate(e.target.value)}
+                  className="ui-input"
+                />
+              </div>
             </div>
           </div>
         ) : null}

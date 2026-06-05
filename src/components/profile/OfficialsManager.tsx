@@ -1,4 +1,4 @@
-﻿import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { listOfficials } from "../../services/officials";
 import type { OfficialHistoryItem, PublicUser } from "../../types";
 
@@ -69,6 +69,7 @@ export const OfficialsManager = ({
 }) => {
   const [officials, setOfficials] = useState<Official[]>([]);
   const [localSelected, setLocalSelected] = useState<number[] | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     let mounted = true;
@@ -78,6 +79,8 @@ export const OfficialsManager = ({
         if (mounted) setOfficials(items);
       } catch {
         // ignore
+      } finally {
+        if (mounted) setLoading(false);
       }
     })();
 
@@ -110,14 +113,16 @@ export const OfficialsManager = ({
   }
 
   return (
-    <div className="mb-4 w-full text-center">
+    <div className="w-full">
       <fieldset className="w-full">
-        <legend className="ui-label text-center">Aktiva Tjänster</legend>
+        <legend className="ui-label">Aktiva tjänster</legend>
         {isEditRoute ? (
-          <div className="flex w-full flex-col items-center gap-2 py-2">
-            {officials.length > 0 ? (
-              <div className="mx-auto max-h-48 w-full overflow-y-auto rounded-md border border-neutral-200 bg-white px-3 py-2 md:w-[28rem]">
-                <div className="flex flex-col gap-2 text-left">
+          <div className="mt-1.5 flex w-full flex-col gap-2">
+            {loading ? (
+              <p className="py-1 text-sm text-neutral-500">Laddar…</p>
+            ) : officials.length > 0 ? (
+              <div className="max-h-48 overflow-y-auto rounded-md border border-neutral-200 bg-white px-3 py-2">
+                <div className="flex flex-col gap-2">
                   {officials.map((official) => (
                     <label
                       key={official.id}
@@ -141,41 +146,41 @@ export const OfficialsManager = ({
                 </div>
               </div>
             ) : (
-              <div className="py-2 text-sm text-neutral-600">Inga tjänster</div>
+              <p className="py-1 text-sm text-neutral-600">Inga tjänster</p>
             )}
           </div>
+
         ) : (
-          <div className="mb-4 py-2 text-center text-sm text-neutral-700">
-            {effectiveSelected && effectiveSelected.length > 0
-              ? effectiveSelected
-                .map((id) => officials.find((official) => official.id === id)?.title ?? "")
-                .filter(Boolean)
-                .join(", ")
-              : "Ingen tjänst"}
-          </div>
+          <p className="mt-0.5 text-sm text-neutral-900">
+            {loading
+              ? "Laddar…"
+              : effectiveSelected && effectiveSelected.length > 0
+                ? effectiveSelected
+                    .map((id) => officials.find((o) => o.id === id)?.title ?? "")
+                    .filter(Boolean)
+                    .join(", ")
+                : "Ingen tjänst"}
+          </p>
         )}
 
-        <div className="mb-1 text-center">
-          <label htmlFor="officialHistoryList" className="ui-label text-center">
-            Tidigare tjänster
-          </label>
+        <div className="mt-4">
+          <p className="ui-label">Tidigare tjänster</p>
           {officialHistory.length > 0 ? (
-            <select
-              id="officialHistoryList"
-              name="officialHistoryList"
-              className="ui-select mx-auto block w-auto"
-            >
+            <ul className="mt-1">
               {officialHistory.map((entry) => (
-                <option
+                <li
                   key={`${entry.id}-${entry.appointedAt}-${entry.unappointedAt}`}
-                  value={`${entry.id}:${entry.appointedAt}`}
+                  className="ui-entry flex items-baseline justify-between gap-4 text-sm text-neutral-900"
                 >
-                  {entry.title} {formatDate(entry.appointedAt)} - {formatDate(entry.unappointedAt)}
-                </option>
+                  <span>{entry.title}</span>
+                  <span className="shrink-0 text-xs text-neutral-600">
+                    {formatDate(entry.appointedAt)} – {formatDate(entry.unappointedAt)}
+                  </span>
+                </li>
               ))}
-            </select>
+            </ul>
           ) : (
-            <div className="py-2 text-sm text-neutral-600">Inga tidigare tjänster</div>
+            <p className="mt-1 text-sm text-neutral-600">Inga tidigare tjänster</p>
           )}
         </div>
       </fieldset>

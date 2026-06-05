@@ -10,14 +10,16 @@ export function PublicumDisplay({
   description,
 }: PublicumDisplayProps) {
   return (
-    <section className="ui-card">
-      <h3 className="ui-section-title mb-3 text-primary-600">{title}</h3>
+    <section>
+      <h2 className="ui-section-title mb-3 border-b border-neutral-200 pb-3">{title}</h2>
       <img
         src={imageUrl}
         alt={title}
         className="mb-3 h-56 w-full rounded-md object-cover md:h-64"
       />
-      <p className="text-sm text-neutral-700 md:text-base">{description}</p>
+      {description && (
+        <p className="text-sm text-neutral-700 md:text-base">{description}</p>
+      )}
     </section>
   );
 }
