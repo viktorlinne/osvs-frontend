@@ -43,7 +43,7 @@
 
   /* Nav item — used in the flat institutional navigation bar */
   .ui-nav-item {
-    @apply block rounded px-2.5 py-1.5 text-xs font-semibold uppercase tracking-widest transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-600 focus-visible:ring-offset-2;
+    @apply block rounded px-2.5 py-1.5 text-xs font-semibold uppercase tracking-widest whitespace-nowrap transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-600 focus-visible:ring-offset-2;
   }
 
   /* Registry entry — list item alternative to cards */
