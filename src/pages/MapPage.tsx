@@ -146,9 +146,8 @@ export const MapPage = () => {
   const [pendingReset, setPendingReset] = useState(false);
   const statusTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const canEditOthers = Boolean(
-    authUser &&
-      (authUser.roles ?? []).some((role) => role === "Admin" || role === "Editor"),
+  const isAdmin = Boolean(
+    authUser && (authUser.roles ?? []).some((role) => role === "Admin"),
   );
 
   const refreshPins = useCallback(
@@ -163,40 +162,26 @@ export const MapPage = () => {
   }, [refreshPins]);
 
   useEffect(() => {
-    if (!canEditOthers) return;
+    if (!isAdmin) return;
     runUsers(() => listUsers()).catch(() => {
       // handled by useFetch
     });
-  }, [canEditOthers, runUsers]);
+  }, [isAdmin, runUsers]);
 
   const editableUsers = useMemo((): EditableUser[] => {
-    if (canEditOthers) {
-      return (allUsers ?? [])
-        .map(toEditableUser)
-        .filter((entry) => Number.isFinite(entry.id) && entry.name.length > 0);
-    }
-
-    if (!authUser) return [];
-
-    const ownName =
-      `${String(authUser.firstname ?? "").trim()} ${String(authUser.lastname ?? "").trim()}`.trim();
-    return [
-      {
-        id: Number(authUser.matrikelnummer),
-        name: ownName || `#${String(authUser.matrikelnummer)}`,
-      },
-    ];
-  }, [allUsers, authUser, canEditOthers]);
+    if (!isAdmin || !allUsers) return [];
+    return (allUsers)
+      .map(toEditableUser)
+      .filter((entry) => Number.isFinite(entry.id) && entry.name.length > 0);
+  }, [allUsers, isAdmin]);
 
   const gradeLegendItems = useMemo(
-    () => [
-      { key: "none", label: "Ingen grad", rank: null as number | null },
-      ...Object.entries(GRADE_ROMAN_LABELS).map(([rank, label]) => ({
+    () =>
+      Object.entries(GRADE_ROMAN_LABELS).map(([rank, label]) => ({
         key: rank,
         label: `Grad ${label}`,
         rank: Number(rank),
       })),
-    ],
     [],
   );
 
@@ -282,9 +267,9 @@ export const MapPage = () => {
     <PageContainer size="xl" className="ui-page">
       <h2 className="ui-page-title mb-4">Medlemskarta</h2>
 
-      <div className="animate-step-in grid gap-4 lg:grid-cols-3">
+      <div className={`animate-step-in grid gap-4${isAdmin ? " lg:grid-cols-3" : ""}`}>
         {/* Main map */}
-        <div className="ui-card lg:col-span-2">
+        <div className={`ui-card${isAdmin ? " lg:col-span-2" : ""}`}>
           <MapContainer
             center={SWEDEN_CENTER}
             zoom={5}
@@ -327,7 +312,7 @@ export const MapPage = () => {
           </MapContainer>
 
           <div className="mt-4">
-            <p className="text-sm font-medium text-neutral-700">Gradfärger</p>
+            <p className="ui-chapter">Gradfärger</p>
             <div className="mt-2 flex flex-wrap gap-x-4 gap-y-2">
               {gradeLegendItems.map((entry) => {
                 const color = getColorPairByRank(entry.rank);
@@ -357,39 +342,36 @@ export const MapPage = () => {
           </div>
         </div>
 
-        {/* Position controls */}
+        {/* Position controls — admin only */}
+        {isAdmin && (
         <div className="ui-card">
-          {canEditOthers && (
-            <>
-              <label htmlFor="mapTargetUser" className="ui-label">
-                Välj broder
-              </label>
-              <select
-                id="mapTargetUser"
-                className={selectClass}
-                value={effectiveSelectedUserId ?? ""}
-                onChange={(event) => {
-                  setSelectedUserId(
-                    event.target.value ? Number(event.target.value) : null,
-                  );
-                  setIsEditing(false);
-                  setPendingReset(false);
-                }}
-                disabled={editableUsers.length === 0}
-              >
-                {editableUsers.map((entry) => (
-                  <option key={entry.id} value={entry.id}>
-                    {entry.name}
-                  </option>
-                ))}
-              </select>
-            </>
-          )}
+          <label htmlFor="mapTargetUser" className="ui-label">
+            Välj broder
+          </label>
+          <select
+            id="mapTargetUser"
+            className={selectClass}
+            value={effectiveSelectedUserId ?? ""}
+            onChange={(event) => {
+              setSelectedUserId(
+                event.target.value ? Number(event.target.value) : null,
+              );
+              setIsEditing(false);
+              setPendingReset(false);
+            }}
+            disabled={editableUsers.length === 0}
+          >
+            {editableUsers.map((entry) => (
+              <option key={entry.id} value={entry.id}>
+                {entry.name}
+              </option>
+            ))}
+          </select>
 
           {actionStatus !== "idle" && (
             <p
               role="status"
-              className={`text-sm font-medium text-success-600${canEditOthers ? " mt-3" : ""}`}
+              className="mt-3 text-sm font-medium text-success-600"
             >
               {actionStatus === "saved"
                 ? "Position sparad."
@@ -398,7 +380,7 @@ export const MapPage = () => {
           )}
 
           {!isEditing ? (
-            <div className={canEditOthers ? "mt-4" : actionStatus !== "idle" ? "mt-3" : undefined}>
+            <div className="mt-4">
               <p className="text-sm text-neutral-600">
                 {hasExistingPin
                   ? "Position registrerad."
@@ -418,13 +400,7 @@ export const MapPage = () => {
               </button>
             </div>
           ) : (
-            <div className={canEditOthers ? "mt-4" : undefined}>
-              {!canEditOthers && (
-                <p className="mb-3 text-sm text-neutral-600">
-                  Du kan endast ändra din egen position.
-                </p>
-              )}
-
+            <div className="mt-4">
               <p className="mb-2 text-sm text-neutral-700">
                 Klicka i kartan för att markera positionen.
               </p>
@@ -503,6 +479,7 @@ export const MapPage = () => {
             </div>
           )}
         </div>
+        )}
       </div>
     </PageContainer>
   );

@@ -3,3 +3,4 @@ export * from "./ProfileForm";
 export * from "./RolesManager";
 export * from "./OfficialsManager";
 export * from "./AllergiesManager";
+export * from "./ProfileMapPinSection";

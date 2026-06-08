@@ -8,6 +8,7 @@ import {
   PageContainer,
   OfficialsManager,
   ProfileForm,
+  ProfileMapPinSection,
   RolesManager,
 } from "../components";
 import { useAuth, useError } from "../context";
@@ -24,6 +25,7 @@ import { toUserProfileUpdatePayload } from "../utils/userProfileForm";
 
 export const Profile = () => {
   const { user, refresh } = useAuth();
+  const isAdmin = Boolean((user?.roles ?? []).some((role) => role === "Admin"));
   const location = useLocation();
   const navigate = useNavigate();
   const isEditRoute = location.pathname.endsWith("/edit");
@@ -348,6 +350,10 @@ export const Profile = () => {
           </div>
         ) : null}
       </form>
+
+      {!isAdmin && user?.matrikelnummer ? (
+        <ProfileMapPinSection userId={Number(user.matrikelnummer)} />
+      ) : null}
     </PageContainer>
   );
 };
