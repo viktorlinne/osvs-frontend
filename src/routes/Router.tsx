@@ -2,6 +2,7 @@ import { Suspense, lazy, type ComponentType } from "react";
 import { createBrowserRouter } from "react-router";
 import { AppLayout } from "../app/AppLayout";
 import AuthGuard from "./AuthGuard";
+import { RouteErrorPage } from "../pages/RouteErrorPage";
 
 function lazyNamedPage(
   loader: () => Promise<Record<string, unknown>>,
@@ -125,6 +126,7 @@ const routes = [
   {
     path: "/",
     element: <AppLayout />,
+    errorElement: <RouteErrorPage />,
     children: [
       {
         path: "/",
@@ -255,7 +257,7 @@ const routes = [
         path: "map",
         element: renderProtectedPage(MapPage),
       },
-      //*! Not Found Route *!//
+//*! Not Found Route *!//
       {
         path: "*",
         element: renderPage(NotFound),
