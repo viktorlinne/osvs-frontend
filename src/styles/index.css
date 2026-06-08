@@ -66,11 +66,11 @@
   }
 
   .ui-input {
-    @apply w-full rounded-md border border-neutral-200 bg-white px-3 py-2.5 text-sm text-neutral-900 shadow-sm placeholder:text-neutral-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-600 focus-visible:ring-offset-2 focus-visible:ring-offset-neutral-50;
+    @apply h-10 w-full rounded-md border border-neutral-200 bg-white px-3 py-2.5 text-sm text-neutral-900 shadow-sm placeholder:text-neutral-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-600 focus-visible:ring-offset-2 focus-visible:ring-offset-neutral-50;
   }
 
   .ui-select {
-    @apply w-full rounded-md border border-neutral-200 bg-white px-3 py-2.5 text-sm text-neutral-900 shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-600 focus-visible:ring-offset-2 focus-visible:ring-offset-neutral-50;
+    @apply h-10 w-full rounded-md border border-neutral-200 bg-white px-3 py-2.5 text-sm text-neutral-900 shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-600 focus-visible:ring-offset-2 focus-visible:ring-offset-neutral-50;
   }
 
   .ui-textarea {

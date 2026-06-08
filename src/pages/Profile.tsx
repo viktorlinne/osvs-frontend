@@ -271,7 +271,7 @@ export const Profile = () => {
                 );
                 await refresh();
               } catch {
-                // state refresh is handled in useProfile fallback
+                setGlobalError("Misslyckades att uppdatera loge");
               } finally {
                 setSaving(false);
               }

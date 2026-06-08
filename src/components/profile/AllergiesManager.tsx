@@ -35,6 +35,7 @@ export const AllergiesManager = ({
 }) => {
   const [allergies, setAllergies] = useState<Allergy[]>([]);
   const [localSelected, setLocalSelected] = useState<number[] | null>(null);
+  const [loadError, setLoadError] = useState(false);
 
   useEffect(() => {
     let mounted = true;
@@ -43,7 +44,7 @@ export const AllergiesManager = ({
         const items = await listAllergies();
         if (mounted) setAllergies(items);
       } catch {
-        // ignore
+        if (mounted) setLoadError(true);
       }
     })();
 
@@ -73,7 +74,9 @@ export const AllergiesManager = ({
         <legend className="ui-label">Allergier</legend>
         {isEditRoute ? (
           <div className="mt-1.5 flex w-full flex-col gap-2">
-            {allergies.length > 0 ? (
+            {loadError ? (
+              <p className="py-1 text-sm text-danger-600">Kunde inte ladda allergier</p>
+            ) : allergies.length > 0 ? (
               <div className="max-h-48 overflow-y-auto rounded-md border border-neutral-200 bg-white px-3 py-2">
                 <div className="flex flex-col gap-2">
                   {allergies.map((allergy) => (

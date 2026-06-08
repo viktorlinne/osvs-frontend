@@ -116,7 +116,7 @@ export const AchievementsPanel = ({
         {isEditRoute && canAward ? (
           <div className="mt-4">
             <label htmlFor="awardSelect" className="ui-label">Tilldela ny utmärkelse</label>
-            <div className="mt-1.5 flex flex-col gap-2 sm:flex-row">
+            <div className="mt-1.5 flex flex-col gap-2 sm:flex-row sm:items-end">
               <select
                 id="awardSelect"
                 name="award"
