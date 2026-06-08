@@ -4,6 +4,7 @@ import { Button, PageContainer, inputClass } from "../components";
 import { useError } from "../context";
 import { useAuth } from "../context/useAuth";
 import useFetch from "../hooks/useFetch";
+import { isApiError } from "../types/api";
 
 export const LoginPage = () => {
   const { login } = useAuth();
@@ -34,8 +35,11 @@ export const LoginPage = () => {
       const user = await run(() => login(email, password));
       if (user) navigate(redirectTo, { replace: true });
       else setError("Kunde inte logga in");
-    } catch {
-      // useFetch already sets friendly messages via global error
+    } catch (e: unknown) {
+      if (isApiError(e) && e.status === 401) {
+        setError("Felaktig e-postadress eller lösenord");
+      }
+      // Other errors are handled by useFetch via global error
     } finally {
       setLoading(false);
     }
