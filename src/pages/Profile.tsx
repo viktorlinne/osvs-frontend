@@ -296,6 +296,7 @@ export const Profile = () => {
               register={register}
               errors={errors}
               isEditRoute={isEditRoute}
+              pictureFile={pictureFile}
               setPictureFile={setPictureFile}
               pictureError={pictureError}
             />

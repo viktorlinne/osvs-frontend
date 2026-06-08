@@ -1,5 +1,6 @@
 import type { FieldErrors, UseFormRegister } from "react-hook-form";
 import {
+  ImageFileInput,
   errorTextClass,
   inputClass,
   labelClass,
@@ -18,6 +19,7 @@ export const ProfileForm = ({
   register,
   errors,
   isEditRoute,
+  pictureFile,
   setPictureFile,
   pictureError,
   showArchive = false,
@@ -26,6 +28,7 @@ export const ProfileForm = ({
   register: UseFormRegister<UpdateUserForm>;
   errors: FieldErrors<UpdateUserForm>;
   isEditRoute: boolean;
+  pictureFile: File | null;
   setPictureFile: (f: File | null) => void;
   pictureError?: string | null;
   showArchive?: boolean;
@@ -136,17 +139,13 @@ export const ProfileForm = ({
         <label htmlFor="profilePicture" className={labelClass}>
           Profilbild
         </label>
-        <input
+        <ImageFileInput
           id="profilePicture"
-          name="profilePicture"
-          type="file"
-          accept="image/*"
-          className={inputClass}
-          onChange={(e) =>
-            setPictureFile(e.target.files ? e.target.files[0] : null)
-          }
+          value={pictureFile}
+          onChange={setPictureFile}
+          error={pictureError ?? undefined}
+          hint="JPEG, PNG, GIF eller WebP, max 5 MB"
         />
-        {pictureError ? <p className={errorTextClass}>{pictureError}</p> : null}
       </div>
 
       <div className="mb-4 grid grid-cols-1 gap-4 md:grid-cols-2">

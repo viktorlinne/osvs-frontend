@@ -4,6 +4,7 @@ import { useForm } from "react-hook-form";
 import {
   AllergiesManager,
   Button,
+  ImageFileInput,
   PageContainer,
   errorTextClass,
   inputClass,
@@ -146,7 +147,7 @@ export const CreateMember = () => {
         </Link>
       </div>
 
-      <h2 className="ui-page-title mb-2">Registrera ledamot</h2>
+      <h2 className="ui-page-title mb-2">Registrera medlem</h2>
 
       <div className="mb-6 flex items-center gap-3">
         <p className="ui-chapter">
@@ -430,27 +431,20 @@ export const CreateMember = () => {
                     Profilbild{" "}
                     <span className="text-danger-600" aria-hidden="true">*</span>
                   </label>
-                  <input
+                  <ImageFileInput
                     id="picture"
-                    type="file"
-                    accept="image/*"
-                    aria-required="true"
-                    onChange={(e) => {
+                    value={picture}
+                    onChange={(nextPicture) => {
                       clearErrors("picture");
                       setPictureTouched(true);
-                      setPicture(e.target.files?.[0] ?? null);
+                      setPicture(nextPicture);
                     }}
-                    className={inputClass}
+                    error={
+                      errors.picture?.message ??
+                      (pictureTouched && pictureError ? pictureError : undefined)
+                    }
+                    hint="JPEG, PNG, GIF eller WebP, max 5 MB"
                   />
-                  {errors.picture?.message ? (
-                    <p className={errorTextClass}>{errors.picture.message}</p>
-                  ) : pictureError ? (
-                    <p className={errorTextClass}>{pictureError}</p>
-                  ) : (
-                    <p className="mt-1.5 text-xs text-neutral-500">
-                      JPEG, PNG, GIF eller WebP, max 5 MB
-                    </p>
-                  )}
                 </div>
               </>
             )}

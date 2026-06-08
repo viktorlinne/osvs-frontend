@@ -447,6 +447,7 @@ export const MemberDetail = () => {
                 register={register}
                 errors={errors}
                 isEditRoute={isEditRoute}
+                pictureFile={pictureFile}
                 setPictureFile={setPictureFile}
                 pictureError={pictureError}
                 showArchive={isEditRoute}
