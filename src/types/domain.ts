@@ -162,6 +162,12 @@ export type MembershipPayment = {
   updatedAt: string;
 };
 
+export type MembershipPaymentWithUser = MembershipPayment & {
+  firstname: string;
+  lastname: string;
+  lodgeName: string | null;
+};
+
 export type EventPayment = MembershipPayment & { eid: number };
 
 export type Revision = {

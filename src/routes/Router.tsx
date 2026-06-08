@@ -99,6 +99,10 @@ const MembershipPage = lazyNamedPage(
   () => import("../pages/MembershipPage"),
   "MembershipPage",
 );
+const MembershipPaymentsPage = lazyNamedPage(
+  () => import("../pages/MembershipPaymentsPage"),
+  "MembershipPaymentsPage",
+);
 const RevisionsPage = lazyNamedPage(
   () => import("../pages/RevisionsPage"),
   "RevisionsPage",
@@ -190,6 +194,10 @@ const routes = [
       {
         path: "profile/memberships",
         element: renderProtectedPage(MembershipPage),
+      },
+      {
+        path: "admin/membership-payments",
+        element: renderProtectedPage(MembershipPaymentsPage, ["Admin"]),
       },
       {
         path: "profile/attended",
