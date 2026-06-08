@@ -25,7 +25,6 @@ export type UpdatePostForm = CreatePostForm;
 
 export type RegisterForm = {
   email?: string;
-  password?: string;
   picture?: string;
   allergyIds?: string;
   firstname?: string;

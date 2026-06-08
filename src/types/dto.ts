@@ -94,9 +94,14 @@ export type CreateMembershipBody = { year?: number; amount?: number };
 export type CreateEventPaymentBody = Record<string, unknown>;
 
 export type LoginBody = { email?: string; password?: string };
+export type ForgotPasswordBody = { email?: string };
+export type VerifyPasswordActionBody = { token?: string };
+export type CompletePasswordActionBody = {
+  token?: string;
+  password?: string;
+};
 export type RegisterBody = {
   email?: string;
-  password?: string;
   firstname?: string;
   lastname?: string;
   dateOfBirth?: string;

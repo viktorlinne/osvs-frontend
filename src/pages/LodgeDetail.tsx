@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useBlocker, useLocation, useNavigate, useParams } from "react-router-dom";
 import {
   Button,
@@ -17,6 +17,7 @@ import { getApiErrorMessage, getApiFieldErrors } from "../utils/apiErrors";
 import { getLodgeFormErrors } from "../utils/formValidation";
 
 export const LodgeDetail = () => {
+  const emptyForm = { name: "", city: "", description: "", email: "" };
   const { id } = useParams<{ id: string }>();
   const { run, data: lodge, loading, notFound } = useFetch<Lodge | null>();
   const { run: runAction, loading: saving } = useFetch<LodgeMutationResult>();
@@ -29,13 +30,8 @@ export const LodgeDetail = () => {
     user && (user.roles ?? []).some((r) => ["Admin", "Editor"].includes(r)),
   );
 
-  const [form, setForm] = useState({
-    name: "",
-    city: "",
-    description: "",
-    email: "",
-  });
-  const initialFormRef = useRef({ name: "", city: "", description: "", email: "" });
+  const [form, setForm] = useState(emptyForm);
+  const [initialForm, setInitialForm] = useState(emptyForm);
   const [serverErrors, setServerErrors] = useState<Record<string, string>>({});
   const [showSavedNotice, setShowSavedNotice] = useState(
     Boolean((location.state as { saved?: boolean } | null)?.saved),
@@ -44,7 +40,7 @@ export const LodgeDetail = () => {
   const clientErrors = getLodgeFormErrors(form);
   const formErrors = { ...serverErrors, ...clientErrors };
   const canSave = canEdit && Object.keys(clientErrors).length === 0;
-  const isDirty = isEditRoute && JSON.stringify(form) !== JSON.stringify(initialFormRef.current);
+  const isDirty = isEditRoute && JSON.stringify(form) !== JSON.stringify(initialForm);
 
   const blocker = useBlocker(isDirty);
 
@@ -71,7 +67,7 @@ export const LodgeDetail = () => {
         description: lodge.description ?? "",
         email: lodge.email ?? "",
       };
-      initialFormRef.current = next;
+      setInitialForm(next);
       setForm(next);
     });
   }, [lodge]);
@@ -261,7 +257,7 @@ export const LodgeDetail = () => {
                   type="button"
                   className="ui-btn ui-btn-secondary"
                   onClick={() => {
-                    setForm(initialFormRef.current);
+                    setForm(initialForm);
                     navigate("..", { relative: "path" });
                   }}
                 >

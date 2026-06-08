@@ -61,7 +61,11 @@ export const MembershipPaymentsPage = () => {
   const [localPayments, setLocalPayments] = useState<MembershipPaymentWithUser[]>([]);
 
   useEffect(() => {
-    setLocalPayments(result?.payments ?? []);
+    const timer = setTimeout(() => {
+      setLocalPayments(result?.payments ?? []);
+    }, 0);
+
+    return () => clearTimeout(timer);
   }, [result]);
 
   async function handleStatusToggle(id: number, currentStatus: "Pending" | "Paid") {

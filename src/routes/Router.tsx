@@ -45,6 +45,14 @@ const LoginPage = lazyNamedPage(
   () => import("../pages/LoginPage"),
   "LoginPage",
 );
+const ForgotPasswordPage = lazyNamedPage(
+  () => import("../pages/ForgotPasswordPage"),
+  "ForgotPasswordPage",
+);
+const SetPasswordPage = lazyNamedPage(
+  () => import("../pages/SetPasswordPage"),
+  "SetPasswordPage",
+);
 const NewsPage = lazyNamedPage(() => import("../pages/PostsPage"), "NewsPage");
 const PostDetail = lazyNamedPage(
   () => import("../pages/PostDetail"),
@@ -147,6 +155,14 @@ const routes = [
       {
         path: "login",
         element: renderPage(LoginPage),
+      },
+      {
+        path: "forgot-password",
+        element: renderPage(ForgotPasswordPage),
+      },
+      {
+        path: "set-password",
+        element: renderPage(SetPasswordPage),
       },
       {
         path: "lodges",

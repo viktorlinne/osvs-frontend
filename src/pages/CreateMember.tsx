@@ -35,7 +35,7 @@ const STEPS = [
 type StepIndex = 0 | 1 | 2 | 3;
 
 const STEP_FIELDS: Record<StepIndex, Array<keyof RegisterForm>> = {
-  0: ["email", "password"],
+  0: ["email"],
   1: ["firstname", "lastname", "dateOfBirth"],
   2: ["mobile", "homeNumber", "city", "address", "zipcode"],
   3: [],
@@ -64,7 +64,6 @@ export const CreateMember = () => {
     mode: "onChange",
     defaultValues: {
       email: "",
-      password: "",
       firstname: "",
       lastname: "",
       dateOfBirth: "",
@@ -102,9 +101,9 @@ export const CreateMember = () => {
         return;
       }
 
+      const email = String(values.email ?? "").trim();
       const fd = new FormData();
-      fd.append("email", String(values.email ?? "").trim());
-      fd.append("password", String(values.password ?? ""));
+      fd.append("email", email);
       fd.append("firstname", String(values.firstname ?? "").trim());
       fd.append("lastname", String(values.lastname ?? "").trim());
       fd.append("dateOfBirth", String(values.dateOfBirth ?? ""));
@@ -124,7 +123,11 @@ export const CreateMember = () => {
       if (picture) fd.append("picture", picture);
 
       await runSubmit(() => registerMember(fd));
-      navigate("/members");
+      navigate("/members", {
+        state: {
+          createdNotice: `Medlemmen skapades och ett mejl skickades till ${email} för att välja lösenord.`,
+        },
+      });
     } catch (error: unknown) {
       if (applyApiFieldErrors(error, setFieldError)) return;
       setError(getApiErrorMessage(error) ?? "Kunde inte registrera ledamoten");
@@ -172,7 +175,6 @@ export const CreateMember = () => {
       <form onSubmit={handleSubmit(onSubmit)} noValidate>
         <div className="ui-card">
           <div key={step} className="animate-step-in space-y-5">
-
             {step === 0 && (
               <>
                 <div>
@@ -193,27 +195,9 @@ export const CreateMember = () => {
                   )}
                 </div>
 
-                <div>
-                  <label htmlFor="password" className="ui-label">
-                    Lösenord{" "}
-                    <span className="text-danger-600" aria-hidden="true">*</span>
-                  </label>
-                  <input
-                    id="password"
-                    type="password"
-                    autoComplete="new-password"
-                    aria-required="true"
-                    {...register("password", registerFormRules.password)}
-                    className={inputClass}
-                  />
-                  {errors.password ? (
-                    <p className={errorTextClass}>{errors.password.message}</p>
-                  ) : (
-                    <p className="mt-1.5 text-xs text-neutral-500">
-                      Minst 6 tecken. Ledamoten kan ändra lösenordet efter inloggning.
-                    </p>
-                  )}
-                </div>
+                <p className="rounded-md border border-primary-200 bg-primary-50 px-4 py-3 text-sm text-primary-800">
+                  När medlemmen skapats skickar vi ett mejl där personen själv får välja sitt lösenord.
+                </p>
               </>
             )}
 
@@ -448,7 +432,6 @@ export const CreateMember = () => {
                 </div>
               </>
             )}
-
           </div>
 
           <div className="mt-5 flex items-center justify-between gap-3 border-t border-neutral-200 pt-5">

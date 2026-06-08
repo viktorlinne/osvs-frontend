@@ -63,15 +63,6 @@ export const registerFormRules = {
       },
     },
   } satisfies Rule<RegisterForm, "email">,
-  password: {
-    validate: {
-      required: requiredTrimmed("Lösenord"),
-      minLength: (value: unknown) => {
-        if (typeof value !== "string") return "Lösenordet måste vara minst 6 tecken";
-        return value.length >= 6 ? true : "Lösenordet måste vara minst 6 tecken";
-      },
-    },
-  } satisfies Rule<RegisterForm, "password">,
   firstname: {
     validate: requiredTrimmed("Förnamn"),
   } satisfies Rule<RegisterForm, "firstname">,

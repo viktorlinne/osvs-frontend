@@ -35,9 +35,19 @@ export function ProfileMapPinSection({ userId }: Props) {
   }, [runPins, userId]);
 
   useEffect(() => {
-    refreshPin().catch(() => {
-      setPinLoaded(true);
-    });
+    let cancelled = false;
+    const timer = setTimeout(() => {
+      void refreshPin().catch(() => {
+        if (!cancelled) {
+          setPinLoaded(true);
+        }
+      });
+    }, 0);
+
+    return () => {
+      cancelled = true;
+      clearTimeout(timer);
+    };
   }, [refreshPin]);
 
   const scheduleStatusReset = useCallback(() => {

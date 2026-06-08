@@ -74,29 +74,33 @@ export const EventsPage = () => {
 
   useEffect(() => {
     let mounted = true;
-    setFetchError(false);
-    void run(() =>
-      user && Array.isArray(user.roles) && user.roles.includes("Admin")
-        ? listEvents()
-        : listMyEvents(),
-    )
-      .then((res: { events?: EventRecord[] } | undefined) => {
-        if (!mounted) return;
-        const arr = res?.events ?? [];
-        const map: Record<string, EventRecord[]> = {};
-        for (const ev of arr) {
-          const key = dateKeyFromEventDate(ev.startDate);
-          if (!key) continue;
-          map[key] = map[key] ?? [];
-          map[key].push(ev);
-        }
-        setEventsByDate(map);
-      })
-      .catch(() => {
-        if (mounted) setFetchError(true);
-      });
+    const timer = setTimeout(() => {
+      setFetchError(false);
+      void run(() =>
+        user && Array.isArray(user.roles) && user.roles.includes("Admin")
+          ? listEvents()
+          : listMyEvents(),
+      )
+        .then((res: { events?: EventRecord[] } | undefined) => {
+          if (!mounted) return;
+          const arr = res?.events ?? [];
+          const map: Record<string, EventRecord[]> = {};
+          for (const ev of arr) {
+            const key = dateKeyFromEventDate(ev.startDate);
+            if (!key) continue;
+            map[key] = map[key] ?? [];
+            map[key].push(ev);
+          }
+          setEventsByDate(map);
+        })
+        .catch(() => {
+          if (mounted) setFetchError(true);
+        });
+    }, 0);
+
     return () => {
       mounted = false;
+      clearTimeout(timer);
     };
   }, [user, run]);
 

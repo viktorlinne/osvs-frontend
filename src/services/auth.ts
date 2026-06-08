@@ -21,6 +21,15 @@ export type RegisterMemberResponse = {
     pictureUrl?: unknown;
   };
   roles?: unknown;
+  inviteEmailSent?: unknown;
+};
+
+export type PasswordActionPurpose = "SET_PASSWORD" | "RESET_PASSWORD";
+
+export type PasswordActionStatus = {
+  purpose: PasswordActionPurpose;
+  email: string;
+  expiresAt: string;
 };
 
 let restoreSessionPromise: Promise<AuthState> | null = null;
@@ -110,6 +119,33 @@ function mergeAuthState(res: unknown): AuthState {
   };
 }
 
+function parsePasswordActionStatus(res: unknown): PasswordActionStatus {
+  if (!res || typeof res !== "object") {
+    throw new Error("Ogiltigt lösenordslänksvar från servern");
+  }
+
+  const record = res as Record<string, unknown>;
+  const purpose = record.purpose;
+  const email = record.email;
+  const expiresAt = record.expiresAt;
+
+  if (
+    (purpose !== "SET_PASSWORD" && purpose !== "RESET_PASSWORD") ||
+    typeof email !== "string" ||
+    email.trim().length === 0 ||
+    typeof expiresAt !== "string" ||
+    expiresAt.trim().length === 0
+  ) {
+    throw new Error("Ogiltigt lösenordslänksvar från servern");
+  }
+
+  return {
+    purpose,
+    email,
+    expiresAt,
+  };
+}
+
 async function fetchCurrentAuthUser(): Promise<AuthState> {
   const res = await fetchData(api.get("/auth/me"));
   return mergeAuthState(res);
@@ -130,6 +166,28 @@ export async function registerMember(
   return res && typeof res === "object"
     ? (res as RegisterMemberResponse)
     : {};
+}
+
+export async function forgotPassword(email: string): Promise<void> {
+  await fetchData(api.post("/auth/forgot-password", { email }));
+}
+
+export async function verifyPasswordAction(
+  token: string,
+): Promise<PasswordActionStatus> {
+  const res = await fetchData(
+    api.post("/auth/password-actions/verify", { token }),
+  );
+  return parsePasswordActionStatus(res);
+}
+
+export async function completePasswordAction(
+  token: string,
+  password: string,
+): Promise<void> {
+  await fetchData(
+    api.post("/auth/password-actions/complete", { token, password }),
+  );
 }
 
 export async function restoreSession(): Promise<AuthState> {
@@ -165,4 +223,14 @@ export async function me(): Promise<AuthState> {
   return fetchCurrentAuthUser();
 }
 
-export default { heartbeat, login, logout, me, registerMember, restoreSession };
+export default {
+  heartbeat,
+  login,
+  logout,
+  me,
+  registerMember,
+  forgotPassword,
+  verifyPasswordAction,
+  completePasswordAction,
+  restoreSession,
+};

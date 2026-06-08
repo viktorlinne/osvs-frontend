@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Button, PageContainer, inputClass, selectClass } from "../components";
 import { SkeletonCircle, SkeletonLabel, SkeletonText } from "../components/PageSkeleton";
 import { useAuth } from "../context";
@@ -25,6 +25,8 @@ export const MembersPage = () => {
   const { run: runOfficials, data: officials } =
     useFetch<Array<{ id: number; title: string }>>();
   const { user } = useAuth();
+  const location = useLocation();
+  const navigate = useNavigate();
   const [query, setQuery] = useState("");
   const [debouncedQuery, setDebouncedQuery] = useState(query);
   const [achievementId, setAchievementId] = useState<number | null>(null);
@@ -32,6 +34,17 @@ export const MembersPage = () => {
   const [officialId, setOfficialId] = useState<number | null>(null);
   const [accommodationOnly, setAccommodationOnly] = useState(false);
   const [page, setPage] = useState(1);
+  const navState = location.state as { createdNotice?: string } | null;
+  const [createdNotice, setCreatedNotice] = useState(
+    typeof navState?.createdNotice === "string"
+      ? navState.createdNotice
+      : null,
+  );
+
+  useEffect(() => {
+    if (!navState?.createdNotice) return;
+    navigate(location.pathname, { replace: true, state: null });
+  }, [location.pathname, navState?.createdNotice, navigate]);
 
   useEffect(() => {
     runAchievements(() => listAchievements()).catch(() => {});
@@ -116,6 +129,20 @@ export const MembersPage = () => {
             </Link>
           )}
       </div>
+
+      {createdNotice ? (
+        <div className="mb-4 flex items-center justify-between rounded-md border border-success-600/20 bg-success-50 px-4 py-3 text-sm text-success-700">
+          <span>{createdNotice}</span>
+          <button
+            type="button"
+            onClick={() => setCreatedNotice(null)}
+            className="ml-4 text-success-700 hover:text-success-800"
+            aria-label="Stäng"
+          >
+            ×
+          </button>
+        </div>
+      ) : null}
 
       <div className="mb-2 grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-5">
         <div className="relative">
