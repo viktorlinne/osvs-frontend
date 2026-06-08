@@ -347,6 +347,9 @@ export const Navbar: React.FC = () => {
               <NavDropdown label="Arkiv" onClose={closeMenu}>
                 <NavItem to="/documents">Dokument</NavItem>
                 <NavItem to="/revisions">Revisioner</NavItem>
+                {(user.roles ?? []).includes("Admin") && (
+                  <NavItem to="/admin/membership-payments">Avgifter</NavItem>
+                )}
               </NavDropdown>
             </>
           )}
@@ -398,6 +401,11 @@ export const Navbar: React.FC = () => {
                 <NavItem to="/revisions" onClick={closeMenu}>
                   Revisioner
                 </NavItem>
+                {(user.roles ?? []).includes("Admin") && (
+                  <NavItem to="/admin/membership-payments" onClick={closeMenu}>
+                    Avgifter
+                  </NavItem>
+                )}
                 <div className="my-2 border-t border-neutral-200" />
                 {countdown && (
                   <p className="px-2.5 py-1.5 text-xs font-medium tabular-nums text-neutral-500">
