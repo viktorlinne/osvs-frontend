@@ -12,6 +12,9 @@ export type UserSelectionProps = {
   disabled?: boolean;
   emptyLabel?: string;
   loading?: boolean;
+  searchQuery?: string;
+  onSearchQueryChange?: (value: string) => void;
+  searchPlaceholder?: string;
 };
 
 type LodgeGroup = {
@@ -30,6 +33,9 @@ export function UserSelection({
   disabled = false,
   emptyLabel = "Inga användare",
   loading = false,
+  searchQuery,
+  onSearchQueryChange,
+  searchPlaceholder = "Sök på namn...",
 }: UserSelectionProps) {
   const explicitIds = normalizeSelectionIds(selectedIds);
   const derivedIds = normalizeSelectionIds(derivedSelectedIds);
@@ -87,6 +93,23 @@ export function UserSelection({
   return (
     <div className="mb-4 w-full">
       <p className="ui-label">{label}</p>
+
+      {onSearchQueryChange ? (
+        <label htmlFor={`${name}-search`} className="sr-only">
+          Sök användare
+        </label>
+      ) : null}
+      {onSearchQueryChange ? (
+        <input
+          id={`${name}-search`}
+          type="search"
+          value={searchQuery ?? ""}
+          onChange={(event) => onSearchQueryChange(event.target.value)}
+          placeholder={searchPlaceholder}
+          className="ui-input mb-2 w-full"
+          disabled={disabled}
+        />
+      ) : null}
 
       {loading && <div className="py-2 text-sm text-neutral-600">Laddar...</div>}
 

@@ -29,6 +29,7 @@ export const HomePage = () => {
   return (
     <div className="ui-page">
       <PageContainer as="div" size="xl" className="pt-8 md:pt-10">
+        <h1 className="sr-only">Ordensamfundet VS</h1>
         <div className="grid grid-cols-1 gap-8 lg:grid-cols-[1fr_2fr_1fr]">
           <section className="space-y-3">
             <h2 className="ui-chapter">Ordenskalender</h2>

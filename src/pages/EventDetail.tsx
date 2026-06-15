@@ -2,9 +2,10 @@ import { useEffect, useMemo, useState } from "react";
 import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
 import { EventDetailEditForm, EventDetailView } from "../components/events";
 import type { EventFormState } from "../components/events/EventDetailEditForm";
-import { PageContainer } from "../components";
+import { NotFoundPanel, PageContainer } from "../components";
 import { useAuth, useError } from "../context";
 import useFetch from "../hooks/useFetch";
+import useEventAudience from "../hooks/useEventAudience";
 import {
   isEventStartedNowStockholm,
   isMoreThan48HoursFromNowStockholm,
@@ -32,15 +33,15 @@ import type {
 } from "../services/events";
 import { listGroups } from "../services/groups";
 import { listLodges } from "../services/lodges";
-import { listUsers } from "../services/users";
 import type {
   Event as EventRecord,
   EventAttendanceRow,
   Group,
   Lodge,
-  PublicUser,
   UpdateEventPayload,
 } from "../types";
+
+import { normalizeNumericIds } from "../utils/normalizeNumericIds";
 
 type AttendanceField = "rsvp" | "bookFood" | "attended" | "paymentPaid";
 
@@ -50,17 +51,6 @@ function normalizeSelection(values?: number[] | null): string[] {
       (values ?? [])
         .map((value) => String(value))
         .filter((value) => value.trim().length > 0),
-    ),
-  );
-}
-
-function normalizeNumericIds(values: string[]): number[] {
-  return Array.from(
-    new Set(
-      values
-        .map((value) => Number(value))
-        .filter((value) => Number.isFinite(value))
-        .map((value) => Math.floor(value)),
     ),
   );
 }
@@ -89,7 +79,7 @@ function hasAttendanceRowResult(
 
 export const EventDetail = () => {
   const { id } = useParams<{ id: string }>();
-  const { run, data: event, loading: eventLoading } = useFetch<EventRecord | null>();
+  const { run, data: event, loading: eventLoading, notFound: eventNotFound } = useFetch<EventRecord | null>();
   const { run: runAction, loading: saving } = useFetch<
     EventMutationResult | SetRsvpResult | SetFoodResult | PatchEventAttendanceResult | void
   >();
@@ -103,16 +93,6 @@ export const EventDetail = () => {
     data: groups,
     loading: groupsLoading,
   } = useFetch<Group[]>();
-  const {
-    run: runUsers,
-    data: users,
-    loading: usersLoading,
-  } = useFetch<PublicUser[]>();
-  const {
-    run: runLodgeUsers,
-    data: lodgeUsers,
-    setData: setLodgeUsers,
-  } = useFetch<PublicUser[]>();
   const { run: runRsvpFetch, loading: rsvpLoading } = useFetch<string | null>();
   const { run: runFoodFetch, loading: foodLoading } = useFetch<boolean | null>();
   const {
@@ -161,6 +141,17 @@ export const EventDetail = () => {
     const parsed = Number(firstValue);
     return Number.isFinite(parsed) ? parsed : null;
   }, [selectedLodgeIds]);
+
+  const {
+    users,
+    lodgeUsers,
+    usersLoading,
+    userQuery,
+    setUserQuery,
+  } = useEventAudience({
+    enabled: isEditRoute && canEdit,
+    selectedLodgeId,
+  });
 
   const canRsvp = isMoreThan48HoursFromNowStockholm(event?.startDate);
   const authUserId = Number(user?.matrikelnummer);
@@ -239,11 +230,7 @@ export const EventDetail = () => {
     ];
 
     if (isEditRoute && canEdit) {
-      requests.push(
-        runUsers(() => listUsers()).catch(() => {
-          // useFetch handles global error presentation
-        }),
-      );
+      // audience users load via useEventAudience
     }
 
     if (event.food) {
@@ -270,24 +257,6 @@ export const EventDetail = () => {
     runGroups,
     runLodges,
     runRsvpFetch,
-    runUsers,
-  ]);
-
-  useEffect(() => {
-    if (!isEditRoute || !canEdit || !selectedLodgeId) {
-      setLodgeUsers([]);
-      return;
-    }
-
-    runLodgeUsers(() => listUsers({ lodgeId: selectedLodgeId })).catch(() => {
-      // useFetch handles global error presentation
-    });
-  }, [
-    canEdit,
-    isEditRoute,
-    runLodgeUsers,
-    selectedLodgeId,
-    setLodgeUsers,
   ]);
 
   async function handleSave() {
@@ -476,11 +445,11 @@ export const EventDetail = () => {
       )}
 
       <p className="sr-only" aria-live="polite" aria-atomic="true">
-        {eventLoading ? "Laddar händelse" : event ? "Händelse laddad" : "Händelsen hittades inte"}
+        {eventLoading ? "Laddar möte" : event ? "Möte laddat" : "Mötet hittades inte"}
       </p>
 
       {eventLoading ? (
-        <div className="ui-card" aria-busy="true" aria-label="Laddar händelse">
+        <div className="ui-card" aria-busy="true" aria-label="Laddar möte">
           <div className="h-8 w-3/5 rounded skeleton-shimmer" />
           <div className="mt-3 h-4 w-44 rounded skeleton-shimmer" />
           <div className="mt-4 space-y-2">
@@ -515,6 +484,8 @@ export const EventDetail = () => {
               lodgesLoading={lodgesLoading}
               groupsLoading={groupsLoading}
               usersLoading={usersLoading}
+              userSearchQuery={userQuery}
+              onUserSearchQueryChange={setUserQuery}
             />
           ) : (
             <EventDetailView
@@ -542,9 +513,14 @@ export const EventDetail = () => {
             />
           )}
         </div>
-      ) : (
-        <div className="text-neutral-600">Händelsen hittades inte</div>
-      )}
+      ) : eventNotFound || !event ? (
+        <NotFoundPanel
+          title="Mötet hittades inte"
+          description="Kontrollera länken eller gå tillbaka till möteslistan."
+          backTo="/events"
+          backLabel="Till möteslistan"
+        />
+      ) : null}
     </PageContainer>
   );
 };

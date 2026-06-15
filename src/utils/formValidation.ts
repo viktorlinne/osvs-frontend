@@ -51,7 +51,40 @@ function validDateRule(required = true) {
   };
 }
 
-export const registerFormRules = {
+const sharedProfileFieldRules = {
+  firstname: {
+    validate: requiredTrimmed("Förnamn"),
+  },
+  lastname: {
+    validate: requiredTrimmed("Efternamn"),
+  },
+  dateOfBirth: {
+    validate: validDateRule(true),
+  },
+  mobile: {
+    validate: {
+      required: requiredTrimmed("Mobilnummer"),
+      format: optionalPattern(/^[0-9+\-\s()]{6,20}$/, "Ogiltigt mobilnummer"),
+    },
+  },
+  homeNumber: {
+    validate: optionalPattern(/^[0-9+\-\s()]{6,20}$/, "Ogiltigt hemnummer"),
+  },
+  city: {
+    validate: requiredTrimmed("Stad"),
+  },
+  address: {
+    validate: requiredTrimmed("Adress"),
+  },
+  zipcode: {
+    validate: {
+      required: requiredTrimmed("Postnummer"),
+      format: optionalPattern(/^[0-9A-Za-z\s-]{3,10}$/, "Ogiltigt postnummer"),
+    },
+  },
+} as const;
+
+export const loginFormRules = {
   email: {
     validate: {
       required: requiredTrimmed("E-post"),
@@ -62,71 +95,20 @@ export const registerFormRules = {
           : "Ogiltig e-postadress";
       },
     },
-  } satisfies Rule<RegisterForm, "email">,
-  firstname: {
-    validate: requiredTrimmed("Förnamn"),
-  } satisfies Rule<RegisterForm, "firstname">,
-  lastname: {
-    validate: requiredTrimmed("Efternamn"),
-  } satisfies Rule<RegisterForm, "lastname">,
-  dateOfBirth: {
-    validate: validDateRule(true),
-  } satisfies Rule<RegisterForm, "dateOfBirth">,
-  mobile: {
-    validate: {
-      required: requiredTrimmed("Mobilnummer"),
-      format: optionalPattern(/^[0-9+\-\s()]{6,20}$/, "Ogiltigt mobilnummer"),
-    },
-  } satisfies Rule<RegisterForm, "mobile">,
-  homeNumber: {
-    validate: optionalPattern(/^[0-9+\-\s()]{6,20}$/, "Ogiltigt hemnummer"),
-  } satisfies Rule<RegisterForm, "homeNumber">,
-  city: {
-    validate: requiredTrimmed("Stad"),
-  } satisfies Rule<RegisterForm, "city">,
-  address: {
-    validate: requiredTrimmed("Adress"),
-  } satisfies Rule<RegisterForm, "address">,
-  zipcode: {
-    validate: {
-      required: requiredTrimmed("Postnummer"),
-      format: optionalPattern(/^[0-9A-Za-z\s-]{3,10}$/, "Ogiltigt postnummer"),
-    },
-  } satisfies Rule<RegisterForm, "zipcode">,
-};
+  },
+  password: {
+    validate: requiredTrimmed("Lösenord"),
+  },
+} as const;
+
+export const registerFormRules = {
+  email: loginFormRules.email,
+  ...sharedProfileFieldRules,
+} satisfies Record<string, Rule<RegisterForm, FieldPath<RegisterForm>>>;
 
 export const updateUserFormRules = {
-  firstname: {
-    validate: requiredTrimmed("Förnamn"),
-  } satisfies Rule<UpdateUserForm, "firstname">,
-  lastname: {
-    validate: requiredTrimmed("Efternamn"),
-  } satisfies Rule<UpdateUserForm, "lastname">,
-  dateOfBirth: {
-    validate: validDateRule(true),
-  } satisfies Rule<UpdateUserForm, "dateOfBirth">,
-  mobile: {
-    validate: {
-      required: requiredTrimmed("Mobilnummer"),
-      format: optionalPattern(/^[0-9+\-\s()]{6,20}$/, "Ogiltigt mobilnummer"),
-    },
-  } satisfies Rule<UpdateUserForm, "mobile">,
-  homeNumber: {
-    validate: optionalPattern(/^[0-9+\-\s()]{6,20}$/, "Ogiltigt hemnummer"),
-  } satisfies Rule<UpdateUserForm, "homeNumber">,
-  city: {
-    validate: requiredTrimmed("Stad"),
-  } satisfies Rule<UpdateUserForm, "city">,
-  address: {
-    validate: requiredTrimmed("Adress"),
-  } satisfies Rule<UpdateUserForm, "address">,
-  zipcode: {
-    validate: {
-      required: requiredTrimmed("Postnummer"),
-      format: optionalPattern(/^[0-9A-Za-z\s-]{3,10}$/, "Ogiltigt postnummer"),
-    },
-  } satisfies Rule<UpdateUserForm, "zipcode">,
-};
+  ...sharedProfileFieldRules,
+} satisfies Record<string, Rule<UpdateUserForm, FieldPath<UpdateUserForm>>>;
 
 export const postFormRules = {
   title: {

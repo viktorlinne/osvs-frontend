@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import {
   PageContainer,
+  AsyncState,
   inputClass,
   labelClass,
   selectClass,
@@ -23,15 +24,18 @@ export const RevisionsPage = () => {
 
   const [yearFilter, setYearFilter] = useState("");
   const [selectedLodge, setSelectedLodge] = useState("");
+  const [fetchError, setFetchError] = useState(false);
+  const [filtersError, setFiltersError] = useState(false);
 
   const hasFilters =
     yearFilter.trim().length > 0 || selectedLodge.trim().length > 0;
 
   useEffect(() => {
+    setFiltersError(false);
     runLodges(async () => {
       const data = await listLodges();
       return Array.isArray(data) ? data : [];
-    }).catch(() => {});
+    }).catch(() => setFiltersError(true));
   }, [runLodges]);
 
   useEffect(() => {
@@ -55,12 +59,13 @@ export const RevisionsPage = () => {
       return;
     }
 
+    setFetchError(false);
     run(() =>
       listRevisions({
         year: parsedYear,
         lodgeId: parsedLodgeId,
       }),
-    ).catch(() => {});
+    ).catch(() => setFetchError(true));
   }, [run, yearFilter, selectedLodge]);
 
   function clearFilters() {
@@ -74,7 +79,7 @@ export const RevisionsPage = () => {
   return (
     <PageContainer size="xl" className="ui-page">
       <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
-        <h2 className="ui-page-title">Revisioner</h2>
+        <h1 className="ui-page-title">Revisioner</h1>
         {canCreate && (
           <Link to="/revisions/create" className="ui-btn ui-btn-primary">
             Ny revision
@@ -131,6 +136,46 @@ export const RevisionsPage = () => {
         )}
       </div>
 
+      {filtersError ? (
+        <AsyncState
+          loading={false}
+          error
+          errorMessage="Logfilter kunde inte laddas."
+          onRetry={() => {
+            setFiltersError(false);
+            runLodges(async () => {
+              const data = await listLodges();
+              return Array.isArray(data) ? data : [];
+            }).catch(() => setFiltersError(true));
+          }}
+        />
+      ) : null}
+
+      {!loading && fetchError ? (
+        <div className="mb-4">
+          <AsyncState
+            loading={false}
+            error
+            errorMessage="Revisioner kunde inte laddas."
+            onRetry={() => {
+              setFetchError(false);
+              const parsedYear =
+                yearFilter.trim().length > 0 ? Number(yearFilter.trim()) : undefined;
+              const parsedLodgeId =
+                selectedLodge.trim().length > 0
+                  ? Number(selectedLodge.trim())
+                  : undefined;
+              run(() =>
+                listRevisions({
+                  year: parsedYear,
+                  lodgeId: parsedLodgeId,
+                }),
+              ).catch(() => setFetchError(true));
+            }}
+          />
+        </div>
+      ) : null}
+
       <div role="status" aria-live="polite">
         {loading && (
           <div>
@@ -147,7 +192,7 @@ export const RevisionsPage = () => {
         )}
       </div>
 
-      {!loading && list.length > 0 && (
+      {!loading && list.length > 0 && !fetchError && (
         <ul className="animate-step-in">
           {list.map((revision) => {
             const hasDoc = Boolean(revision.pictureUrl);
@@ -198,7 +243,7 @@ export const RevisionsPage = () => {
         </ul>
       )}
 
-      {isEmpty && hasFilters && (
+      {isEmpty && !fetchError && hasFilters && (
         <div className="mt-8 flex flex-col items-start gap-3">
           <p className="text-sm text-neutral-600">
             Inga revisioner matchade filtret.
@@ -213,7 +258,7 @@ export const RevisionsPage = () => {
         </div>
       )}
 
-      {isEmpty && !hasFilters && (
+      {isEmpty && !fetchError && !hasFilters && (
         <div className="mt-8">
           <p className="text-sm text-neutral-600">
             {canCreate

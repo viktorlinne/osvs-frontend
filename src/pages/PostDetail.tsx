@@ -4,6 +4,7 @@ import { useForm, useWatch } from "react-hook-form";
 import {
   Button,
   LodgeSelection,
+  NotFoundPanel,
   PageContainer,
   errorTextClass,
   inputClass,
@@ -205,15 +206,12 @@ export const PostDetail = () => {
       )}
 
       {!postLoading && postNotFound && (
-        <div className="ui-card flex flex-col items-center gap-3 py-10 text-center">
-          <h1 className="ui-page-title">Inlägget hittades inte</h1>
-          <p className="text-neutral-600 text-sm">
-            Kontrollera länken eller gå tillbaka till inläggslistan.
-          </p>
-          <Link to="/posts" className="ui-btn ui-btn-primary mt-2">
-            Till inläggslistan
-          </Link>
-        </div>
+        <NotFoundPanel
+          title="Inlägget hittades inte"
+          description="Kontrollera länken eller gå tillbaka till inläggslistan."
+          backTo="/posts"
+          backLabel="Till inläggslistan"
+        />
       )}
 
       {post && !isEditRoute && (

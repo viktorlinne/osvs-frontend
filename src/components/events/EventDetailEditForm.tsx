@@ -36,6 +36,8 @@ type Props = {
   lodgesLoading?: boolean;
   groupsLoading?: boolean;
   usersLoading?: boolean;
+  userSearchQuery?: string;
+  onUserSearchQueryChange?: (value: string) => void;
 };
 
 export function EventDetailEditForm({
@@ -61,6 +63,8 @@ export function EventDetailEditForm({
   lodgesLoading = false,
   groupsLoading = false,
   usersLoading = false,
+  userSearchQuery,
+  onUserSearchQueryChange,
 }: Props) {
   const descriptionRef = useRef<HTMLTextAreaElement | null>(null);
 
@@ -108,6 +112,8 @@ export function EventDetailEditForm({
         lodgesLoading={lodgesLoading}
         groupsLoading={groupsLoading}
         usersLoading={usersLoading}
+        userSearchQuery={userSearchQuery}
+        onUserSearchQueryChange={onUserSearchQueryChange}
       />
 
       <div>

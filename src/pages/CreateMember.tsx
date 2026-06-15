@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import {
   AllergiesManager,
+  AsyncState,
   Button,
   ImageFileInput,
   PageContainer,
@@ -49,6 +50,7 @@ export const CreateMember = () => {
   const [pictureTouched, setPictureTouched] = useState(false);
   const [selectedAllergyIds, setSelectedAllergyIds] = useState<number[]>([]);
   const [lodges, setLodges] = useState<Lodge[]>([]);
+  const [lodgesError, setLodgesError] = useState(false);
   const { run: runLodges, loading: lodgesLoading } = useFetch<Lodge[]>();
   const { run: runSubmit } = useFetch<RegisterMemberResponse>();
   const { setError } = useError();
@@ -136,10 +138,16 @@ export const CreateMember = () => {
     }
   }
 
-  useEffect(() => {
+  const loadLodges = () => {
+    setLodgesError(false);
     runLodges(() => listLodges())
       .then((data) => setLodges(data))
-      .catch(() => {});
+      .catch(() => setLodgesError(true));
+  };
+
+  useEffect(() => {
+    loadLodges();
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- loadLodges is stable for mount fetch
   }, [runLodges]);
 
   return (
@@ -150,7 +158,7 @@ export const CreateMember = () => {
         </Link>
       </div>
 
-      <h2 className="ui-page-title mb-2">Registrera medlem</h2>
+      <h1 className="ui-page-title mb-2">Registrera medlem</h1>
 
       <div className="mb-6 flex items-center gap-3">
         <p className="ui-chapter">
@@ -374,7 +382,14 @@ export const CreateMember = () => {
               <>
                 <div>
                   <label htmlFor="lodgeId" className="ui-label">Loge</label>
-                  {lodgesLoading ? (
+                  {lodgesError ? (
+                    <AsyncState
+                      loading={false}
+                      error
+                      errorMessage="Loger kunde inte laddas."
+                      onRetry={loadLodges}
+                    />
+                  ) : lodgesLoading ? (
                     <p className="py-2 text-sm text-neutral-500">Laddar loger…</p>
                   ) : (
                     <select

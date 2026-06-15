@@ -55,7 +55,9 @@ export const LodgeDetail = () => {
 
   useEffect(() => {
     if (!id) return setGlobalError("Saknar loge-id");
-    void run(() => getLodge(id)).catch(() => {});
+    void run(() => getLodge(id)).catch(() => {
+      /* useFetch sets global error; notFound handled via notFound flag */
+    });
   }, [id, run, setGlobalError]);
 
   useEffect(() => {

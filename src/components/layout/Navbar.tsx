@@ -1,7 +1,9 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import { useAuth, useError } from "../../context";
 import { getApiErrorMessage } from "../../utils/apiErrors";
+import { NavDropdown } from "./NavDropdown";
+import { NavItem } from "./NavItem";
 
 function formatSessionCountdown(expiresAt: string, nowMs: number) {
   const remainingMs = Math.max(0, Date.parse(expiresAt) - nowMs);
@@ -11,120 +13,126 @@ function formatSessionCountdown(expiresAt: string, nowMs: number) {
   return `${minutes}:${String(seconds).padStart(2, "0")}`;
 }
 
-function NavItem({
-  to,
-  children,
-  onClick,
-  inDropdown,
+function NavbarUserMenu({
+  countdown,
+  confirmingLogout,
+  onLogoutClick,
+  onClose,
+  mobile = false,
 }: {
-  to: string;
-  children: React.ReactNode;
-  onClick?: () => void;
-  inDropdown?: boolean;
+  countdown: string | null;
+  confirmingLogout: boolean;
+  onLogoutClick: () => void;
+  onClose: () => void;
+  mobile?: boolean;
 }) {
+  if (mobile) {
+    return (
+      <>
+        {countdown ? (
+          <p className="px-2.5 py-1.5 text-xs font-medium tabular-nums text-neutral-500">
+            {countdown}
+          </p>
+        ) : null}
+        <NavItem to="/profile" onClick={onClose}>
+          Profil
+        </NavItem>
+        <button
+          type="button"
+          onClick={onLogoutClick}
+          className={`ui-btn ui-btn-sm mt-2 w-full ${confirmingLogout ? "ui-btn-danger" : "ui-btn-secondary"}`}
+        >
+          {confirmingLogout ? "Bekräfta utloggning?" : "Logga ut"}
+        </button>
+      </>
+    );
+  }
+
   return (
-    <NavLink
-      to={to}
-      onClick={onClick}
-      role={inDropdown ? "menuitem" : undefined}
-      className={({ isActive }) =>
-        inDropdown
-          ? `block w-full px-4 py-1.5 text-xs font-semibold uppercase tracking-widest whitespace-nowrap transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-600 focus-visible:ring-offset-2 ${
-              isActive
-                ? "bg-primary-50 text-primary-700"
-                : "text-neutral-600 hover:bg-neutral-100 hover:text-neutral-900"
-            }`
-          : `ui-nav-item ${
-              isActive
-                ? "bg-primary-50 text-primary-700"
-                : "text-neutral-600 hover:bg-neutral-100 hover:text-neutral-900"
-            }`
-      }
-    >
-      {children}
-    </NavLink>
+    <>
+      {countdown ? (
+        <span className="text-xs font-medium tabular-nums text-neutral-500">
+          {countdown}
+        </span>
+      ) : null}
+      <NavLink
+        to="/profile"
+        onClick={onClose}
+        className="text-xs font-semibold uppercase tracking-widest text-neutral-600 transition-colors hover:text-neutral-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-600 focus-visible:ring-offset-2"
+      >
+        Profil
+      </NavLink>
+      <button
+        type="button"
+        onClick={onLogoutClick}
+        className={`ui-btn ui-btn-sm ${confirmingLogout ? "ui-btn-danger" : "ui-btn-secondary"}`}
+      >
+        {confirmingLogout ? "Bekräfta?" : "Logga ut"}
+      </button>
+    </>
   );
 }
 
-function NavDropdown({
-  label,
+function NavbarLinks({
+  user,
   onClose,
-  children,
 }: {
-  label: string;
-  onClose?: () => void;
-  children: React.ReactNode;
+  user: { roles?: string[] } | null;
+  onClose: () => void;
 }) {
-  const [open, setOpen] = useState(false);
-  const containerRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const onMouseDown = (e: MouseEvent) => {
-      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
-        setOpen(false);
-      }
-    };
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setOpen(false);
-    };
-    document.addEventListener("mousedown", onMouseDown);
-    document.addEventListener("keydown", onKey);
-    return () => {
-      document.removeEventListener("mousedown", onMouseDown);
-      document.removeEventListener("keydown", onKey);
-    };
-  }, []);
-
-  const handleItemClick = () => {
-    setOpen(false);
-    onClose?.();
-  };
-
   return (
-    <div ref={containerRef} className="relative">
-      <button
-        type="button"
-        onClick={() => setOpen((s) => !s)}
-        aria-expanded={open}
-        aria-haspopup="menu"
-        className={`ui-nav-item inline-flex items-center gap-1 ${
-          open
-            ? "bg-primary-50 text-primary-700"
-            : "text-neutral-600 hover:bg-neutral-100 hover:text-neutral-900"
-        }`}
-      >
-        {label}
-        <svg
-          className="h-3 w-3 shrink-0"
-          viewBox="0 0 12 12"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth={2}
-          aria-hidden="true"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            d={open ? "M2 8l4-4 4 4" : "M2 4l4 4 4-4"}
-          />
-        </svg>
-      </button>
-      {open && (
-        <div
-          role="menu"
-          className="absolute left-0 top-full z-50 mt-1 min-w-[10rem] rounded border border-neutral-200 bg-neutral-50 py-1 shadow-card"
-        >
-          {React.Children.map(children, (child) =>
-            React.isValidElement(child)
-              ? React.cloneElement(
-                  child as React.ReactElement<{ onClick?: () => void; inDropdown?: boolean }>,
-                  { onClick: handleItemClick, inDropdown: true }
-                )
-              : child
-          )}
-        </div>
-      )}
-    </div>
+    <>
+      <NavItem to="/" onClick={onClose}>
+        Hem
+      </NavItem>
+      <NavItem to="/about" onClick={onClose}>
+        Om VS
+      </NavItem>
+      <NavItem to="/lodges" onClick={onClose}>
+        Loger
+      </NavItem>
+      <NavItem to="/contact" onClick={onClose}>
+        Kontakt
+      </NavItem>
+      <NavItem to="/gdpr" onClick={onClose}>
+        GDPR
+      </NavItem>
+
+      {user ? (
+        <>
+          <span className="mx-2 select-none text-neutral-300" aria-hidden>
+            ·
+          </span>
+          <NavItem to="/posts" onClick={onClose}>
+            Nyheter
+          </NavItem>
+          <NavItem to="/members" onClick={onClose}>
+            Medlemmar
+          </NavItem>
+          <NavItem to="/events" onClick={onClose}>
+            Möten
+          </NavItem>
+          <NavItem to="/regalia" onClick={onClose}>
+            Regalier
+          </NavItem>
+          <NavItem to="/map" onClick={onClose}>
+            Karta
+          </NavItem>
+          <span className="mx-2 hidden select-none text-neutral-300 lg:inline" aria-hidden>
+            ·
+          </span>
+          <div className="hidden lg:contents">
+            <NavDropdown label="Arkiv" onClose={onClose}>
+              <NavItem to="/documents">Dokument</NavItem>
+              <NavItem to="/revisions">Revisioner</NavItem>
+              {(user.roles ?? []).includes("Admin") ? (
+                <NavItem to="/admin/membership-payments">Avgifter</NavItem>
+              ) : null}
+            </NavDropdown>
+          </div>
+        </>
+      ) : null}
+    </>
   );
 }
 
@@ -199,10 +207,8 @@ export const Navbar: React.FC = () => {
       >
         Hoppa till innehåll
       </a>
-      {/* Masthead */}
       <div className="border-b border-neutral-200 bg-neutral-100">
         <div className="container grid grid-cols-[1fr_auto_1fr] items-center gap-4 py-4">
-          {/* Left: mobile hamburger */}
           <div className="flex items-center lg:hidden">
             <button
               type="button"
@@ -220,25 +226,14 @@ export const Navbar: React.FC = () => {
                 aria-hidden="true"
               >
                 {open ? (
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M6 18L18 6M6 6l12 12"
-                  />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                 ) : (
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M4 6h16M4 12h16M4 18h16"
-                  />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
                 )}
               </svg>
             </button>
           </div>
 
-          {/* Center: seal + org name */}
           <div className="flex flex-col items-center gap-1 text-center">
             <NavLink
               to="/"
@@ -259,30 +254,14 @@ export const Navbar: React.FC = () => {
             </p>
           </div>
 
-          {/* Right: auth controls (desktop) */}
           <div className="hidden items-center justify-end gap-3 lg:flex">
-            {countdown && (
-              <span className="text-xs font-medium tabular-nums text-neutral-500">
-                {countdown}
-              </span>
-            )}
             {user ? (
-              <>
-                <NavLink
-                  to="/profile"
-                  onClick={closeMenu}
-                  className="text-xs font-semibold uppercase tracking-widest text-neutral-600 transition-colors hover:text-neutral-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-600 focus-visible:ring-offset-2"
-                >
-                  Profil
-                </NavLink>
-                <button
-                  type="button"
-                  onClick={handleLogoutClick}
-                  className={`ui-btn ui-btn-sm ${confirmingLogout ? "ui-btn-danger" : "ui-btn-secondary"}`}
-                >
-                  {confirmingLogout ? "Bekräfta?" : "Logga ut"}
-                </button>
-              </>
+              <NavbarUserMenu
+                countdown={countdown}
+                confirmingLogout={confirmingLogout}
+                onLogoutClick={handleLogoutClick}
+                onClose={closeMenu}
+              />
             ) : (
               <NavLink
                 to="/login"
@@ -294,138 +273,47 @@ export const Navbar: React.FC = () => {
             )}
           </div>
 
-          {/* Right spacer on mobile (balances hamburger) */}
           <div className="lg:hidden" />
         </div>
       </div>
 
-      {/* Flat nav bar (desktop) */}
       <nav
         aria-label="Primär navigering"
         className="border-b border-neutral-200 bg-neutral-50"
       >
         <div className="container hidden items-center gap-0.5 py-1.5 lg:flex">
-          <NavItem to="/" onClick={closeMenu}>
-            Hem
-          </NavItem>
-          <NavItem to="/about" onClick={closeMenu}>
-            Om VS
-          </NavItem>
-          <NavItem to="/lodges" onClick={closeMenu}>
-            Loger
-          </NavItem>
-          <NavItem to="/contact" onClick={closeMenu}>
-            Kontakt
-          </NavItem>
-          <NavItem to="/gdpr" onClick={closeMenu}>
-            GDPR
-          </NavItem>
-
-          {user && (
-            <>
-              <span className="mx-2 select-none text-neutral-300" aria-hidden>
-                ·
-              </span>
-              <NavItem to="/posts" onClick={closeMenu}>
-                Nyheter
-              </NavItem>
-              <NavItem to="/members" onClick={closeMenu}>
-                Medlemmar
-              </NavItem>
-              <NavItem to="/events" onClick={closeMenu}>
-                Möten
-              </NavItem>
-              <NavItem to="/regalia" onClick={closeMenu}>
-                Regalier
-              </NavItem>
-              <NavItem to="/map" onClick={closeMenu}>
-                Karta
-              </NavItem>
-              <span className="mx-2 select-none text-neutral-300" aria-hidden>
-                ·
-              </span>
-              <NavDropdown label="Arkiv" onClose={closeMenu}>
-                <NavItem to="/documents">Dokument</NavItem>
-                <NavItem to="/revisions">Revisioner</NavItem>
-                {(user.roles ?? []).includes("Admin") && (
-                  <NavItem to="/admin/membership-payments">Avgifter</NavItem>
-                )}
-              </NavDropdown>
-            </>
-          )}
+          <NavbarLinks user={user} onClose={closeMenu} />
         </div>
       </nav>
 
-      {/* Mobile drawer */}
-      {open && (
+      {open ? (
         <div className="border-b border-neutral-200 bg-neutral-50 lg:hidden">
           <div className="container space-y-0.5 py-3">
-            <NavItem to="/" onClick={closeMenu}>
-              Hem
-            </NavItem>
-            <NavItem to="/about" onClick={closeMenu}>
-              Om VS
-            </NavItem>
-            <NavItem to="/lodges" onClick={closeMenu}>
-              Loger
-            </NavItem>
-            <NavItem to="/contact" onClick={closeMenu}>
-              Kontakt
-            </NavItem>
-            <NavItem to="/gdpr" onClick={closeMenu}>
-              GDPR
-            </NavItem>
-
-            {user && (
+            <NavbarLinks user={user} onClose={closeMenu} />
+            {user ? (
               <>
-                <div className="my-2 border-t border-neutral-200" />
-                <NavItem to="/posts" onClick={closeMenu}>
-                  Nyheter
-                </NavItem>
-                <NavItem to="/members" onClick={closeMenu}>
-                  Medlemmar
-                </NavItem>
-                <NavItem to="/events" onClick={closeMenu}>
-                  Möten
-                </NavItem>
-                <NavItem to="/regalia" onClick={closeMenu}>
-                  Regalier
-                </NavItem>
-                <NavItem to="/map" onClick={closeMenu}>
-                  Karta
-                </NavItem>
-                <div className="my-2 border-t border-neutral-200" />
+                <div className="my-2 border-t border-neutral-200 lg:hidden" />
                 <NavItem to="/documents" onClick={closeMenu}>
                   Dokument
                 </NavItem>
                 <NavItem to="/revisions" onClick={closeMenu}>
                   Revisioner
                 </NavItem>
-                {(user.roles ?? []).includes("Admin") && (
+                {(user.roles ?? []).includes("Admin") ? (
                   <NavItem to="/admin/membership-payments" onClick={closeMenu}>
                     Avgifter
                   </NavItem>
-                )}
+                ) : null}
                 <div className="my-2 border-t border-neutral-200" />
-                {countdown && (
-                  <p className="px-2.5 py-1.5 text-xs font-medium tabular-nums text-neutral-500">
-                    {countdown}
-                  </p>
-                )}
-                <NavItem to="/profile" onClick={closeMenu}>
-                  Profil
-                </NavItem>
-                <button
-                  type="button"
-                  onClick={handleLogoutClick}
-                  className={`ui-btn ui-btn-sm mt-2 w-full ${confirmingLogout ? "ui-btn-danger" : "ui-btn-secondary"}`}
-                >
-                  {confirmingLogout ? "Bekräfta utloggning?" : "Logga ut"}
-                </button>
+                <NavbarUserMenu
+                  countdown={countdown}
+                  confirmingLogout={confirmingLogout}
+                  onLogoutClick={handleLogoutClick}
+                  onClose={closeMenu}
+                  mobile
+                />
               </>
-            )}
-
-            {!user && (
+            ) : (
               <>
                 <div className="my-2 border-t border-neutral-200" />
                 <NavItem to="/login" onClick={closeMenu}>
@@ -435,7 +323,9 @@ export const Navbar: React.FC = () => {
             )}
           </div>
         </div>
-      )}
+      ) : null}
     </header>
   );
 };
+
+export default Navbar;

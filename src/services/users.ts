@@ -261,16 +261,8 @@ export async function listUsersPage(
 export async function listUsers(
   filters?: Omit<ListUsersFilters, "page" | "pageSize">,
 ): Promise<PublicUser[]> {
-  const pageSize = 100;
-  const firstPage = await listUsersPage({ ...filters, page: 1, pageSize });
-  const users = [...firstPage.users];
-
-  for (let page = 2; page <= firstPage.totalPages; page += 1) {
-    const nextPage = await listUsersPage({ ...filters, page, pageSize });
-    users.push(...nextPage.users);
-  }
-
-  return users;
+  const response = await listUsersPage({ ...filters, page: 1, pageSize: 100 });
+  return response.users;
 }
 
 export async function listUsersMapPins(): Promise<UserMapPin[]> {

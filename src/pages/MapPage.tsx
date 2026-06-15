@@ -2,12 +2,12 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import L from "leaflet";
 import { MapContainer, Marker, Popup, TileLayer, useMap } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
-import { PageContainer, selectClass } from "../components";
+import { PageContainer, AsyncState, selectClass } from "../components";
 import { useAuth } from "../context";
+import useDebouncedUserSearch from "../hooks/useDebouncedUserSearch";
 import useFetch from "../hooks/useFetch";
 import {
   clearUserLocationOverride,
-  listUsers,
   listUsersMapPins,
   setUserLocation,
 } from "../services/users";
@@ -133,9 +133,16 @@ function toEditableUser(user: PublicUser): EditableUser {
 export const MapPage = () => {
   const { user: authUser } = useAuth();
 
-  const { run: runPins, data: pins } = useFetch<UserMapPin[]>();
-  const { run: runUsers, data: allUsers } = useFetch<PublicUser[]>();
+  const { run: runPins, data: pins, loading: pinsLoading } = useFetch<UserMapPin[]>();
   const { run: runAction, loading: actionLoading } = useFetch<unknown>();
+  const {
+    users: adminUsers,
+    query: adminUserQuery,
+    setQuery: setAdminUserQuery,
+    loading: adminUsersLoading,
+  } = useDebouncedUserSearch({ pageSize: 100 });
+
+  const [pinsError, setPinsError] = useState(false);
 
   const [selectedUserId, setSelectedUserId] = useState<number | null>(null);
   const [draftLocationsByUserId, setDraftLocationsByUserId] = useState<
@@ -151,29 +158,23 @@ export const MapPage = () => {
   );
 
   const refreshPins = useCallback(
-    () => runPins(() => listUsersMapPins()),
+    () => {
+      setPinsError(false);
+      return runPins(() => listUsersMapPins());
+    },
     [runPins],
   );
 
   useEffect(() => {
-    refreshPins().catch(() => {
-      // handled by useFetch
-    });
+    refreshPins().catch(() => setPinsError(true));
   }, [refreshPins]);
 
-  useEffect(() => {
-    if (!isAdmin) return;
-    runUsers(() => listUsers()).catch(() => {
-      // handled by useFetch
-    });
-  }, [isAdmin, runUsers]);
-
   const editableUsers = useMemo((): EditableUser[] => {
-    if (!isAdmin || !allUsers) return [];
-    return (allUsers)
+    if (!isAdmin) return [];
+    return adminUsers
       .map(toEditableUser)
       .filter((entry) => Number.isFinite(entry.id) && entry.name.length > 0);
-  }, [allUsers, isAdmin]);
+  }, [adminUsers, isAdmin]);
 
   const gradeLegendItems = useMemo(
     () =>
@@ -265,11 +266,33 @@ export const MapPage = () => {
 
   return (
     <PageContainer size="xl" className="ui-page">
-      <h2 className="ui-page-title mb-4">Medlemskarta</h2>
+      <h1 className="ui-page-title mb-4">Medlemskarta</h1>
+
+      {pinsError ? (
+        <div className="mb-4">
+          <AsyncState
+            loading={false}
+            error
+            errorMessage="Kartan kunde inte laddas."
+            onRetry={() => {
+              void refreshPins().catch(() => setPinsError(true));
+            }}
+          />
+        </div>
+      ) : null}
 
       <div className={`animate-step-in grid gap-4${isAdmin ? " lg:grid-cols-3" : ""}`}>
         {/* Main map */}
         <div className={`ui-card${isAdmin ? " lg:col-span-2" : ""}`}>
+          {pinsLoading ? (
+            <div
+              className="flex h-[560px] items-center justify-center rounded-md bg-neutral-100 text-sm text-neutral-600"
+              aria-busy="true"
+              aria-label="Laddar kartnålar"
+            >
+              Laddar karta...
+            </div>
+          ) : (
           <MapContainer
             center={SWEDEN_CENTER}
             zoom={5}
@@ -310,6 +333,21 @@ export const MapPage = () => {
               </Marker>
             ))}
           </MapContainer>
+          )}
+
+          {(pins ?? []).length > 0 ? (
+            <section className="mt-4" aria-label="Medlemmar på kartan">
+              <h2 className="ui-chapter mb-2">Medlemmar med position</h2>
+              <ul className="max-h-40 space-y-1 overflow-y-auto text-sm text-neutral-700">
+                {(pins ?? []).map((pin) => (
+                  <li key={pin.id}>
+                    {pin.name}
+                    {pin.lodgeName ? ` — ${pin.lodgeName}` : ""}
+                  </li>
+                ))}
+              </ul>
+            </section>
+          ) : null}
 
           <div className="mt-4">
             <p className="ui-chapter">Gradfärger</p>
@@ -345,6 +383,17 @@ export const MapPage = () => {
         {/* Position controls — admin only */}
         {isAdmin && (
         <div className="ui-card">
+          <label htmlFor="mapTargetUserSearch" className="ui-label">
+            Sök broder
+          </label>
+          <input
+            id="mapTargetUserSearch"
+            type="search"
+            className="ui-input mb-3 w-full"
+            value={adminUserQuery}
+            onChange={(event) => setAdminUserQuery(event.target.value)}
+            placeholder="Sök på namn..."
+          />
           <label htmlFor="mapTargetUser" className="ui-label">
             Välj broder
           </label>
@@ -359,7 +408,7 @@ export const MapPage = () => {
               setIsEditing(false);
               setPendingReset(false);
             }}
-            disabled={editableUsers.length === 0}
+            disabled={editableUsers.length === 0 || adminUsersLoading}
           >
             {editableUsers.map((entry) => (
               <option key={entry.id} value={entry.id}>

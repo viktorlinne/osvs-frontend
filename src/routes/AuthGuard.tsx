@@ -1,5 +1,6 @@
 import React, { useEffect, useRef } from "react";
 import { Navigate, useLocation } from "react-router";
+import { RouteLoadingFallback } from "../components/RouteLoadingFallback";
 import { useAuth } from "../context";
 import * as authService from "../services/auth";
 import {
@@ -198,7 +199,7 @@ export default function AuthGuard({ children, roles }: Props) {
   const location = useLocation();
 
   if (loading) {
-    return null;
+    return <RouteLoadingFallback />;
   }
 
   if (!user) {
@@ -210,7 +211,7 @@ export default function AuthGuard({ children, roles }: Props) {
     const userRoles = user.roles ?? [];
     const has = required.some((role) => userRoles.includes(role));
     if (!has) {
-      return <Navigate to="/login" replace state={{ from: location }} />;
+      return <Navigate to="/forbidden" replace state={{ from: location }} />;
     }
   }
 

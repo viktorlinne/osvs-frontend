@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
 import { useForm } from "react-hook-form";
-import { Button, PageContainer } from "../components";
+import { Button, NotFoundPanel, PageContainer } from "../components";
 import { MemberDetailSkeleton } from "../components/MemberDetailSkeleton";
 import {
   AchievementsPanel,
@@ -66,7 +66,7 @@ function readMemberRoleNames(member: MemberDetailUser | null): string[] {
 
 export const MemberDetail = () => {
   const { matrikelnummer } = useParams<{ matrikelnummer: string }>();
-  const { run, data: member, loading: memberLoading } = useFetch<MemberDetailUser | null>();
+  const { run, data: member, loading: memberLoading, notFound: memberNotFound } = useFetch<MemberDetailUser | null>();
   const { run: runAvailable } = useFetch<Achievement[]>();
   const { run: runLodges } = useFetch<Lodge[]>();
   const { run: runRoles } = useFetch<Role[]>();
@@ -511,11 +511,14 @@ export const MemberDetail = () => {
             </div>
           ) : null}
         </form>
-      ) : (
-        <div className="ui-card">
-          <p className="text-sm text-neutral-600">Broder hittades inte.</p>
-        </div>
-      )}
+      ) : memberNotFound || !member ? (
+        <NotFoundPanel
+          title="Brodern hittades inte"
+          description="Kontrollera länken eller gå tillbaka till medlemslistan."
+          backTo="/members"
+          backLabel="Till medlemslistan"
+        />
+      ) : null}
     </PageContainer>
   );
 };

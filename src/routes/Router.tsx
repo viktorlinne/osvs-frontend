@@ -1,6 +1,7 @@
 import { Suspense, lazy, type ComponentType } from "react";
 import { createBrowserRouter } from "react-router";
 import { AppLayout } from "../app/AppLayout";
+import { RouteLoadingFallback } from "../components/RouteLoadingFallback";
 import AuthGuard from "./AuthGuard";
 import { RouteErrorPage } from "../pages/RouteErrorPage";
 
@@ -20,7 +21,7 @@ function lazyNamedPage(
 
 function renderPage(Page: ComponentType) {
   return (
-    <Suspense fallback={null}>
+    <Suspense fallback={<RouteLoadingFallback />}>
       <Page />
     </Suspense>
   );
@@ -129,6 +130,10 @@ const UploadDocument = lazyNamedPage(
   "UploadDocument",
 );
 const Regalia = lazyNamedPage(() => import("../pages/Regalia"), "Regalia");
+const ForbiddenPage = lazyNamedPage(
+  () => import("../pages/ForbiddenPage"),
+  "ForbiddenPage",
+);
 
 const routes = [
   {
@@ -155,6 +160,10 @@ const routes = [
       {
         path: "login",
         element: renderPage(LoginPage),
+      },
+      {
+        path: "forbidden",
+        element: renderPage(ForbiddenPage),
       },
       {
         path: "forgot-password",

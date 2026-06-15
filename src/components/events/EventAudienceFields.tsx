@@ -23,6 +23,8 @@ type Props = {
   lodgesLoading?: boolean;
   groupsLoading?: boolean;
   usersLoading?: boolean;
+  userSearchQuery?: string;
+  onUserSearchQueryChange?: (value: string) => void;
 };
 
 export function EventAudienceFields({
@@ -42,6 +44,8 @@ export function EventAudienceFields({
   lodgesLoading = false,
   groupsLoading = false,
   usersLoading = false,
+  userSearchQuery,
+  onUserSearchQueryChange,
 }: Props) {
   const explicitGroupIds = useMemo(
     () => new Set(normalizeSelectionIds(selectedGroupIds)),
@@ -177,6 +181,8 @@ export function EventAudienceFields({
         }}
         disabled={disabled}
         loading={usersLoading}
+        searchQuery={userSearchQuery}
+        onSearchQueryChange={onUserSearchQueryChange}
         name="event-users"
       />
       {errors.userIds ? <p className={errorTextClass}>{errors.userIds}</p> : null}

@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { Button, PageContainer, inputClass, selectClass } from "../components";
+import { Button, PageContainer, AsyncState, inputClass, selectClass } from "../components";
 import { SkeletonCircle, SkeletonLabel, SkeletonText } from "../components/PageSkeleton";
 import { useAuth } from "../context";
 import useFetch from "../hooks/useFetch";
@@ -34,6 +34,8 @@ export const MembersPage = () => {
   const [officialId, setOfficialId] = useState<number | null>(null);
   const [accommodationOnly, setAccommodationOnly] = useState(false);
   const [page, setPage] = useState(1);
+  const [fetchError, setFetchError] = useState(false);
+  const [filtersError, setFiltersError] = useState(false);
   const navState = location.state as { createdNotice?: string } | null;
   const [createdNotice, setCreatedNotice] = useState(
     typeof navState?.createdNotice === "string"
@@ -47,14 +49,18 @@ export const MembersPage = () => {
   }, [location.pathname, navState?.createdNotice, navigate]);
 
   useEffect(() => {
-    runAchievements(() => listAchievements()).catch(() => {});
-    runLodges(() => listLodges()).catch(() => {});
-    runOfficials(() => listOfficials()).catch(() => {});
+    setFiltersError(false);
+    Promise.all([
+      runAchievements(() => listAchievements()),
+      runLodges(() => listLodges()),
+      runOfficials(() => listOfficials()),
+    ]).catch(() => setFiltersError(true));
   }, [runAchievements, runLodges, runOfficials]);
 
   const doFetch = useCallback(
-    () =>
-      run(() =>
+    () => {
+      setFetchError(false);
+      return run(() =>
         listUsersService({
           name: debouncedQuery || undefined,
           achievementId,
@@ -64,12 +70,13 @@ export const MembersPage = () => {
           page,
           pageSize: MEMBERS_PAGE_SIZE,
         }),
-      ),
+      );
+    },
     [run, debouncedQuery, achievementId, lodgeId, officialId, accommodationOnly, page],
   );
 
   useEffect(() => {
-    doFetch().catch(() => {});
+    doFetch().catch(() => setFetchError(true));
   }, [doFetch]);
 
   useEffect(() => {
@@ -121,7 +128,7 @@ export const MembersPage = () => {
   return (
     <PageContainer size="xl" className="ui-page">
       <div className="mb-6 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-        <h2 className="ui-page-title">Medlemmar</h2>
+        <h1 className="ui-page-title">Medlemmar</h1>
         {user &&
           (user.roles ?? []).some((r) => ["Admin", "Editor"].includes(r)) && (
             <Link to="/members/create" className="ui-btn ui-btn-primary">
@@ -233,7 +240,23 @@ export const MembersPage = () => {
         </div>
       )}
 
-      {!loading ? (
+      {filtersError ? (
+        <AsyncState
+          loading={false}
+          error
+          errorMessage="Filter kunde inte laddas. Listan kan vara ofullständig."
+          onRetry={() => {
+            setFiltersError(false);
+            void Promise.all([
+              runAchievements(() => listAchievements()),
+              runLodges(() => listLodges()),
+              runOfficials(() => listOfficials()),
+            ]).catch(() => setFiltersError(true));
+          }}
+        />
+      ) : null}
+
+      {!loading && !fetchError ? (
         <div
           className="mb-4 text-sm text-neutral-600"
           aria-live="polite"
@@ -245,7 +268,14 @@ export const MembersPage = () => {
         </div>
       ) : null}
 
-      {loading ? (
+      <AsyncState
+        loading={loading}
+        error={fetchError}
+        errorMessage="Medlemmar kunde inte laddas."
+        onRetry={() => {
+          void doFetch().catch(() => setFetchError(true));
+        }}
+        loadingFallback={
         <div className="grid w-full grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3">
           {Array.from({ length: 6 }, (_, i) => (
             <div key={i} className="ui-card flex items-center gap-4">
@@ -257,7 +287,9 @@ export const MembersPage = () => {
             </div>
           ))}
         </div>
-      ) : members.length === 0 ? (
+        }
+      >
+      {members.length === 0 ? (
         <div className="ui-card flex flex-col gap-3 text-neutral-600 sm:flex-row sm:items-center sm:justify-between">
           <span>Ingen broder matchar de valda filtren.</span>
           {hasActiveFilters && (
@@ -277,6 +309,7 @@ export const MembersPage = () => {
           ))}
         </div>
       )}
+      </AsyncState>
 
       {totalPages > 1 ? (
         <div className="mt-6 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">

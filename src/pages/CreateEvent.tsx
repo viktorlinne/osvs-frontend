@@ -10,26 +10,16 @@ import {
   textareaClass,
 } from "../components";
 import { useAuth, useError } from "../context";
+import useEventAudience from "../hooks/useEventAudience";
 import useFetch from "../hooks/useFetch";
 import { createEvent as createEventSvc } from "../services";
 import type { CreateEventResult } from "../services/events";
 import { listGroups } from "../services/groups";
 import { listLodges } from "../services/lodges";
-import { listUsers } from "../services/users";
-import type { CreateEventPayload, Group, Lodge, PublicUser } from "../types";
+import type { CreateEventPayload, Group, Lodge } from "../types";
 import { getApiErrorMessage, getApiFieldErrors } from "../utils/apiErrors";
 import { getEventFormErrors } from "../utils/formValidation";
-
-function normalizeNumericIds(values: string[]): number[] {
-  return Array.from(
-    new Set(
-      values
-        .map((value) => Number(value))
-        .filter((value) => Number.isFinite(value))
-        .map((value) => Math.floor(value)),
-    ),
-  );
-}
+import { normalizeNumericIds } from "../utils/normalizeNumericIds";
 
 export const CreateEvent = () => {
   const navigate = useNavigate();
@@ -50,16 +40,6 @@ export const CreateEvent = () => {
     data: groups,
     loading: groupsLoading,
   } = useFetch<Group[]>();
-  const {
-    run: runUsers,
-    data: users,
-    loading: usersLoading,
-  } = useFetch<PublicUser[]>();
-  const {
-    run: runLodgeUsers,
-    data: lodgeUsers,
-    setData: setLodgeUsers,
-  } = useFetch<PublicUser[]>();
   const { run: runSubmit, loading: saving } = useFetch<CreateEventResult>();
 
   const [form, setForm] = useState({
@@ -84,6 +64,17 @@ export const CreateEvent = () => {
     return Number.isFinite(parsed) ? parsed : null;
   }, [selectedLodgeIds]);
 
+  const {
+    users,
+    lodgeUsers,
+    usersLoading,
+    userQuery,
+    setUserQuery,
+  } = useEventAudience({
+    enabled: canCreate,
+    selectedLodgeId,
+  });
+
   function clearServerField(field: string) {
     setServerErrors((prev) => {
       if (!(field in prev)) return prev;
@@ -101,22 +92,8 @@ export const CreateEvent = () => {
       runGroups(() => listGroups()).catch(() => {
         /* useFetch handles errors */
       }),
-      runUsers(() => listUsers()).catch(() => {
-        /* useFetch handles errors */
-      }),
     ]);
-  }, [runGroups, runLodges, runUsers]);
-
-  useEffect(() => {
-    if (!selectedLodgeId) {
-      setLodgeUsers([]);
-      return;
-    }
-
-    runLodgeUsers(() => listUsers({ lodgeId: selectedLodgeId })).catch(() => {
-      /* useFetch handles errors */
-    });
-  }, [runLodgeUsers, selectedLodgeId, setLodgeUsers]);
+  }, [runGroups, runLodges]);
 
   async function handleCreate(e?: React.FormEvent) {
     e?.preventDefault();
@@ -288,6 +265,8 @@ export const CreateEvent = () => {
               lodgesLoading={lodgesLoading}
               groupsLoading={groupsLoading}
               usersLoading={usersLoading}
+              userSearchQuery={userQuery}
+              onUserSearchQueryChange={setUserQuery}
             />
           </div>
 

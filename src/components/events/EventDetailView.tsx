@@ -70,7 +70,7 @@ export function EventDetailView({
   return (
     <div>
       {/* ── Header ── */}
-      <div className="ui-page-title">{event.title}</div>
+      <h1 className="ui-page-title">{event.title}</h1>
 
       {event.lodgeMeeting && (
         <span className="mt-2 inline-flex items-center rounded px-2 py-0.5 text-xs font-semibold uppercase tracking-widest bg-primary-100 text-primary-800">

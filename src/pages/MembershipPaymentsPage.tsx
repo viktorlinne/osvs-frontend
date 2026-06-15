@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { Button, PageContainer, inputClass, selectClass } from "../components";
+import { Button, AsyncState, PageContainer, inputClass, selectClass } from "../components";
 import { SkeletonLabel, SkeletonText } from "../components/PageSkeleton";
 import useFetch from "../hooks/useFetch";
 import { listLodges } from "../services/lodges";
@@ -27,14 +27,18 @@ export const MembershipPaymentsPage = () => {
   const [year, setYear] = useState<number | null>(CURRENT_YEAR);
   const [page, setPage] = useState(1);
   const [toggleError, setToggleError] = useState<string | null>(null);
+  const [fetchError, setFetchError] = useState(false);
+  const [filtersError, setFiltersError] = useState(false);
 
   useEffect(() => {
-    runLodges(() => listLodges()).catch(() => {});
+    setFiltersError(false);
+    runLodges(() => listLodges()).catch(() => setFiltersError(true));
   }, [runLodges]);
 
   const doFetch = useCallback(
-    () =>
-      run(() =>
+    () => {
+      setFetchError(false);
+      return run(() =>
         getAllMembershipPayments({
           name: debouncedQuery || undefined,
           lodgeId,
@@ -42,12 +46,13 @@ export const MembershipPaymentsPage = () => {
           page,
           pageSize: PAGE_SIZE,
         }),
-      ),
+      );
+    },
     [run, debouncedQuery, lodgeId, year, page],
   );
 
   useEffect(() => {
-    doFetch().catch(() => {});
+    doFetch().catch(() => setFetchError(true));
   }, [doFetch]);
 
   useEffect(() => {
@@ -184,7 +189,19 @@ export const MembershipPaymentsPage = () => {
         </div>
       )}
 
-      {!loading && (
+      {filtersError ? (
+        <AsyncState
+          loading={false}
+          error
+          errorMessage="Logfilter kunde inte laddas."
+          onRetry={() => {
+            setFiltersError(false);
+            runLodges(() => listLodges()).catch(() => setFiltersError(true));
+          }}
+        />
+      ) : null}
+
+      {!loading && !fetchError && (
         <div
           className={total > 0 ? "mb-4 text-sm text-neutral-600" : "sr-only"}
           aria-live="polite"
@@ -194,18 +211,27 @@ export const MembershipPaymentsPage = () => {
         </div>
       )}
 
-      {loading ? (
-        <div className="ui-card divide-y divide-neutral-200">
-          {Array.from({ length: 8 }, (_, i) => (
-            <div key={i} className="flex items-center gap-4 px-4 py-3">
-              <div className="h-4 w-4 shrink-0 rounded border border-neutral-300 bg-neutral-100" />
-              <SkeletonText width="w-36" />
-              <SkeletonLabel width="w-24" />
-              <SkeletonLabel width="w-16" />
-            </div>
-          ))}
-        </div>
-      ) : localPayments.length === 0 ? (
+      <AsyncState
+        loading={loading}
+        error={fetchError}
+        errorMessage="Medlemsavgifter kunde inte laddas."
+        onRetry={() => {
+          void doFetch().catch(() => setFetchError(true));
+        }}
+        loadingFallback={
+          <div className="ui-card divide-y divide-neutral-200">
+            {Array.from({ length: 8 }, (_, i) => (
+              <div key={i} className="flex items-center gap-4 px-4 py-3">
+                <div className="h-4 w-4 shrink-0 rounded border border-neutral-300 bg-neutral-100" />
+                <SkeletonText width="w-36" />
+                <SkeletonLabel width="w-24" />
+                <SkeletonLabel width="w-16" />
+              </div>
+            ))}
+          </div>
+        }
+      >
+      {localPayments.length === 0 ? (
         <div className="ui-card flex flex-col gap-3 text-neutral-600 sm:flex-row sm:items-center sm:justify-between">
           <span>
             {hasActiveFilters
@@ -258,6 +284,7 @@ export const MembershipPaymentsPage = () => {
           </div>
         </div>
       )}
+      </AsyncState>
 
       {totalPages > 1 && (
         <div className="mt-6 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
