@@ -10,6 +10,12 @@ import {
 import type { PublicUser, UpdateUserForm } from "../../types";
 import { updateUserFormRules } from "../../utils/formValidation";
 
+function formatFlag(value: boolean | undefined): string {
+  if (value === true) return "Ja";
+  if (value === false) return "Nej";
+  return "—";
+}
+
 function FieldValue({ value }: { value: string | null | undefined }) {
   return <dd className="mt-0.5 text-sm text-neutral-900">{value || "—"}</dd>;
 }
@@ -23,6 +29,7 @@ export const ProfileForm = ({
   setPictureFile,
   pictureError,
   showArchive = false,
+  showAdminFlags = false,
 }: {
   user?: PublicUser | null;
   register: UseFormRegister<UpdateUserForm>;
@@ -32,6 +39,8 @@ export const ProfileForm = ({
   setPictureFile: (f: File | null) => void;
   pictureError?: string | null;
   showArchive?: boolean;
+  /** Admin/Editor only: "Befriad från årsavgift" and "Ständiga listan". */
+  showAdminFlags?: boolean;
 }) => {
   if (!isEditRoute) {
     return (
@@ -100,6 +109,22 @@ export const ProfileForm = ({
             {user?.accommodationAvailable === true ? "Ja" : user?.accommodationAvailable === false ? "Nej" : "—"}
           </dd>
         </div>
+        {showAdminFlags ? (
+          <>
+            <div>
+              <dt className={labelClass}>Befriad från årsavgift</dt>
+              <dd className="mt-0.5 text-sm text-neutral-900">
+                {formatFlag(user?.feeExempt)}
+              </dd>
+            </div>
+            <div>
+              <dt className={labelClass}>Ständiga listan</dt>
+              <dd className="mt-0.5 text-sm text-neutral-900">
+                {formatFlag(user?.standingList)}
+              </dd>
+            </div>
+          </>
+        ) : null}
       </dl>
     );
   }
@@ -332,6 +357,39 @@ export const ProfileForm = ({
           <p className={errorTextClass}>{errors.accommodationAvailable.message}</p>
         ) : null}
       </div>
+
+      {showAdminFlags ? (
+        <>
+          <div className="mb-4 flex items-center gap-3">
+            <input
+              id="feeExempt"
+              type="checkbox"
+              {...register("feeExempt")}
+              className="h-4 w-4 rounded border-neutral-300 text-primary-600 focus-visible:ring-primary-600"
+            />
+            <label htmlFor="feeExempt" className="text-sm text-neutral-700">
+              Befriad från årsavgift
+            </label>
+            {errors.feeExempt ? (
+              <p className={errorTextClass}>{errors.feeExempt.message}</p>
+            ) : null}
+          </div>
+          <div className="mb-4 flex items-center gap-3">
+            <input
+              id="standingList"
+              type="checkbox"
+              {...register("standingList")}
+              className="h-4 w-4 rounded border-neutral-300 text-primary-600 focus-visible:ring-primary-600"
+            />
+            <label htmlFor="standingList" className="text-sm text-neutral-700">
+              Ständiga listan
+            </label>
+            {errors.standingList ? (
+              <p className={errorTextClass}>{errors.standingList.message}</p>
+            ) : null}
+          </div>
+        </>
+      ) : null}
 
       {showArchive ? (
         <div className="mb-4">
