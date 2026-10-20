@@ -43,7 +43,10 @@ import type {
   Role,
   UpdateUserForm,
 } from "../types";
-import { toUserProfileUpdatePayload } from "../utils/userProfileForm";
+import {
+  toAdminUserProfileUpdatePayload,
+  toUserProfileUpdatePayload,
+} from "../utils/userProfileForm";
 import { applyApiFieldErrors } from "../utils/apiErrors";
 import { validateImageFile } from "../utils/formValidation";
 
@@ -87,6 +90,13 @@ export const MemberDetail = () => {
     (authUser.roles ?? []).some((r) => ["Admin", "Editor"].includes(r)),
   );
   const isEditRoute = location.pathname.endsWith("/edit");
+  // The backend only returns feeExempt/standingList to Admin/Editor. Only show
+  // and send them when they were actually loaded, so a save can never clear
+  // flags that were not shown.
+  const showAdminFlags =
+    canEdit &&
+    typeof member?.feeExempt === "boolean" &&
+    typeof member?.standingList === "boolean";
   const shouldLoadRoleData = isEditRoute && canEdit;
 
   const [saving, setSaving] = useState(false);
@@ -134,6 +144,8 @@ export const MemberDetail = () => {
       zipcode: "",
       accommodationAvailable: null,
       archive: "",
+      feeExempt: false,
+      standingList: false,
     },
   });
 
@@ -249,6 +261,8 @@ export const MemberDetail = () => {
       zipcode: member.zipcode ?? "",
       accommodationAvailable: member.accommodationAvailable ?? null,
       archive: member.archive ?? "",
+      feeExempt: member.feeExempt === true,
+      standingList: member.standingList === true,
     });
     setPictureFile(null);
     void trigger();
@@ -275,7 +289,12 @@ export const MemberDetail = () => {
       const userId = matrikelnummer;
 
       await runAction(() =>
-        adminUpdateUser(userId, toUserProfileUpdatePayload(values)),
+        adminUpdateUser(
+          userId,
+          showAdminFlags
+            ? toAdminUserProfileUpdatePayload(values)
+            : toUserProfileUpdatePayload(values),
+        ),
       );
 
       if (pictureFile) {
@@ -451,6 +470,7 @@ export const MemberDetail = () => {
                 setPictureFile={setPictureFile}
                 pictureError={pictureError}
                 showArchive={isEditRoute}
+                showAdminFlags={showAdminFlags}
               />
             </div>
 

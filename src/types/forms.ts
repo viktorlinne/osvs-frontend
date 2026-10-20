@@ -11,6 +11,8 @@ export type UpdateUserForm = {
   zipcode?: string;
   accommodationAvailable?: boolean | null;
   archive?: "Avliden" | "Urgången" | "" | null;
+  feeExempt?: boolean;
+  standingList?: boolean;
 };
 
 export type CreatePostForm = {

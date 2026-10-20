@@ -37,6 +37,10 @@ export type User = {
   work?: string | null;
   revokedAt?: string | null;
   accommodationAvailable?: boolean | null;
+  /** "Befriad från årsavgift". Only returned to Admin/Editor. */
+  feeExempt?: boolean;
+  /** "Ständiga listan". Only returned to Admin/Editor. */
+  standingList?: boolean;
   mobile: string;
   homeNumber?: string | null;
   city: string;

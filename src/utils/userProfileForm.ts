@@ -32,6 +32,20 @@ export function toUserProfileUpdatePayload(
   };
 }
 
+/**
+ * Payload for Admin/Editor edits of another member (PUT /users/:id). Adds the
+ * admin-only flags; never use this for PUT /users/me.
+ */
+export function toAdminUserProfileUpdatePayload(
+  values: Record<string, unknown>,
+): UpdateUserProfileBody {
+  return {
+    ...toUserProfileUpdatePayload(values),
+    feeExempt: values.feeExempt === true,
+    standingList: values.standingList === true,
+  };
+}
+
 export function extractMissingFields(error: unknown): string[] | null {
   const fields = getApiFieldErrors(error);
   if (!fields) return null;
