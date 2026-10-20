@@ -6,6 +6,7 @@ import { MemberDetailSkeleton } from "../components/MemberDetailSkeleton";
 import {
   AchievementsPanel,
   AllergiesManager,
+  MemberHistoryEditor,
   OfficialsManager,
   ProfileForm,
   RolesManager,
@@ -16,15 +17,12 @@ import { listRoles } from "../services/admin";
 import achievementsService from "../services/achievements";
 import { setMemberAllergies } from "../services/allergies";
 import lodgesService from "../services/lodges";
-import { setMemberOfficials } from "../services/officials";
 import {
   adminUpdateUser,
-  type AchievementMutationResult,
   getPublicUserById,
   type PictureUploadResult,
   getUserLodge,
   getUserRoles,
-  postAchievement,
   setRoles,
   setUserLodge,
   uploadUserPicture,
@@ -32,7 +30,6 @@ import {
 } from "../services/users";
 import type { UserLodgeResponse } from "../services/users";
 import type { MemberAllergiesResponse } from "../services/allergies";
-import type { MemberOfficialsResponse } from "../services/officials";
 import type {
   Achievement,
   Allergy,
@@ -56,9 +53,7 @@ type MemberActionResult =
   | null
   | UserMutationResult
   | PictureUploadResult
-  | AchievementMutationResult
-  | MemberAllergiesResponse
-  | MemberOfficialsResponse;
+  | MemberAllergiesResponse;
 
 function readMemberRoleNames(member: MemberDetailUser | null): string[] {
   return Array.isArray(member?.roles) ? member.roles : [];
@@ -78,10 +73,6 @@ export const MemberDetail = () => {
   const location = useLocation();
   const navigate = useNavigate();
 
-  const canAward = Boolean(
-    authUser &&
-    (authUser.roles ?? []).some((r) => ["Admin", "Editor"].includes(r)),
-  );
   const canEdit = Boolean(
     authUser &&
     (authUser.roles ?? []).some((r) => ["Admin", "Editor"].includes(r)),
@@ -91,8 +82,6 @@ export const MemberDetail = () => {
 
   const [saving, setSaving] = useState(false);
   const [pictureFile, setPictureFile] = useState<File | null>(null);
-  const [selectedAid, setSelectedAid] = useState<number | null>(null);
-  const [awardDate, setAwardDate] = useState("");
   const [selectedLid, setSelectedLid] = useState<number | null>(null);
   const [available, setAvailable] = useState<Achievement[]>([]);
   const [lodges, setLodges] = useState<Lodge[]>([]);
@@ -104,9 +93,6 @@ export const MemberDetail = () => {
   >([]);
   const [rolesList, setRolesList] = useState<Role[]>([]);
   const [selectedRoleIds, setSelectedRoleIds] = useState<number[]>([]);
-  const [selectedOfficialIds, setSelectedOfficialIds] = useState<
-    number[] | null
-  >(null);
   const [selectedAllergyIds, setSelectedAllergyIds] = useState<number[] | null>(
     null,
   );
@@ -289,36 +275,11 @@ export const MemberDetail = () => {
       }
 
       try {
-        if (Array.isArray(selectedOfficialIds)) {
-          await runAction(() =>
-            setMemberOfficials(userId, selectedOfficialIds),
-          );
-        }
-      } catch {
-        setGlobalError("Misslyckades att uppdatera tjänster");
-      }
-
-      try {
         if (Array.isArray(selectedAllergyIds)) {
           await runAction(() => setMemberAllergies(userId, selectedAllergyIds));
         }
       } catch {
         setGlobalError("Misslyckades att uppdatera allergier");
-      }
-
-      try {
-        if (selectedAid) {
-          await runAction(() =>
-            postAchievement(userId, {
-              achievementId: selectedAid,
-              awardedAt: awardDate || undefined,
-            }),
-          );
-          setSelectedAid(null);
-          setAwardDate("");
-        }
-      } catch {
-        setGlobalError("Misslyckades att tilldela utmärkelse");
       }
 
       try {
@@ -376,7 +337,12 @@ export const MemberDetail = () => {
       {memberLoading && !member ? (
         <MemberDetailSkeleton />
       ) : member ? (
-        <form onSubmit={handleMemberSave} className="flex flex-col gap-4 animate-step-in">
+        <div className="flex flex-col gap-4 animate-step-in">
+        <form
+          id="member-edit-form"
+          onSubmit={handleMemberSave}
+          className="flex flex-col gap-4"
+        >
           {/* Profile header */}
           <div className="ui-card">
             <AchievementsPanel
@@ -409,31 +375,9 @@ export const MemberDetail = () => {
                 }
               }}
               isEditRoute={isEditRoute}
-              selectedAid={selectedAid}
-              setSelectedAid={setSelectedAid}
-              awardDate={awardDate}
-              setAwardDate={setAwardDate}
-              canAward={canAward}
-              assignAchievement={async (
-                targetUserId: number,
-                achievementId: number,
-                awardedAt?: string,
-              ) => {
-                if (!targetUserId) throw new Error("Invalid target");
-                clearGlobalError();
-                setSaving(true);
-                try {
-                  await runAction(() =>
-                    postAchievement(String(targetUserId), {
-                      achievementId,
-                      awardedAt,
-                    }),
-                  );
-                  await run(loadMember);
-                } finally {
-                  setSaving(false);
-                }
-              }}
+              // Awards are added/edited in the "Utmärkelser" section below
+              // so that every change is change-logged with a note.
+              canAward={false}
             />
           </div>
 
@@ -479,14 +423,14 @@ export const MemberDetail = () => {
                 setGlobalError={setGlobalError}
                 setSaving={setSaving}
               />
-              <OfficialsManager
-                user={member}
-                assignedOfficials={memberOfficials}
-                historyEntries={memberOfficialHistory}
-                isEditRoute={isEditRoute}
-                selectedIds={selectedOfficialIds ?? undefined}
-                setSelectedIds={setSelectedOfficialIds}
-              />
+              {!isEditRoute ? (
+                <OfficialsManager
+                  user={member}
+                  assignedOfficials={memberOfficials}
+                  historyEntries={memberOfficialHistory}
+                  isEditRoute={false}
+                />
+              ) : null}
               <AllergiesManager
                 user={member}
                 assignedAllergies={memberAllergies}
@@ -497,10 +441,44 @@ export const MemberDetail = () => {
             </div>
           </div>
 
+        </form>
+
+          {/* Tjänster, utmärkelser and Ändringslogg (OSVS-25/26). Kept outside
+              the profile <form>: each entry is saved immediately via its own
+              dialog, and portal events must not bubble into the profile form. */}
+          {isEditRoute && canEdit && matrikelnummer ? (
+            <MemberHistoryEditor
+              matrikelnummer={matrikelnummer}
+              achievementOptions={available}
+              onChanged={() => {
+                // Refresh only the header lists; reloading `member` would
+                // reset unsaved edits in the profile form.
+                getPublicUserById(matrikelnummer)
+                  .then((detail) => {
+                    setAchievements(
+                      Array.isArray(detail.achievements) ? detail.achievements : [],
+                    );
+                    setLoadedMemberOfficials(
+                      Array.isArray(detail.officials) ? detail.officials : [],
+                    );
+                    setMemberOfficialHistory(
+                      Array.isArray(detail.officialHistory)
+                        ? detail.officialHistory
+                        : [],
+                    );
+                  })
+                  .catch(() => {
+                    // Header refresh is best-effort; the editor shows its own state.
+                  });
+              }}
+            />
+          ) : null}
+
           {isEditRoute ? (
             <div className="flex flex-col gap-2 sm:flex-row">
               <Button
                 type="submit"
+                form="member-edit-form"
                 disabled={saving || !isValid || Boolean(pictureError)}
               >
                 {saving ? "Sparar..." : "Spara"}
@@ -510,7 +488,7 @@ export const MemberDetail = () => {
               </Link>
             </div>
           ) : null}
-        </form>
+        </div>
       ) : memberNotFound || !member ? (
         <NotFoundPanel
           title="Brodern hittades inte"

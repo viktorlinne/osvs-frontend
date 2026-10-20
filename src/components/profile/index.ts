@@ -4,3 +4,4 @@ export * from "./RolesManager";
 export * from "./OfficialsManager";
 export * from "./AllergiesManager";
 export * from "./ProfileMapPinSection";
+export * from "./MemberHistoryEditor";

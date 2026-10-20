@@ -20,11 +20,11 @@ export const AchievementsPanel = ({
   achievements: Achievement[];
   available: Achievement[];
   selectedAid?: number | null;
-  setSelectedAid: (id: number | null) => void;
-  awardDate: string;
-  setAwardDate: (d: string) => void;
+  setSelectedAid?: (id: number | null) => void;
+  awardDate?: string;
+  setAwardDate?: (d: string) => void;
   canAward: boolean;
-  assignAchievement: (
+  assignAchievement?: (
     targetUserId: number,
     achievementId: number,
     awardedAt?: string,
@@ -113,7 +113,7 @@ export const AchievementsPanel = ({
           )}
         </div>
 
-        {isEditRoute && canAward ? (
+        {isEditRoute && canAward && setSelectedAid && setAwardDate ? (
           <div className="mt-4">
             <label htmlFor="awardSelect" className="ui-label">Tilldela ny utmärkelse</label>
             <div className="mt-1.5 flex flex-col gap-2 sm:flex-row sm:items-end">
@@ -139,7 +139,7 @@ export const AchievementsPanel = ({
                   id="awardDate"
                   name="awardDate"
                   type="date"
-                  value={awardDate}
+                  value={awardDate ?? ""}
                   onChange={(e) => setAwardDate(e.target.value)}
                   className="ui-input"
                 />
