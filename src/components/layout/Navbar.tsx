@@ -73,6 +73,10 @@ function NavbarUserMenu({
   );
 }
 
+function canManageGroups(user: { roles?: string[] }) {
+  return (user.roles ?? []).some((role) => role === "Admin" || role === "Editor");
+}
+
 function NavbarLinks({
   user,
   onClose,
@@ -125,6 +129,9 @@ function NavbarLinks({
             <NavDropdown label="Arkiv" onClose={onClose}>
               <NavItem to="/documents">Dokument</NavItem>
               <NavItem to="/revisions">Revisioner</NavItem>
+              {canManageGroups(user) ? (
+                <NavItem to="/admin/groups">Grupper</NavItem>
+              ) : null}
               {(user.roles ?? []).includes("Admin") ? (
                 <NavItem to="/admin/membership-payments">Avgifter</NavItem>
               ) : null}
@@ -299,6 +306,11 @@ export const Navbar: React.FC = () => {
                 <NavItem to="/revisions" onClick={closeMenu}>
                   Revisioner
                 </NavItem>
+                {canManageGroups(user) ? (
+                  <NavItem to="/admin/groups" onClick={closeMenu}>
+                    Grupper
+                  </NavItem>
+                ) : null}
                 {(user.roles ?? []).includes("Admin") ? (
                   <NavItem to="/admin/membership-payments" onClick={closeMenu}>
                     Avgifter

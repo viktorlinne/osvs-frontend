@@ -28,3 +28,5 @@ export * from "./DocumentsPage";
 export * from "./UploadRevisions";
 export * from "./UploadDocument";
 export * from "./Regalia";
+export * from "./GroupsPage";
+export * from "./GroupDetail";

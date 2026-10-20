@@ -129,6 +129,14 @@ const UploadDocument = lazyNamedPage(
   () => import("../pages/UploadDocument"),
   "UploadDocument",
 );
+const GroupsPage = lazyNamedPage(
+  () => import("../pages/GroupsPage"),
+  "GroupsPage",
+);
+const GroupDetail = lazyNamedPage(
+  () => import("../pages/GroupDetail"),
+  "GroupDetail",
+);
 const Regalia = lazyNamedPage(() => import("../pages/Regalia"), "Regalia");
 const ForbiddenPage = lazyNamedPage(
   () => import("../pages/ForbiddenPage"),
@@ -225,6 +233,14 @@ const routes = [
       {
         path: "admin/membership-payments",
         element: renderProtectedPage(MembershipPaymentsPage, ["Admin"]),
+      },
+      {
+        path: "admin/groups",
+        element: renderProtectedPage(GroupsPage, ["Admin", "Editor"]),
+      },
+      {
+        path: "admin/groups/:id",
+        element: renderProtectedPage(GroupDetail, ["Admin", "Editor"]),
       },
       {
         path: "profile/attended",
