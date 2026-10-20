@@ -5,6 +5,7 @@ export * from "./RouteLoadingFallback";
 export * from "./layout";
 export * from "./profile";
 export * from "./events";
+export * from "./groups";
 export * from "./ui";
 export * from "./EventList";
 export * from "./PublicumList";
