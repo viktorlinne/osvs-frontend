@@ -34,9 +34,33 @@ export type EventFoodResponse = {
 
 export type SetFoodResult = EventMutationResult & EventFoodResponse;
 
+export type EventRegistration = {
+  /** `null` when the member has not answered yet. */
+  rsvp: boolean | null;
+  bookFood: boolean;
+};
+
+export type SaveEventRegistrationBody = {
+  rsvp: boolean;
+  bookFood: boolean;
+};
+
+export type SaveEventRegistrationResult = EventMutationResult & {
+  registration: EventRegistration;
+};
+
 export type PatchEventAttendanceResult = EventMutationResult & {
   row: EventAttendanceRow | null;
 };
+
+function parseRegistration(source: unknown): EventRegistration {
+  const record = readObjectField(source, "registration");
+  const rsvp = readBooleanField(record, "rsvp");
+  return {
+    rsvp,
+    bookFood: rsvp === true && readBooleanField(record, "bookFood") === true,
+  };
+}
 
 function parseMutationResult(source: unknown): EventMutationResult {
   return {
@@ -153,6 +177,28 @@ export async function setFood(
   };
 }
 
+/** Current member's combined attendance + food registration. */
+export async function getRegistration(
+  eventId: number | string,
+): Promise<EventRegistration> {
+  const response = await fetchData(api.get(`/events/${eventId}/registration`));
+  return parseRegistration(response);
+}
+
+/** Saves attendance and food together (atomic on the backend). */
+export async function saveRegistration(
+  eventId: number | string,
+  payload: SaveEventRegistrationBody,
+): Promise<SaveEventRegistrationResult> {
+  const response = await fetchData(
+    api.put(`/events/${eventId}/registration`, payload),
+  );
+  return {
+    ...parseMutationResult(response),
+    registration: parseRegistration(response),
+  };
+}
+
 export async function listEventAttendances(
   eventId: number | string,
 ): Promise<EventAttendanceRow[]> {
@@ -189,6 +235,8 @@ export default {
   getRsvp,
   getFood,
   setFood,
+  getRegistration,
+  saveRegistration,
   listEventAttendances,
   patchEventAttendance,
 };

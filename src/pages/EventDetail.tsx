@@ -17,19 +17,18 @@ import { getEventFormErrors } from "../utils/formValidation";
 import {
   deleteEvent,
   getEvent,
-  getFood,
-  getRsvp,
+  getRegistration,
   listEventAttendances,
   patchEventAttendance,
-  setFood,
-  setRsvp,
+  saveRegistration,
   updateEvent,
 } from "../services/events";
 import type {
   EventMutationResult,
+  EventRegistration,
   PatchEventAttendanceResult,
-  SetFoodResult,
-  SetRsvpResult,
+  SaveEventRegistrationBody,
+  SaveEventRegistrationResult,
 } from "../services/events";
 import { listGroups } from "../services/groups";
 import { listLodges } from "../services/lodges";
@@ -55,24 +54,14 @@ function normalizeSelection(values?: number[] | null): string[] {
   );
 }
 
-function hasBookFoodResult(
-  value:
-    | EventMutationResult
-    | SetRsvpResult
-    | SetFoodResult
-    | PatchEventAttendanceResult
-    | void,
-): value is SetFoodResult {
-  return Boolean(value && typeof value === "object" && "bookFood" in value);
-}
+type ActionResult =
+  | EventMutationResult
+  | SaveEventRegistrationResult
+  | PatchEventAttendanceResult
+  | void;
 
 function hasAttendanceRowResult(
-  value:
-    | EventMutationResult
-    | SetRsvpResult
-    | SetFoodResult
-    | PatchEventAttendanceResult
-    | void,
+  value: ActionResult,
 ): value is PatchEventAttendanceResult {
   return Boolean(value && typeof value === "object" && "row" in value);
 }
@@ -80,9 +69,7 @@ function hasAttendanceRowResult(
 export const EventDetail = () => {
   const { id } = useParams<{ id: string }>();
   const { run, data: event, loading: eventLoading, notFound: eventNotFound } = useFetch<EventRecord | null>();
-  const { run: runAction, loading: saving } = useFetch<
-    EventMutationResult | SetRsvpResult | SetFoodResult | PatchEventAttendanceResult | void
-  >();
+  const { run: runAction, loading: saving } = useFetch<ActionResult>();
   const {
     run: runLodges,
     data: lodges,
@@ -93,8 +80,12 @@ export const EventDetail = () => {
     data: groups,
     loading: groupsLoading,
   } = useFetch<Group[]>();
-  const { run: runRsvpFetch, loading: rsvpLoading } = useFetch<string | null>();
-  const { run: runFoodFetch, loading: foodLoading } = useFetch<boolean | null>();
+  const {
+    run: runRegistrationFetch,
+    data: registration,
+    setData: setRegistration,
+    loading: registrationLoading,
+  } = useFetch<EventRegistration>();
   const {
     run: runAttendances,
     data: attendances,
@@ -127,8 +118,9 @@ export const EventDetail = () => {
   const [selectedGroupIds, setSelectedGroupIds] = useState<string[]>([]);
   const [selectedUserIds, setSelectedUserIds] = useState<string[]>([]);
   const [serverErrors, setServerErrors] = useState<Record<string, string>>({});
-  const [rsvpStatus, setRsvpStatus] = useState<string | null>(null);
-  const [bookFoodStatus, setBookFoodStatus] = useState<boolean | null>(null);
+  const [registrationErrors, setRegistrationErrors] = useState<
+    Record<string, string>
+  >({});
   const [attendanceSavingUid, setAttendanceSavingUid] = useState<number | null>(
     null,
   );
@@ -159,14 +151,12 @@ export const EventDetail = () => {
     Number.isFinite(authUserId) &&
     Array.isArray(attendances) &&
     attendances.some((row) => Number(row.uid) === authUserId);
-  const canShowRsvpButtons = Boolean(user) && isUserInvitedToEvent && canRsvp;
-
-  const canBookFood = (() => {
-    if (!event?.food || !event?.startDate || rsvpStatus !== "going") {
-      return false;
-    }
-    return !isEventStartedNowStockholm(event.startDate);
-  })();
+  // The registration flow is open while the member may still OSA
+  // (existing rule: more than 48 hours before start).
+  const canChangeRegistration =
+    Boolean(user) && isUserInvitedToEvent && canRsvp;
+  const showRegistration = Boolean(user) && isUserInvitedToEvent;
+  const eventIdForRegistration = Number(event?.id);
 
   function clearServerField(field: string) {
     setServerErrors((prev) => {
@@ -217,13 +207,6 @@ export const EventDetail = () => {
       runGroups(() => listGroups()).catch(() => {
         // useFetch handles global error presentation
       }),
-      runRsvpFetch(async () => {
-        const status = await getRsvp(eventId);
-        setRsvpStatus(status);
-        return status;
-      }).catch(() => {
-        // useFetch handles global error presentation
-      }),
       runAttendances(() => listEventAttendances(eventId)).catch(() => {
         // useFetch handles global error presentation
       }),
@@ -233,31 +216,26 @@ export const EventDetail = () => {
       // audience users load via useEventAudience
     }
 
-    if (event.food) {
-      requests.push(
-        runFoodFetch(async () => {
-          const bookFood = await getFood(eventId);
-          setBookFoodStatus(bookFood);
-          return bookFood;
-        }).catch(() => {
-          // useFetch handles global error presentation
-        }),
-      );
-    } else {
-      setBookFoodStatus(null);
-    }
-
     void Promise.all(requests);
   }, [
     canEdit,
     event,
     isEditRoute,
     runAttendances,
-    runFoodFetch,
     runGroups,
     runLodges,
-    runRsvpFetch,
   ]);
+
+  // Load the member's own registration once we know they are invited
+  // (the endpoint answers 403 for members who are not invited).
+  useEffect(() => {
+    if (!showRegistration || !Number.isFinite(eventIdForRegistration)) return;
+    runRegistrationFetch(() => getRegistration(eventIdForRegistration)).catch(
+      () => {
+        // useFetch handles global error presentation
+      },
+    );
+  }, [eventIdForRegistration, runRegistrationFetch, showRegistration]);
 
   async function handleSave() {
     if (!id) {
@@ -345,37 +323,33 @@ export const EventDetail = () => {
     }
   }
 
-  async function handleRsvp(status: "going" | "not-going") {
-    if (!event) return;
-
+  async function handleConfirmRegistration(
+    payload: SaveEventRegistrationBody,
+  ): Promise<boolean> {
+    if (!event) return false;
     const eventId = Number(event.id);
-    if (!Number.isFinite(eventId)) return;
+    if (!Number.isFinite(eventId)) return false;
 
+    setRegistrationErrors({});
     try {
-      await runAction(() => setRsvp(eventId, status));
-      setRsvpStatus(status);
-      if (status !== "going") setBookFoodStatus(false);
-      await runAttendances(() => listEventAttendances(eventId));
-    } catch {
-      setGlobalError("Misslyckades att uppdatera osa");
-    }
-  }
-
-  async function handleBookFood(value: boolean) {
-    if (!event) return;
-    const eventId = Number(event.id);
-    if (!Number.isFinite(eventId)) return;
-
-    try {
-      const response = await runAction(() => setFood(eventId, value));
-      setBookFoodStatus(
-        hasBookFoodResult(response) && typeof response.bookFood === "boolean"
-          ? response.bookFood
-          : value,
+      const response = await runAction(() => saveRegistration(eventId, payload));
+      if (response && "registration" in response) {
+        setRegistration(response.registration);
+      }
+      await runAttendances(() => listEventAttendances(eventId)).catch(() => {
+        // useFetch handles global error presentation
+      });
+      return true;
+    } catch (error: unknown) {
+      const fields = getApiFieldErrors(error);
+      if (fields) {
+        setRegistrationErrors(fields);
+        return false;
+      }
+      setGlobalError(
+        getApiErrorMessage(error) ?? "Misslyckades att spara anmälan",
       );
-      await runAttendances(() => listEventAttendances(eventId));
-    } catch {
-      setGlobalError("Misslyckades att uppdatera matbokningen");
+      return false;
     }
   }
 
@@ -418,6 +392,11 @@ export const EventDetail = () => {
         });
       } else {
         await runAttendances(() => listEventAttendances(eventId));
+      }
+      if (uid === authUserId) {
+        await runRegistrationFetch(() => getRegistration(eventId)).catch(() => {
+          // useFetch handles global error presentation
+        });
       }
     } catch {
       setGlobalError("Misslyckades att uppdatera närvaron");
@@ -490,15 +469,13 @@ export const EventDetail = () => {
           ) : (
             <EventDetailView
               event={event}
-              userCanRsvp={canShowRsvpButtons}
-              onRsvp={handleRsvp}
-              userCanBookFood={Boolean(user && canBookFood)}
-              onBookFood={handleBookFood}
+              showRegistration={showRegistration}
+              registration={registration}
+              registrationLoading={registrationLoading}
+              canChangeRegistration={canChangeRegistration}
+              registrationErrors={registrationErrors}
+              onConfirmRegistration={handleConfirmRegistration}
               saving={saving}
-              rsvpLoading={rsvpLoading}
-              rsvpStatus={rsvpStatus}
-              foodLoading={foodLoading}
-              bookFoodStatus={bookFoodStatus}
               formatDisplayDate={formatEventDisplayDate}
               lodges={lodges}
               eventLodgeIds={event.lodgeIds ?? []}
