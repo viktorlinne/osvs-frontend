@@ -10,7 +10,7 @@ export type UpdateUserForm = {
   address?: string;
   zipcode?: string;
   accommodationAvailable?: boolean | null;
-  archive?: "Avliden" | "Urgången" | "" | null;
+  archive?: "Avliden" | "Urgången" | "Avförd" | "" | null;
   feeExempt?: boolean;
   standingList?: boolean;
 };

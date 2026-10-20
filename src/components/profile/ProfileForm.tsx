@@ -400,6 +400,7 @@ export const ProfileForm = ({
             <option value="">— Aktiv —</option>
             <option value="Avliden">Avliden</option>
             <option value="Urgången">Urgången</option>
+            <option value="Avförd">Avförd</option>
           </select>
           <p className="mt-1.5 text-xs text-neutral-500">
             Arkivering döljer medlemmen från aktiva listor. Välj tomt för att återaktivera.

@@ -49,7 +49,7 @@ export type User = {
   achievements?: Achievement[] | null;
   allergies?: Allergy[] | null;
   officialHistory?: OfficialHistoryItem[] | null;
-  archive?: "Avliden" | "Urgången" | null;
+  archive?: "Avliden" | "Urgången" | "Avförd" | null;
   firstname: string;
   lastname: string;
   dateOfBirth: string;

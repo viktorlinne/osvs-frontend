@@ -26,7 +26,9 @@ export function toUserProfileUpdatePayload(
         ? values.accommodationAvailable
         : null,
     archive:
-      values.archive === "Avliden" || values.archive === "Urgången"
+      values.archive === "Avliden" ||
+      values.archive === "Urgången" ||
+      values.archive === "Avförd"
         ? values.archive
         : null,
   };
