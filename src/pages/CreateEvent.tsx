@@ -58,11 +58,13 @@ export const CreateEvent = () => {
   const formErrors = { ...serverErrors, ...clientErrors };
   const canSubmit = canCreate && Object.keys(clientErrors).length === 0;
   const hasFoodFromPrice = Number.isFinite(Number(form.price)) && Number(form.price) > 0;
-  const selectedLodgeId = useMemo(() => {
-    const firstValue = selectedLodgeIds[0];
-    const parsed = Number(firstValue);
-    return Number.isFinite(parsed) ? parsed : null;
-  }, [selectedLodgeIds]);
+  const selectedLodgeNumericIds = useMemo(
+    () =>
+      selectedLodgeIds
+        .map((value) => Number(value))
+        .filter((id) => Number.isFinite(id) && id > 0),
+    [selectedLodgeIds],
+  );
 
   const {
     users,
@@ -72,7 +74,7 @@ export const CreateEvent = () => {
     setUserQuery,
   } = useEventAudience({
     enabled: canCreate,
-    selectedLodgeId,
+    selectedLodgeIds: selectedLodgeNumericIds,
   });
 
   function clearServerField(field: string) {
@@ -246,7 +248,7 @@ export const CreateEvent = () => {
           <div className="py-5">
             <p className="ui-chapter mb-1.5">Målgrupp</p>
             <p className="mb-3 text-xs text-neutral-600">
-              Välj loge, grupper eller enskilda bröder.
+              Välj loger, grupper eller enskilda bröder.
             </p>
             <EventAudienceFields
               lodges={lodges}

@@ -2,7 +2,7 @@ import { useMemo } from "react";
 import type { Group, Lodge, PublicUser } from "../../types";
 import { errorTextClass } from "../ui";
 import { GroupSelection } from "../GroupSelection";
-import { SingleLodgeSelection } from "../SingleLodgeSelection";
+import { LodgeSelection } from "../LodgeSelection";
 import { UserSelection } from "../UserSelection";
 import { normalizeSelectionIds } from "../lodgeSelectionUtils";
 
@@ -57,7 +57,7 @@ export function EventAudienceFields({
     [selectedUserIds],
   );
 
-  // Users belonging to the currently selected lodge
+  // Users belonging to any of the explicitly selected lodges
   const lodgeUserSet = useMemo(
     () => new Set((lodgeUsers ?? []).map((u) => String(u.matrikelnummer))),
     [lodgeUsers],
@@ -85,26 +85,34 @@ export function EventAudienceFields({
     return map;
   }, [users]);
 
-  // Auto-derive a lodge when no lodge is explicitly selected but all of a lodge's
-  // members are already covered by the combination of groups + individual users.
-  const autoLodgeId = useMemo(() => {
-    if (selectedLodgeIds.length > 0) return null;
-    for (const lodge of lodges ?? []) {
-      const lodgeUids = lodgeUsersById.get(String(lodge.id));
-      if (!lodgeUids || lodgeUids.size === 0) continue;
-      if ([...lodgeUids].every((uid) => groupUserSet.has(uid) || individualSet.has(uid))) {
-        return String(lodge.id);
-      }
-    }
-    return null;
-  }, [selectedLodgeIds, lodges, lodgeUsersById, groupUserSet, individualSet]);
-
-  const effectiveLodgeIds = useMemo(
-    () => (selectedLodgeIds.length > 0 ? selectedLodgeIds : autoLodgeId ? [autoLodgeId] : []),
-    [selectedLodgeIds, autoLodgeId],
+  const explicitLodgeIds = useMemo(
+    () => new Set(normalizeSelectionIds(selectedLodgeIds)),
+    [selectedLodgeIds],
   );
 
-  // Groups whose every member is covered by the lodge → locked, cannot be deselected.
+  // Lodges that are not explicitly selected but whose members are all already
+  // covered by the rest of the selection (other lodges, groups, individual
+  // users). They are shown as checked/read-only and are not sent as an
+  // explicit choice.
+  const autoLodgeIds = useMemo(() => {
+    const derived: string[] = [];
+    for (const lodge of lodges ?? []) {
+      const lid = String(lodge.id);
+      if (explicitLodgeIds.has(lid)) continue;
+      const lodgeUids = lodgeUsersById.get(lid);
+      if (!lodgeUids || lodgeUids.size === 0) continue;
+      if (
+        [...lodgeUids].every(
+          (uid) => lodgeUserSet.has(uid) || groupUserSet.has(uid) || individualSet.has(uid),
+        )
+      ) {
+        derived.push(lid);
+      }
+    }
+    return derived;
+  }, [lodges, explicitLodgeIds, lodgeUsersById, lodgeUserSet, groupUserSet, individualSet]);
+
+  // Groups whose every member is covered by the selected lodges → locked, cannot be deselected.
   // Groups covered only by individual user selections are NOT locked.
   const lockedGroupIds = useMemo(
     () =>
@@ -137,16 +145,18 @@ export function EventAudienceFields({
     <div className="space-y-2">
       {errors.audience ? <p className={errorTextClass}>{errors.audience}</p> : null}
 
-      <SingleLodgeSelection
+      <LodgeSelection
         lodges={lodges}
-        selectedIds={effectiveLodgeIds}
+        selectedIds={selectedLodgeIds}
+        derivedSelectedIds={autoLodgeIds}
         onChange={(ids) => {
           clearServerField("audience");
           clearServerField("lodgeId");
           clearServerField("lodgeIds");
-          onLodgeChange(ids);
+          // Strip auto-derived lodge IDs — they're not an explicit user choice
+          onLodgeChange(ids.filter((id) => !autoLodgeIds.includes(id)));
         }}
-        label="Välj loge"
+        label="Välj loger"
         disabled={disabled}
         loading={lodgesLoading}
         name="event-lodge"

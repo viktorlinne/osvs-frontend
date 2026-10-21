@@ -128,11 +128,13 @@ export const EventDetail = () => {
   const formErrors = { ...serverErrors, ...clientErrors };
   const canSave = Object.keys(clientErrors).length === 0;
   const hasStarted = isEventStartedNowStockholm(event?.startDate);
-  const selectedLodgeId = useMemo(() => {
-    const firstValue = selectedLodgeIds[0];
-    const parsed = Number(firstValue);
-    return Number.isFinite(parsed) ? parsed : null;
-  }, [selectedLodgeIds]);
+  const selectedLodgeNumericIds = useMemo(
+    () =>
+      selectedLodgeIds
+        .map((value) => Number(value))
+        .filter((id) => Number.isFinite(id) && id > 0),
+    [selectedLodgeIds],
+  );
 
   const {
     users,
@@ -142,7 +144,7 @@ export const EventDetail = () => {
     setUserQuery,
   } = useEventAudience({
     enabled: isEditRoute && canEdit,
-    selectedLodgeId,
+    selectedLodgeIds: selectedLodgeNumericIds,
   });
 
   const canRsvp = isMoreThan48HoursFromNowStockholm(event?.startDate);

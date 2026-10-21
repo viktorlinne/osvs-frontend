@@ -13,6 +13,5 @@ export * from "./PublicumDisplay";
 export * from "./AudienceSelection";
 export * from "./GroupSelection";
 export * from "./LodgeSelection";
-export * from "./SingleLodgeSelection";
 export * from "./UserSelection";
 export * from "./lodgeSelectionUtils";

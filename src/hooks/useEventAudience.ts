@@ -5,12 +5,15 @@ import type { PublicUser } from "../types";
 
 type UseEventAudienceOptions = {
   enabled?: boolean;
-  selectedLodgeId?: number | null;
+  /** Every lodge selected in the audience; members of all of them are loaded. */
+  selectedLodgeIds?: number[];
 };
+
+const NO_LODGES: number[] = [];
 
 export function useEventAudience({
   enabled = true,
-  selectedLodgeId = null,
+  selectedLodgeIds = NO_LODGES,
 }: UseEventAudienceOptions = {}) {
   const {
     run: runUsers,
@@ -50,18 +53,39 @@ export function useEventAudience({
     });
   }, [enabled, loadUsers]);
 
+  // Stable key so a new array with the same ids does not refetch.
+  const lodgeIdsKey = useMemo(
+    () =>
+      Array.from(
+        new Set(selectedLodgeIds.filter((id) => Number.isFinite(id) && id > 0)),
+      )
+        .sort((a, b) => a - b)
+        .join(","),
+    [selectedLodgeIds],
+  );
+
   useEffect(() => {
-    if (!enabled || !selectedLodgeId) {
+    const lodgeIds = lodgeIdsKey ? lodgeIdsKey.split(",").map(Number) : [];
+    if (!enabled || lodgeIds.length === 0) {
       setLodgeUsers(null);
       return;
     }
 
     runLodgeUsers(() =>
-      listAllUsers({ lodgeId: selectedLodgeId }).then((users) => ({ users })),
+      Promise.all(lodgeIds.map((lodgeId) => listAllUsers({ lodgeId }))).then(
+        (perLodge) => {
+          // Merge members of all selected lodges, deduped by matrikelnummer.
+          const byId = new Map<number, PublicUser>();
+          for (const users of perLodge) {
+            for (const user of users) byId.set(user.matrikelnummer, user);
+          }
+          return { users: Array.from(byId.values()) };
+        },
+      ),
     ).catch(() => {
       /* useFetch handles errors */
     });
-  }, [enabled, runLodgeUsers, selectedLodgeId, setLodgeUsers]);
+  }, [enabled, runLodgeUsers, lodgeIdsKey, setLodgeUsers]);
 
   const users = useMemo(() => usersPage?.users ?? [], [usersPage?.users]);
   const lodgeUsers = useMemo(
