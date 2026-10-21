@@ -1,12 +1,9 @@
 import { useCallback, useEffect, useState } from "react";
 import useFetch from "./useFetch";
-import { listUsersPage } from "../services/users";
+import { listAllUsers } from "../services/users";
 import type { PublicUser } from "../types";
 
-const DEFAULT_PAGE_SIZE = 50;
-
 type UseDebouncedUserSearchOptions = {
-  pageSize?: number;
   debounceMs?: number;
   lodgeId?: number | null;
   achievementId?: number | null;
@@ -18,7 +15,6 @@ export function useDebouncedUserSearch(
   options: UseDebouncedUserSearchOptions = {},
 ) {
   const {
-    pageSize = DEFAULT_PAGE_SIZE,
     debounceMs = 400,
     lodgeId = null,
     achievementId = null,
@@ -38,15 +34,15 @@ export function useDebouncedUserSearch(
   const load = useCallback(() => {
     setFetchError(false);
     return run(() =>
-      listUsersPage({
+      // All matching members (every page), so pickers grouped by lodge show
+      // every member without typing, not only the first page.
+      listAllUsers({
         name: debouncedQuery || undefined,
         lodgeId,
         achievementId,
         officialId,
         accommodationAvailable,
-        page: 1,
-        pageSize,
-      }).then((response) => ({ users: response.users })),
+      }).then((users) => ({ users })),
     );
   }, [
     accommodationAvailable,
@@ -54,7 +50,6 @@ export function useDebouncedUserSearch(
     debouncedQuery,
     lodgeId,
     officialId,
-    pageSize,
     run,
   ]);
 

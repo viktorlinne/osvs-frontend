@@ -258,11 +258,44 @@ export async function listUsersPage(
   return parsePaginatedUsersResponse(res);
 }
 
+/** Largest page the backend accepts for GET /users (MAX_USERS_PAGE_SIZE). */
+export const MAX_USERS_PAGE_SIZE = 100;
+
+/**
+ * Every member matching the filters, across all pages. GET /users caps
+ * pageSize at 100, so pickers that must offer all ~1,150 members (grouped by
+ * lodge, without typing) fetch page 1 and then the remaining pages in
+ * parallel.
+ */
+export async function listAllUsers(
+  filters?: Omit<ListUsersFilters, "page" | "pageSize">,
+): Promise<PublicUser[]> {
+  const first = await listUsersPage({
+    ...filters,
+    page: 1,
+    pageSize: MAX_USERS_PAGE_SIZE,
+  });
+  if (first.totalPages <= 1) return first.users;
+
+  const rest = await Promise.all(
+    Array.from({ length: first.totalPages - 1 }, (_, index) =>
+      listUsersPage({ ...filters, page: index + 2, pageSize: first.pageSize }),
+    ),
+  );
+  const seen = new Set<number>();
+  const all: PublicUser[] = [];
+  for (const user of [first, ...rest].flatMap((page) => page.users)) {
+    if (seen.has(user.matrikelnummer)) continue;
+    seen.add(user.matrikelnummer);
+    all.push(user);
+  }
+  return all;
+}
+
 export async function listUsers(
   filters?: Omit<ListUsersFilters, "page" | "pageSize">,
 ): Promise<PublicUser[]> {
-  const response = await listUsersPage({ ...filters, page: 1, pageSize: 100 });
-  return response.users;
+  return listAllUsers(filters);
 }
 
 export async function listUsersMapPins(): Promise<UserMapPin[]> {
@@ -367,6 +400,7 @@ export async function getUserAttendedEvents(
 }
 
 export default {
+  listAllUsers,
   updateMe,
   adminUpdateUser,
   uploadMyPicture,

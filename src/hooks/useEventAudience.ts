@@ -1,9 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import useFetch from "./useFetch";
-import { listUsersPage } from "../services/users";
+import { listAllUsers } from "../services/users";
 import type { PublicUser } from "../types";
-
-const USER_PAGE_SIZE = 50;
 
 type UseEventAudienceOptions = {
   enabled?: boolean;
@@ -37,11 +35,11 @@ export function useEventAudience({
   const loadUsers = useCallback(() => {
     if (!enabled) return Promise.resolve({ users: [] as PublicUser[] });
     return runUsers(() =>
-      listUsersPage({
-        name: debouncedUserQuery || undefined,
-        page: 1,
-        pageSize: USER_PAGE_SIZE,
-      }).then((response) => ({ users: response.users })),
+      // Every member (all pages): the audience picker groups members by lodge
+      // and must offer all of them, not only the first page.
+      listAllUsers({ name: debouncedUserQuery || undefined }).then((users) => ({
+        users,
+      })),
     );
   }, [debouncedUserQuery, enabled, runUsers]);
 
@@ -59,11 +57,7 @@ export function useEventAudience({
     }
 
     runLodgeUsers(() =>
-      listUsersPage({
-        lodgeId: selectedLodgeId,
-        page: 1,
-        pageSize: USER_PAGE_SIZE,
-      }).then((response) => ({ users: response.users })),
+      listAllUsers({ lodgeId: selectedLodgeId }).then((users) => ({ users })),
     ).catch(() => {
       /* useFetch handles errors */
     });

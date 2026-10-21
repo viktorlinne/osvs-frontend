@@ -140,7 +140,7 @@ export const MapPage = () => {
     query: adminUserQuery,
     setQuery: setAdminUserQuery,
     loading: adminUsersLoading,
-  } = useDebouncedUserSearch({ pageSize: 100 });
+  } = useDebouncedUserSearch();
 
   const [pinsError, setPinsError] = useState(false);
 
