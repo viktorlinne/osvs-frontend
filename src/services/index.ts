@@ -3,6 +3,7 @@ export * from "./api";
 export * from "./auth";
 export * from "./events";
 export * from "./groups";
+export * from "./mailings";
 export * from "./globalAuth";
 export * from "./lodges";
 export * from "./posts";

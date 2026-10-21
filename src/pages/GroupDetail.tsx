@@ -4,6 +4,7 @@ import {
   AsyncState,
   Button,
   GroupForm,
+  GroupMailingSection,
   NotFoundPanel,
   PageContainer,
   UserSelection,
@@ -454,6 +455,10 @@ export const GroupDetail = () => {
               </Button>
             </div>
           </section>
+
+          {id ? (
+            <GroupMailingSection groupId={id} membersVersion={group.memberCount} />
+          ) : null}
         </>
       ) : null}
     </PageContainer>
