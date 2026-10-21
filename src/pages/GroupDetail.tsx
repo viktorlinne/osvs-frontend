@@ -3,6 +3,7 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 import {
   AsyncState,
   Button,
+  ConfirmDialog,
   GroupForm,
   GroupMailingSection,
   NotFoundPanel,
@@ -26,6 +27,11 @@ import { getApiErrorMessage, getApiFieldErrors } from "../utils/apiErrors";
 
 function formatMemberCount(count: number) {
   return count === 1 ? "1 medlem" : `${count} medlemmar`;
+}
+
+function memberDisplayName(member: GroupMember) {
+  const fullName = `${member.firstname} ${member.lastname}`.trim();
+  return fullName || `#${member.matrikelnummer}`;
 }
 
 function formatAddResult(added: number, alreadyMembers: number) {
@@ -108,6 +114,10 @@ export const GroupDetail = () => {
     () => new Set((members ?? []).map((member) => member.matrikelnummer)),
     [members],
   );
+  const confirmRemoveMember =
+    confirmRemoveId === null
+      ? null
+      : (members ?? []).find((member) => member.matrikelnummer === confirmRemoveId) ?? null;
   const candidateUsers = useMemo(
     () => userSearch.users.filter((user) => !memberIds.has(user.matrikelnummer)),
     [userSearch.users, memberIds],
@@ -181,6 +191,8 @@ export const GroupDetail = () => {
       setAddResult(null);
       syncMemberCount(await loadMembers());
     } catch (error: unknown) {
+      // Close the dialog so the global error banner is visible.
+      setConfirmRemoveId(null);
       setGlobalError(getApiErrorMessage(error) ?? "Kunde inte ta bort medlemmen");
     } finally {
       setRemovingId(null);
@@ -252,44 +264,30 @@ export const GroupDetail = () => {
                 </div>
 
                 <div className="flex shrink-0 flex-wrap items-center gap-2">
-                  {!confirmDelete ? (
-                    <>
-                      <Button type="button" variant="secondary" onClick={() => setEditing(true)}>
-                        Redigera
-                      </Button>
-                      <Button
-                        type="button"
-                        variant="danger"
-                        onClick={() => setConfirmDelete(true)}
-                      >
-                        Ta bort
-                      </Button>
-                    </>
-                  ) : (
-                    <div className="flex flex-wrap items-center gap-2" role="group" aria-label="Bekräfta borttagning">
-                      <span className="text-sm text-danger-700">
-                        {group.memberCount > 0
-                          ? `Ta bort gruppen? ${group.memberCount} medlemskap tas bort, men medlemmarnas konton påverkas inte.`
-                          : "Ta bort gruppen permanent?"}
-                      </span>
-                      <Button
-                        type="button"
-                        variant="danger"
-                        onClick={handleDelete}
-                        loading={deleting}
-                      >
-                        {deleting ? "Tar bort…" : "Ja, ta bort"}
-                      </Button>
-                      <Button
-                        type="button"
-                        variant="secondary"
-                        onClick={() => setConfirmDelete(false)}
-                        disabled={deleting}
-                      >
-                        Avbryt
-                      </Button>
-                    </div>
-                  )}
+                  <Button type="button" variant="secondary" onClick={() => setEditing(true)}>
+                    Redigera
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="danger"
+                    onClick={() => setConfirmDelete(true)}
+                  >
+                    Ta bort
+                  </Button>
+                  <ConfirmDialog
+                    open={confirmDelete}
+                    onOpenChange={setConfirmDelete}
+                    title={`Ta bort gruppen ${group.name}?`}
+                    description={
+                      group.memberCount > 0
+                        ? `${group.memberCount} medlemskap tas bort, men medlemmarnas konton påverkas inte.`
+                        : "Gruppen tas bort permanent."
+                    }
+                    confirmLabel="Ta bort"
+                    pendingLabel="Tar bort…"
+                    pending={deleting}
+                    onConfirm={() => void handleDelete()}
+                  />
                 </div>
               </div>
             )}
@@ -335,8 +333,6 @@ export const GroupDetail = () => {
               <ul className="overflow-hidden rounded-card border border-neutral-200">
                 {(members ?? []).map((member) => {
                   const fullName = `${member.firstname} ${member.lastname}`.trim();
-                  const confirming = confirmRemoveId === member.matrikelnummer;
-                  const removing = removingId === member.matrikelnummer;
                   return (
                     <li
                       key={member.matrikelnummer}
@@ -361,45 +357,39 @@ export const GroupDetail = () => {
                           </span>
                         ) : null}
                       </div>
-                      {confirming ? (
-                        <div className="flex items-center gap-2">
-                          <span className="text-sm text-danger-700">Ta bort ur gruppen?</span>
-                          <Button
-                            type="button"
-                            size="sm"
-                            variant="danger"
-                            loading={removing}
-                            onClick={() => handleRemoveMember(member.matrikelnummer)}
-                          >
-                            Ja
-                          </Button>
-                          <Button
-                            type="button"
-                            size="sm"
-                            variant="secondary"
-                            disabled={removing}
-                            onClick={() => setConfirmRemoveId(null)}
-                          >
-                            Nej
-                          </Button>
-                        </div>
-                      ) : (
-                        <Button
-                          type="button"
-                          size="sm"
-                          variant="secondary"
-                          disabled={removingId !== null}
-                          onClick={() => setConfirmRemoveId(member.matrikelnummer)}
-                          aria-label={`Ta bort ${fullName || member.matrikelnummer} ur gruppen`}
-                        >
-                          Ta bort
-                        </Button>
-                      )}
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="secondary"
+                        disabled={removingId !== null}
+                        onClick={() => setConfirmRemoveId(member.matrikelnummer)}
+                        aria-label={`Ta bort ${fullName || member.matrikelnummer} ur gruppen`}
+                      >
+                        Ta bort
+                      </Button>
                     </li>
                   );
                 })}
               </ul>
             </AsyncState>
+            <ConfirmDialog
+              open={confirmRemoveMember !== null}
+              onOpenChange={(open) => {
+                if (!open) setConfirmRemoveId(null);
+              }}
+              title="Ta bort ur gruppen?"
+              description={
+                confirmRemoveMember
+                  ? `${memberDisplayName(confirmRemoveMember)} tas bort ur gruppen ${group.name}. Medlemmens konto påverkas inte.`
+                  : undefined
+              }
+              confirmLabel="Ta bort"
+              pendingLabel="Tar bort…"
+              pending={removingId !== null}
+              onConfirm={() => {
+                if (confirmRemoveMember) void handleRemoveMember(confirmRemoveMember.matrikelnummer);
+              }}
+            />
           </section>
 
           <section className="mb-8" aria-labelledby="add-members-heading">

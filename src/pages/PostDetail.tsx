@@ -3,6 +3,7 @@ import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
 import { useForm, useWatch } from "react-hook-form";
 import {
   Button,
+  ConfirmDialog,
   LodgeSelection,
   NotFoundPanel,
   PageContainer,
@@ -332,7 +333,7 @@ export const PostDetail = () => {
             <Link to=".." relative="path" className="ui-btn ui-btn-secondary">
               Avbryt
             </Link>
-            {isAdmin && !confirmDelete && (
+            {isAdmin && (
               <Button
                 type="button"
                 className="ui-btn-danger sm:ml-auto"
@@ -342,30 +343,21 @@ export const PostDetail = () => {
                 Radera
               </Button>
             )}
-            {isAdmin && confirmDelete && (
-              <div className="flex items-center gap-2 sm:ml-auto">
-                <span className="text-sm text-danger-700">Radera permanent?</span>
-                <Button
-                  type="button"
-                  className="ui-btn-danger"
-                  onClick={handleConfirmDelete}
-                  disabled={submitting}
-                >
-                  {submitting ? "Raderar..." : "Ja"}
-                </Button>
-                <Button
-                  type="button"
-                  className="ui-btn-secondary"
-                  onClick={() => setConfirmDelete(false)}
-                  disabled={submitting}
-                >
-                  Nej
-                </Button>
-              </div>
-            )}
           </div>
         </form>
       )}
+      {isAdmin ? (
+        <ConfirmDialog
+          open={confirmDelete}
+          onOpenChange={setConfirmDelete}
+          title="Radera inlägget?"
+          description="Inlägget raderas permanent. Det går inte att ångra."
+          confirmLabel="Radera"
+          pendingLabel="Raderar…"
+          pending={submitting && confirmDelete}
+          onConfirm={() => void handleConfirmDelete()}
+        />
+      ) : null}
     </PageContainer>
   );
 };

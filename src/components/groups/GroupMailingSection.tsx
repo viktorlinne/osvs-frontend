@@ -25,7 +25,7 @@ import {
   validateMailingSubject,
 } from "../../utils/mailings";
 import { AsyncState } from "../AsyncState";
-import { Button, errorTextClass, inputClass, labelClass, textareaClass } from "../ui";
+import { Button, ConfirmDialog, errorTextClass, inputClass, labelClass, textareaClass } from "../ui";
 
 /** How often the history refreshes while a mailing is queued or sending. */
 export const MAILING_REFRESH_MS = 5000;
@@ -279,32 +279,29 @@ export function GroupMailingSection({ groupId, membersVersion }: GroupMailingSec
             ) : null}
           </div>
 
-          {pendingValues ? (
-            <div
-              className="flex flex-wrap items-center gap-2"
-              role="group"
-              aria-label="Bekräfta utskick"
-            >
-              <span className="text-sm font-medium text-neutral-900">
-                {formatConfirmQuestion(recipients)}
-              </span>
-              <Button type="button" onClick={confirmSend} loading={sending}>
-                {sending ? "Skickar…" : "Ja, skicka"}
-              </Button>
-              <Button
-                type="button"
-                variant="secondary"
-                onClick={() => setPendingValues(null)}
-                disabled={sending}
-              >
-                Avbryt
-              </Button>
-            </div>
-          ) : (
-            <Button type="submit" disabled={previewLoading || previewError || noRecipients}>
-              Skicka utskick
-            </Button>
-          )}
+          <Button
+            type="submit"
+            disabled={previewLoading || previewError || noRecipients || pendingValues !== null}
+          >
+            Skicka utskick
+          </Button>
+          <ConfirmDialog
+            open={pendingValues !== null}
+            onOpenChange={(open) => {
+              if (!open) setPendingValues(null);
+            }}
+            title={formatConfirmQuestion(recipients)}
+            description={
+              pendingValues
+                ? `Ämne: ${pendingValues.subject.trim()}`
+                : undefined
+            }
+            variant="primary"
+            confirmLabel="Ja, skicka"
+            pendingLabel="Skickar…"
+            pending={sending}
+            onConfirm={() => void confirmSend()}
+          />
           {sentMessage ? (
             <p className="mt-3 text-sm text-neutral-700" role="status">
               {sentMessage}

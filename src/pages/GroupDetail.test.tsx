@@ -1,0 +1,100 @@
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import { render, screen, waitFor, within } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
+import { createMemoryRouter, RouterProvider } from "react-router-dom";
+import ErrorContext from "../context/ErrorContext";
+
+const groupsMock = vi.hoisted(() => ({
+  addGroupMembers: vi.fn(),
+  deleteGroup: vi.fn(),
+  getGroup: vi.fn(),
+  listGroupMembers: vi.fn(),
+  removeGroupMember: vi.fn(),
+  updateGroup: vi.fn(),
+}));
+vi.mock("../services/groups", () => groupsMock);
+vi.mock("../services/users", () => ({
+  listAllUsers: vi.fn().mockResolvedValue([]),
+}));
+vi.mock("../components/groups/GroupMailingSection", () => ({
+  GroupMailingSection: () => null,
+}));
+
+import { GroupDetail } from "./GroupDetail";
+
+const members = [
+  { matrikelnummer: 11, firstname: "Anders", lastname: "Berg", email: "a@x.se", archive: null },
+  { matrikelnummer: 12, firstname: "Bo", lastname: "Ek", email: "b@x.se", archive: null },
+];
+
+function renderPage() {
+  const router = createMemoryRouter(
+    [
+      { path: "/admin/groups/:id", element: <GroupDetail /> },
+      { path: "/admin/groups", element: <div>Grupplista</div> },
+    ],
+    { initialEntries: ["/admin/groups/3"] },
+  );
+  render(
+    <ErrorContext.Provider value={{ error: null, setError: vi.fn(), clearError: vi.fn() }}>
+      <RouterProvider router={router} />
+    </ErrorContext.Provider>,
+  );
+}
+
+beforeEach(() => {
+  vi.clearAllMocks();
+  groupsMock.getGroup.mockResolvedValue({
+    id: 3,
+    name: "Styrelsen",
+    description: null,
+    userIds: [11, 12],
+    memberCount: 2,
+  });
+  groupsMock.listGroupMembers.mockResolvedValue(members);
+  groupsMock.deleteGroup.mockResolvedValue(undefined);
+  groupsMock.removeGroupMember.mockResolvedValue(undefined);
+});
+
+describe("GroupDetail confirmations", () => {
+  it("confirms before deleting the group", async () => {
+    const user = userEvent.setup();
+    renderPage();
+    await screen.findByRole("heading", { name: "Styrelsen" });
+
+    await user.click(screen.getByRole("button", { name: "Ta bort" }));
+    let dialog = await screen.findByRole("alertdialog", {
+      name: "Ta bort gruppen Styrelsen?",
+    });
+    expect(dialog).toHaveTextContent("2 medlemskap tas bort");
+    await user.click(within(dialog).getByRole("button", { name: "Avbryt" }));
+    await waitFor(() => expect(screen.queryByRole("alertdialog")).not.toBeInTheDocument());
+    expect(groupsMock.deleteGroup).not.toHaveBeenCalled();
+
+    await user.click(screen.getByRole("button", { name: "Ta bort" }));
+    dialog = await screen.findByRole("alertdialog");
+    await user.click(within(dialog).getByRole("button", { name: "Ta bort" }));
+
+    await waitFor(() => expect(groupsMock.deleteGroup).toHaveBeenCalledWith("3"));
+    expect(await screen.findByText("Grupplista")).toBeInTheDocument();
+  });
+
+  it("confirms before removing a member", async () => {
+    const user = userEvent.setup();
+    renderPage();
+    await user.click(
+      await screen.findByRole("button", { name: "Ta bort Bo Ek ur gruppen" }),
+    );
+    const dialog = await screen.findByRole("alertdialog", { name: "Ta bort ur gruppen?" });
+    expect(dialog).toHaveTextContent("Bo Ek tas bort ur gruppen Styrelsen");
+
+    groupsMock.listGroupMembers.mockResolvedValue([members[0]]);
+    await user.click(within(dialog).getByRole("button", { name: "Ta bort" }));
+
+    await waitFor(() => expect(groupsMock.removeGroupMember).toHaveBeenCalledWith("3", 12));
+    await waitFor(() => expect(screen.queryByRole("alertdialog")).not.toBeInTheDocument());
+    await waitFor(() =>
+      expect(screen.queryByRole("link", { name: "Bo Ek" })).not.toBeInTheDocument(),
+    );
+  });
+});

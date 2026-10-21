@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
 import { EventDetailEditForm, EventDetailView } from "../components/events";
 import type { EventFormState } from "../components/events/EventDetailEditForm";
-import { NotFoundPanel, PageContainer } from "../components";
+import { NotFoundPanel, PageContainer, useConfirm } from "../components";
 import { useAuth, useError } from "../context";
 import useFetch from "../hooks/useFetch";
 import useEventAudience from "../hooks/useEventAudience";
@@ -70,6 +70,7 @@ export const EventDetail = () => {
   const { id } = useParams<{ id: string }>();
   const { run, data: event, loading: eventLoading, notFound: eventNotFound } = useFetch<EventRecord | null>();
   const { run: runAction, loading: saving } = useFetch<ActionResult>();
+  const { confirm, confirmDialog } = useConfirm();
   const {
     run: runLodges,
     data: lodges,
@@ -312,9 +313,13 @@ export const EventDetail = () => {
       return;
     }
 
-    const confirmed = window.confirm(
-      "Är du säker på att du vill radera mötet?",
-    );
+    const confirmed = await confirm({
+      title: "Radera mötet?",
+      description: event?.title
+        ? `”${event.title}” raderas permanent. Det går inte att ångra.`
+        : "Mötet raderas permanent. Det går inte att ångra.",
+      confirmLabel: "Radera",
+    });
     if (!confirmed) return;
 
     try {
@@ -501,6 +506,7 @@ export const EventDetail = () => {
           backLabel="Till möteslistan"
         />
       ) : null}
+      {confirmDialog}
     </PageContainer>
   );
 };

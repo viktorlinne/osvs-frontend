@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { cleanup, render, screen, waitFor } from "@testing-library/react";
+import { cleanup, render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import ErrorContext from "../../context/ErrorContext";
 
@@ -94,9 +94,14 @@ describe("GroupMailingSection", () => {
     await user.type(screen.getByLabelText("Meddelande"), "Hej!{enter}Välkomna.");
     await user.click(screen.getByRole("button", { name: "Skicka utskick" }));
 
-    expect(await screen.findByText("Skicka till 12 mottagare?")).toBeInTheDocument();
-    await user.click(screen.getByRole("button", { name: "Avbryt" }));
-    expect(screen.queryByText("Skicka till 12 mottagare?")).not.toBeInTheDocument();
+    const dialog = await screen.findByRole("alertdialog", {
+      name: "Skicka till 12 mottagare?",
+    });
+    expect(dialog).toHaveAccessibleDescription("Ämne: Kallelse");
+    await user.click(within(dialog).getByRole("button", { name: "Avbryt" }));
+    await waitFor(() =>
+      expect(screen.queryByText("Skicka till 12 mottagare?")).not.toBeInTheDocument(),
+    );
     expect(mailingsMock.createMailing).not.toHaveBeenCalled();
 
     await user.click(screen.getByRole("button", { name: "Skicka utskick" }));
