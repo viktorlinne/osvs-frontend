@@ -29,6 +29,8 @@ type Props = {
   groups: Group[] | null | undefined;
   eventGroupIds: number[];
   isAdmin: boolean;
+  /** Admin/Editor: may open groups (/admin/groups/:id). */
+  canManageGroups?: boolean;
   attendancesLoading: boolean;
   attendances: EventAttendanceRow[] | null | undefined;
   attendanceSavingUid: number | null;
@@ -55,6 +57,7 @@ export function EventDetailView({
   groups,
   eventGroupIds,
   isAdmin,
+  canManageGroups = false,
   attendancesLoading,
   attendances,
   attendanceSavingUid,
@@ -138,15 +141,21 @@ export function EventDetailView({
             <div className="flex flex-wrap gap-2">
               {groups
                 .filter((g) => eventGroupIds.includes(g.id))
-                .map((g) => (
-                  <Link
-                    key={g.id}
-                    to={`/groups/${g.id}`}
-                    className="ui-link text-sm"
-                  >
-                    {g.name}
-                  </Link>
-                ))}
+                .map((g) =>
+                  canManageGroups ? (
+                    <Link
+                      key={g.id}
+                      to={`/admin/groups/${g.id}`}
+                      className="ui-link text-sm"
+                    >
+                      {g.name}
+                    </Link>
+                  ) : (
+                    <span key={g.id} className="text-sm text-neutral-900">
+                      {g.name}
+                    </span>
+                  ),
+                )}
             </div>
           ) : (
             <p className="text-sm text-neutral-600">Inga grupper inbjudna</p>
