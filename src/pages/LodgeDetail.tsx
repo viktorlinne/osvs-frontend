@@ -15,6 +15,7 @@ import type { LodgeMutationResult } from "../services/lodges";
 import type { Lodge } from "../types";
 import { getApiErrorMessage, getApiFieldErrors } from "../utils/apiErrors";
 import { getLodgeFormErrors } from "../utils/formValidation";
+import { SkeletonBlock } from "../components/PageSkeleton";
 
 export const LodgeDetail = () => {
   const emptyForm = { name: "", city: "", description: "", email: "" };
@@ -147,12 +148,12 @@ export const LodgeDetail = () => {
       {loading ? (
         <div className="ui-card">
           <div className="space-y-4">
-            <div className="h-28 w-28 rounded-lg skeleton-shimmer md:h-40 md:w-40" />
-            <div className="h-6 w-48 rounded skeleton-shimmer" />
-            <div className="h-4 w-24 rounded skeleton-shimmer" />
+            <SkeletonBlock className="h-28 w-28 rounded-lg md:h-40 md:w-40" />
+            <SkeletonBlock className="h-6 w-48" />
+            <SkeletonBlock className="h-4 w-24" />
             <div className="space-y-2">
-              <div className="h-4 w-full rounded skeleton-shimmer" />
-              <div className="h-4 w-3/4 rounded skeleton-shimmer" />
+              <SkeletonBlock className="h-4 w-full" />
+              <SkeletonBlock className="h-4 w-3/4" />
             </div>
           </div>
         </div>
@@ -253,7 +254,7 @@ export const LodgeDetail = () => {
                   onClick={handleSave}
                   disabled={saving || !canSave}
                 >
-                  {saving ? "Sparar..." : "Spara"}
+                  {saving ? "Sparar…" : "Spara"}
                 </Button>
                 <button
                   type="button"

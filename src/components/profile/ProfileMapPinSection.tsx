@@ -139,7 +139,7 @@ export function ProfileMapPinSection({ userId }: Props) {
                 void handleSave();
               }}
             >
-              {actionLoading && !pendingReset ? "Sparar..." : "Spara position"}
+              {actionLoading && !pendingReset ? "Sparar…" : "Spara position"}
             </button>
 
             {existingPin !== null && !pendingReset && (
@@ -167,7 +167,7 @@ export function ProfileMapPinSection({ userId }: Props) {
                       void handleRemove();
                     }}
                   >
-                    {actionLoading ? "Tar bort..." : "Bekräfta"}
+                    {actionLoading ? "Tar bort…" : "Bekräfta"}
                   </button>
                   <button
                     type="button"

@@ -1,7 +1,9 @@
 import type { ReactNode } from "react";
+import { cn } from "@/lib/utils";
 
+/** Decorative shimmer placeholder (hidden from assistive tech). */
 export const SkeletonBlock = ({ className = "" }: { className?: string }) => (
-  <div className={`rounded skeleton-shimmer ${className}`} aria-hidden="true" />
+  <div className={cn("rounded skeleton-shimmer", className)} aria-hidden="true" />
 );
 
 export const SkeletonCircle = ({ className = "" }: { className?: string }) => (

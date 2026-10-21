@@ -6,6 +6,7 @@ import useFetch from "../hooks/useFetch";
 import { listEvents, listMyEvents } from "../services";
 import type { Event as EventRecord } from "../types";
 import { dateKeyFromEventDate } from "./events/dateUtils";
+import { SkeletonBlock } from "../components/PageSkeleton";
 
 const WEEK_DAYS = ["Mån", "Tis", "Ons", "Tor", "Fre", "Lör", "Sön"];
 
@@ -182,9 +183,9 @@ export const EventsPage = () => {
           <div className="divide-y divide-neutral-200" aria-busy="true" aria-label="Laddar möten">
             {Array.from({ length: 3 }, (_, i) => (
               <div key={i} className="flex items-start gap-3 p-3">
-                <div className="h-[3.25rem] w-14 rounded skeleton-shimmer" />
+                <SkeletonBlock className="h-[3.25rem] w-14" />
                 <div className="flex-1 pt-1">
-                  <div className="h-7 rounded skeleton-shimmer" />
+                  <SkeletonBlock className="h-7" />
                 </div>
               </div>
             ))}

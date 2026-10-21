@@ -24,6 +24,7 @@ import {
   validateOptionalPostImage,
 } from "../utils/formValidation";
 import { mediaPlaceholderUrl } from "../utils/media";
+import { SkeletonBlock } from "../components/PageSkeleton";
 
 export const PostDetail = () => {
   const { user } = useAuth();
@@ -189,18 +190,18 @@ export const PostDetail = () => {
       {postLoading && (
         <div className="ui-card grid gap-4 md:grid-cols-3">
           <div className="md:col-span-1">
-            <div className="h-64 w-full rounded-md skeleton-shimmer md:h-full md:min-h-48" />
+            <SkeletonBlock className="h-64 w-full rounded-md md:h-full md:min-h-48" />
           </div>
           <div className="md:col-span-2 flex flex-col gap-3">
-            <div className="h-7 w-2/3 rounded skeleton-shimmer" />
+            <SkeletonBlock className="h-7 w-2/3" />
             <div className="space-y-2">
-              <div className="h-4 w-full rounded skeleton-shimmer" />
-              <div className="h-4 w-5/6 rounded skeleton-shimmer" />
-              <div className="h-4 w-4/5 rounded skeleton-shimmer" />
+              <SkeletonBlock className="h-4 w-full" />
+              <SkeletonBlock className="h-4 w-5/6" />
+              <SkeletonBlock className="h-4 w-4/5" />
             </div>
             <div className="mt-auto flex gap-2 pt-2 border-t border-neutral-100">
-              <div className="h-5 w-16 rounded skeleton-shimmer" />
-              <div className="h-5 w-20 rounded skeleton-shimmer" />
+              <SkeletonBlock className="h-5 w-16" />
+              <SkeletonBlock className="h-5 w-20" />
             </div>
           </div>
         </div>
@@ -328,7 +329,7 @@ export const PostDetail = () => {
                 submitting || lodgesLoading || !isValid || Boolean(pictureError)
               }
             >
-              {submitting && !confirmDelete ? "Sparar..." : "Spara"}
+              {submitting && !confirmDelete ? "Sparar…" : "Spara"}
             </Button>
             <Link to=".." relative="path" className="ui-btn ui-btn-secondary">
               Avbryt

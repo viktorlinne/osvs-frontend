@@ -13,6 +13,7 @@ import { listLodges, listPosts } from "../services";
 import type { PaginatedPostsResponse } from "../services/posts";
 import type { Lodge } from "../types";
 import { mediaPlaceholderUrl } from "../utils/media";
+import { SkeletonBlock } from "../components/PageSkeleton";
 
 const POSTS_PAGE_SIZE = 24;
 
@@ -22,12 +23,12 @@ function PostSkeleton({ featured = false }: { featured?: boolean }) {
       <div className="flex overflow-hidden rounded-card border border-neutral-200 bg-white shadow-card md:flex-row">
         <div className="h-56 w-full skeleton-shimmer md:h-auto md:w-2/5" />
         <div className="flex flex-1 flex-col justify-center gap-3 p-6 md:p-8">
-          <div className="h-3 w-20 rounded skeleton-shimmer" />
-          <div className="h-8 w-4/5 rounded skeleton-shimmer" />
+          <SkeletonBlock className="h-3 w-20" />
+          <SkeletonBlock className="h-8 w-4/5" />
           <div className="space-y-2">
-            <div className="h-4 w-full rounded skeleton-shimmer" />
-            <div className="h-4 w-4/5 rounded skeleton-shimmer" />
-            <div className="h-4 w-3/5 rounded skeleton-shimmer" />
+            <SkeletonBlock className="h-4 w-full" />
+            <SkeletonBlock className="h-4 w-4/5" />
+            <SkeletonBlock className="h-4 w-3/5" />
           </div>
         </div>
       </div>
@@ -37,11 +38,11 @@ function PostSkeleton({ featured = false }: { featured?: boolean }) {
     <div className="overflow-hidden rounded-card border border-neutral-200 bg-white shadow-card">
       <div className="aspect-[16/9] skeleton-shimmer" />
       <div className="flex flex-col gap-2 p-4 md:p-5">
-        <div className="h-3 w-16 rounded skeleton-shimmer" />
-        <div className="h-5 w-3/4 rounded skeleton-shimmer" />
+        <SkeletonBlock className="h-3 w-16" />
+        <SkeletonBlock className="h-5 w-3/4" />
         <div className="space-y-1.5">
-          <div className="h-4 w-full rounded skeleton-shimmer" />
-          <div className="h-4 w-3/5 rounded skeleton-shimmer" />
+          <SkeletonBlock className="h-4 w-full" />
+          <SkeletonBlock className="h-4 w-3/5" />
         </div>
       </div>
     </div>

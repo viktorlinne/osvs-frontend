@@ -158,7 +158,7 @@ export const MembersPage = () => {
             id="search"
             name="search"
             type="search"
-            placeholder="Sök på namn..."
+            placeholder="Sök på namn…"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             className={inputClass}

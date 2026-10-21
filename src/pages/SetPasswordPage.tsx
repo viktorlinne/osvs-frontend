@@ -254,7 +254,7 @@ export const SetPasswordPage = () => {
 
             <div className="flex flex-col gap-2 sm:flex-row">
               <Button type="submit" disabled={submitting}>
-                {submitting ? "Sparar..." : "Spara lösenord"}
+                {submitting ? "Sparar…" : "Spara lösenord"}
               </Button>
               <Link to="/login" className="ui-btn ui-btn-secondary">
                 Avbryt

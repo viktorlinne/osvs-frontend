@@ -109,7 +109,7 @@ export const ForgotPasswordPage = () => {
 
             <div className="flex flex-col gap-2 sm:flex-row">
               <Button type="submit" disabled={submitting}>
-                {submitting ? "Skickar..." : "Skicka länk"}
+                {submitting ? "Skickar…" : "Skicka länk"}
               </Button>
               <Link to="/login" className="ui-btn ui-btn-secondary">
                 Tillbaka

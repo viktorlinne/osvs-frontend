@@ -12,6 +12,7 @@ import {
   UserSelection,
   errorTextClass,
 } from "../components";
+import { Badge } from "../components/shadcn/badge";
 import { useError } from "../context";
 import useDebouncedUserSearch from "../hooks/useDebouncedUserSearch";
 import useFetch from "../hooks/useFetch";
@@ -25,6 +26,7 @@ import {
 } from "../services/groups";
 import type { Group, GroupInput, GroupMember } from "../types";
 import { getApiErrorMessage, getApiFieldErrors } from "../utils/apiErrors";
+import { SkeletonBlock } from "../components/PageSkeleton";
 
 function formatMemberCount(count: number) {
   return count === 1 ? "1 medlem" : `${count} medlemmar`;
@@ -234,8 +236,8 @@ export const GroupDetail = () => {
         onRetry={loadGroup}
         loadingFallback={
           <div className="mt-4" aria-busy="true" aria-label="Laddar grupp">
-            <div className="h-8 w-1/2 rounded skeleton-shimmer" aria-hidden="true" />
-            <div className="mt-3 h-4 w-2/3 rounded skeleton-shimmer" aria-hidden="true" />
+            <SkeletonBlock className="h-8 w-1/2" />
+            <SkeletonBlock className="mt-3 h-4 w-2/3" />
           </div>
         }
       >
@@ -333,7 +335,7 @@ export const GroupDetail = () => {
                       className="border-b border-neutral-200 px-5 py-3.5 last:border-b-0"
                       aria-hidden="true"
                     >
-                      <div className="h-5 w-1/2 rounded skeleton-shimmer" />
+                      <SkeletonBlock className="h-5 w-1/2" />
                     </div>
                   ))}
                 </div>
@@ -358,7 +360,7 @@ export const GroupDetail = () => {
                           #{member.matrikelnummer}
                         </span>
                         {member.archive ? (
-                          <span className="ui-chapter ml-2">{member.archive}</span>
+                          <Badge className="ml-2">{member.archive}</Badge>
                         ) : null}
                         {member.email ? (
                           <span className="block truncate text-sm text-neutral-600">

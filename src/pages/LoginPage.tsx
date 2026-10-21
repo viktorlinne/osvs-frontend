@@ -118,7 +118,7 @@ export const LoginPage = () => {
           </Link>
         </div>
         <Button type="submit" disabled={loading}>
-          {loading ? "Loggar in..." : "Logga in"}
+          {loading ? "Loggar in…" : "Logga in"}
         </Button>
         <p className="mt-4 text-sm text-neutral-500">
           Första gången på nya webbplatsen? Klicka på{" "}

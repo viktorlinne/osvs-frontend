@@ -218,7 +218,7 @@ export const CreatePost = () => {
             loading={loading}
             disabled={loading || lodgesLoading || !isValid || Boolean(pictureError)}
           >
-            {loading ? "Skapar..." : "Skapa"}
+            {loading ? "Skapar…" : "Skapa"}
           </Button>
           <Link to=".." relative="path" className="ui-btn ui-btn-secondary">
             Avbryt

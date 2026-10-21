@@ -145,7 +145,7 @@ function DialogActions({
           disabled={disabled}
           aria-describedby={showHint ? hintId : undefined}
         >
-          {submitting ? "Sparar..." : submitLabel}
+          {submitting ? "Sparar…" : submitLabel}
         </Button>
       </div>
     </div>

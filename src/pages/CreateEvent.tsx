@@ -327,7 +327,7 @@ export const CreateEvent = () => {
               className="ui-btn-primary"
               disabled={saving || !canSubmit}
             >
-              {saving ? "Skapar..." : "Skapa"}
+              {saving ? "Skapar…" : "Skapa"}
             </Button>
             <Link
               to=".."

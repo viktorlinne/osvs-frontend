@@ -32,7 +32,7 @@ export function EventList() {
   }, []);
 
   if (loading)
-    return <p className="text-sm text-neutral-600">Laddar möten...</p>;
+    return <p className="text-sm text-neutral-600">Laddar möten…</p>;
   if (failed)
     return (
       <p className="text-sm text-danger-600">

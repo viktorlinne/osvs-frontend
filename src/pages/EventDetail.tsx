@@ -41,6 +41,7 @@ import type {
 } from "../types";
 
 import { normalizeNumericIds } from "../utils/normalizeNumericIds";
+import { SkeletonBlock } from "../components/PageSkeleton";
 
 type AttendanceField = "rsvp" | "bookFood" | "attended" | "paymentPaid";
 
@@ -436,12 +437,12 @@ export const EventDetail = () => {
 
       {eventLoading ? (
         <div className="ui-card" aria-busy="true" aria-label="Laddar möte">
-          <div className="h-8 w-3/5 rounded skeleton-shimmer" />
-          <div className="mt-3 h-4 w-44 rounded skeleton-shimmer" />
+          <SkeletonBlock className="h-8 w-3/5" />
+          <SkeletonBlock className="mt-3 h-4 w-44" />
           <div className="mt-4 space-y-2">
-            <div className="h-4 w-full rounded skeleton-shimmer" />
-            <div className="h-4 w-5/6 rounded skeleton-shimmer" />
-            <div className="h-4 w-2/3 rounded skeleton-shimmer" />
+            <SkeletonBlock className="h-4 w-full" />
+            <SkeletonBlock className="h-4 w-5/6" />
+            <SkeletonBlock className="h-4 w-2/3" />
           </div>
         </div>
       ) : event ? (

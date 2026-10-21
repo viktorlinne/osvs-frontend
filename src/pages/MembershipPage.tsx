@@ -5,6 +5,7 @@ import useFetch from "../hooks/useFetch";
 import { getMyMemberships } from "../services/";
 import type { MembershipPayment } from "../types";
 import { formatDate, formatAmount } from "../utils/time";
+import { SkeletonBlock } from "../components/PageSkeleton";
 
 const STATUS_LABELS: Record<MembershipPayment["status"], string> = {
   Pending: "Väntande",
@@ -24,8 +25,8 @@ function LoadingSkeleton() {
           className="border-b border-neutral-200 px-5 py-4 last:border-b-0"
           aria-hidden="true"
         >
-          <div className="mb-3 h-3.5 w-1/4 rounded skeleton-shimmer" />
-          <div className="h-4 w-1/2 rounded skeleton-shimmer" />
+          <SkeletonBlock className="mb-3 h-3.5 w-1/4" />
+          <SkeletonBlock className="h-4 w-1/2" />
         </div>
       ))}
     </div>

@@ -290,7 +290,7 @@ export const MapPage = () => {
               aria-busy="true"
               aria-label="Laddar kartnålar"
             >
-              Laddar karta...
+              Laddar karta…
             </div>
           ) : (
           <MapContainer
@@ -392,7 +392,7 @@ export const MapPage = () => {
             className="ui-input mb-3 w-full"
             value={adminUserQuery}
             onChange={(event) => setAdminUserQuery(event.target.value)}
-            placeholder="Sök på namn..."
+            placeholder="Sök på namn…"
           />
           <label htmlFor="mapTargetUser" className="ui-label">
             Välj broder
@@ -473,7 +473,7 @@ export const MapPage = () => {
                     void handleSave();
                   }}
                 >
-                  {actionLoading && !pendingReset ? "Sparar..." : "Spara position"}
+                  {actionLoading && !pendingReset ? "Sparar…" : "Spara position"}
                 </button>
 
                 {!pendingReset ? (
@@ -499,7 +499,7 @@ export const MapPage = () => {
                           void handleReset();
                         }}
                       >
-                        {actionLoading ? "Tar bort..." : "Bekräfta"}
+                        {actionLoading ? "Tar bort…" : "Bekräfta"}
                       </button>
                       <button
                         type="button"

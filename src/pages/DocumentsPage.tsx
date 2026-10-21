@@ -5,6 +5,7 @@ import { useAuth } from "../context";
 import useFetch from "../hooks/useFetch";
 import { listDocuments } from "../services";
 import type { SiteDocument } from "../types";
+import { SkeletonBlock } from "../components/PageSkeleton";
 
 export const DocumentsPage = () => {
   const { user } = useAuth();
@@ -79,7 +80,7 @@ export const DocumentsPage = () => {
                 className="border-b border-neutral-200 px-5 py-3.5 last:border-b-0"
                 aria-hidden="true"
               >
-                <div className="h-5 w-2/3 rounded skeleton-shimmer" />
+                <SkeletonBlock className="h-5 w-2/3" />
               </div>
             ))}
           </div>

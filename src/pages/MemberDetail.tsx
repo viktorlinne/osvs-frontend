@@ -562,7 +562,7 @@ export const MemberDetail = () => {
                   saving || !hasChanges || !isValid || Boolean(pictureError)
                 }
               >
-                {saving ? "Sparar..." : "Spara"}
+                {saving ? "Sparar…" : "Spara"}
               </Button>
               <Link to=".." relative="path" className="ui-btn ui-btn-secondary">
                 Avbryt

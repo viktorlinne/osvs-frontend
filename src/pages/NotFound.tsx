@@ -24,7 +24,7 @@ export const NotFound = () => {
         <p className="mb-2 text-5xl font-bold text-primary-600">404</p>
         <h2 className="ui-section-title mb-3">Sidan hittades inte</h2>
         <p className="mb-5 text-sm text-neutral-600">
-          Du omdirigeras till startsidan om {seconds} sekunder...
+          Du omdirigeras till startsidan om {seconds} sekunder…
         </p>
         <Link to="/" className="ui-btn ui-btn-primary">
           Gå till startsidan

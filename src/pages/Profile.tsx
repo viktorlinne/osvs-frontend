@@ -376,7 +376,7 @@ export const Profile = () => {
                 saving || !hasChanges || !isValid || Boolean(pictureError)
               }
             >
-              {saving ? "Sparar..." : "Spara"}
+              {saving ? "Sparar…" : "Spara"}
             </Button>
             <Link
               to=".."

@@ -226,7 +226,7 @@ export function EventDetailEditForm({
           onClick={onSave}
           disabled={saving || !canSubmit}
         >
-          {saving ? "Sparar..." : "Spara"}
+          {saving ? "Sparar…" : "Spara"}
         </Button>
         {isAdmin && onDelete && (
           <Button

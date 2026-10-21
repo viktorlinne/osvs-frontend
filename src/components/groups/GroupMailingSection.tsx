@@ -13,8 +13,10 @@ import { applyApiFieldErrors, getApiErrorMessage } from "../../utils/apiErrors";
 import {
   MAILING_BODY_MAX_LENGTH,
   MAILING_STATUS_LABEL,
+  MAILING_STATUS_TONE,
   MAILING_SUBJECT_MAX_LENGTH,
   RECIPIENT_STATUS_LABEL,
+  RECIPIENT_STATUS_TONE,
   formatConfirmQuestion,
   formatMailingCounts,
   formatMailingDate,
@@ -26,7 +28,9 @@ import {
   validateMailingSubject,
 } from "../../utils/mailings";
 import { AsyncState } from "../AsyncState";
+import { Badge } from "../shadcn/badge";
 import { Button, ConfirmDialog, errorTextClass, inputClass, labelClass, textareaClass } from "../ui";
+import { SkeletonBlock } from "../PageSkeleton";
 
 /** How often the history refreshes while a mailing is queued or sending. */
 export const MAILING_REFRESH_MS = 5000;
@@ -55,10 +59,18 @@ function MailingRecipients({ mailing }: { mailing: MailingDetail }) {
               <span className="ml-2 break-all text-neutral-600">{recipient.email}</span>
             ) : null}
           </span>
-          <span className={recipient.status === "failed" ? "text-danger-700" : "text-neutral-700"}>
-            {RECIPIENT_STATUS_LABEL[recipient.status]}
-            {recipient.reason ? ` – ${recipient.reason}` : null}
-            {recipient.status === "failed" && recipient.lastError ? ` – ${recipient.lastError}` : null}
+          <span
+            className={`flex flex-wrap items-baseline gap-x-2 ${
+              recipient.status === "failed" ? "text-danger-700" : "text-neutral-700"
+            }`}
+          >
+            <Badge variant={RECIPIENT_STATUS_TONE[recipient.status]}>
+              {RECIPIENT_STATUS_LABEL[recipient.status]}
+            </Badge>
+            {recipient.reason ? <span>{recipient.reason}</span> : null}
+            {recipient.status === "failed" && recipient.lastError ? (
+              <span>{recipient.lastError}</span>
+            ) : null}
           </span>
         </li>
       ))}
@@ -252,7 +264,10 @@ export function GroupMailingSection({ groupId, membersVersion }: GroupMailingSec
 
           <div className="mb-4 text-sm text-neutral-700" aria-live="polite">
             {previewLoading && !preview ? (
-              <div className="h-4 w-2/3 rounded skeleton-shimmer" aria-label="Räknar mottagare" />
+              <div>
+                <span className="sr-only">Räknar mottagare…</span>
+                <SkeletonBlock className="h-4 w-2/3" />
+              </div>
             ) : previewError ? (
               <AsyncState
                 loading={false}
@@ -327,7 +342,7 @@ export function GroupMailingSection({ groupId, membersVersion }: GroupMailingSec
             >
               {[0, 1].map((i) => (
                 <div key={i} className="border-b border-neutral-200 px-5 py-3.5 last:border-b-0" aria-hidden="true">
-                  <div className="h-5 w-1/2 rounded skeleton-shimmer" />
+                  <SkeletonBlock className="h-5 w-1/2" />
                 </div>
               ))}
             </div>
@@ -351,7 +366,9 @@ export function GroupMailingSection({ groupId, membersVersion }: GroupMailingSec
                           : null}
                       </p>
                       <p className="mt-1 text-sm text-neutral-700">
-                        <span className="ui-chapter mr-2">{MAILING_STATUS_LABEL[mailing.status]}</span>
+                        <Badge variant={MAILING_STATUS_TONE[mailing.status]} className="mr-2">
+                          {MAILING_STATUS_LABEL[mailing.status]}
+                        </Badge>
                         {formatMailingCounts(mailing.counts)}
                       </p>
                     </div>
@@ -378,7 +395,10 @@ export function GroupMailingSection({ groupId, membersVersion }: GroupMailingSec
                     ) : openMailing ? (
                       <MailingRecipients mailing={openMailing} />
                     ) : (
-                      <div className="mt-3 h-4 w-1/2 rounded skeleton-shimmer" aria-label="Laddar mottagare" />
+                      <div role="status" className="mt-3">
+                        <span className="sr-only">Laddar mottagare…</span>
+                        <SkeletonBlock className="h-4 w-1/2" />
+                      </div>
                     )
                   ) : null}
                 </li>

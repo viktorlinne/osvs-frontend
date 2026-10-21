@@ -65,6 +65,23 @@ export const MAILING_STATUS_LABEL: Record<MailingStatus, string> = {
   cancelled: "Avbruten",
 };
 
+export type StatusTone = "neutral" | "success" | "warning" | "danger";
+
+export const MAILING_STATUS_TONE: Record<MailingStatus, StatusTone> = {
+  queued: "neutral",
+  sending: "warning",
+  done: "success",
+  cancelled: "danger",
+};
+
+export const RECIPIENT_STATUS_TONE: Record<MailingRecipientStatus, StatusTone> = {
+  pending: "neutral",
+  sending: "warning",
+  sent: "success",
+  failed: "danger",
+  skipped: "neutral",
+};
+
 export const RECIPIENT_STATUS_LABEL: Record<MailingRecipientStatus, string> = {
   pending: "Väntar",
   sending: "Skickas",

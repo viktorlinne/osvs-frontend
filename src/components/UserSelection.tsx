@@ -74,7 +74,7 @@ export function UserSelection({
   loading = false,
   searchQuery,
   onSearchQueryChange,
-  searchPlaceholder = "Sök på namn...",
+  searchPlaceholder = "Sök på namn…",
 }: UserSelectionProps) {
   const labelId = useId();
   const triggerTextId = useId();
@@ -200,7 +200,7 @@ export function UserSelection({
             <CommandList>
               {loading ? (
                 <div className="px-2 py-2 text-sm text-neutral-600" role="status">
-                  Laddar...
+                  Laddar…
                 </div>
               ) : null}
               {!loading || hasUsers ? (

@@ -12,6 +12,7 @@ import {
 import useFetch from "../hooks/useFetch";
 import { createGroup, listGroups } from "../services/groups";
 import type { Group } from "../types";
+import { SkeletonBlock } from "../components/PageSkeleton";
 
 function formatMemberCount(count: number) {
   return count === 1 ? "1 medlem" : `${count} medlemmar`;
@@ -105,7 +106,7 @@ export const GroupsPage = () => {
                 className="border-b border-neutral-200 px-5 py-3.5 last:border-b-0"
                 aria-hidden="true"
               >
-                <div className="h-5 w-2/3 rounded skeleton-shimmer" />
+                <SkeletonBlock className="h-5 w-2/3" />
               </div>
             ))}
           </div>

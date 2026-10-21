@@ -79,7 +79,7 @@ export function ChangeLogList({ entries }: { entries: ChangeLogEntry[] }) {
               {ENTITY_LABEL[entry.entityType]} {ACTION_LABEL[entry.action].toLowerCase()}
             </span>
             <span className="shrink-0 text-xs text-neutral-600">
-              {entry.createdAt.slice(0, 16)}
+              {entry.createdAt.slice(0, 16).replace("T", " ")}
               {" · "}
               {entry.editorName ??
                 (entry.editorId !== null ? `#${entry.editorId}` : "Okänd")}

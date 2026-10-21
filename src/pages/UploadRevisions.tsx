@@ -173,7 +173,7 @@ export const UploadRevisions = () => {
             disabled={lodges === null}
           >
             {lodges === null ? (
-              <option value="">Laddar loger...</option>
+              <option value="">Laddar loger…</option>
             ) : (
               <>
                 <option value="">Välj loge</option>
@@ -213,7 +213,7 @@ export const UploadRevisions = () => {
             loading={loading}
             disabled={loading || !isValid || Boolean(fileError)}
           >
-            {loading ? "Skapar..." : "Skapa"}
+            {loading ? "Skapar…" : "Skapa"}
           </Button>
           <Link to=".." relative="path" className="ui-btn ui-btn-secondary">
             Avbryt

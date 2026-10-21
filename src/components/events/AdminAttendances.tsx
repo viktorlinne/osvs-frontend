@@ -36,7 +36,7 @@ export function AdminAttendances({
       <div className="rounded-md border border-neutral-200 bg-white p-2">
         {loading ? (
           <div className="py-2 text-sm text-neutral-600">
-            Läser deltagare...
+            Läser deltagare…
           </div>
         ) : Array.isArray(rows) && rows.length > 0 ? (
           <div className="max-h-80 overflow-y-auto overflow-x-hidden">

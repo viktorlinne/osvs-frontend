@@ -95,7 +95,7 @@ export function AudienceSelection({
           {!hasItems && !loading && (
             <div className="py-2 text-sm text-neutral-600">{emptyLabel}</div>
           )}
-          {loading && <div className="py-2 text-sm text-neutral-600">Laddar...</div>}
+          {loading && <div className="py-2 text-sm text-neutral-600">Laddar…</div>}
         </div>
       </fieldset>
     </div>

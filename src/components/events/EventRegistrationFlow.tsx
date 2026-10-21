@@ -14,6 +14,7 @@ import {
   type RegistrationFlowState,
   type SavedRegistration,
 } from "./registrationFlow";
+import { SkeletonBlock } from "../PageSkeleton";
 
 type Props = {
   eventHasFood: boolean;
@@ -89,7 +90,7 @@ export function EventRegistrationFlow({
     return (
       <div aria-busy="true" aria-label="Laddar anmälan">
         <p className="ui-chapter mb-2">Anmälan</p>
-        <div className="h-9 w-56 rounded skeleton-shimmer" />
+        <SkeletonBlock className="h-9 w-56" />
       </div>
     );
   }
