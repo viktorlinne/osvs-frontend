@@ -1,4 +1,5 @@
 import type { ButtonHTMLAttributes } from "react";
+import { cn } from "@/lib/utils";
 
 type ButtonVariant = "primary" | "secondary" | "danger";
 type ButtonSize = "sm" | "md";
@@ -21,10 +22,6 @@ type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
   className?: string;
 };
 
-function cx(...classes: Array<string | undefined | false>) {
-  return classes.filter(Boolean).join(" ");
-}
-
 export function Button({
   variant = "primary",
   size = "md",
@@ -39,7 +36,7 @@ export function Button({
       {...props}
       disabled={disabled || loading}
       aria-busy={loading || undefined}
-      className={cx("ui-btn", sizeClasses[size], variantClasses[variant], className)}
+      className={cn("ui-btn", sizeClasses[size], variantClasses[variant], className)}
     >
       {loading && (
         <svg
