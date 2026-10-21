@@ -1,4 +1,4 @@
-import type { ButtonHTMLAttributes } from "react";
+import type { ComponentProps } from "react";
 import { cn } from "@/lib/utils";
 
 type ButtonVariant = "primary" | "secondary" | "danger";
@@ -15,7 +15,9 @@ const sizeClasses: Record<ButtonSize, string> = {
   md: "",
 };
 
-type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
+// ComponentProps<"button"> includes `ref` (React 19 passes it as a prop), so
+// Button can be used as a Radix trigger via `asChild`.
+type ButtonProps = ComponentProps<"button"> & {
   variant?: ButtonVariant;
   size?: ButtonSize;
   loading?: boolean;

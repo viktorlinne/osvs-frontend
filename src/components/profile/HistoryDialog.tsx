@@ -1,10 +1,16 @@
-import { useEffect, useId, useRef, type ReactNode } from "react";
-import { createPortal } from "react-dom";
+import { useLayoutEffect, useRef, type ReactNode } from "react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/shadcn/dialog";
 
 /**
- * Minimal modal dialog used by the member history editor. Rendered in a
- * portal; closes on Escape and on the explicit close button (not on backdrop
- * click, so a half-written note is not lost by accident).
+ * Modal dialog used by the member history editor, built on Radix Dialog
+ * (focus trap, Escape, portal, focus return). It is open while mounted.
+ * It closes on Escape and on the explicit close button, but NOT on a click
+ * outside, so a half-written note is not lost by accident.
  */
 export function HistoryDialog({
   title,
@@ -15,57 +21,48 @@ export function HistoryDialog({
   onClose: () => void;
   children: ReactNode;
 }) {
-  const titleId = useId();
-  const panelRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const previouslyFocused =
-      document.activeElement instanceof HTMLElement
-        ? document.activeElement
-        : null;
-    const first =
-      panelRef.current?.querySelector<HTMLElement>("input, select, textarea") ??
-      panelRef.current?.querySelector<HTMLElement>("button");
-    first?.focus();
-    return () => {
-      previouslyFocused?.focus();
-    };
+  // The dialog is rendered conditionally (no Radix Trigger), so Radix has no
+  // trigger to return focus to. Remember what had focus when it mounted
+  // (layout effect: before Radix moves focus inside) and restore it on close.
+  const returnFocusRef = useRef<HTMLElement | null>(null);
+  useLayoutEffect(() => {
+    returnFocusRef.current =
+      document.activeElement instanceof HTMLElement ? document.activeElement : null;
   }, []);
 
-  useEffect(() => {
-    function onKeyDown(event: KeyboardEvent) {
-      if (event.key === "Escape") onClose();
-    }
-    document.addEventListener("keydown", onKeyDown);
-    return () => document.removeEventListener("keydown", onKeyDown);
-  }, [onClose]);
-
-  return createPortal(
-    <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-neutral-900/50 p-4 sm:items-center">
-      <div
-        ref={panelRef}
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby={titleId}
-        className="ui-card w-full max-w-lg"
+  return (
+    <Dialog
+      open
+      onOpenChange={(open) => {
+        if (!open) onClose();
+      }}
+    >
+      <DialogContent
+        aria-describedby={undefined}
+        onInteractOutside={(event) => event.preventDefault()}
+        onCloseAutoFocus={(event) => {
+          event.preventDefault();
+          const target = returnFocusRef.current;
+          if (target?.isConnected) target.focus();
+        }}
+        onOpenAutoFocus={(event) => {
+          // Prefer the first form field over the close/cancel buttons.
+          const content = event.currentTarget as HTMLElement | null;
+          const first =
+            content?.querySelector<HTMLElement>("input, select, textarea") ??
+            content?.querySelector<HTMLElement>("button");
+          if (first) {
+            event.preventDefault();
+            first.focus();
+          }
+        }}
       >
-        <div className="mb-4 flex items-start justify-between gap-4">
-          <h2 id={titleId} className="text-lg font-semibold text-neutral-900">
-            {title}
-          </h2>
-          <button
-            type="button"
-            onClick={onClose}
-            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md text-neutral-600 hover:bg-neutral-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-600"
-            aria-label="Stäng"
-          >
-            ✕
-          </button>
-        </div>
+        <DialogHeader>
+          <DialogTitle>{title}</DialogTitle>
+        </DialogHeader>
         {children}
-      </div>
-    </div>,
-    document.body,
+      </DialogContent>
+    </Dialog>
   );
 }
 
