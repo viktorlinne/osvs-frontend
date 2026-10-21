@@ -39,6 +39,73 @@ export type AddGroupMembersResult = {
   alreadyMembers: number[];
 };
 
+export type MailingStatus = "queued" | "sending" | "done" | "cancelled";
+export type MailingRecipientStatus = "pending" | "sending" | "sent" | "failed" | "skipped";
+export type MailingSkipReason =
+  | "archived"
+  | "no_email"
+  | "placeholder"
+  | "invalid_email"
+  | "duplicate"
+  | "dev_allowlist";
+export type MailingSkippedByReason = Partial<Record<MailingSkipReason, number>>;
+
+export type MailingPreview = {
+  recipients: number;
+  skipped: number;
+  skippedByReason: MailingSkippedByReason;
+  devAllowlist: { active: boolean; blocked: number };
+};
+
+export type MailingInput = {
+  subject: string;
+  body: string;
+};
+
+export type CreatedMailing = {
+  id: number;
+  status: MailingStatus;
+  queued: number;
+  skipped: number;
+  skippedByReason: MailingSkippedByReason;
+};
+
+export type MailingCounts = {
+  sent: number;
+  pending: number;
+  failed: number;
+  skipped: number;
+};
+
+export type MailingSummary = {
+  id: number;
+  groupId: number | null;
+  groupName: string;
+  subject: string;
+  senderName: string | null;
+  senderEmail: string | null;
+  status: MailingStatus;
+  createdAt: string;
+  counts: MailingCounts;
+};
+
+export type MailingRecipient = {
+  id: number;
+  uid: number | null;
+  name: string | null;
+  email: string | null;
+  status: MailingRecipientStatus;
+  reason: string | null;
+  attempts: number;
+  lastError: string | null;
+  sentAt: string | null;
+};
+
+export type MailingDetail = MailingSummary & {
+  body: string;
+  recipients: MailingRecipient[];
+};
+
 export type User = {
   matrikelnummer: number;
   email: string;
