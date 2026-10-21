@@ -120,6 +120,13 @@ export const LoginPage = () => {
         <Button type="submit" disabled={loading}>
           {loading ? "Loggar in..." : "Logga in"}
         </Button>
+        <p className="mt-4 text-sm text-neutral-500">
+          Första gången på nya webbplatsen? Klicka på{" "}
+          <Link to="/forgot-password" className="ui-link">
+            Glömt lösenord
+          </Link>{" "}
+          för att välja ett lösenord.
+        </p>
       </form>
     </PageContainer>
   );
