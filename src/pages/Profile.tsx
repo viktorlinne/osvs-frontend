@@ -35,6 +35,7 @@ export const Profile = () => {
   const { run: runLodges } = useFetch<Lodge[]>();
 
   const [saving, setSaving] = useState(false);
+  const [resetVersion, setResetVersion] = useState(0);
   const [pictureFile, setPictureFile] = useState<File | null>(null);
   const [lodges, setLodges] = useState<Lodge[]>([]);
   const [selectedLid, setSelectedLid] = useState<number | null>(null);
@@ -116,8 +117,16 @@ export const Profile = () => {
       zipcode: user?.zipcode ?? "",
       accommodationAvailable: user?.accommodationAvailable ?? null,
     });
+    // Validate after the re-render that re-registers the fields; calling
+    // trigger() right after reset() validates nothing and leaves errors empty
+    // while isValid is false.
+    setResetVersion((v) => v + 1);
+  }, [reset, user]);
+
+  useEffect(() => {
+    if (resetVersion === 0) return;
     void trigger();
-  }, [reset, trigger, user]);
+  }, [resetVersion, trigger]);
 
   useEffect(() => {
     let mounted = true;

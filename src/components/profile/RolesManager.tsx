@@ -54,7 +54,8 @@ export const RolesManager = ({
     );
   }
 
-  if (!isEditRoute && viewModeRoles.length > 0) {
+  // View mode, and edit mode for users who may not change roles (Editors).
+  if (viewModeRoles.length > 0) {
     return (
       <div>
         <p className="ui-label">Roller</p>

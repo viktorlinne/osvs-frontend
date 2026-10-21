@@ -45,7 +45,10 @@ import {
   toUserProfileUpdatePayload,
 } from "../utils/userProfileForm";
 import { applyApiFieldErrors } from "../utils/apiErrors";
-import { validateImageFile } from "../utils/formValidation";
+import {
+  adminUpdateUserFormRules,
+  validateImageFile,
+} from "../utils/formValidation";
 
 type MemberDetailUser = PublicUser & {
   roles?: string[];
@@ -80,6 +83,9 @@ export const MemberDetail = () => {
     authUser &&
     (authUser.roles ?? []).some((r) => ["Admin", "Editor"].includes(r)),
   );
+  // Role changes are Admin-only (GET /admin/roles and POST /users/:id/roles
+  // return 403 for Editors), so only Admins load the role list or save roles.
+  const isAdmin = Boolean(authUser && (authUser.roles ?? []).includes("Admin"));
   const isEditRoute = location.pathname.endsWith("/edit");
   // The backend only returns feeExempt/standingList to Admin/Editor. Only show
   // and send them when they were actually loaded, so a save can never clear
@@ -103,6 +109,11 @@ export const MemberDetail = () => {
   >([]);
   const [rolesList, setRolesList] = useState<Role[]>([]);
   const [selectedRoleIds, setSelectedRoleIds] = useState<number[]>([]);
+  const [initialRoleIds, setInitialRoleIds] = useState<number[]>([]);
+  // Bumped after each reset(); validation must run after the re-render that
+  // re-registers the fields, otherwise errors stay empty while isValid is
+  // false and "Spara" is disabled without any visible reason.
+  const [resetVersion, setResetVersion] = useState(0);
   const [selectedAllergyIds, setSelectedAllergyIds] = useState<number[] | null>(
     null,
   );
@@ -187,7 +198,7 @@ export const MemberDetail = () => {
         // useFetch handles global error
       });
 
-    if (shouldLoadRoleData) {
+    if (shouldLoadRoleData && isAdmin) {
       runRoles(() => listRoles())
         .then((roles) => setRolesList(roles))
         .catch(() => {
@@ -212,6 +223,7 @@ export const MemberDetail = () => {
     runUserLodge,
     setGlobalError,
     shouldLoadRoleData,
+    isAdmin,
   ]);
 
   useEffect(() => {
@@ -227,6 +239,7 @@ export const MemberDetail = () => {
       .filter((value): value is number => typeof value === "number");
 
     setSelectedRoleIds(ids);
+    setInitialRoleIds(ids);
   }, [member, rolesList]);
 
   useEffect(() => {
@@ -251,8 +264,13 @@ export const MemberDetail = () => {
       standingList: member.standingList === true,
     });
     setPictureFile(null);
+    setResetVersion((v) => v + 1);
+  }, [member, reset]);
+
+  useEffect(() => {
+    if (resetVersion === 0) return;
     void trigger();
-  }, [member, reset, trigger]);
+  }, [resetVersion, trigger]);
 
   useEffect(() => {
     if (!pictureFile) return;
@@ -287,10 +305,15 @@ export const MemberDetail = () => {
         await runAction(() => uploadUserPicture(userId, pictureFile));
       }
 
-      try {
-        await runAction(() => setRoles(userId, selectedRoleIds));
-      } catch {
-        setGlobalError("Misslyckades att uppdatera roller");
+      const rolesChanged =
+        selectedRoleIds.length !== initialRoleIds.length ||
+        selectedRoleIds.some((id) => !initialRoleIds.includes(id));
+      if (isAdmin && rolesChanged && selectedRoleIds.length > 0) {
+        try {
+          await runAction(() => setRoles(userId, selectedRoleIds));
+        } catch {
+          setGlobalError("Misslyckades att uppdatera roller");
+        }
       }
 
       try {
@@ -415,6 +438,7 @@ export const MemberDetail = () => {
                 pictureError={pictureError}
                 showArchive={isEditRoute}
                 showAdminFlags={showAdminFlags}
+                rules={adminUpdateUserFormRules}
               />
             </div>
 
@@ -426,7 +450,7 @@ export const MemberDetail = () => {
                 rolesList={rolesList}
                 selectedRoleIds={selectedRoleIds}
                 setSelectedRoleIds={setSelectedRoleIds}
-                canEditRoles={canEdit}
+                canEditRoles={isAdmin}
                 isEditRoute={isEditRoute}
                 viewModeRoles={readMemberRoleNames(member)}
                 saveRoles={async (targetUserId: number, roleIds: number[]) => {
@@ -506,6 +530,11 @@ export const MemberDetail = () => {
               <Link to=".." relative="path" className="ui-btn ui-btn-secondary">
                 Avbryt
               </Link>
+              {!isValid && !saving ? (
+                <p className="text-sm text-neutral-600 sm:self-center">
+                  Rätta de markerade fälten för att kunna spara.
+                </p>
+              ) : null}
             </div>
           ) : null}
         </div>

@@ -51,6 +51,10 @@ function validDateRule(required = true) {
   };
 }
 
+// Digits plus common separators. Migrated numbers are often written as
+// "042/132521" or "0705.12 34 56", so "/" and "." are accepted too.
+const PHONE_PATTERN = /^[0-9+\-\s()/.]{6,20}$/;
+
 const sharedProfileFieldRules = {
   firstname: {
     validate: requiredTrimmed("Förnamn"),
@@ -64,11 +68,11 @@ const sharedProfileFieldRules = {
   mobile: {
     validate: {
       required: requiredTrimmed("Mobilnummer"),
-      format: optionalPattern(/^[0-9+\-\s()]{6,20}$/, "Ogiltigt mobilnummer"),
+      format: optionalPattern(PHONE_PATTERN, "Ogiltigt mobilnummer"),
     },
   },
   homeNumber: {
-    validate: optionalPattern(/^[0-9+\-\s()]{6,20}$/, "Ogiltigt hemnummer"),
+    validate: optionalPattern(PHONE_PATTERN, "Ogiltigt hemnummer"),
   },
   city: {
     validate: requiredTrimmed("Stad"),
@@ -109,6 +113,28 @@ export const registerFormRules = {
 export const updateUserFormRules = {
   ...sharedProfileFieldRules,
 } satisfies Record<string, Rule<UpdateUserForm, FieldPath<UpdateUserForm>>>;
+
+export type UserProfileFieldRules = {
+  [K in keyof typeof updateUserFormRules]: Rule<UpdateUserForm, K>;
+};
+
+/**
+ * Admin/Editor edits of another member (PUT /users/:id). Migrated members
+ * often lack mobile number or address, and the backend does not require
+ * them, so only the format is checked here. Otherwise an Admin could not
+ * even toggle a flag on such a member without inventing contact data.
+ */
+export const adminUpdateUserFormRules: UserProfileFieldRules = {
+  ...updateUserFormRules,
+  mobile: {
+    validate: optionalPattern(PHONE_PATTERN, "Ogiltigt mobilnummer"),
+  },
+  city: {},
+  address: {},
+  zipcode: {
+    validate: optionalPattern(/^[0-9A-Za-z\s-]{3,10}$/, "Ogiltigt postnummer"),
+  },
+};
 
 export const postFormRules = {
   title: {

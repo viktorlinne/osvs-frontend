@@ -8,7 +8,10 @@ import {
   textareaClass,
 } from "../ui";
 import type { PublicUser, UpdateUserForm } from "../../types";
-import { updateUserFormRules } from "../../utils/formValidation";
+import {
+  updateUserFormRules,
+  type UserProfileFieldRules,
+} from "../../utils/formValidation";
 
 function formatFlag(value: boolean | undefined): string {
   if (value === true) return "Ja";
@@ -30,6 +33,7 @@ export const ProfileForm = ({
   pictureError,
   showArchive = false,
   showAdminFlags = false,
+  rules = updateUserFormRules,
 }: {
   user?: PublicUser | null;
   register: UseFormRegister<UpdateUserForm>;
@@ -41,6 +45,8 @@ export const ProfileForm = ({
   showArchive?: boolean;
   /** Admin/Editor only: "Befriad från årsavgift" and "Ständiga listan". */
   showAdminFlags?: boolean;
+  /** Field rules; Admin/Editor member edits pass the relaxed admin rules. */
+  rules?: UserProfileFieldRules;
 }) => {
   if (!isEditRoute) {
     return (
@@ -180,7 +186,7 @@ export const ProfileForm = ({
           </label>
           <input
             id="firstname"
-            {...register("firstname", updateUserFormRules.firstname)}
+            {...register("firstname", rules.firstname)}
             className={inputClass}
           />
           {errors.firstname ? (
@@ -193,7 +199,7 @@ export const ProfileForm = ({
           </label>
           <input
             id="lastname"
-            {...register("lastname", updateUserFormRules.lastname)}
+            {...register("lastname", rules.lastname)}
             className={inputClass}
           />
           {errors.lastname ? (
@@ -210,7 +216,7 @@ export const ProfileForm = ({
           <input
             id="dateOfBirth"
             type="date"
-            {...register("dateOfBirth", updateUserFormRules.dateOfBirth)}
+            {...register("dateOfBirth", rules.dateOfBirth)}
             className={inputClass}
           />
           {errors.dateOfBirth ? (
@@ -244,7 +250,7 @@ export const ProfileForm = ({
             id="mobile"
             type="text"
             inputMode="tel"
-            {...register("mobile", updateUserFormRules.mobile)}
+            {...register("mobile", rules.mobile)}
             className={inputClass}
           />
           {errors.mobile ? (
@@ -259,7 +265,7 @@ export const ProfileForm = ({
             id="homeNumber"
             type="text"
             inputMode="tel"
-            {...register("homeNumber", updateUserFormRules.homeNumber)}
+            {...register("homeNumber", rules.homeNumber)}
             className={inputClass}
           />
           {errors.homeNumber ? (
@@ -275,7 +281,7 @@ export const ProfileForm = ({
           </label>
           <input
             id="address"
-            {...register("address", updateUserFormRules.address)}
+            {...register("address", rules.address)}
             autoComplete="off"
             className={inputClass}
           />
@@ -291,7 +297,7 @@ export const ProfileForm = ({
             id="zipcode"
             type="text"
             inputMode="numeric"
-            {...register("zipcode", updateUserFormRules.zipcode)}
+            {...register("zipcode", rules.zipcode)}
             className={inputClass}
           />
           {errors.zipcode ? (
@@ -304,7 +310,7 @@ export const ProfileForm = ({
           </label>
           <input
             id="city"
-            {...register("city", updateUserFormRules.city)}
+            {...register("city", rules.city)}
             className={inputClass}
           />
           {errors.city ? (

@@ -20,7 +20,9 @@ export const useProfile = ({ isEditRoute }: { isEditRoute: boolean }) => {
   const canAward = Boolean(
     user && (user.roles ?? []).some((r) => ["Admin", "Editor"].includes(r))
   );
-  const canEditRoles = canAward;
+  // Role changes are Admin-only on the backend (GET /admin/roles and
+  // POST /users/:id/roles return 403 for Editors).
+  const canEditRoles = Boolean(user && (user.roles ?? []).includes("Admin"));
   const shouldLoadRoleData = canEditRoles && isEditRoute;
 
   useEffect(() => {
