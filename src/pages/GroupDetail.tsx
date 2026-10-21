@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import {
@@ -84,6 +84,12 @@ export const GroupDetail = () => {
 
   const [confirmRemoveId, setConfirmRemoveId] = useState<number | null>(null);
   const [removingId, setRemovingId] = useState<number | null>(null);
+  // After a member is removed its row (and the button that opened the
+  // confirm dialog) disappears. Remember the row index so focus can move to
+  // the next row's remove button, or to the list heading when it was the last.
+  const focusAfterRemoveRef = useRef<number | null>(null);
+  const membersListRef = useRef<HTMLUListElement>(null);
+  const membersHeadingRef = useRef<HTMLHeadingElement>(null);
 
   const userSearch = useDebouncedUserSearch();
 
@@ -112,6 +118,18 @@ export const GroupDetail = () => {
     }, 0);
     return () => clearTimeout(timer);
   }, [loadGroup, loadMembers]);
+
+  useEffect(() => {
+    const index = focusAfterRemoveRef.current;
+    if (index === null || removingId !== null || !members) return;
+    focusAfterRemoveRef.current = null;
+    const buttons =
+      membersListRef.current?.querySelectorAll<HTMLButtonElement>("button[data-remove-member]") ??
+      [];
+    const target =
+      buttons.length > 0 ? buttons[Math.min(index, buttons.length - 1)] : membersHeadingRef.current;
+    target?.focus();
+  }, [members, removingId]);
 
   const memberIds = useMemo(
     () => new Set((members ?? []).map((member) => member.matrikelnummer)),
@@ -192,7 +210,9 @@ export const GroupDetail = () => {
     setRemovingId(matrikelnummer);
     try {
       await removeGroupMember(id, matrikelnummer);
-      const removed = (members ?? []).find((m) => m.matrikelnummer === matrikelnummer);
+      const removedIndex = (members ?? []).findIndex((m) => m.matrikelnummer === matrikelnummer);
+      const removed = removedIndex >= 0 ? (members ?? [])[removedIndex] : undefined;
+      focusAfterRemoveRef.current = Math.max(removedIndex, 0);
       toast.success(
         removed
           ? `${memberDisplayName(removed)} togs bort ur gruppen.`
@@ -309,7 +329,12 @@ export const GroupDetail = () => {
       {group ? (
         <>
           <section className="mb-8" aria-labelledby="members-heading">
-            <h2 id="members-heading" className="mb-3 text-lg font-semibold text-neutral-900">
+            <h2
+              id="members-heading"
+              ref={membersHeadingRef}
+              tabIndex={-1}
+              className="mb-3 text-lg font-semibold text-neutral-900 focus:outline-none"
+            >
               Medlemmar
             </h2>
             <AsyncState
@@ -341,7 +366,10 @@ export const GroupDetail = () => {
                 </div>
               }
             >
-              <ul className="overflow-hidden rounded-card border border-neutral-200">
+              <ul
+                ref={membersListRef}
+                className="overflow-hidden rounded-card border border-neutral-200"
+              >
                 {(members ?? []).map((member) => {
                   const fullName = `${member.firstname} ${member.lastname}`.trim();
                   return (
@@ -373,6 +401,7 @@ export const GroupDetail = () => {
                         size="sm"
                         variant="secondary"
                         disabled={removingId !== null}
+                        data-remove-member
                         onClick={() => setConfirmRemoveId(member.matrikelnummer)}
                         aria-label={`Ta bort ${fullName || member.matrikelnummer} ur gruppen`}
                       >

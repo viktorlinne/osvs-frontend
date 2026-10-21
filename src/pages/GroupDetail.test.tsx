@@ -103,6 +103,46 @@ describe("GroupDetail confirmations", () => {
     await waitFor(() =>
       expect(screen.queryByRole("link", { name: "Bo Ek" })).not.toBeInTheDocument(),
     );
+    // The removed row's button is gone; focus moves to the remaining row.
+    await waitFor(() =>
+      expect(
+        screen.getByRole("button", { name: "Ta bort Anders Berg ur gruppen" }),
+      ).toHaveFocus(),
+    );
+  });
+
+  it("moves focus to the next row after removing a member", async () => {
+    const user = userEvent.setup();
+    renderPage();
+    await user.click(
+      await screen.findByRole("button", { name: "Ta bort Anders Berg ur gruppen" }),
+    );
+    const dialog = await screen.findByRole("alertdialog", { name: "Ta bort ur gruppen?" });
+    groupsMock.listGroupMembers.mockResolvedValue([members[1]]);
+    await user.click(within(dialog).getByRole("button", { name: "Ta bort" }));
+
+    await waitFor(() =>
+      expect(screen.queryByRole("link", { name: "Anders Berg" })).not.toBeInTheDocument(),
+    );
+    await waitFor(() =>
+      expect(screen.getByRole("button", { name: "Ta bort Bo Ek ur gruppen" })).toHaveFocus(),
+    );
+  });
+
+  it("moves focus to the members heading after removing the last member", async () => {
+    const user = userEvent.setup();
+    groupsMock.listGroupMembers.mockResolvedValue([members[0]]);
+    renderPage();
+    await user.click(
+      await screen.findByRole("button", { name: "Ta bort Anders Berg ur gruppen" }),
+    );
+    const dialog = await screen.findByRole("alertdialog", { name: "Ta bort ur gruppen?" });
+    groupsMock.listGroupMembers.mockResolvedValue([]);
+    await user.click(within(dialog).getByRole("button", { name: "Ta bort" }));
+
+    await waitFor(() =>
+      expect(screen.getByRole("heading", { name: "Medlemmar" })).toHaveFocus(),
+    );
   });
 
   it("adds members picked in the combobox", async () => {
