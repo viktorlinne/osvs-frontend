@@ -96,32 +96,57 @@ function NoteField({
   );
 }
 
+const NOTE_REQUIRED_HINT = "Skriv en anteckning – krävs vid ändring";
+const NOTE_REQUIRED_DELETE_HINT = "Skriv en anteckning – krävs vid borttagning";
+
 function DialogActions({
   submitLabel,
   submitting,
   disabled,
   onCancel,
   variant = "primary",
+  missing = [],
 }: {
   submitLabel: string;
   submitting: boolean;
   disabled: boolean;
   onCancel: () => void;
   variant?: "primary" | "danger";
+  /** What still blocks saving; shown next to the disabled button. */
+  missing?: string[];
 }) {
+  const hintId = useId();
+  const showHint = disabled && !submitting && missing.length > 0;
   return (
-    <div className="flex flex-col-reverse gap-2 pt-2 sm:flex-row sm:justify-end">
-      <Button type="button" variant="secondary" onClick={onCancel}>
-        Avbryt
-      </Button>
-      <Button
-        type="submit"
-        variant={variant}
-        loading={submitting}
-        disabled={disabled}
-      >
-        {submitting ? "Sparar..." : submitLabel}
-      </Button>
+    <div className="flex flex-col gap-2 pt-2 sm:flex-row sm:items-center sm:justify-end">
+      {showHint ? (
+        <div
+          id={hintId}
+          className="text-xs text-neutral-600 sm:mr-auto"
+          aria-live="polite"
+        >
+          <p className="font-medium">För att spara:</p>
+          <ul className="list-disc pl-4">
+            {missing.map((item) => (
+              <li key={item}>{item}</li>
+            ))}
+          </ul>
+        </div>
+      ) : null}
+      <div className="flex flex-col-reverse gap-2 sm:flex-row">
+        <Button type="button" variant="secondary" onClick={onCancel}>
+          Avbryt
+        </Button>
+        <Button
+          type="submit"
+          variant={variant}
+          loading={submitting}
+          disabled={disabled}
+          aria-describedby={showHint ? hintId : undefined}
+        >
+          {submitting ? "Sparar..." : submitLabel}
+        </Button>
+      </div>
     </div>
   );
 }
@@ -165,14 +190,14 @@ export function OfficialEntryForm({
   const noteRequired = mode === "edit";
   const endBeforeStart =
     Boolean(appointedAt && unappointedAt) && unappointedAt < appointedAt;
-  const canSave =
-    officialId !== null &&
-    appointedAt.length > 0 &&
-    !endBeforeStart &&
-    startConfirmed &&
-    endConfirmed &&
-    (!noteRequired || note.trim().length > 0) &&
-    !submitting;
+  const missing: string[] = [];
+  if (officialId === null) missing.push("Välj tjänst");
+  if (appointedAt.length === 0) missing.push("Ange startdatum");
+  if (endBeforeStart) missing.push("Slutdatum kan inte vara före startdatum");
+  if (!startConfirmed) missing.push("Bekräfta startdatum");
+  if (!endConfirmed) missing.push("Bekräfta slutdatum eller pågående");
+  if (noteRequired && note.trim().length === 0) missing.push(NOTE_REQUIRED_HINT);
+  const canSave = missing.length === 0 && !submitting;
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -326,6 +351,7 @@ export function OfficialEntryForm({
         submitting={submitting}
         disabled={!canSave}
         onCancel={onCancel}
+        missing={missing}
       />
     </form>
   );
@@ -362,11 +388,11 @@ export function AchievementEntryForm({
   const { submitting, fieldErrors, formError, submit } = useSubmitState();
 
   const noteRequired = mode === "edit";
-  const canSave =
-    achievementId !== null &&
-    awardedAt.length > 0 &&
-    (!noteRequired || note.trim().length > 0) &&
-    !submitting;
+  const missing: string[] = [];
+  if (achievementId === null) missing.push("Välj utmärkelse");
+  if (awardedAt.length === 0) missing.push("Ange datum");
+  if (noteRequired && note.trim().length === 0) missing.push(NOTE_REQUIRED_HINT);
+  const canSave = missing.length === 0 && !submitting;
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -441,6 +467,7 @@ export function AchievementEntryForm({
         submitting={submitting}
         disabled={!canSave}
         onCancel={onCancel}
+        missing={missing}
       />
     </form>
   );
@@ -461,7 +488,9 @@ export function DeleteEntryForm({
 }) {
   const [note, setNote] = useState("");
   const { submitting, fieldErrors, formError, submit } = useSubmitState();
-  const canSave = note.trim().length > 0 && !submitting;
+  const missing =
+    note.trim().length > 0 ? [] : [NOTE_REQUIRED_DELETE_HINT];
+  const canSave = missing.length === 0 && !submitting;
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -485,6 +514,7 @@ export function DeleteEntryForm({
         disabled={!canSave}
         onCancel={onCancel}
         variant="danger"
+        missing={missing}
       />
     </form>
   );

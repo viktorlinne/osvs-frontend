@@ -132,6 +132,51 @@ describe("OfficialEntryForm", () => {
   });
 });
 
+describe("Spara hints", () => {
+  it("lists what is missing next to the disabled Spara and updates it", async () => {
+    const user = userEvent.setup();
+    render(
+      <OfficialEntryForm
+        mode="edit"
+        initial={{ officialId: 1, appointedAt: "2019-01-15", unappointedAt: null }}
+        options={officials}
+        onSubmit={vi.fn()}
+        onCancel={() => {}}
+      />,
+    );
+
+    expect(screen.getByText("Bekräfta startdatum")).toBeInTheDocument();
+    expect(screen.getByText("Bekräfta slutdatum eller pågående")).toBeInTheDocument();
+    expect(
+      screen.getByText("Skriv en anteckning – krävs vid ändring"),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Spara" }),
+    ).toHaveAccessibleDescription(/Bekräfta startdatum/);
+
+    await user.click(screen.getByLabelText("Jag bekräftar startdatumet 2019-01-15"));
+    expect(screen.queryByText("Bekräfta startdatum")).not.toBeInTheDocument();
+
+    await user.click(screen.getByLabelText(/pågående/));
+    await user.type(screen.getByLabelText(/Anteckning/), "Rättning");
+    expect(screen.queryByText("För att spara:")).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Spara" })).toBeEnabled();
+  });
+
+  it("explains that a note is required before deleting", () => {
+    render(
+      <DeleteEntryForm
+        description="Ta bort tjänsten?"
+        onSubmit={vi.fn()}
+        onCancel={() => {}}
+      />,
+    );
+    expect(
+      screen.getByText("Skriv en anteckning – krävs vid borttagning"),
+    ).toBeInTheDocument();
+  });
+});
+
 describe("AchievementEntryForm", () => {
   it("requires a note when changing an achievement", async () => {
     const user = userEvent.setup();
