@@ -263,7 +263,7 @@ export const NewsPage = () => {
                   {featured.title}
                 </h3>
                 {featured.description && (
-                  <p className="line-clamp-3 text-neutral-700">
+                  <p className="line-clamp-3 whitespace-pre-line text-neutral-700">
                     {featured.description}
                   </p>
                 )}
@@ -295,7 +295,7 @@ export const NewsPage = () => {
                       {p.title}
                     </h3>
                     {p.description && (
-                      <p className="line-clamp-2 text-sm text-neutral-700">
+                      <p className="line-clamp-2 whitespace-pre-line text-sm text-neutral-700">
                         {p.description}
                       </p>
                     )}

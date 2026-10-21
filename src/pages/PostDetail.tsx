@@ -225,7 +225,7 @@ export const PostDetail = () => {
           </div>
           <div className="md:col-span-2 flex flex-col gap-3">
             <h1 className="ui-section-title">{post.title}</h1>
-            <p className="text-neutral-900">{post.description}</p>
+            <p className="whitespace-pre-line break-words text-neutral-900">{post.description}</p>
             <div className="mt-auto flex flex-wrap items-center gap-2 pt-2 border-t border-neutral-100">
               {post.publicum ? (
                 <span className="ui-chapter rounded px-2 py-0.5 bg-primary-50 text-primary-700">

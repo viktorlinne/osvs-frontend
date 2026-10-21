@@ -18,7 +18,7 @@ export function PublicumDisplay({
         className="mb-3 h-56 w-full rounded-md object-cover md:h-64"
       />
       {description && (
-        <p className="text-sm text-neutral-700 md:text-base">{description}</p>
+        <p className="whitespace-pre-line text-sm text-neutral-700 md:text-base">{description}</p>
       )}
     </section>
   );
