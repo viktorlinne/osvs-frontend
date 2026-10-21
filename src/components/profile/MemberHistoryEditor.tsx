@@ -312,7 +312,9 @@ export function MemberHistoryEditor({
         </div>
         {historyStatus ??
           (history.officials.length === 0 ? (
-            <p className="text-sm text-neutral-600">Inga tjänster registrerade</p>
+            <p className="text-sm text-neutral-600">
+              Inga tjänster registrerade. Välj Lägg till för att registrera en tjänst.
+            </p>
           ) : (
             <ul className="flex flex-col">
               {history.officials.map((entry) => (
@@ -370,7 +372,9 @@ export function MemberHistoryEditor({
         </div>
         {historyStatus ??
           (history.achievements.length === 0 ? (
-            <p className="text-sm text-neutral-600">Inga utmärkelser registrerade</p>
+            <p className="text-sm text-neutral-600">
+              Inga utmärkelser registrerade. Välj Lägg till för att registrera en utmärkelse.
+            </p>
           ) : (
             <ul className="flex flex-col">
               {history.achievements.map((entry) => (

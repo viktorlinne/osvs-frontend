@@ -344,9 +344,20 @@ export const GroupDetail = () => {
               onRetry={() => void loadMembers()}
               empty={(members ?? []).length === 0}
               emptyMessage={
-                <p className="rounded-card border border-neutral-200 px-5 py-4 text-sm text-neutral-600">
-                  Gruppen har inga medlemmar ännu.
-                </p>
+                <div className="flex flex-wrap items-center justify-between gap-3 rounded-card border border-neutral-200 px-5 py-4">
+                  <p className="text-sm text-neutral-600">
+                    Gruppen har inga medlemmar ännu. Lägg till medlemmar för att kunna skicka
+                    utskick till gruppen.
+                  </p>
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="secondary"
+                    onClick={() => document.getElementById("group-add-users-trigger")?.focus()}
+                  >
+                    Lägg till medlemmar
+                  </Button>
+                </div>
               }
               loadingFallback={
                 <div

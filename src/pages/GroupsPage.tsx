@@ -145,7 +145,7 @@ export const GroupsPage = () => {
             <p className="text-neutral-600">
               {isFiltered
                 ? "Inga grupper matchade sökningen."
-                : "Det finns inga grupper ännu."}
+                : "Det finns inga grupper ännu. Skapa en grupp för att kunna skicka utskick till flera medlemmar på en gång."}
             </p>
             {isFiltered ? (
               <button
@@ -155,6 +155,10 @@ export const GroupsPage = () => {
               >
                 Rensa sökning
               </button>
+            ) : !creating ? (
+              <Button type="button" className="mt-1" onClick={() => setCreating(true)}>
+                Skapa grupp
+              </Button>
             ) : null}
           </div>
         )}

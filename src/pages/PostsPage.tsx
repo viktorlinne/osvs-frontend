@@ -51,9 +51,11 @@ function PostSkeleton({ featured = false }: { featured?: boolean }) {
 
 function EmptyPosts({
   isFiltered,
+  canCreate,
   onClear,
 }: {
   isFiltered: boolean;
+  canCreate: boolean;
   onClear: () => void;
 }) {
   return (
@@ -66,7 +68,7 @@ function EmptyPosts({
           ? "Inga inlägg matchade dina filterval."
           : "Inga inlägg har publicerats ännu."}
       </p>
-      {isFiltered && (
+      {isFiltered ? (
         <button
           type="button"
           onClick={onClear}
@@ -74,7 +76,11 @@ function EmptyPosts({
         >
           Rensa filter
         </button>
-      )}
+      ) : canCreate ? (
+        <Link to="/posts/create" className="ui-btn ui-btn-primary mt-1">
+          Skriv det första inlägget
+        </Link>
+      ) : null}
     </div>
   );
 }
@@ -99,6 +105,7 @@ export const NewsPage = () => {
     () => Math.max(1, Number(searchParams.get("sida") ?? 1)),
   );
   const { user } = useAuth();
+  const canCreate = (user?.roles ?? []).some((r) => ["Admin", "Editor"].includes(r));
   const isFirstRender = useRef(true);
 
   useEffect(() => {
@@ -182,12 +189,11 @@ export const NewsPage = () => {
       <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
         <h2 className="ui-page-title">Nyheter</h2>
 
-        {user &&
-          (user.roles ?? []).some((r) => ["Admin", "Editor"].includes(r)) && (
-            <Link to="/posts/create" className="ui-btn ui-btn-primary">
-              Skapa inlägg
-            </Link>
-          )}
+        {canCreate && (
+          <Link to="/posts/create" className="ui-btn ui-btn-primary">
+            Skapa inlägg
+          </Link>
+        )}
       </div>
 
       <div className="mb-8 grid grid-cols-1 gap-3 md:grid-cols-2">
@@ -238,7 +244,7 @@ export const NewsPage = () => {
           </div>
         </div>
       ) : posts.length === 0 ? (
-        <EmptyPosts isFiltered={isFiltered} onClear={clearFilters} />
+        <EmptyPosts isFiltered={isFiltered} canCreate={canCreate} onClear={clearFilters} />
       ) : (
         <div
           aria-busy={isPaginating}

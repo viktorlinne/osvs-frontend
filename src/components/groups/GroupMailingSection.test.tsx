@@ -59,6 +59,13 @@ describe("GroupMailingSection", () => {
     ).toBeInTheDocument();
   });
 
+  it("empty history offers to write a mailing", async () => {
+    const user = userEvent.setup();
+    renderSection();
+    await user.click(await screen.findByRole("button", { name: "Skriv ett utskick" }));
+    expect(screen.getByLabelText("Ämne")).toHaveFocus();
+  });
+
   it("validates before asking for confirmation", async () => {
     const user = userEvent.setup();
     renderSection();

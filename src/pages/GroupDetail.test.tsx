@@ -145,6 +145,17 @@ describe("GroupDetail confirmations", () => {
     );
   });
 
+  it("empty member list points to the member picker", async () => {
+    const user = userEvent.setup();
+    groupsMock.listGroupMembers.mockResolvedValue([]);
+    renderPage();
+    expect(await screen.findByText(/Gruppen har inga medlemmar ännu/)).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Lägg till medlemmar" }));
+    expect(
+      screen.getByRole("button", { name: /Välj medlemmar att lägga till/ }),
+    ).toHaveFocus();
+  });
+
   it("adds members picked in the combobox", async () => {
     const user = userEvent.setup();
     groupsMock.addGroupMembers.mockResolvedValue({ added: [13], alreadyMembers: [] });

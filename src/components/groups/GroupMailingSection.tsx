@@ -101,6 +101,7 @@ export function GroupMailingSection({ groupId, membersVersion }: GroupMailingSec
     handleSubmit,
     reset,
     clearErrors,
+    setFocus,
     setError: setFieldError,
     formState: { errors },
   } = useForm<MailingFormValues>({
@@ -330,9 +331,19 @@ export function GroupMailingSection({ groupId, membersVersion }: GroupMailingSec
           onRetry={() => void loadMailings()}
           empty={(mailings ?? []).length === 0}
           emptyMessage={
-            <p className="rounded-card border border-neutral-200 px-5 py-4 text-sm text-neutral-600">
-              Inga utskick har skickats till gruppen ännu.
-            </p>
+            <div className="flex flex-wrap items-center justify-between gap-3 rounded-card border border-neutral-200 px-5 py-4">
+              <p className="text-sm text-neutral-600">
+                Inga utskick har skickats till gruppen ännu.
+              </p>
+              <Button
+                type="button"
+                size="sm"
+                variant="secondary"
+                onClick={() => setFocus("subject")}
+              >
+                Skriv ett utskick
+              </Button>
+            </div>
           }
           loadingFallback={
             <div

@@ -123,6 +123,21 @@ export const EventsPage = () => {
     });
   }, [year, month, eventsByDate]);
 
+  const emptyMonth = (
+    <div className="flex flex-col items-start gap-3">
+      <p className="text-sm text-neutral-600">
+        {canCreate
+          ? "Inga möten den här månaden."
+          : "Inga möten den här månaden. Använd Förra och Nästa för att se andra månader."}
+      </p>
+      {canCreate ? (
+        <Link to="/events/create" className="ui-btn ui-btn-sm ui-btn-secondary">
+          Skapa möte
+        </Link>
+      ) : null}
+    </div>
+  );
+
   return (
     <PageContainer size="xl" className="ui-page">
       {/* ── Header ── */}
@@ -191,9 +206,7 @@ export const EventsPage = () => {
             ))}
           </div>
         ) : daysWithEvents.length === 0 ? (
-          <p className="px-4 py-6 text-sm text-neutral-600">
-            {!fetchError && "Inga möten den här månaden."}
-          </p>
+          <div className="px-4 py-6">{fetchError ? null : emptyMonth}</div>
         ) : (
           daysWithEvents.map((d) => {
             const date = new Date(year, month, d);
@@ -330,6 +343,9 @@ export const EventsPage = () => {
           </React.Fragment>
         ))}
       </div>
+      {!loading && !fetchError && daysWithEvents.length === 0 ? (
+        <div className="mt-4 hidden sm:block">{emptyMonth}</div>
+      ) : null}
     </PageContainer>
   );
 };
