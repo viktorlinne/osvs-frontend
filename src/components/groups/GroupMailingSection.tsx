@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import { toast } from "sonner";
 import { useForm } from "react-hook-form";
 import { useError } from "../../context";
 import {
@@ -78,7 +79,6 @@ export function GroupMailingSection({ groupId, membersVersion }: GroupMailingSec
 
   const [pendingValues, setPendingValues] = useState<MailingFormValues | null>(null);
   const [sending, setSending] = useState(false);
-  const [sentMessage, setSentMessage] = useState<string | null>(null);
 
   const [openMailingId, setOpenMailingId] = useState<number | null>(null);
   const [openMailing, setOpenMailing] = useState<MailingDetail | null>(null);
@@ -160,7 +160,6 @@ export function GroupMailingSection({ groupId, membersVersion }: GroupMailingSec
 
   function requestConfirm(values: MailingFormValues) {
     clearGlobalError();
-    setSentMessage(null);
     setPendingValues(values);
   }
 
@@ -177,7 +176,7 @@ export function GroupMailingSection({ groupId, membersVersion }: GroupMailingSec
       reset({ subject: "", body: "" });
       setPendingValues(null);
       const skippedText = created.skipped > 0 ? `, ${created.skipped} hoppas över` : "";
-      setSentMessage(
+      toast.success(
         `Utskicket har lagts i kö till ${formatRecipientCount(created.queued)}${skippedText}.`,
       );
       await loadMailings(true);
@@ -302,11 +301,6 @@ export function GroupMailingSection({ groupId, membersVersion }: GroupMailingSec
             pending={sending}
             onConfirm={() => void confirmSend()}
           />
-          {sentMessage ? (
-            <p className="mt-3 text-sm text-neutral-700" role="status">
-              {sentMessage}
-            </p>
-          ) : null}
         </form>
       </section>
 

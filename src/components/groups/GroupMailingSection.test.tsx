@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { cleanup, render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { Toaster } from "sonner";
 import ErrorContext from "../../context/ErrorContext";
 
 const mailingsMock = vi.hoisted(() => ({
@@ -20,6 +21,7 @@ function renderSection() {
   render(
     <ErrorContext.Provider value={{ error: null, setError, clearError: vi.fn() }}>
       <GroupMailingSection groupId="5" membersVersion={5} />
+      <Toaster />
     </ErrorContext.Provider>,
   );
 }

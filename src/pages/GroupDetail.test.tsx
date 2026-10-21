@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { createMemoryRouter, RouterProvider } from "react-router-dom";
+import { Toaster } from "sonner";
 import ErrorContext from "../context/ErrorContext";
 
 const groupsMock = vi.hoisted(() => ({
@@ -38,6 +39,7 @@ function renderPage() {
   render(
     <ErrorContext.Provider value={{ error: null, setError: vi.fn(), clearError: vi.fn() }}>
       <RouterProvider router={router} />
+      <Toaster />
     </ErrorContext.Provider>,
   );
 }
@@ -77,6 +79,7 @@ describe("GroupDetail confirmations", () => {
 
     await waitFor(() => expect(groupsMock.deleteGroup).toHaveBeenCalledWith("3"));
     expect(await screen.findByText("Grupplista")).toBeInTheDocument();
+    expect(await screen.findByText("Gruppen Styrelsen togs bort.")).toBeInTheDocument();
   });
 
   it("confirms before removing a member", async () => {
@@ -92,6 +95,7 @@ describe("GroupDetail confirmations", () => {
     await user.click(within(dialog).getByRole("button", { name: "Ta bort" }));
 
     await waitFor(() => expect(groupsMock.removeGroupMember).toHaveBeenCalledWith("3", 12));
+    expect(await screen.findByText("Bo Ek togs bort ur gruppen.")).toBeInTheDocument();
     await waitFor(() => expect(screen.queryByRole("alertdialog")).not.toBeInTheDocument());
     await waitFor(() =>
       expect(screen.queryByRole("link", { name: "Bo Ek" })).not.toBeInTheDocument(),

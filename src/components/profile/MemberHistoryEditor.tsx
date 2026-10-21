@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
+import { toast } from "sonner";
 import { Button } from "../ui";
 import { HistoryDialog } from "./HistoryDialog";
 import {
@@ -165,7 +166,8 @@ export function MemberHistoryEditor({
 
   const closeDialog = useCallback(() => setDialog(null), []);
 
-  async function afterMutation() {
+  async function afterMutation(message: string) {
+    toast.success(message);
     setDialog(null);
     await reload();
     onChanged?.();
@@ -182,7 +184,9 @@ export function MemberHistoryEditor({
     } else {
       await memberHistoryService.createOfficialEntry(matrikelnummer, payload);
     }
-    await afterMutation();
+    await afterMutation(
+      dialog.mode === "edit" ? "Tjänsten sparades." : "Tjänsten lades till.",
+    );
   }
 
   async function saveAchievement(payload: AchievementEntryPayload) {
@@ -196,7 +200,9 @@ export function MemberHistoryEditor({
     } else {
       await memberHistoryService.createAchievementEntry(matrikelnummer, payload);
     }
-    await afterMutation();
+    await afterMutation(
+      dialog.mode === "edit" ? "Utmärkelsen sparades." : "Utmärkelsen lades till.",
+    );
   }
 
   async function deleteEntry(note: string) {
@@ -214,7 +220,9 @@ export function MemberHistoryEditor({
         note,
       );
     }
-    await afterMutation();
+    await afterMutation(
+      dialog.kind === "official" ? "Tjänsten togs bort." : "Utmärkelsen togs bort.",
+    );
   }
 
   function renderDialog() {

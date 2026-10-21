@@ -2,6 +2,7 @@ import { useEffect, useRef } from "react";
 import { Outlet, useLocation, useNavigate } from "react-router";
 import { useAuth, useError } from "../context";
 import { Navbar, Footer } from "../components";
+import { Toaster } from "@/components/shadcn/sonner";
 import {
   registerUnauthorizedHandler,
   unregisterUnauthorizedHandler,
@@ -55,6 +56,7 @@ export function AppLayout() {
         <Outlet />
       </main>
       <Footer />
+      <Toaster />
     </div>
   );
 }

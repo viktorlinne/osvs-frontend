@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { toast } from "sonner";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import {
   AsyncState,
@@ -141,6 +142,7 @@ export const GroupDetail = () => {
     const updated = await updateGroup(id, values);
     setGroup(updated);
     setEditing(false);
+    toast.success("Gruppen sparades.");
   }
 
   async function handleDelete() {
@@ -149,6 +151,7 @@ export const GroupDetail = () => {
     setDeleting(true);
     try {
       await deleteGroup(id);
+      toast.success(group ? `Gruppen ${group.name} togs bort.` : "Gruppen togs bort.");
       navigate("/admin/groups");
     } catch (error: unknown) {
       setConfirmDelete(false);
@@ -187,6 +190,12 @@ export const GroupDetail = () => {
     setRemovingId(matrikelnummer);
     try {
       await removeGroupMember(id, matrikelnummer);
+      const removed = (members ?? []).find((m) => m.matrikelnummer === matrikelnummer);
+      toast.success(
+        removed
+          ? `${memberDisplayName(removed)} togs bort ur gruppen.`
+          : "Medlemmen togs bort ur gruppen.",
+      );
       setConfirmRemoveId(null);
       setAddResult(null);
       syncMemberCount(await loadMembers());

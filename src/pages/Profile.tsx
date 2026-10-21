@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { toast } from "sonner";
 import { SaveHint } from "../components/profile/SaveHint";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
@@ -47,21 +48,6 @@ export const Profile = () => {
   const [selectedAllergyIds, setSelectedAllergyIds] = useState<number[] | null>(
     null,
   );
-
-  const navState = location.state as Record<string, unknown> | null;
-  const [showSaved, setShowSaved] = useState(navState?.saved === true);
-
-  useEffect(() => {
-    if (!showSaved) return;
-    const t = setTimeout(() => setShowSaved(false), 4000);
-    return () => clearTimeout(t);
-  }, [showSaved]);
-
-  useEffect(() => {
-    if (navState?.saved) {
-      navigate(location.pathname, { replace: true, state: null });
-    }
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const {
     achievements,
@@ -186,6 +172,8 @@ export const Profile = () => {
     achievementPending;
 
   const handleProfileSave = handleSubmit(async (values) => {
+    // Inner steps report their own errors; only toast when all succeeded.
+    let partialFailure = false;
     clearGlobalError();
     clearErrors();
     setSaving(true);
@@ -206,6 +194,7 @@ export const Profile = () => {
             await run(() => saveRoles(userId, selectedRoleIds));
           }
         } catch {
+          partialFailure = true;
           setGlobalError("Misslyckades att uppdatera roller");
         }
 
@@ -214,6 +203,7 @@ export const Profile = () => {
             await run(() => setMemberOfficials(userId, selectedOfficialIds));
           }
         } catch {
+          partialFailure = true;
           setGlobalError("Misslyckades att uppdatera tjänster");
         }
 
@@ -222,6 +212,7 @@ export const Profile = () => {
             await run(() => setMemberAllergies(userId, selectedAllergyIds));
           }
         } catch {
+          partialFailure = true;
           setGlobalError("Misslyckades att uppdatera allergier");
         }
 
@@ -234,6 +225,7 @@ export const Profile = () => {
             setAwardDate("");
           }
         } catch {
+          partialFailure = true;
           setGlobalError("Misslyckades att tilldela utmärkelse");
         }
 
@@ -246,6 +238,7 @@ export const Profile = () => {
               ),
             );
           } catch {
+            partialFailure = true;
             setGlobalError("Misslyckades att uppdatera loge");
           }
         }
@@ -256,7 +249,8 @@ export const Profile = () => {
       setSelectedAllergyIds(null);
 
       await refresh();
-      navigate("/profile", { replace: true, state: { saved: true } });
+      if (!partialFailure) toast.success("Profilen sparades.");
+      navigate("/profile", { replace: true });
     } catch (error: unknown) {
       if (applyApiFieldErrors(error, setFieldError)) {
         return;
@@ -290,15 +284,6 @@ export const Profile = () => {
           </Link>
         </div>
       </div>
-
-      {showSaved ? (
-        <p
-          role="status"
-          className="mb-4 rounded border border-success-600/20 bg-success-50 px-4 py-2.5 text-sm font-medium text-success-600"
-        >
-          Profil uppdaterad.
-        </p>
-      ) : null}
 
       <form onSubmit={handleProfileSave} className="flex flex-col gap-4 animate-step-in">
         {/* Profile header */}

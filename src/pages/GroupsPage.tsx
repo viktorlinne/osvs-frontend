@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
+import { toast } from "sonner";
 import { Link, useNavigate } from "react-router-dom";
 import {
   AsyncState,
@@ -35,6 +36,7 @@ export const GroupsPage = () => {
 
   async function handleCreate(values: { name: string; description: string | null }) {
     const group = await createGroup(values);
+    toast.success(`Gruppen ${group.name} skapades.`);
     navigate(`/admin/groups/${group.id}`);
   }
 

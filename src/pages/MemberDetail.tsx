@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
+import { toast } from "sonner";
 import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { Button, NotFoundPanel, PageContainer } from "../components";
@@ -307,6 +308,8 @@ export const MemberDetail = () => {
     rolesChanged;
 
   const handleMemberSave = handleSubmit(async (values) => {
+    // Inner steps report their own errors; only toast when all succeeded.
+    let partialFailure = false;
     clearGlobalError();
     clearErrors();
     setSaving(true);
@@ -334,6 +337,7 @@ export const MemberDetail = () => {
         try {
           await runAction(() => setRoles(userId, selectedRoleIds));
         } catch {
+          partialFailure = true;
           setGlobalError("Misslyckades att uppdatera roller");
         }
       }
@@ -343,6 +347,7 @@ export const MemberDetail = () => {
           await runAction(() => setMemberAllergies(userId, selectedAllergyIds));
         }
       } catch {
+        partialFailure = true;
         setGlobalError("Misslyckades att uppdatera allergier");
       }
 
@@ -356,12 +361,14 @@ export const MemberDetail = () => {
           );
           setInitialLid(selectedLid);
         } catch {
+          partialFailure = true;
           setGlobalError("Misslyckades att uppdatera loge");
         }
       }
       setSelectedAllergyIds(null);
 
       await run(loadMember);
+      if (!partialFailure) toast.success("Medlemmen sparades.");
       navigate(`/members/${matrikelnummer}`, { replace: true });
     } catch (error: unknown) {
       if (applyApiFieldErrors(error, setFieldError)) {
