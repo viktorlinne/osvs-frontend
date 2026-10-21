@@ -14,6 +14,7 @@ export const useProfile = ({ isEditRoute }: { isEditRoute: boolean }) => {
   const [lodge, setLodge] = useState<Lodge | null>(null);
   const [rolesList, setRolesList] = useState<Role[]>([]);
   const [selectedRoleIds, setSelectedRoleIds] = useState<number[]>([]);
+  const [initialRoleIds, setInitialRoleIds] = useState<number[]>([]);
   const [selectedAid, setSelectedAid] = useState<number | null>(null);
   const [awardDate, setAwardDate] = useState<string>("");
 
@@ -48,6 +49,7 @@ export const useProfile = ({ isEditRoute }: { isEditRoute: boolean }) => {
           if (mounted) {
             setRolesList([]);
             setSelectedRoleIds([]);
+            setInitialRoleIds([]);
           }
           return;
         }
@@ -62,7 +64,10 @@ export const useProfile = ({ isEditRoute }: { isEditRoute: boolean }) => {
               return rolesArray.find((x) => (x.name ?? x.role ?? "") === rnName)?.id;
             })
             .filter((v): v is number => Boolean(v));
-          if (mounted) setSelectedRoleIds(ids);
+          if (mounted) {
+            setSelectedRoleIds(ids);
+            setInitialRoleIds(ids);
+          }
         } catch {
           // ignore
         }
@@ -107,6 +112,7 @@ export const useProfile = ({ isEditRoute }: { isEditRoute: boolean }) => {
     rolesList,
     selectedRoleIds,
     setSelectedRoleIds,
+    initialRoleIds,
     selectedAid,
     setSelectedAid,
     awardDate,

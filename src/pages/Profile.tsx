@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { SaveHint } from "../components/profile/SaveHint";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import {
@@ -22,6 +23,7 @@ import type { Lodge, UpdateUserForm } from "../types";
 import { applyApiFieldErrors } from "../utils/apiErrors";
 import { validateImageFile } from "../utils/formValidation";
 import { toUserProfileUpdatePayload } from "../utils/userProfileForm";
+import { idsFromField, selectionChanged, sameIds } from "../utils/idSets";
 
 export const Profile = () => {
   const { user, refresh } = useAuth();
@@ -68,6 +70,7 @@ export const Profile = () => {
     rolesList,
     selectedRoleIds,
     setSelectedRoleIds,
+    initialRoleIds,
     selectedAid,
     setSelectedAid,
     awardDate,
@@ -85,15 +88,15 @@ export const Profile = () => {
     trigger,
     clearErrors,
     setError: setFieldError,
-    formState: { errors, isValid },
+    formState: { errors, isValid, isDirty },
   } = useForm<UpdateUserForm>({
     mode: "onChange",
     defaultValues: {
       firstname: user?.firstname ?? "",
       lastname: user?.lastname ?? "",
       dateOfBirth: user?.dateOfBirth ? user.dateOfBirth.slice(0, 10) : "",
-      work: user?.work ?? undefined,
-      notes: user?.notes ?? undefined,
+      work: user?.work ?? "",
+      notes: user?.notes ?? "",
       mobile: user?.mobile ?? "",
       homeNumber: user?.homeNumber ?? "",
       city: user?.city ?? "",
@@ -108,8 +111,8 @@ export const Profile = () => {
       firstname: user?.firstname ?? "",
       lastname: user?.lastname ?? "",
       dateOfBirth: user?.dateOfBirth ? user.dateOfBirth.slice(0, 10) : "",
-      work: user?.work ?? undefined,
-      notes: user?.notes ?? undefined,
+      work: user?.work ?? "",
+      notes: user?.notes ?? "",
       mobile: user?.mobile ?? "",
       homeNumber: user?.homeNumber ?? "",
       city: user?.city ?? "",
@@ -152,13 +155,45 @@ export const Profile = () => {
 
   const pictureError = validateImageFile(pictureFile);
 
+  // Lodge, tjänster and utmärkelser may only be changed by Admin/Editor
+  // (POST /users/:id/lodges, PUT /officials/member/:id and
+  // POST /users/:id/achievements return 403 for members); roles are
+  // Admin-only; allergies may be changed by the member themself.
+  const canEditMembership = canAward;
+  const initialLid = lodge?.id ? Number(lodge.id) : null;
+  const initialOfficialIds = idsFromField(user?.officials);
+  const initialAllergyIds = idsFromField(user?.allergies);
+  const lodgeChanged = canEditMembership && selectedLid !== initialLid;
+  const officialsChanged =
+    canEditMembership &&
+    selectionChanged(selectedOfficialIds, initialOfficialIds);
+  const allergiesChanged = selectionChanged(
+    selectedAllergyIds,
+    initialAllergyIds,
+  );
+  const rolesChanged =
+    canEditRoles &&
+    selectedRoleIds.length > 0 &&
+    !sameIds(selectedRoleIds, initialRoleIds);
+  const achievementPending = canEditMembership && selectedAid !== null;
+  const hasChanges =
+    isDirty ||
+    pictureFile !== null ||
+    lodgeChanged ||
+    officialsChanged ||
+    allergiesChanged ||
+    rolesChanged ||
+    achievementPending;
+
   const handleProfileSave = handleSubmit(async (values) => {
     clearGlobalError();
     clearErrors();
     setSaving(true);
 
     try {
-      await run(() => updateMe(toUserProfileUpdatePayload(values)));
+      if (isDirty) {
+        await run(() => updateMe(toUserProfileUpdatePayload(values)));
+      }
 
       if (pictureFile) {
         await run(() => uploadMyPicture(pictureFile));
@@ -167,7 +202,7 @@ export const Profile = () => {
       const userId = user?.matrikelnummer;
       if (userId) {
         try {
-          if (Array.isArray(selectedRoleIds) && selectedRoleIds.length > 0) {
+          if (rolesChanged) {
             await run(() => saveRoles(userId, selectedRoleIds));
           }
         } catch {
@@ -175,7 +210,7 @@ export const Profile = () => {
         }
 
         try {
-          if (Array.isArray(selectedOfficialIds)) {
+          if (officialsChanged && selectedOfficialIds) {
             await run(() => setMemberOfficials(userId, selectedOfficialIds));
           }
         } catch {
@@ -183,7 +218,7 @@ export const Profile = () => {
         }
 
         try {
-          if (Array.isArray(selectedAllergyIds)) {
+          if (allergiesChanged && selectedAllergyIds) {
             await run(() => setMemberAllergies(userId, selectedAllergyIds));
           }
         } catch {
@@ -191,7 +226,7 @@ export const Profile = () => {
         }
 
         try {
-          if (selectedAid) {
+          if (achievementPending && selectedAid) {
             await run(() =>
               assignAchievement(userId, selectedAid, awardDate || undefined),
             );
@@ -202,17 +237,23 @@ export const Profile = () => {
           setGlobalError("Misslyckades att tilldela utmärkelse");
         }
 
-        try {
-          await run(() =>
-            setUserLodge(
-              String(userId),
-              selectedLid === null ? null : Number(selectedLid),
-            ),
-          );
-        } catch {
-          setGlobalError("Misslyckades att uppdatera loge");
+        if (lodgeChanged) {
+          try {
+            await run(() =>
+              setUserLodge(
+                String(userId),
+                selectedLid === null ? null : Number(selectedLid),
+              ),
+            );
+          } catch {
+            setGlobalError("Misslyckades att uppdatera loge");
+          }
         }
       }
+
+      setPictureFile(null);
+      setSelectedOfficialIds(null);
+      setSelectedAllergyIds(null);
 
       await refresh();
       navigate("/profile", { replace: true, state: { saved: true } });
@@ -269,7 +310,7 @@ export const Profile = () => {
             lodge={lodge}
             lodges={lodges}
             selectedLid={selectedLid}
-            setSelectedLid={setSelectedLid}
+            setSelectedLid={canEditMembership ? setSelectedLid : undefined}
             onSaveLodge={async (targetUserId: number, lodgeId: number | null) => {
               if (!targetUserId) throw new Error("Invalid target");
               setSaving(true);
@@ -327,7 +368,7 @@ export const Profile = () => {
             />
             <OfficialsManager
               user={user}
-              isEditRoute={isEditRoute}
+              isEditRoute={isEditRoute && canEditMembership}
               selectedIds={selectedOfficialIds ?? undefined}
               setSelectedIds={setSelectedOfficialIds}
             />
@@ -344,7 +385,9 @@ export const Profile = () => {
           <div className="flex flex-col gap-2 sm:flex-row">
             <Button
               type="submit"
-              disabled={saving || !isValid || Boolean(pictureError)}
+              disabled={
+                saving || !hasChanges || !isValid || Boolean(pictureError)
+              }
             >
               {saving ? "Sparar..." : "Spara"}
             </Button>
@@ -357,6 +400,7 @@ export const Profile = () => {
             >
               Avbryt
             </Link>
+            <SaveHint saving={saving} isValid={isValid} hasChanges={hasChanges} />
           </div>
         ) : null}
       </form>

@@ -25,10 +25,11 @@ vi.mock("../services/achievements", () => ({
 vi.mock("../services/lodges", () => ({
   default: { listLodges: vi.fn().mockResolvedValue([]) },
 }));
-vi.mock("../services/allergies", () => ({
-  listAllergies: vi.fn().mockResolvedValue([]),
-  setMemberAllergies: vi.fn().mockResolvedValue({}),
+const allergiesMock = vi.hoisted(() => ({
+  listAllergies: vi.fn(),
+  setMemberAllergies: vi.fn(),
 }));
+vi.mock("../services/allergies", () => allergiesMock);
 vi.mock("../components/profile/MemberHistoryEditor", () => ({
   MemberHistoryEditor: () => null,
 }));
@@ -93,6 +94,8 @@ beforeEach(() => {
     officialHistory: [],
   });
   usersMock.getUserLodge.mockResolvedValue({ lodge: null });
+  allergiesMock.listAllergies.mockResolvedValue([]);
+  allergiesMock.setMemberAllergies.mockResolvedValue({});
   usersMock.getUserRoles.mockResolvedValue(["Member"]);
   usersMock.adminUpdateUser.mockResolvedValue({});
   usersMock.setRoles.mockResolvedValue({});
@@ -116,6 +119,9 @@ describe("MemberDetail edit", () => {
 
     const standing = await screen.findByLabelText("Ständiga listan");
     const save = screen.getByRole("button", { name: "Spara" });
+    // Nothing changed yet.
+    await waitFor(() => expect(screen.getByText("Inga ändringar")).toBeInTheDocument());
+    expect(save).toBeDisabled();
     await user.click(standing);
     await waitFor(() => expect(save).toBeEnabled());
 
@@ -127,6 +133,22 @@ describe("MemberDetail edit", () => {
     // Role changes are Admin-only: an Editor must never hit those endpoints.
     expect(adminMock.listRoles).not.toHaveBeenCalled();
     expect(usersMock.setRoles).not.toHaveBeenCalled();
+    // Unchanged lodge/allergies are not sent.
+    expect(usersMock.setUserLodge).not.toHaveBeenCalled();
+    expect(allergiesMock.setMemberAllergies).not.toHaveBeenCalled();
+  });
+
+  it("disables Spara again when a change is undone", async () => {
+    const user = userEvent.setup();
+    renderEdit(["Editor"]);
+
+    const city = await screen.findByLabelText("Stad");
+    const save = screen.getByRole("button", { name: "Spara" });
+    await waitFor(() => expect(save).toBeDisabled());
+    await user.type(city, "x");
+    await waitFor(() => expect(save).toBeEnabled());
+    await user.type(city, "{Backspace}");
+    await waitFor(() => expect(save).toBeDisabled());
   });
 
   it("loads the role list for an Admin and only saves roles when changed", async () => {

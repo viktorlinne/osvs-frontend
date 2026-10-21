@@ -45,6 +45,8 @@ import {
   toUserProfileUpdatePayload,
 } from "../utils/userProfileForm";
 import { applyApiFieldErrors } from "../utils/apiErrors";
+import { idsFromField, sameIds, selectionChanged } from "../utils/idSets";
+import { SaveHint } from "../components/profile/SaveHint";
 import {
   adminUpdateUserFormRules,
   validateImageFile,
@@ -99,6 +101,7 @@ export const MemberDetail = () => {
   const [saving, setSaving] = useState(false);
   const [pictureFile, setPictureFile] = useState<File | null>(null);
   const [selectedLid, setSelectedLid] = useState<number | null>(null);
+  const [initialLid, setInitialLid] = useState<number | null>(null);
   const [available, setAvailable] = useState<Achievement[]>([]);
   const [lodges, setLodges] = useState<Lodge[]>([]);
   const [achievements, setAchievements] = useState<Achievement[]>([]);
@@ -125,15 +128,15 @@ export const MemberDetail = () => {
     trigger,
     clearErrors,
     setError: setFieldError,
-    formState: { errors, isValid },
+    formState: { errors, isValid, isDirty },
   } = useForm<UpdateUserForm>({
     mode: "onChange",
     defaultValues: {
       firstname: "",
       lastname: "",
       dateOfBirth: "",
-      work: undefined,
-      notes: undefined,
+      work: "",
+      notes: "",
       mobile: "",
       homeNumber: "",
       city: "",
@@ -207,9 +210,11 @@ export const MemberDetail = () => {
     }
 
     runUserLodge(() => getUserLodge(matrikelnummer))
-      .then((current) =>
-        setSelectedLid(current?.lodge ? Number(current.lodge.id) : null),
-      )
+      .then((current) => {
+        const lid = current?.lodge ? Number(current.lodge.id) : null;
+        setSelectedLid(lid);
+        setInitialLid(lid);
+      })
       .catch(() => {
         // useFetch handles global error
       });
@@ -251,8 +256,8 @@ export const MemberDetail = () => {
       dateOfBirth: member.dateOfBirth
         ? String(member.dateOfBirth).slice(0, 10)
         : "",
-      work: member.work ?? undefined,
-      notes: member.notes ?? undefined,
+      work: member.work ?? "",
+      notes: member.notes ?? "",
       mobile: member.mobile ?? "",
       homeNumber: member.homeNumber ?? "",
       city: member.city ?? "",
@@ -283,6 +288,24 @@ export const MemberDetail = () => {
 
   const pictureError = validateImageFile(pictureFile);
 
+  // Only changed values are sent; "Spara" stays disabled until something
+  // changed. Profile fields and the flags are form fields (isDirty).
+  const lodgeChanged = selectedLid !== initialLid;
+  const allergiesChanged = selectionChanged(
+    selectedAllergyIds,
+    idsFromField(memberAllergies),
+  );
+  const rolesChanged =
+    isAdmin &&
+    selectedRoleIds.length > 0 &&
+    !sameIds(selectedRoleIds, initialRoleIds);
+  const hasChanges =
+    isDirty ||
+    pictureFile !== null ||
+    lodgeChanged ||
+    allergiesChanged ||
+    rolesChanged;
+
   const handleMemberSave = handleSubmit(async (values) => {
     clearGlobalError();
     clearErrors();
@@ -292,23 +315,22 @@ export const MemberDetail = () => {
       if (!matrikelnummer) throw new Error("Missing matrikelnummer");
       const userId = matrikelnummer;
 
-      await runAction(() =>
-        adminUpdateUser(
-          userId,
-          showAdminFlags
-            ? toAdminUserProfileUpdatePayload(values)
-            : toUserProfileUpdatePayload(values),
-        ),
-      );
+      if (isDirty) {
+        await runAction(() =>
+          adminUpdateUser(
+            userId,
+            showAdminFlags
+              ? toAdminUserProfileUpdatePayload(values)
+              : toUserProfileUpdatePayload(values),
+          ),
+        );
+      }
 
       if (pictureFile) {
         await runAction(() => uploadUserPicture(userId, pictureFile));
       }
 
-      const rolesChanged =
-        selectedRoleIds.length !== initialRoleIds.length ||
-        selectedRoleIds.some((id) => !initialRoleIds.includes(id));
-      if (isAdmin && rolesChanged && selectedRoleIds.length > 0) {
+      if (rolesChanged) {
         try {
           await runAction(() => setRoles(userId, selectedRoleIds));
         } catch {
@@ -317,23 +339,27 @@ export const MemberDetail = () => {
       }
 
       try {
-        if (Array.isArray(selectedAllergyIds)) {
+        if (allergiesChanged && selectedAllergyIds) {
           await runAction(() => setMemberAllergies(userId, selectedAllergyIds));
         }
       } catch {
         setGlobalError("Misslyckades att uppdatera allergier");
       }
 
-      try {
-        await runAction(() =>
-          setUserLodge(
-            userId,
-            selectedLid === null ? null : Number(selectedLid),
-          ),
-        );
-      } catch {
-        setGlobalError("Misslyckades att uppdatera loge");
+      if (lodgeChanged) {
+        try {
+          await runAction(() =>
+            setUserLodge(
+              userId,
+              selectedLid === null ? null : Number(selectedLid),
+            ),
+          );
+          setInitialLid(selectedLid);
+        } catch {
+          setGlobalError("Misslyckades att uppdatera loge");
+        }
       }
+      setSelectedAllergyIds(null);
 
       await run(loadMember);
       navigate(`/members/${matrikelnummer}`, { replace: true });
@@ -523,18 +549,20 @@ export const MemberDetail = () => {
               <Button
                 type="submit"
                 form="member-edit-form"
-                disabled={saving || !isValid || Boolean(pictureError)}
+                disabled={
+                  saving || !hasChanges || !isValid || Boolean(pictureError)
+                }
               >
                 {saving ? "Sparar..." : "Spara"}
               </Button>
               <Link to=".." relative="path" className="ui-btn ui-btn-secondary">
                 Avbryt
               </Link>
-              {!isValid && !saving ? (
-                <p className="text-sm text-neutral-600 sm:self-center">
-                  Rätta de markerade fälten för att kunna spara.
-                </p>
-              ) : null}
+              <SaveHint
+                saving={saving}
+                isValid={isValid}
+                hasChanges={hasChanges}
+              />
             </div>
           ) : null}
         </div>
