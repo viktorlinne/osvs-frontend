@@ -118,11 +118,14 @@ describe("MemberDetail edit", () => {
     renderEdit(["Editor"]);
 
     const standing = await screen.findByLabelText("Ständiga listan");
+    expect(standing).toHaveAttribute("role", "switch");
+    expect(standing).toBeChecked();
     const save = screen.getByRole("button", { name: "Spara" });
     // Nothing changed yet.
     await waitFor(() => expect(screen.getByText("Inga ändringar")).toBeInTheDocument());
     expect(save).toBeDisabled();
     await user.click(standing);
+    expect(standing).not.toBeChecked();
     await waitFor(() => expect(save).toBeEnabled());
 
     await user.click(save);

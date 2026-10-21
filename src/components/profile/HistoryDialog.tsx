@@ -49,7 +49,9 @@ export function HistoryDialog({
           // Prefer the first form field over the close/cancel buttons.
           const content = event.currentTarget as HTMLElement | null;
           const first =
-            content?.querySelector<HTMLElement>("input, select, textarea") ??
+            content?.querySelector<HTMLElement>(
+              'input:not([aria-hidden="true"]), select, textarea',
+            ) ??
             content?.querySelector<HTMLElement>("button");
           if (first) {
             event.preventDefault();

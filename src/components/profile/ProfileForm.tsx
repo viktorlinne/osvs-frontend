@@ -1,4 +1,10 @@
-import type { FieldErrors, UseFormRegister } from "react-hook-form";
+import {
+  Controller,
+  type Control,
+  type FieldErrors,
+  type UseFormRegister,
+} from "react-hook-form";
+import { Switch } from "../shadcn/switch";
 import {
   ImageFileInput,
   errorTextClass,
@@ -23,9 +29,58 @@ function FieldValue({ value }: { value: string | null | undefined }) {
   return <dd className="mt-0.5 text-sm text-neutral-900">{value || "—"}</dd>;
 }
 
+type BooleanFieldName = "accommodationAvailable" | "feeExempt" | "standingList";
+
+/** A boolean profile field as a switch, wired to react-hook-form. */
+function BooleanSwitchField({
+  control,
+  name,
+  label,
+  error,
+}: {
+  control: Control<UpdateUserForm>;
+  name: BooleanFieldName;
+  label: string;
+  error?: string;
+}) {
+  const errorId = `${name}-error`;
+  return (
+    <div className="mb-4">
+      <div className="flex min-h-11 items-center gap-3">
+        <Controller
+          control={control}
+          name={name}
+          render={({ field }) => (
+            <Switch
+              id={name}
+              name={field.name}
+              ref={field.ref}
+              checked={Boolean(field.value)}
+              onCheckedChange={(checked) => field.onChange(checked)}
+              onBlur={field.onBlur}
+              disabled={field.disabled}
+              aria-invalid={error ? true : undefined}
+              aria-describedby={error ? errorId : undefined}
+            />
+          )}
+        />
+        <label htmlFor={name} className="cursor-pointer text-sm text-neutral-700">
+          {label}
+        </label>
+      </div>
+      {error ? (
+        <p id={errorId} className={errorTextClass}>
+          {error}
+        </p>
+      ) : null}
+    </div>
+  );
+}
+
 export const ProfileForm = ({
   user,
   register,
+  control,
   errors,
   isEditRoute,
   pictureFile,
@@ -37,6 +92,8 @@ export const ProfileForm = ({
 }: {
   user?: PublicUser | null;
   register: UseFormRegister<UpdateUserForm>;
+  /** Needed for the boolean switches in edit mode. */
+  control: Control<UpdateUserForm>;
   errors: FieldErrors<UpdateUserForm>;
   isEditRoute: boolean;
   pictureFile: File | null;
@@ -349,51 +406,27 @@ export const ProfileForm = ({
         ) : null}
       </div>
 
-      <div className="mb-4 flex items-center gap-3">
-        <input
-          id="accommodationAvailable"
-          type="checkbox"
-          {...register("accommodationAvailable")}
-          className="h-4 w-4 rounded border-neutral-300 text-primary-600 focus-visible:ring-primary-600"
-        />
-        <label htmlFor="accommodationAvailable" className="text-sm text-neutral-700">
-          Tillgängligt boende
-        </label>
-        {errors.accommodationAvailable ? (
-          <p className={errorTextClass}>{errors.accommodationAvailable.message}</p>
-        ) : null}
-      </div>
+      <BooleanSwitchField
+        control={control}
+        name="accommodationAvailable"
+        label="Tillgängligt boende"
+        error={errors.accommodationAvailable?.message}
+      />
 
       {showAdminFlags ? (
         <>
-          <div className="mb-4 flex items-center gap-3">
-            <input
-              id="feeExempt"
-              type="checkbox"
-              {...register("feeExempt")}
-              className="h-4 w-4 rounded border-neutral-300 text-primary-600 focus-visible:ring-primary-600"
-            />
-            <label htmlFor="feeExempt" className="text-sm text-neutral-700">
-              Befriad från årsavgift
-            </label>
-            {errors.feeExempt ? (
-              <p className={errorTextClass}>{errors.feeExempt.message}</p>
-            ) : null}
-          </div>
-          <div className="mb-4 flex items-center gap-3">
-            <input
-              id="standingList"
-              type="checkbox"
-              {...register("standingList")}
-              className="h-4 w-4 rounded border-neutral-300 text-primary-600 focus-visible:ring-primary-600"
-            />
-            <label htmlFor="standingList" className="text-sm text-neutral-700">
-              Ständiga listan
-            </label>
-            {errors.standingList ? (
-              <p className={errorTextClass}>{errors.standingList.message}</p>
-            ) : null}
-          </div>
+          <BooleanSwitchField
+            control={control}
+            name="feeExempt"
+            label="Befriad från årsavgift"
+            error={errors.feeExempt?.message}
+          />
+          <BooleanSwitchField
+            control={control}
+            name="standingList"
+            label="Ständiga listan"
+            error={errors.standingList?.message}
+          />
         </>
       ) : null}
 

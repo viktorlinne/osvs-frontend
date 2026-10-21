@@ -1,5 +1,6 @@
 import { useId, useState, type FormEvent } from "react";
 import { Button } from "../ui";
+import { Checkbox } from "../shadcn/checkbox";
 import { getApiErrorMessage, getApiFieldErrors } from "../../utils/apiErrors";
 import type {
   AchievementEntryPayload,
@@ -305,30 +306,28 @@ export function OfficialEntryForm({
         <div className="flex flex-col gap-2">
           <label
             htmlFor={`${id}-confirm-start`}
-            className="inline-flex items-start gap-2 text-sm text-neutral-800"
+            className="inline-flex min-h-11 cursor-pointer items-start gap-2 py-2 text-sm text-neutral-800"
           >
-            <input
+            <Checkbox
               id={`${id}-confirm-start`}
               name="startConfirmed"
-              type="checkbox"
               checked={startConfirmed}
               disabled={!appointedAt}
-              onChange={(e) => setStartConfirmed(e.target.checked)}
-              className="mt-0.5 h-4 w-4 rounded border-neutral-300 text-primary-600 focus-visible:ring-primary-600"
+              onCheckedChange={(checked) => setStartConfirmed(checked === true)}
+              className="mt-0.5"
             />
             <span>{startLabel}</span>
           </label>
           <label
             htmlFor={`${id}-confirm-end`}
-            className="inline-flex items-start gap-2 text-sm text-neutral-800"
+            className="inline-flex min-h-11 cursor-pointer items-start gap-2 py-2 text-sm text-neutral-800"
           >
-            <input
+            <Checkbox
               id={`${id}-confirm-end`}
               name="endConfirmed"
-              type="checkbox"
               checked={endConfirmed}
-              onChange={(e) => setEndConfirmed(e.target.checked)}
-              className="mt-0.5 h-4 w-4 rounded border-neutral-300 text-primary-600 focus-visible:ring-primary-600"
+              onCheckedChange={(checked) => setEndConfirmed(checked === true)}
+              className="mt-0.5"
             />
             <span>{endLabel}</span>
           </label>

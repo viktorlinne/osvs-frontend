@@ -69,6 +69,7 @@ export const Profile = () => {
 
   const {
     register,
+    control,
     handleSubmit,
     reset,
     trigger,
@@ -329,6 +330,7 @@ export const Profile = () => {
             <ProfileForm
               user={user}
               register={register}
+              control={control}
               errors={errors}
               isEditRoute={isEditRoute}
               pictureFile={pictureFile}

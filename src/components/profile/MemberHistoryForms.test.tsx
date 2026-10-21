@@ -40,7 +40,11 @@ describe("OfficialEntryForm", () => {
     const save = screen.getByRole("button", { name: "Spara" });
     expect(save).toBeDisabled();
 
-    await user.click(screen.getByLabelText("Jag bekräftar startdatumet 2020-01-01"));
+    const startConfirm = screen.getByLabelText("Jag bekräftar startdatumet 2020-01-01");
+    expect(startConfirm).toHaveAttribute("role", "checkbox");
+    expect(startConfirm).not.toBeChecked();
+    await user.click(startConfirm);
+    expect(startConfirm).toBeChecked();
     expect(save).toBeDisabled();
 
     await user.click(

@@ -124,6 +124,7 @@ export const MemberDetail = () => {
 
   const {
     register,
+    control,
     handleSubmit,
     reset,
     trigger,
@@ -464,6 +465,7 @@ export const MemberDetail = () => {
               <ProfileForm
                 user={member}
                 register={register}
+                control={control}
                 errors={errors}
                 isEditRoute={isEditRoute}
                 pictureFile={pictureFile}
