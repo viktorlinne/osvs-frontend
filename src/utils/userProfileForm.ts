@@ -9,12 +9,15 @@ export function toUserProfileUpdatePayload(
   const address = typeof values.address === "string" ? values.address.trim() : "";
   const zipcode = typeof values.zipcode === "string" ? values.zipcode.trim() : "";
   const work = typeof values.work === "string" ? values.work.trim() : "";
+  const homeNumber =
+    typeof values.homeNumber === "string" ? values.homeNumber.trim() : "";
   const notes = typeof values.notes === "string" ? values.notes.trim() : "";
 
   return {
     firstname: String(values.firstname ?? "").trim(),
     lastname: String(values.lastname ?? "").trim(),
     mobile: String(values.mobile ?? "").trim(),
+    homeNumber: homeNumber.length > 0 ? homeNumber : null,
     city: String(values.city ?? "").trim(),
     dateOfBirth: dateOfBirth.length > 0 ? dateOfBirth : undefined,
     address: address.length > 0 ? address : undefined,
