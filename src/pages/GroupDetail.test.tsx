@@ -15,7 +15,10 @@ const groupsMock = vi.hoisted(() => ({
 }));
 vi.mock("../services/groups", () => groupsMock);
 vi.mock("../services/users", () => ({
-  listAllUsers: vi.fn().mockResolvedValue([]),
+  listAllUsers: vi.fn().mockResolvedValue([
+    { matrikelnummer: 11, firstname: "Anders", lastname: "Berg", lodgeId: 1, lodgeName: "Regulus" },
+    { matrikelnummer: 13, firstname: "Cecil", lastname: "Holm", lodgeId: 1, lodgeName: "Regulus" },
+  ]),
 }));
 vi.mock("../components/groups/GroupMailingSection", () => ({
   GroupMailingSection: () => null,
@@ -100,5 +103,23 @@ describe("GroupDetail confirmations", () => {
     await waitFor(() =>
       expect(screen.queryByRole("link", { name: "Bo Ek" })).not.toBeInTheDocument(),
     );
+  });
+
+  it("adds members picked in the combobox", async () => {
+    const user = userEvent.setup();
+    groupsMock.addGroupMembers.mockResolvedValue({ added: [13], alreadyMembers: [] });
+    renderPage();
+    await screen.findByRole("link", { name: "Bo Ek" });
+
+    await user.click(screen.getByRole("button", { name: /Välj medlemmar att lägga till/ }));
+    const listbox = await screen.findByRole("listbox");
+    // Existing member 11 is filtered out of the candidates.
+    expect(within(listbox).getAllByRole("option")).toHaveLength(1);
+    await user.click(within(listbox).getByRole("option", { name: /Cecil Holm/ }));
+    await user.keyboard("{Escape}");
+
+    await user.click(screen.getByRole("button", { name: "Lägg till (1)" }));
+    await waitFor(() => expect(groupsMock.addGroupMembers).toHaveBeenCalledWith("3", [13]));
+    expect(await screen.findByText("1 medlem lades till.")).toBeInTheDocument();
   });
 });

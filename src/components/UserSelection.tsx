@@ -1,6 +1,15 @@
-import { useMemo, useState } from "react";
+import { useEffect, useId, useMemo, useState } from "react";
 import type { PublicUser } from "../types";
 import { normalizeSelectionIds } from "./lodgeSelectionUtils";
+import { Popover, PopoverContent, PopoverTrigger } from "./shadcn/popover";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "./shadcn/command";
 
 export type UserSelectionProps = {
   users?: PublicUser[] | null;
@@ -23,6 +32,36 @@ type LodgeGroup = {
   users: PublicUser[];
 };
 
+function fullName(user: PublicUser) {
+  return `${user.firstname ?? ""} ${user.lastname ?? ""}`.trim() || `#${user.matrikelnummer}`;
+}
+
+function matchesQuery(user: PublicUser, tokens: string[]) {
+  if (tokens.length === 0) return true;
+  const haystack = [
+    user.firstname,
+    user.lastname,
+    String(user.matrikelnummer),
+    user.lodgeName ?? "",
+  ]
+    .join(" ")
+    .toLocaleLowerCase("sv-SE");
+  return tokens.every((token) => haystack.includes(token));
+}
+
+/**
+ * Member picker: a searchable combobox (Radix Popover + cmdk) grouped by
+ * lodge, with the explicit selection shown as removable chips.
+ *
+ * Keyboard: Enter/Space on the trigger opens it, type to filter, ↑/↓ to move,
+ * Enter toggles the highlighted member, Escape closes and returns focus.
+ *
+ * `derivedSelectedIds` are members already covered by another choice (lodge
+ * or group): shown as selected but read-only, and never emitted by onChange.
+ * When `onSearchQueryChange` is given the query is controlled by the caller
+ * (server-side search); the list is additionally filtered client-side so it
+ * reacts instantly while the server request is debounced.
+ */
 export function UserSelection({
   users,
   selectedIds,
@@ -37,154 +76,216 @@ export function UserSelection({
   onSearchQueryChange,
   searchPlaceholder = "Sök på namn...",
 }: UserSelectionProps) {
-  const explicitIds = normalizeSelectionIds(selectedIds);
-  const derivedIds = normalizeSelectionIds(derivedSelectedIds);
+  const labelId = useId();
+  const triggerTextId = useId();
+  const explicitIds = useMemo(() => normalizeSelectionIds(selectedIds), [selectedIds]);
+  const derivedIds = useMemo(
+    () => normalizeSelectionIds(derivedSelectedIds),
+    [derivedSelectedIds],
+  );
   const mergedSelectedIds = useMemo(
-    () => Array.from(new Set([...explicitIds, ...derivedIds])),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [selectedIds, derivedSelectedIds],
+    () => new Set([...explicitIds, ...derivedIds]),
+    [explicitIds, derivedIds],
   );
 
-  const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set());
+  const [open, setOpen] = useState(false);
+  const [localQuery, setLocalQuery] = useState("");
+  const query = onSearchQueryChange ? (searchQuery ?? "") : localQuery;
+  function setQuery(value: string) {
+    if (onSearchQueryChange) onSearchQueryChange(value);
+    else setLocalQuery(value);
+  }
+
+  // Remember every member we have seen, so chips keep their names even when a
+  // (server-side) search no longer returns the selected member.
+  const [knownUsers, setKnownUsers] = useState<Map<string, PublicUser>>(() => new Map());
+  useEffect(() => {
+    if (!users || users.length === 0) return;
+    setKnownUsers((prev) => {
+      const next = new Map(prev);
+      for (const user of users) next.set(String(user.matrikelnummer), user);
+      return next;
+    });
+  }, [users]);
+
+  const tokens = useMemo(
+    () =>
+      query
+        .trim()
+        .toLocaleLowerCase("sv-SE")
+        .split(/\s+/)
+        .filter(Boolean),
+    [query],
+  );
 
   const groups = useMemo<LodgeGroup[]>(() => {
     const map = new Map<string, LodgeGroup>();
     for (const user of users ?? []) {
+      if (!matchesQuery(user, tokens)) continue;
       const key = user.lodgeId != null ? String(user.lodgeId) : "none";
-      if (!map.has(key)) {
-        map.set(key, {
-          key,
-          lodgeName: user.lodgeName ?? "Ingen loge",
-          users: [],
-        });
+      let group = map.get(key);
+      if (!group) {
+        group = { key, lodgeName: user.lodgeName ?? "Ingen loge", users: [] };
+        map.set(key, group);
       }
-      map.get(key)!.users.push(user);
+      group.users.push(user);
     }
     // lodges in insertion order, "none" last
     const entries = Array.from(map.values());
     const noneIndex = entries.findIndex((g) => g.key === "none");
-    if (noneIndex > 0) {
+    if (noneIndex >= 0 && noneIndex < entries.length - 1) {
       entries.push(entries.splice(noneIndex, 1)[0]);
     }
     return entries;
-  }, [users]);
+  }, [users, tokens]);
 
-  function toggleGroup(key: string) {
-    setExpandedGroups((prev) => {
-      const next = new Set(prev);
-      if (next.has(key)) next.delete(key);
-      else next.add(key);
-      return next;
-    });
-  }
-
-  function toggleUser(userId: number, checked: boolean) {
+  function toggleUser(userId: number | string) {
     const value = String(userId);
     const next = new Set(mergedSelectedIds);
-    if (checked) next.add(value);
-    else next.delete(value);
+    if (next.has(value)) next.delete(value);
+    else next.add(value);
     // only emit explicit (non-derived) ids
-    const nextExplicit = Array.from(next).filter((id) => !derivedIds.includes(id) || id === value);
+    const nextExplicit = Array.from(next).filter(
+      (id) => !derivedIds.includes(id) || id === value,
+    );
     onChange(nextExplicit);
   }
 
+  function removeExplicit(id: string) {
+    onChange(explicitIds.filter((value) => value !== id));
+  }
+
+  const derivedOnlyCount = derivedIds.filter((id) => !explicitIds.includes(id)).length;
   const hasUsers = (users ?? []).length > 0;
+  const visibleCount = groups.reduce((sum, group) => sum + group.users.length, 0);
 
   return (
     <div className="mb-4 w-full">
-      <p className="ui-label">{label}</p>
+      <p id={labelId} className="ui-label">
+        {label}
+      </p>
 
-      {onSearchQueryChange ? (
-        <label htmlFor={`${name}-search`} className="sr-only">
-          Sök användare
-        </label>
-      ) : null}
-      {onSearchQueryChange ? (
-        <input
-          id={`${name}-search`}
-          type="search"
-          value={searchQuery ?? ""}
-          onChange={(event) => onSearchQueryChange(event.target.value)}
-          placeholder={searchPlaceholder}
-          className="ui-input mb-2 w-full"
-          disabled={disabled}
-        />
-      ) : null}
-
-      {loading && <div className="py-2 text-sm text-neutral-600">Laddar...</div>}
-
-      {!loading && !hasUsers && (
-        <div className="py-2 text-sm text-neutral-600">{emptyLabel}</div>
-      )}
-
-      {!loading && hasUsers && (
-        <div className="flex flex-col gap-1">
-          {groups.map((group) => {
-            const isOpen = expandedGroups.has(group.key);
-            const selectedInGroup = group.users.filter((u) =>
-              mergedSelectedIds.includes(String(u.matrikelnummer)),
-            ).length;
-
-            return (
-              <div key={group.key} className="rounded-md border border-neutral-200">
-                <button
-                  type="button"
-                  onClick={() => toggleGroup(group.key)}
-                  className="flex w-full items-center justify-between px-3 py-2 text-left text-sm font-medium text-neutral-700 hover:bg-neutral-50"
-                >
-                  <span>{group.lodgeName}</span>
-                  <span className="flex items-center gap-2 text-xs text-neutral-500">
-                    {selectedInGroup > 0 && (
-                      <span className="rounded-full bg-primary-100 px-2 py-0.5 font-medium text-primary-700">
-                        {selectedInGroup} Vald{selectedInGroup !== 1 ? "a" : ""}
-                      </span>
-                    )}
-                    <span>{isOpen ? "↓" : "↑"}</span>
-                  </span>
-                </button>
-
-                {isOpen && (
-                  <div className="flex flex-col gap-1 border-t border-neutral-200 px-3 py-2">
-                    {group.users.map((user) => {
-                      const value = String(user.matrikelnummer);
-                      const isChecked = mergedSelectedIds.includes(value);
-                      const isReadOnly =
-                        derivedIds.includes(value) && !explicitIds.includes(value);
-                      const isDisabled = disabled || isReadOnly;
-                      const inputId = `${name}-${user.matrikelnummer}`;
-
-                      return (
-                        <label
-                          key={user.matrikelnummer}
-                          htmlFor={inputId}
-                          className={`inline-flex items-center gap-2 rounded px-2 py-1 text-sm text-neutral-700 ${
-                            isDisabled ? "opacity-60" : "hover:bg-neutral-50"
+      <Popover
+        open={open}
+        onOpenChange={(next) => {
+          if (disabled && next) return;
+          setOpen(next);
+        }}
+      >
+        <PopoverTrigger asChild>
+          <button
+            id={`${name}-trigger`}
+            type="button"
+            disabled={disabled}
+            aria-labelledby={`${labelId} ${triggerTextId}`}
+            className="ui-select flex items-center justify-between gap-2 text-left disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            <span id={triggerTextId} className="truncate text-neutral-600">
+              {explicitIds.length > 0
+                ? `${explicitIds.length} vald${explicitIds.length === 1 ? "" : "a"} – sök för att lägga till fler`
+                : "Sök och välj medlemmar"}
+            </span>
+            <span aria-hidden="true" className="text-neutral-600">
+              ▾
+            </span>
+          </button>
+        </PopoverTrigger>
+        <PopoverContent className="w-[var(--radix-popover-trigger-width)] min-w-[18rem] p-2">
+          <Command shouldFilter={false} label={label} loop>
+            <CommandInput
+              value={query}
+              onValueChange={setQuery}
+              placeholder={searchPlaceholder}
+            />
+            <CommandList>
+              {loading ? (
+                <div className="px-2 py-2 text-sm text-neutral-600" role="status">
+                  Laddar...
+                </div>
+              ) : null}
+              {!loading || hasUsers ? (
+                <CommandEmpty>{hasUsers ? "Inga medlemmar matchade sökningen" : emptyLabel}</CommandEmpty>
+              ) : null}
+              {groups.map((group) => (
+                <CommandGroup key={group.key} heading={group.lodgeName}>
+                  {group.users.map((user) => {
+                    const value = String(user.matrikelnummer);
+                    const isChecked = mergedSelectedIds.has(value);
+                    const isReadOnly =
+                      derivedIds.includes(value) && !explicitIds.includes(value);
+                    return (
+                      <CommandItem
+                        key={value}
+                        value={value}
+                        disabled={disabled || isReadOnly}
+                        onSelect={() => toggleUser(user.matrikelnummer)}
+                      >
+                        <span
+                          aria-hidden="true"
+                          className={`flex h-4 w-4 shrink-0 items-center justify-center rounded border text-[0.65rem] ${
+                            isChecked
+                              ? "border-primary-600 bg-primary-600 text-white"
+                              : "border-neutral-300 bg-white"
                           }`}
                         >
-                          <input
-                            id={inputId}
-                            type="checkbox"
-                            name={name}
-                            value={value}
-                            checked={isChecked}
-                            disabled={isDisabled}
-                            className="h-4 w-4 rounded border-neutral-300 text-primary-600 focus-visible:ring-primary-600"
-                            onChange={(e) => toggleUser(user.matrikelnummer, e.target.checked)}
-                          />
-                          <span>{user.firstname} {user.lastname}</span>
-                          {isReadOnly && (
-                            <span className="text-xs text-neutral-500">via annat val</span>
-                          )}
-                        </label>
-                      );
-                    })}
-                  </div>
-                )}
-              </div>
+                          {isChecked ? "✓" : null}
+                        </span>
+                        <span className="min-w-0 flex-1 truncate">{fullName(user)}</span>
+                        <span className="text-xs text-neutral-600">#{user.matrikelnummer}</span>
+                        {isReadOnly ? (
+                          <span className="text-xs text-neutral-600">via annat val</span>
+                        ) : null}
+                        {isChecked && !isReadOnly ? (
+                          <span className="sr-only">(vald)</span>
+                        ) : null}
+                      </CommandItem>
+                    );
+                  })}
+                </CommandGroup>
+              ))}
+            </CommandList>
+            {hasUsers ? (
+              <p className="sr-only" aria-live="polite">
+                {visibleCount === 1 ? "1 träff" : `${visibleCount} träffar`}
+              </p>
+            ) : null}
+          </Command>
+        </PopoverContent>
+      </Popover>
+
+      {explicitIds.length > 0 ? (
+        <ul className="mt-2 flex flex-wrap gap-2" aria-label="Valda medlemmar">
+          {explicitIds.map((id) => {
+            const user = knownUsers.get(id);
+            const display = user ? fullName(user) : `#${id}`;
+            return (
+              <li
+                key={id}
+                className="inline-flex min-h-11 items-center gap-1 rounded-md border border-primary-200 bg-primary-50 pl-3 text-sm text-neutral-900"
+              >
+                <span>{display}</span>
+                <button
+                  type="button"
+                  onClick={() => removeExplicit(id)}
+                  disabled={disabled}
+                  aria-label={`Ta bort ${display}`}
+                  className="flex h-11 w-11 items-center justify-center rounded-md text-neutral-600 hover:bg-primary-100 hover:text-neutral-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-600 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  <span aria-hidden="true">✕</span>
+                </button>
+              </li>
             );
           })}
-        </div>
-      )}
+        </ul>
+      ) : null}
+
+      {derivedOnlyCount > 0 ? (
+        <p className="mt-2 text-xs text-neutral-600">
+          {derivedOnlyCount === 1
+            ? "1 medlem ingår redan via valda loger eller grupper."
+            : `${derivedOnlyCount} medlemmar ingår redan via valda loger eller grupper.`}
+        </p>
+      ) : null}
     </div>
   );
 }
