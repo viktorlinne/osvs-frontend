@@ -151,6 +151,8 @@ export const Navbar: React.FC = () => {
   const [nowMs, setNowMs] = useState(() => Date.now());
   const [confirmingLogout, setConfirmingLogout] = useState(false);
   const confirmTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const menuButtonRef = useRef<HTMLButtonElement>(null);
+  const mobileMenuRef = useRef<HTMLDivElement>(null);
 
   const countdown =
     user && session
@@ -165,7 +167,12 @@ export const Navbar: React.FC = () => {
 
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") closeMenu();
+      if (e.key !== "Escape") return;
+      // Return focus to the toggle when Escape closes the mobile menu from
+      // inside it, so keyboard users are not dropped at the top of the page.
+      const focusInMobileMenu = mobileMenuRef.current?.contains(document.activeElement);
+      closeMenu();
+      if (focusInMobileMenu) menuButtonRef.current?.focus();
     };
     document.addEventListener("keydown", onKeyDown);
     return () => document.removeEventListener("keydown", onKeyDown);
@@ -218,11 +225,13 @@ export const Navbar: React.FC = () => {
         <div className="container grid grid-cols-[1fr_auto_1fr] items-center gap-4 py-4">
           <div className="flex items-center lg:hidden">
             <button
+              ref={menuButtonRef}
               type="button"
               aria-expanded={open}
+              aria-controls="mobile-menu"
               aria-label={open ? "Stäng meny" : "Öppna meny"}
               onClick={() => setOpen((s) => !s)}
-              className="inline-flex min-h-10 min-w-10 items-center justify-center rounded-md p-2 text-neutral-700 transition-colors hover:bg-neutral-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-600 focus-visible:ring-offset-2"
+              className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-md p-2 text-neutral-700 transition-colors hover:bg-neutral-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-600 focus-visible:ring-offset-2"
             >
               <svg
                 className="h-6 w-6"
@@ -294,7 +303,11 @@ export const Navbar: React.FC = () => {
       </nav>
 
       {open ? (
-        <div className="border-b border-neutral-200 bg-neutral-50 lg:hidden">
+        <div
+          id="mobile-menu"
+          ref={mobileMenuRef}
+          className="border-b border-neutral-200 bg-neutral-50 lg:hidden"
+        >
           <div className="container space-y-0.5 py-3">
             <NavbarLinks user={user} onClose={closeMenu} />
             {user ? (
