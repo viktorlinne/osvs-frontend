@@ -249,3 +249,151 @@ No critical findings remain. These serious ones are left for a decision:
 - `npm run build`: OK
 - `npm test`: 30 files, 104 tests passed (night 1: 26 files, 90 tests)
 - Playwright: 16/16 passed
+
+## Logo green, payment visibility, tone of voice
+
+Decisions by Viktor, three commits on top of `9422ebc`. This resolves open
+questions 2, 3, 5 and 7 above, and night-2 question 1 (Viktor chose the logo
+green over a darker, higher-contrast one).
+
+| Commit | Summary |
+| --- | --- |
+| `f5c768c` | **Primary green = the logo, #00a460.** See the table below. `--primary` and `--ring` are `155.1 100% 32.2%`. The map's selected-pin glow and the green skeleton shimmer (oklch hue 149 → 156) follow. `C:\OSVS\DESIGN.md` (`ordensgreen*`) is updated too. |
+| `cf7be4a` | **Payment status for Admin/Editor only.** The backend no longer sends `paymentStatus`/`paymentPaid` to members. The "Betalning" column in the attendance table is shown only when `canViewPayments` (Admin/Editor) is set, and the type fields are optional. 4 new tests. |
+| `d2f3d78` | **Wording and tone of voice.** The style rules are below. Logout and the two map "Är du säker?" confirmations now use `ConfirmDialog`. "Logen sparad." and the map "Position sparad." lines are now toasts. 3 new Navbar tests. |
+
+### The green scale
+
+Every shade is on the logo's hue (HSL 155°). The hover and active shades
+lower the lightness, and the tints keep the old tints' saturation and
+lightness.
+
+| Token | Old | New | HSL |
+| --- | --- | --- | --- |
+| `primary-50` | #eef7f1 | #eef7f3 | 153 36% 95.1% |
+| `primary-100` | #d3eedd | #d3eee3 | 156 44% 88.0% |
+| `primary-200` | #a8dbb8 | #a8dbc6 | 155 42% 75.9% |
+| `primary-600` (base) | #208f44 | **#00a460** | 155.1 100% 32.2% |
+| `primary-700` (hover) | #15803d | #008a51 | 155.2 100% 27.1% |
+| `primary-800` (active) | #166534 | #006f41 | 155.1 100% 21.8% |
+
+`success-*` (#16a34a/#15803d) is a separate status scale and was left alone,
+and so was the map picker pin (`#16a34a`).
+
+**Contrast (WCAG), measured:**
+
+| Pair | Old #208f44 | New #00a460 |
+| --- | --- | --- |
+| White text on `primary-600` (primary buttons) | 4.14:1 | **3.24:1** |
+| `primary-600` text on white (links, page titles) | 4.14:1 | **3.24:1** |
+| `primary-600` text on parchment #faf8f4 | 3.90:1 | **3.06:1** |
+| `primary-600` on `primary-50` | — | 2.97:1 |
+| White on `primary-700` (hover) | — | 4.42:1 |
+| White on `primary-800` (active) | — | 6.27:1 |
+
+The trade-off: #00a460 meets 3:1, which is enough for large text (18.66px
+bold or 24px and up, such as `ui-page-title`) and for UI components such as
+the focus ring and the button shape. It does **not** meet the 4.5:1 that
+WCAG AA requires for normal-size text. That covers button labels at 14px,
+`ui-link` and small green text. axe `color-contrast` will report this on
+every page, more often than before. As decided, which elements use primary
+was **not** changed. If it ever needs to pass AA, the smallest change is to
+use `primary-800` (#006f41, 6.27:1) only for small *text* (links), and keep
+#00a460 for surfaces and large headings.
+
+### Wording rules (mini style guide)
+
+1. **Swedish, sentence case** everywhere ("Logernas kontakt", not "Logernas
+   Kontakt"). Labels are rendered uppercase by CSS, not written that way.
+2. **Deleting is "Ta bort"** (in progress: "Tar bort…"), never "Radera".
+3. **Confirmations use `ConfirmDialog`**, never inline two-step buttons or
+   `window.confirm`.
+   - Title: a question with the object in definite form ("Ta bort mötet?",
+     "Ta bort gruppen?", "Logga ut?").
+   - Body: names the item in ”…” and states the consequence ("Mötet ”X” tas
+     bort permanent, med alla anmälningar. Det går inte att ångra.").
+   - Buttons: the bare verb ("Ta bort", "Skicka", "Logga ut") and "Avbryt".
+     No "Ja, …" or "Bekräfta".
+   - Use `variant="danger"` for destructive actions and `primary` otherwise
+     (send a mailing, log out).
+4. **Save buttons say "Spara"** (in progress: "Sparar…"). Create buttons say
+   "Skapa …" (in progress: "Skapar…").
+5. **Success = toast**, in the form "*Subjekt* har *particip*.":
+   - Every edit: "Ändringarna har sparats."
+   - Create, add or remove: name the thing, e.g. "Gruppen ”X” har skapats.",
+     "Tjänsten har lagts till.", "Bo Ek har tagits bort ur gruppen.",
+     "Positionen har tagits bort."
+   - Exceptions are states, not transient saves, so they stay inline and
+     get no extra toast: the event registration's "Din anmälan är
+     bekräftad.", and the members list's "Medlemmen har registrerats. Ett
+     mejl har skickats till …" (it contains the address).
+6. **Errors are sentences with a full stop.**
+   - Actions: "Kunde inte *verb objekt*." ("Kunde inte spara mötet.").
+     Replaces "Misslyckades att …".
+   - Loading: "*Sak* kunde inte laddas." ("Tjänsterna kunde inte laddas.").
+   - Backend messages are shown as they are; these are only the frontend
+     fallbacks.
+7. **Terminology.**
+   - "möte" for events in all UI text.
+   - "loge", "grad", "tjänst", "utmärkelse".
+   - "medlem" for the register and administration: lists, filters,
+     pickers, roles, "Ny medlem", "Välj medlemmar", "Medlemmen hittades
+     inte".
+   - "broder/bröder" when brothers are referred to collectively in lodge
+     life: "Inbjudna bröder", "synligt för bröder i valda loger".
+   - Avoid English and IT words: "Kommer", not "RSVP"; "medlemmar", not
+     "användare"; "Välj loger", not "Associera loger".
+   - Routes and data names are unchanged.
+8. **Typography.**
+   - Ellipsis is "…" (U+2026), never "...".
+   - Quote item names with ” ” (U+201D on both sides, as Swedish does).
+   - Separators are "·" or an en dash "–", not a hyphen.
+   - Dates are sv-SE (`2026-10-22`, `toLocaleDateString("sv-SE")`).
+9. "Redigera" opens an edit mode for a whole page or record, and "Ändra"
+   edits a row inside a list (history entries, position). This is the
+   existing usage, written down here.
+
+### Strings that changed in the checklists above
+
+- "Medlemmen sparades.", "Profilen sparades." and "Gruppen sparades." are now
+  "Ändringarna har sparats.".
+- The **Radera** buttons on event and post edit are now **Ta bort**.
+- The mailing confirmation button is now "Skicka", not "Ja, skicka".
+- The attendance table is now titled "Inbjudna bröder", and its "RSVP"
+  column is now "Kommer". The e2e specs in the scratchpad still use the old
+  names (`RSVP – …`, "Inbjudna medlemmar") and need the same rename before
+  they are run again.
+
+### Left for Viktor
+
+1. **Contrast.** With the logo green, small green text and button labels are
+   below AA (3.24:1). See the trade-off above.
+2. **Tailwind classes that do nothing.**
+   - `primary-400` and `primary-500` are used (CreateMember step dots, the
+     EventsPage "·", the drag-over border on file inputs) but never defined,
+     so they produce no CSS.
+   - LodgeDetail's leave-page warning uses `border-warning`, `bg-warning-pale`
+     and `text-ink-mid`, which are also undefined. These come from DESIGN.md
+     names, not Tailwind tokens.
+   - Not changed here.
+3. **DESIGN.md** still lists an older Material-style palette (`primary:
+   #006b2d`, `surface-*` and so on) that the code does not use. Only the
+   `ordensgreen*` tokens and the color note were updated, and a new
+   `ordensgreen-light` (#a8dbc6, which is `primary-200`) was added.
+4. **Content pages were not edited.** AboutPage spells the name
+   "Ordenssamfundet" in places (the brand is "Ordensamfundet") and has the
+   typo "Initialenerna". ContactPage capitalises office titles.
+5. **Mixed labels.**
+   - The event view says "Avgift" and the edit form says "Pris".
+   - The members list empty states mix "Inga …" with and without a full
+     stop.
+   - Both were left alone.
+6. **Focus after a successful map-position removal** falls to the page body,
+   because the edit panel closes and unmounts the button that opened the
+   dialog. This was the same with the inline confirm before.
+
+### Verification (logo green / payments / wording)
+
+- `npm run lint`: 0 errors, 2 warnings (the same pre-existing ones)
+- `npm run build`: OK
+- `npm test`: 30 files, 111 tests passed (before: 30 files, 104 tests)
