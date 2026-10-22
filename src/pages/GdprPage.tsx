@@ -253,6 +253,13 @@ export const GdprPage = () => {
               föreningens egen databas.
             </p>
             <p>
+              Kartorna visas med kartbilder från OpenStreetMap. När du öppnar
+              en karta hämtar din webbläsare kartbilderna direkt från
+              OpenStreetMap Foundations servrar, som då får din IP-adress och
+              vilket kartområde som visas. Inga namn, positioner eller andra
+              medlemsuppgifter skickas med.
+            </p>
+            <p>
               Webbplatsens typsnitt ligger på föreningens egen server. Din
               webbläsare hämtar dem inte från Google eller någon annan
               typsnittstjänst.

@@ -291,7 +291,10 @@
   @apply text-sm font-medium text-primary-800 underline-offset-2 transition hover:underline focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-primary-600 focus-visible:ring-offset-2;
 }
 
-@utility leaflet-popup-content {
+/* Map popups in the site font. Unlayered and two classes deep, because
+   leaflet.css (unlayered, loaded later with the map chunk) sets Helvetica on
+   .leaflet-container and the size on .leaflet-popup-content. */
+.leaflet-container .leaflet-popup-content {
   font-family: 'EB Garamond Variable', Georgia, serif;
   font-size: 0.875rem;
   line-height: 1.65;

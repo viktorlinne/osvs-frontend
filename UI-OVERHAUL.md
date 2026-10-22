@@ -455,6 +455,9 @@ remaining violations are white text on #00a460, kept by decision: the
 `ui-btn-primary` labels (3.24:1) and the date badges on the events page
 (white 3.24:1, the month label at `opacity-70` 2.3:1).
 
+Decision (Viktor, 2026-10-22): white on the logo green stays, on buttons and
+on the date badges alike.
+
 ## Tailwind 4 (2026-10-22)
 
 Tailwind 3.4 → 4.3.3, in its own commit after the contrast and font work.
@@ -519,8 +522,9 @@ Size: the main CSS went from 52.1 kB to 69.3 kB raw (9.2 → 11.4 kB gzip), from
 the theme variables, `@property` rules and the compat CSS. The main JS went
 from 481.8 to 490.1 kB (155.9 → 157.6 kB gzip), mostly from tailwind-merge 3.
 
-Not done: the leftover `.leaflet-popup-content` rule (EB Garamond in map
-popups) never reached the CSS in Tailwind 3, because it was in `@layer
-components` and Leaflet's class is not in the scanned sources. It is still
-inert as an `@utility`; making it a plain rule would change how map popups
-look.
+Follow-up (Viktor, 2026-10-22): the `.leaflet-popup-content` rule (EB
+Garamond in map popups) never reached the CSS in Tailwind 3, because it was in
+`@layer components` and Leaflet's class is not in the scanned sources. It is
+now a plain unlayered rule, `.leaflet-container .leaflet-popup-content`, so it
+beats leaflet.css, which loads later with the map chunk. Map popups now use
+the site font instead of Helvetica.
