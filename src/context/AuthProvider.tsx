@@ -2,10 +2,12 @@ import {
   useCallback,
   useEffect,
   useMemo,
+  useRef,
   useState,
   type ReactNode,
 } from "react";
 import * as authService from "../services/auth";
+import { reportGlobalError } from "../services/globalError";
 import {
   clearAuthSession,
   getSessionInfo,
@@ -14,8 +16,29 @@ import {
 } from "../services/globalAuth";
 import { type AuthContextValue, AuthContext } from "./AuthContext";
 
+function isUnauthorizedError(error: unknown) {
+  return (
+    !!error &&
+    typeof error === "object" &&
+    (error as { status?: unknown }).status === 401
+  );
+}
+
+/** Message for a failed session check that is not a real logout (429, network). */
+function sessionCheckErrorMessage(error: unknown): string | null {
+  if (!error || typeof error !== "object") return null;
+  const { status, message } = error as { status?: unknown; message?: unknown };
+  if (status === 429 && typeof message === "string" && message) return message;
+  return null;
+}
+
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<AuthContextValue["user"]>(null);
+  const userRef = useRef<AuthContextValue["user"]>(null);
+
+  useEffect(() => {
+    userRef.current = user;
+  }, [user]);
   const [session, setSession] = useState<AuthContextValue["session"]>(() =>
     getSessionInfo(),
   );
@@ -42,8 +65,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         } else {
           clearAuthSession();
         }
-      } catch {
-        if (mounted) clearUser();
+      } catch (error) {
+        if (!mounted) return;
+        // The user could not be determined. Nothing is revoked server-side:
+        // on e.g. 429 the session cookies stay valid, so a later reload
+        // restores the session. Tell the user why.
+        clearUser();
+        const message = sessionCheckErrorMessage(error);
+        if (message) reportGlobalError(message);
       } finally {
         if (mounted) setLoading(false);
       }
@@ -84,9 +113,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         clearAuthSession();
       }
       return authState.user;
-    } catch {
-      clearUser();
-      return null;
+    } catch (error) {
+      if (isUnauthorizedError(error)) {
+        clearUser();
+        return null;
+      }
+      // Not a logout (rate limited, network, server error): keep current state.
+      const message = sessionCheckErrorMessage(error);
+      if (message) reportGlobalError(message);
+      return userRef.current;
     }
   }, [clearUser]);
 
