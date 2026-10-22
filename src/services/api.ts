@@ -3,7 +3,12 @@ import axios, {
   type AxiosRequestConfig,
   type AxiosResponse,
 } from "axios";
-import { reportUnauthorized } from "./globalAuth";
+import {
+  hasActiveSession,
+  parseSessionInfo,
+  reportUnauthorized,
+  setAuthenticatedSession,
+} from "./globalAuth";
 import type { ApiError } from "../types";
 
 const BASE_URL = import.meta.env.DEV
@@ -20,7 +25,76 @@ export const api = axios.create({
 
 type ApiRequestConfig = AxiosRequestConfig & {
   _unauthorizedNotified?: boolean;
+  _retriedAfterRefresh?: boolean;
 };
+
+export const SESSION_RENEWAL_RATE_LIMITED_MESSAGE =
+  "Sessionen kunde inte förnyas just nu. Försök igen om en stund.";
+
+type SessionRenewalPath = "/auth/refresh" | "/auth/heartbeat";
+
+const SESSION_RENEWAL_LOCK = "osvs-session-renewal";
+let sessionRenewal: Promise<unknown> | null = null;
+
+function errorStatus(error: unknown): number | undefined {
+  if (!error || typeof error !== "object") return undefined;
+  const status = (error as { status?: unknown }).status;
+  return typeof status === "number" ? status : undefined;
+}
+
+/**
+ * Renews the session (POST /auth/refresh or /auth/heartbeat) with at most one
+ * renewal in flight: concurrent callers in this tab share the same promise,
+ * and other tabs wait on a Web Lock where supported. The backend rotates the
+ * refresh token on every renewal and treats concurrent reuse of one token as
+ * theft (revoking all sessions), so renewals must never run in parallel.
+ *
+ * Rejects with an ApiError. A 401 means the session is gone; a 429 is mapped
+ * to a Swedish "try again later" message and does NOT mean logged out.
+ */
+export function renewSession(
+  path: SessionRenewalPath = "/auth/refresh",
+): Promise<unknown> {
+  if (sessionRenewal) return sessionRenewal;
+
+  const run = async () => {
+    try {
+      return await fetchData(api.post(path));
+    } catch (error) {
+      if (errorStatus(error) === 429) {
+        const rateLimited: ApiError = {
+          status: 429,
+          message: SESSION_RENEWAL_RATE_LIMITED_MESSAGE,
+        };
+        throw rateLimited;
+      }
+      throw error;
+    }
+  };
+
+  const locks =
+    typeof navigator !== "undefined" ? navigator.locks : undefined;
+  const pending: Promise<unknown> = locks
+    ? locks.request(SESSION_RENEWAL_LOCK, run)
+    : run();
+
+  sessionRenewal = pending;
+  const clear = () => {
+    if (sessionRenewal === pending) sessionRenewal = null;
+  };
+  pending.then(clear, clear);
+  return pending;
+}
+
+function notifyUnauthorized(config: ApiRequestConfig, status: number) {
+  if (config._unauthorizedNotified) return;
+  config._unauthorizedNotified = true;
+  reportUnauthorized({
+    status,
+    url: String(config.url ?? ""),
+    source: "axios-interceptor",
+  });
+}
 
 function getRequestPath(config?: AxiosRequestConfig): string {
   const rawUrl = String(config?.url ?? "");
@@ -47,19 +121,35 @@ api.interceptors.response.use(
     if (!originalConfig) return Promise.reject(err);
 
     const status = err.response?.status;
-    if (
-      status === 401 &&
-      !isAuthFlowRequest(originalConfig) &&
-      !originalConfig._unauthorizedNotified
-    ) {
-      originalConfig._unauthorizedNotified = true;
-      reportUnauthorized({
-        status,
-        url: String(originalConfig.url ?? ""),
-        source: "axios-interceptor",
-      });
+    if (status !== 401 || isAuthFlowRequest(originalConfig)) {
+      return Promise.reject(err);
     }
 
+    // The access token has expired (or was dropped). If we believe we are
+    // logged in, renew once (shared with any concurrent 401s) and retry.
+    if (!originalConfig._retriedAfterRefresh && hasActiveSession()) {
+      originalConfig._retriedAfterRefresh = true;
+      try {
+        const renewed = await renewSession("/auth/refresh");
+        const session = parseSessionInfo(
+          renewed && typeof renewed === "object"
+            ? (renewed as Record<string, unknown>).session
+            : undefined,
+        );
+        if (session) setAuthenticatedSession(session);
+      } catch (renewError) {
+        if (errorStatus(renewError) !== 401) {
+          // Rate limited, network or server error: the session may still be
+          // valid, so keep the auth state and surface the renewal error.
+          return Promise.reject(renewError);
+        }
+        notifyUnauthorized(originalConfig, 401);
+        return Promise.reject(err);
+      }
+      return api.request(originalConfig);
+    }
+
+    notifyUnauthorized(originalConfig, status);
     return Promise.reject(err);
   },
 );

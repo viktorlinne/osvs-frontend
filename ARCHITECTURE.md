@@ -57,6 +57,21 @@ Core characteristics:
 - uses `withCredentials`
 - uses `/api` in dev and `VITE_BACKEND_URL` in production
 - reports unauthorized responses through the shared auth flow
+- on a 401 while a session is active, renews once via `/auth/refresh` and
+  retries the request; `renewSession()` keeps at most one renewal
+  (refresh or heartbeat) in flight per tab, and a Web Lock serialises tabs,
+  because the backend rotates the refresh token and treats concurrent reuse
+  as theft
+- only a 401 from the renewal logs the user out; a 429 (rate limited) keeps
+  the auth state and surfaces a Swedish "try again later" message
+
+### Session lifecycle
+
+- app start: `restoreSession()` calls `/auth/me` with the existing access
+  cookie and refreshes only if that returns 401 (no refresh per page load)
+- while active: `AuthGuard` sends `/auth/heartbeat` at most every 60 s after
+  user activity; the inactivity timeout is enforced by the backend and by the
+  local expiry timer
 
 ### `src/services/*`
 

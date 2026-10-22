@@ -1,4 +1,4 @@
-import api, { fetchData } from "./api";
+import api, { fetchData, renewSession } from "./api";
 import type {
   AuthUser,
   LoginPayload,
@@ -190,19 +190,49 @@ export async function completePasswordAction(
   );
 }
 
+function isUnauthorizedError(error: unknown) {
+  return (
+    !!error &&
+    typeof error === "object" &&
+    (error as { status?: unknown }).status === 401
+  );
+}
+
+/**
+ * Loads the current user without renewing the session when possible:
+ * `/auth/me` with the existing access cookie first; only on 401 (expired
+ * access token) renew once via `/auth/refresh` and retry. A 401 from the
+ * renewal means logged out and resolves to an empty state; any other error
+ * (e.g. 429 rate limited) is rethrown so callers keep their current state.
+ */
+async function loadAuthState(): Promise<AuthState> {
+  try {
+    return await fetchCurrentAuthUser();
+  } catch (error) {
+    if (!isUnauthorizedError(error)) throw error;
+  }
+
+  let session: SessionInfo;
+  try {
+    session = readSessionInfo(await renewSession("/auth/refresh"));
+  } catch (error) {
+    if (isUnauthorizedError(error)) return { user: null, session: null };
+    throw error;
+  }
+
+  const authState = await fetchCurrentAuthUser();
+  return {
+    user: authState.user,
+    session: authState.session ?? session,
+  };
+}
+
 export async function restoreSession(): Promise<AuthState> {
   if (restoreSessionPromise) {
     return restoreSessionPromise;
   }
 
-  restoreSessionPromise = (async () => {
-    const session = readSessionInfo(await fetchData(api.post("/auth/refresh")));
-    const authState = await fetchCurrentAuthUser();
-    return {
-      user: authState.user,
-      session: authState.session ?? session,
-    };
-  })();
+  restoreSessionPromise = loadAuthState();
 
   try {
     return await restoreSessionPromise;
@@ -212,7 +242,7 @@ export async function restoreSession(): Promise<AuthState> {
 }
 
 export async function heartbeat(): Promise<SessionInfo> {
-  return readSessionInfo(await fetchData(api.post("/auth/heartbeat")));
+  return readSessionInfo(await renewSession("/auth/heartbeat"));
 }
 
 export async function logout(): Promise<void> {
