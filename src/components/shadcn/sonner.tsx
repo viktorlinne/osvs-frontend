@@ -32,10 +32,10 @@ function Toaster(props: ToasterProps) {
           icon: "text-primary-600",
           title: "text-sm font-semibold",
           description: "text-sm text-neutral-600",
-          // Sonner draws a 20px circle. An invisible ::before 12px past
-          // each edge makes the hit area 44x44px without changing the look.
+          // Sonner draws a 20px circle. An invisible ::before 13px past
+          // the 18px padding box makes the hit area 44x44px without changing the look.
           closeButton:
-            "!border-neutral-200 !bg-white !text-neutral-600 hover:!bg-neutral-100 before:absolute before:-inset-3 before:content-['']",
+            "!border-neutral-200 !bg-white !text-neutral-600 hover:!bg-neutral-100 before:absolute before:-inset-[13px] before:content-['']",
         },
       }}
       {...props}
