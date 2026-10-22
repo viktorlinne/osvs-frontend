@@ -58,9 +58,9 @@ export const AchievementsPanel = ({
       </div>
 
       <div className="min-w-0 flex-1 text-center sm:text-left">
-        <p className="text-2xl font-semibold tracking-tight text-neutral-900">
+        <h1 className="text-2xl font-semibold tracking-tight text-neutral-900">
           {user?.firstname} {user?.lastname}
-        </p>
+        </h1>
 
         <div className="mt-2">
           {isEditRoute && lodges && setSelectedLid ? (
