@@ -253,12 +253,12 @@ export const Navbar: React.FC = () => {
             >
               <img
                 src="/osvs.png"
-                alt="Ordensamfundet VS logotyp"
+                alt="Ordenssamfundet VS logotyp"
                 className="mx-auto h-14 object-contain"
               />
             </NavLink>
             <p className="text-xs font-semibold uppercase tracking-widest text-neutral-700">
-              Ordensamfundet VS
+              Ordenssamfundet VS
             </p>
             <p className="text-[10px] font-medium uppercase tracking-widest text-neutral-400">
               est. MCMXXIV

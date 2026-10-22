@@ -232,7 +232,7 @@ export function getEventFormErrors(
   if (form.price.trim().length > 0) {
     const price = Number(form.price);
     if (!Number.isFinite(price) || price < 0) {
-      errors.price = "Pris måste vara 0 eller större";
+      errors.price = "Avgiften måste vara 0 eller större";
     }
   }
 

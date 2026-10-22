@@ -123,8 +123,8 @@ export const LodgeDetail = () => {
       </div>
 
       {blocker.state === "blocked" && (
-        <div className="mb-4 rounded-md border border-warning bg-warning-pale px-4 py-3 text-sm">
-          <p className="text-ink-mid mb-3">Du har osparade ändringar. Vill du lämna ändå?</p>
+        <div className="mb-4 rounded-md border border-warning-600/30 bg-warning-50 px-4 py-3 text-sm">
+          <p className="mb-3 text-neutral-700">Du har osparade ändringar. Vill du lämna ändå?</p>
           <div className="flex gap-2">
             <button
               type="button"
@@ -159,7 +159,7 @@ export const LodgeDetail = () => {
       ) : notFound ? (
         <div className="ui-card flex flex-col items-center gap-3 py-10 text-center">
           <h1 className="ui-page-title">Logen hittades inte</h1>
-          <p className="text-ink-secondary text-sm">
+          <p className="text-neutral-600 text-sm">
             Kontrollera länken eller gå tillbaka till logelistan.
           </p>
           <Link to="/lodges" className="ui-btn ui-btn-primary mt-2">
@@ -283,13 +283,13 @@ export const LodgeDetail = () => {
               {lodge.city && (
                 <div>
                   <p className={labelClass}>Stad</p>
-                  <p className="text-ink-secondary">{lodge.city}</p>
+                  <p className="text-neutral-600">{lodge.city}</p>
                 </div>
               )}
               {lodge.description && (
                 <div>
                   <p className={labelClass}>Beskrivning</p>
-                  <p className="text-ink-secondary whitespace-pre-line">{lodge.description}</p>
+                  <p className="text-neutral-600 whitespace-pre-line">{lodge.description}</p>
                 </div>
               )}
               {lodge.email && (

@@ -180,7 +180,7 @@ export function EventDetailEditForm({
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
         <div>
           <label htmlFor="price" className="ui-label">
-            Pris
+            Avgift
           </label>
           <input
             id="price"
@@ -198,7 +198,7 @@ export function EventDetailEditForm({
           />
           {errors.price ? <p className={errorTextClass}>{errors.price}</p> : null}
           {Number(form.price) > 0 && Number.isFinite(Number(form.price)) && (
-            <p className="mt-1 text-xs text-neutral-600">Matbokning aktiveras</p>
+            <p className="mt-1 text-xs text-neutral-600">Matbokning aktiveras.</p>
           )}
         </div>
         <label

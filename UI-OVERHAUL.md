@@ -212,7 +212,7 @@ No critical findings remain. These serious ones are left for a decision:
   - `neutral-500` #796d63 at 12px is 4.31:1. Seen on the session countdown.
   - These are design-token choices, so they were not changed.
 - **label-content-name-mismatch** (members list, 24 cards). Each card has `aria-label="Visa profil för <namn>"`, but its visible text also includes the initials and the lodge. Dropping the `aria-label` fixes it, but changes what screen readers announce.
-- Moderate: the member detail/edit page has no `<h1>` (`page-has-heading-one`).
+- ~~Moderate: the member detail/edit page has no `<h1>` (`page-has-heading-one`).~~ Fixed in `fb3b490`.
 
 ### Backend findings (not changed; backend is read-only here)
 
@@ -235,7 +235,7 @@ No critical findings remain. These serious ones are left for a decision:
 4. The `AudienceSelection` lodge/group labels are 38px tall, under 44px. So far this has been by design.
 5. On mobile the tab order is toggle, then logo, then menu items, because the menu is rendered after the header. That works, but it could be reordered.
 6. Back restores the members list only partly (356 of 688 px), because the list is still loading when the position is restored.
-7. "Skriv ett utskick" (the empty "Tidigare utskick" state) shows even when nobody in the group can receive mail. "Skicka utskick" is disabled in that case.
+7. ~~"Skriv ett utskick" (the empty "Tidigare utskick" state) shows even when nobody in the group can receive mail.~~ Fixed in `dffd32d`: the button is hidden then.
 8. **Test data.** Everything that was created has been removed: the test groups and their memberships, the 3 mailings with their outbox rows, and the 6 test messages in Mailpit. Member 308's flags are back to `feeExempt=0` and `standingList=1`, and the registration on 499 is unchanged. Refresh-token rows from the test logins remain in the trial DB.
 
 ### Test notes
@@ -360,40 +360,69 @@ use `primary-800` (#006f41, 6.27:1) only for small *text* (links), and keep
 - The **Radera** buttons on event and post edit are now **Ta bort**.
 - The mailing confirmation button is now "Skicka", not "Ja, skicka".
 - The attendance table is now titled "Inbjudna bröder", and its "RSVP"
-  column is now "Kommer". The e2e specs in the scratchpad still use the old
-  names (`RSVP – …`, "Inbjudna medlemmar") and need the same rename before
-  they are run again.
+  column is now "Kommer". ~~The e2e specs in the scratchpad still use the old
+  names~~: the specs now use the current wording (see "UI leftovers" below).
 
 ### Left for Viktor
 
 1. **Contrast.** With the logo green, small green text and button labels are
    below AA (3.24:1). See the trade-off above.
-2. **Tailwind classes that do nothing.**
-   - `primary-400` and `primary-500` are used (CreateMember step dots, the
-     EventsPage "·", the drag-over border on file inputs) but never defined,
-     so they produce no CSS.
-   - LodgeDetail's leave-page warning uses `border-warning`, `bg-warning-pale`
-     and `text-ink-mid`, which are also undefined. These come from DESIGN.md
-     names, not Tailwind tokens.
-   - Not changed here.
-3. **DESIGN.md** still lists an older Material-style palette (`primary:
-   #006b2d`, `surface-*` and so on) that the code does not use. Only the
-   `ordensgreen*` tokens and the color note were updated, and a new
-   `ordensgreen-light` (#a8dbc6, which is `primary-200`) was added.
-4. **Content pages were not edited.** AboutPage spells the name
-   "Ordenssamfundet" in places (the brand is "Ordensamfundet") and has the
-   typo "Initialenerna". ContactPage capitalises office titles.
-5. **Mixed labels.**
-   - The event view says "Avgift" and the edit form says "Pris".
-   - The members list empty states mix "Inga …" with and without a full
-     stop.
-   - Both were left alone.
-6. **Focus after a successful map-position removal** falls to the page body,
-   because the edit panel closes and unmounts the button that opened the
-   dialog. This was the same with the inline confirm before.
+2. ~~**Tailwind classes that do nothing.**~~ Fixed in `9a3b378`.
+3. ~~**DESIGN.md** still lists an older Material-style palette.~~ Fixed (the
+   file is not in git).
+4. ~~**Content pages were not edited.**~~ Fixed in `c1e9de6`.
+5. ~~**Mixed labels.**~~ Fixed in `c1e9de6`.
+6. ~~**Focus after a successful map-position removal** falls to the page
+   body.~~ Fixed in `04d1f19`.
 
 ### Verification (logo green / payments / wording)
 
 - `npm run lint`: 0 errors, 2 warnings (the same pre-existing ones)
 - `npm run build`: OK
 - `npm test`: 30 files, 111 tests passed (before: 30 files, 104 tests)
+
+## UI leftovers
+
+Fixes for "Left for Viktor" 2–6 and the polish items from the night-2 list,
+on branch `fix/ui-polish` on top of `0f6c4e0`.
+
+| Commit | Summary |
+| --- | --- |
+| `9a3b378` | **Undefined Tailwind classes.** Every class in `src/` was checked against the built CSS (script: Tailwind build, then each utility-like token in a string literal is looked up). Nine produced no CSS; they now use existing tokens. No new tokens were added. `primary-400` (CreateMember current step) → `primary-200`, between `primary-600` (done) and `neutral-200` (to do). `primary-400` (EventsPage "·") → `primary-600`. `primary-500`/`danger-400` (file-input drag-over) → `primary-600`/`danger-600`. `border-warning bg-warning-pale` (LodgeDetail, SetPasswordPage) → `border-warning-600/30 bg-warning-50`, as the warning badge. `text-ink-mid`/`text-ink-secondary` → `neutral-700`/`neutral-600`. `hover:text-success-800` on the members-list notice ✕ → a 44px button with `hover:bg-success-600/10`. |
+| `c1e9de6` | **Wording.** The name is **"Ordenssamfundet VS"** everywhere in the UI (page title, header and logo alt, footer, login, forgot/set password, About, Contact, GDPR), as on the old site. AboutPage: "Initialerna", "avslöjas", "Ordenssamfundet VS:s" (was "Ordenssamfundets VS:s"), "Orden" (was "Ordern"), ”sin loge”. ContactPage: office titles in lower case; "Kontakt" is now the page's `<h1>`. An event's price is **"Avgift"** in the create and edit forms too (and "Avgiften måste vara 0 eller större"); the edit form's hint gets its full stop. Members list: "Inga medlemmar hittades." with a full stop, and the empty card only mentions filters when a filter is active. GDPR document viewer ✕ is 44px. |
+| `dffd32d` | **Mailing empty state.** "Skriv ett utskick" is hidden when nobody in the group can receive mail. 1 test extended. |
+| `04d1f19` | **Map focus.** Saving, removing or cancelling a manual position moves focus to "Ändra position"/"Ange position manuellt"; entering edit mode moves it to the "Klicka i kartan…" hint (`tabIndex=-1`). Before, all four fell to `<body>`. 3 tests (they fail without the fix). |
+| `fb3b490` | **h1 on member detail and profile.** The member's name in the profile header is the `<h1>`, same styling. |
+
+`C:\OSVS\DESIGN.md` (not in git): the `colors` block now lists exactly the
+Tailwind scales (`primary` 50/100/200/600/700/800, `neutral` 50–700 and 900,
+`success`/`warning`/`danger` 50/600/700), each with its Tailwind token in a
+comment. The old Material-style palette (`surface-*`, `primary: #006b2d`,
+`tertiary-*` and so on) and the duplicate `display-lg` … `label-caps`
+typography entries were removed. The name there is "Ordenssamfundet VS" too.
+`PRODUCT.md` still spells it "Ordensamfundet VS" and was not edited.
+
+The Playwright specs in the scratchpad (`e2e	ests\`) now use the current
+wording: logo "Ordenssamfundet VS logotyp", "Ändringarna har sparats.",
+"Gruppen ”X” har skapats./har tagits bort.", "3 medlemmar har lagts till.",
+"X har tagits bort ur gruppen.", the "Skicka" button and the "Ta bort
+gruppen?" dialog. They contained no "RSVP – …", "Inbjudna medlemmar" or
+"Radera" selectors. They were not run (no backend).
+
+### Still open
+
+- Contrast of the logo green for small text (Left for Viktor 1).
+- Open questions 1, 4, 6 and 8, and night-2 questions 2–6: product or UX
+  decisions (member-card `aria-label`, registration step focus and the native
+  food checkbox, 38px audience labels, mobile tab order, partial scroll
+  restore on the members list).
+- AboutPage wording that may be old but is not a clear typo was kept: "nån",
+  "VS tvingar inga medlemmar någon viss religionsuppfattning" (perhaps
+  "påtvingar"), "Damklubbens i logen insatser".
+- Lint: the same 2 warnings (CreateEvent `autoFocus`, GdprPage overlay).
+
+### Verification (UI leftovers)
+
+- `npm run lint`: 0 errors, 2 warnings (the same pre-existing ones)
+- `npm run build`: OK
+- `npm test`: 31 files, 114 tests passed (before: 30 files, 111 tests)

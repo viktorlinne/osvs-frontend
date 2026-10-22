@@ -77,9 +77,9 @@ export function ImageFileInput({
   const zoneClass = [
     "rounded-md border px-4 transition-colors duration-150",
     error
-      ? "border-dashed border-danger-400 bg-neutral-50"
+      ? "border-dashed border-danger-600 bg-neutral-50"
       : isDragging
-        ? "border-dashed border-primary-500 bg-primary-50"
+        ? "border-dashed border-primary-600 bg-primary-50"
         : value
           ? "border-neutral-200 bg-white"
           : "border-dashed border-neutral-300 bg-neutral-50",

@@ -161,5 +161,9 @@ describe("GroupMailingSection", () => {
       "Ingen i gruppen kan ta emot e-post.",
     );
     expect(screen.getByRole("button", { name: "Skicka utskick" })).toBeDisabled();
+    expect(
+      await screen.findByText("Inga utskick har skickats till gruppen ännu."),
+    ).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Skriv ett utskick" })).not.toBeInTheDocument();
   });
 });

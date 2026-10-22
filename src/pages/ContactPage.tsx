@@ -3,7 +3,7 @@ import { PageContainer } from "../components";
 const roles = [
   {
     title: "Förtroenderådet",
-    description: "Består av Logernas Logemästare, Logekansler och Logesekreterare",
+    description: "Består av logernas logemästare, logekansler och logesekreterare",
   },
   {
     title: "Ordensmästare",
@@ -29,11 +29,11 @@ export const ContactPage = () => {
       <div className="grid w-full grid-cols-1 gap-8 lg:grid-cols-[1fr_2fr]">
 
         <section className="space-y-4">
-          <h2 className="ui-section-title">Kontakt</h2>
+          <h1 className="ui-section-title">Kontakt</h1>
           <div className="overflow-hidden rounded-md border border-neutral-200">
             <img
               src="/contact.png"
-              alt="Ordensamfundet VS, tidigare bröder"
+              alt="Ordenssamfundet VS, tidigare bröder"
               className="h-auto w-full object-cover"
             />
           </div>

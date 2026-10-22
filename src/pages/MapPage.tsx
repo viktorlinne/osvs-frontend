@@ -151,6 +151,23 @@ export const MapPage = () => {
   >({});
   const [isEditing, setIsEditing] = useState(false);
   const [pendingReset, setPendingReset] = useState(false);
+  // Entering or leaving edit mode unmounts the focused button (and, after a
+  // removal, the confirm dialog's opener). Move focus to the counterpart in
+  // the other mode instead of letting it fall to <body>.
+  const focusAfterModeChangeRef = useRef(false);
+  const editButtonRef = useRef<HTMLButtonElement>(null);
+  const editHintRef = useRef<HTMLParagraphElement>(null);
+
+  const changeEditMode = useCallback((editing: boolean) => {
+    focusAfterModeChangeRef.current = true;
+    setIsEditing(editing);
+  }, []);
+
+  useEffect(() => {
+    if (!focusAfterModeChangeRef.current || pendingReset) return;
+    focusAfterModeChangeRef.current = false;
+    (isEditing ? editHintRef.current : editButtonRef.current)?.focus();
+  }, [isEditing, pendingReset]);
 
   const isAdmin = Boolean(
     authUser && (authUser.roles ?? []).some((role) => role === "Admin"),
@@ -229,7 +246,7 @@ export const MapPage = () => {
       );
       await refreshPins();
       toast.success("Positionen har sparats.");
-      setIsEditing(false);
+      changeEditMode(false);
     } catch {
       // error surfaced via global error banner
     }
@@ -247,7 +264,7 @@ export const MapPage = () => {
       await refreshPins();
       setPendingReset(false);
       toast.success("Positionen har tagits bort.");
-      setIsEditing(false);
+      changeEditMode(false);
     } catch {
       setPendingReset(false);
     }
@@ -420,11 +437,12 @@ export const MapPage = () => {
                   : "Ingen position registrerad."}
               </p>
               <button
+                ref={editButtonRef}
                 type="button"
                 className="ui-btn ui-btn-secondary mt-3 w-full"
                 disabled={effectiveSelectedUserId === null}
                 onClick={() => {
-                  setIsEditing(true);
+                  changeEditMode(true);
                   setPendingReset(false);
                 }}
               >
@@ -433,7 +451,11 @@ export const MapPage = () => {
             </div>
           ) : (
             <div className="mt-4">
-              <p className="mb-2 text-sm text-neutral-700">
+              <p
+                ref={editHintRef}
+                tabIndex={-1}
+                className="mb-2 text-sm text-neutral-700 focus:outline-none"
+              >
                 Klicka i kartan för att markera positionen.
               </p>
 
@@ -487,7 +509,7 @@ export const MapPage = () => {
                   className="ui-btn ui-btn-secondary"
                   disabled={actionLoading}
                   onClick={() => {
-                    setIsEditing(false);
+                    changeEditMode(false);
                     setPendingReset(false);
                   }}
                 >

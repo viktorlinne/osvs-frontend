@@ -155,7 +155,7 @@ export const SetPasswordPage = () => {
       className="ui-page flex min-h-full items-center justify-center"
     >
       <div className="ui-card w-full max-w-md">
-        <p className="ui-chapter mb-3">Ordensamfundet VS</p>
+        <p className="ui-chapter mb-3">Ordenssamfundet VS</p>
         <h2 className="ui-section-title mb-3">
           {completed ? "Lösenord klart" : actionLabel}
         </h2>
@@ -164,7 +164,7 @@ export const SetPasswordPage = () => {
           <p className="text-sm text-neutral-600">Verifierar länken…</p>
         ) : linkError ? (
           <div className="space-y-4">
-            <p className="rounded-md border border-warning bg-warning-pale px-4 py-3 text-sm text-neutral-700">
+            <p className="rounded-md border border-warning-600/30 bg-warning-50 px-4 py-3 text-sm text-neutral-700">
               {linkError}
             </p>
             <div className="flex flex-col gap-2 sm:flex-row">
