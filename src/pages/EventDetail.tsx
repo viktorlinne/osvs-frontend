@@ -491,6 +491,7 @@ export const EventDetail = () => {
               eventGroupIds={event.groupIds ?? []}
               isAdmin={isAdmin}
               canManageGroups={canEdit}
+              canViewPayments={canEdit}
               attendancesLoading={attendancesLoading}
               attendances={attendances}
               attendanceSavingUid={attendanceSavingUid}

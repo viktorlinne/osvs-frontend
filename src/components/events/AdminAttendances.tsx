@@ -6,6 +6,9 @@ type Props = {
   rows: EventAttendanceRow[] | null | undefined;
   loading?: boolean;
   isAdmin?: boolean;
+  /** Admin/Editor only: show the Betalning column. The API omits payment
+   *  fields for members, so the column is hidden for them. */
+  showPayment?: boolean;
   savingUid?: number | null;
   canEditRsvpAndBookFood?: boolean;
   canEditAttended?: boolean;
@@ -20,6 +23,7 @@ export function AdminAttendances({
   rows,
   loading = false,
   isAdmin = false,
+  showPayment = false,
   savingUid = null,
   canEditRsvpAndBookFood = true,
   canEditAttended = true,
@@ -56,7 +60,9 @@ export function AdminAttendances({
                   <th className="py-2 pr-3 font-medium">Boka mat</th>
                   <th className="py-2 pr-3 font-medium">Allergier</th>
                   <th className="py-2 pr-3 font-medium">Deltagande</th>
-                  <th className="py-2 pr-3 font-medium">Betalning</th>
+                  {showPayment && (
+                    <th className="py-2 pr-3 font-medium">Betalning</th>
+                  )}
                 </tr>
               </thead>
               <tbody>
@@ -124,22 +130,24 @@ export function AdminAttendances({
                           }
                         />
                       </td>
-                      <td className="py-2 pr-3">
-                        <input
-                          type="checkbox"
-                          checked={row.paymentPaid}
-                          aria-label={`Betalning – ${row.firstname} ${row.lastname}`}
-                          disabled={disableBase}
-                          className="h-4 w-4 rounded border-neutral-300 text-primary-600 focus-visible:ring-primary-600"
-                          onChange={(event) =>
-                            onToggle?.(
-                              row.uid,
-                              "paymentPaid",
-                              event.target.checked,
-                            )
-                          }
-                        />
-                      </td>
+                      {showPayment && (
+                        <td className="py-2 pr-3">
+                          <input
+                            type="checkbox"
+                            checked={row.paymentPaid ?? false}
+                            aria-label={`Betalning – ${row.firstname} ${row.lastname}`}
+                            disabled={disableBase}
+                            className="h-4 w-4 rounded border-neutral-300 text-primary-600 focus-visible:ring-primary-600"
+                            onChange={(event) =>
+                              onToggle?.(
+                                row.uid,
+                                "paymentPaid",
+                                event.target.checked,
+                              )
+                            }
+                          />
+                        </td>
+                      )}
                     </tr>
                   );
                 })}

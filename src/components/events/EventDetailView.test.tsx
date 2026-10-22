@@ -8,7 +8,7 @@ afterEach(() => cleanup());
 
 type ViewProps = ComponentProps<typeof EventDetailView>;
 
-function renderView(canManageGroups: boolean) {
+function renderView(canManageGroups: boolean, extra: Partial<ViewProps> = {}) {
   const props = {
     event: {
       id: 1,
@@ -38,6 +38,7 @@ function renderView(canManageGroups: boolean) {
     attendanceSavingUid: null,
     onAttendanceToggle: vi.fn(),
     hasStarted: false,
+    ...extra,
   } as unknown as ViewProps;
   render(
     <MemoryRouter>
@@ -59,5 +60,26 @@ describe("EventDetailView invited groups", () => {
     renderView(false);
     expect(screen.getByText("Styrelsen")).toBeInTheDocument();
     expect(screen.queryByRole("link", { name: "Styrelsen" })).not.toBeInTheDocument();
+  });
+});
+
+describe("EventDetailView payment visibility", () => {
+  const attendances = [
+    { uid: 3, firstname: "Per", lastname: "Ås", allergies: [], rsvp: true, bookFood: true, attended: false },
+  ];
+
+  it("hides the Betalning column for members", () => {
+    renderView(false, { attendances });
+    expect(screen.getByRole("checkbox", { name: "RSVP – Per Ås" })).toBeInTheDocument();
+    expect(screen.queryByRole("columnheader", { name: "Betalning" })).not.toBeInTheDocument();
+  });
+
+  it("shows the Betalning column for Admin/Editor", () => {
+    renderView(true, {
+      canViewPayments: true,
+      attendances: [{ ...attendances[0], paymentStatus: "Pending", paymentPaid: false }],
+    });
+    expect(screen.getByRole("columnheader", { name: "Betalning" })).toBeInTheDocument();
+    expect(screen.getByRole("checkbox", { name: "Betalning – Per Ås" })).not.toBeChecked();
   });
 });

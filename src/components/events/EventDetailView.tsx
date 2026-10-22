@@ -31,6 +31,8 @@ type Props = {
   isAdmin: boolean;
   /** Admin/Editor: may open groups (/admin/groups/:id). */
   canManageGroups?: boolean;
+  /** Admin/Editor: see invitees' payment status (members never get it). */
+  canViewPayments?: boolean;
   attendancesLoading: boolean;
   attendances: EventAttendanceRow[] | null | undefined;
   attendanceSavingUid: number | null;
@@ -58,6 +60,7 @@ export function EventDetailView({
   eventGroupIds,
   isAdmin,
   canManageGroups = false,
+  canViewPayments = false,
   attendancesLoading,
   attendances,
   attendanceSavingUid,
@@ -169,6 +172,7 @@ export function EventDetailView({
           rows={attendances}
           loading={attendancesLoading}
           isAdmin={isAdmin}
+          showPayment={canViewPayments}
           savingUid={attendanceSavingUid}
           canEditRsvpAndBookFood={canEditRsvpAndBookFood}
           canEditAttended={canEditAttended}

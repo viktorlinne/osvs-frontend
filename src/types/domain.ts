@@ -238,8 +238,10 @@ export type EventAttendanceRow = {
   rsvp: boolean;
   bookFood: boolean;
   attended: boolean;
-  paymentStatus: "Pending" | "Paid" | null;
-  paymentPaid: boolean;
+  /** Only returned to Admin/Editor (omitted for members). */
+  paymentStatus?: "Pending" | "Paid" | null;
+  /** Only returned to Admin/Editor (omitted for members). */
+  paymentPaid?: boolean;
 };
 
 export type MembershipPayment = {
