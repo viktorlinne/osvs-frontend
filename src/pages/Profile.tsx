@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { SaveHint } from "../components/profile/SaveHint";
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router";
 import { useForm } from "react-hook-form";
 import {
   AchievementsPanel,
@@ -173,8 +173,10 @@ export const Profile = () => {
     achievementPending;
 
   const handleProfileSave = handleSubmit(async (values) => {
-    // Inner steps report their own errors; only toast when all succeeded.
-    let partialFailure = false;
+    // Failed inner steps are collected and shown after the final reload:
+    // useFetch.run() clears the global banner, so reporting them immediately
+    // let a later step wipe the message and a failed change looked saved.
+    const failures: string[] = [];
     clearGlobalError();
     clearErrors();
     setSaving(true);
@@ -195,8 +197,7 @@ export const Profile = () => {
             await run(() => saveRoles(userId, selectedRoleIds));
           }
         } catch {
-          partialFailure = true;
-          setGlobalError("Kunde inte uppdatera rollerna.");
+          failures.push("Kunde inte uppdatera rollerna.");
         }
 
         try {
@@ -204,8 +205,7 @@ export const Profile = () => {
             await run(() => setMemberOfficials(userId, selectedOfficialIds));
           }
         } catch {
-          partialFailure = true;
-          setGlobalError("Kunde inte uppdatera tjänsterna.");
+          failures.push("Kunde inte uppdatera tjänsterna.");
         }
 
         try {
@@ -213,8 +213,7 @@ export const Profile = () => {
             await run(() => setMemberAllergies(userId, selectedAllergyIds));
           }
         } catch {
-          partialFailure = true;
-          setGlobalError("Kunde inte uppdatera allergierna.");
+          failures.push("Kunde inte uppdatera allergierna.");
         }
 
         try {
@@ -226,8 +225,7 @@ export const Profile = () => {
             setAwardDate("");
           }
         } catch {
-          partialFailure = true;
-          setGlobalError("Kunde inte tilldela utmärkelsen.");
+          failures.push("Kunde inte tilldela utmärkelsen.");
         }
 
         if (lodgeChanged) {
@@ -239,8 +237,7 @@ export const Profile = () => {
               ),
             );
           } catch {
-            partialFailure = true;
-            setGlobalError("Kunde inte uppdatera logen.");
+            failures.push("Kunde inte uppdatera logen.");
           }
         }
       }
@@ -249,8 +246,9 @@ export const Profile = () => {
       setSelectedOfficialIds(null);
       setSelectedAllergyIds(null);
 
-      await refresh();
-      if (!partialFailure) toast.success("Ändringarna har sparats.");
+      await refresh().catch(() => undefined);
+      if (failures.length > 0) setGlobalError(failures.join(" "));
+      else toast.success("Ändringarna har sparats.");
       navigate("/profile", { replace: true });
     } catch (error: unknown) {
       if (applyApiFieldErrors(error, setFieldError)) {

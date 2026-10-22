@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { Suspense, lazy, useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
 import useFetch from "../../hooks/useFetch";
 import {
@@ -7,11 +7,13 @@ import {
   setUserLocation,
 } from "../../services/users";
 import type { UserMapPin } from "../../types";
-import {
-  ManualLocationPicker,
-  type ManualLocationValue,
-} from "../map/ManualLocationPicker";
+import type { ManualLocationValue } from "../map/ManualLocationPicker";
 import { ConfirmDialog } from "../ui/ConfirmDialog";
+
+// Leaflet (~150 kB) is only needed once the member starts editing the pin, so
+// the picker is loaded on demand instead of with every page that uses this
+// section (or the shared components barrel).
+const ManualLocationPicker = lazy(() => import("../map/ManualLocationPicker"));
 
 type Props = {
   userId: number;
@@ -111,10 +113,21 @@ export function ProfileMapPinSection({ userId }: Props) {
             Klicka i kartan för att markera positionen.
           </p>
 
-          <ManualLocationPicker
-            value={draftLocation}
-            onChange={setDraftLocation}
-          />
+          <Suspense
+            fallback={
+              <div
+                className="flex h-[320px] w-full items-center justify-center rounded-md bg-neutral-100 text-sm text-neutral-600"
+                role="status"
+              >
+                Laddar karta…
+              </div>
+            }
+          >
+            <ManualLocationPicker
+              value={draftLocation}
+              onChange={setDraftLocation}
+            />
+          </Suspense>
 
           <div className="flex flex-col gap-2">
             <button

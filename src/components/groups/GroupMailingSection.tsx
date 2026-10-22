@@ -139,12 +139,18 @@ export function GroupMailingSection({ groupId, membersVersion }: GroupMailingSec
     [groupId],
   );
 
+  const openMailingIdRef = useRef(openMailingId);
+  openMailingIdRef.current = openMailingId;
   const loadOpenMailing = useCallback(async (id: number) => {
     setOpenMailingError(false);
     try {
-      setOpenMailing(await getMailing(id));
+      const mailing = await getMailing(id);
+      // Ignore a late response for a mailing that is no longer expanded,
+      // otherwise its recipients would render under another mailing.
+      if (openMailingIdRef.current !== id) return;
+      setOpenMailing(mailing);
     } catch {
-      setOpenMailingError(true);
+      if (openMailingIdRef.current === id) setOpenMailingError(true);
     }
   }, []);
 
@@ -160,8 +166,6 @@ export function GroupMailingSection({ groupId, membersVersion }: GroupMailingSec
 
   // Auto-refresh while something is queued or being sent.
   const inProgress = (mailings ?? []).some((mailing) => isMailingInProgress(mailing.status));
-  const openMailingIdRef = useRef(openMailingId);
-  openMailingIdRef.current = openMailingId;
   useEffect(() => {
     if (!inProgress) return;
     const interval = setInterval(() => {
@@ -205,10 +209,12 @@ export function GroupMailingSection({ groupId, membersVersion }: GroupMailingSec
   function toggleMailing(id: number) {
     if (openMailingId === id) {
       setOpenMailingId(null);
+      openMailingIdRef.current = null;
       setOpenMailing(null);
       return;
     }
     setOpenMailingId(id);
+    openMailingIdRef.current = id;
     setOpenMailing(null);
     void loadOpenMailing(id);
   }

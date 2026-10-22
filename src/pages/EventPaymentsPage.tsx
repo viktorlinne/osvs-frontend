@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link } from "react-router";
 import { AsyncState, Button, PageContainer, selectClass } from "@/components";
 import { SkeletonLabel, SkeletonText } from "@/components/PageSkeleton";
 import { formatAmount, formatDaysSince } from "@/components/payments/paymentFormat";

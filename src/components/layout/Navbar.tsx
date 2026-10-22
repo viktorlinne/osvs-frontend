@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import { NavLink, useNavigate } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router";
 import { useAuth, useError } from "../../context";
 import { getApiErrorMessage } from "../../utils/apiErrors";
 import { ConfirmDialog } from "../ui/ConfirmDialog";
@@ -196,15 +196,18 @@ export const Navbar: React.FC = () => {
     try {
       await logout();
       clearError();
+    } catch (error: unknown) {
+      // The local session is cleared either way (see AuthProvider.logout).
+      const reason = getApiErrorMessage(error);
+      setError(
+        `Servern kunde inte bekräfta utloggningen${reason ? ` (${reason})` : ""}. ` +
+          "Stäng webbläsaren om du använder en delad dator.",
+      );
+    } finally {
+      setLoggingOut(false);
       setLogoutDialogOpen(false);
       closeMenu();
       navigate("/login");
-    } catch (error: unknown) {
-      setLogoutDialogOpen(false);
-      setError(getApiErrorMessage(error) ?? "Kunde inte logga ut.");
-      setTimeout(() => clearError(), 6000);
-    } finally {
-      setLoggingOut(false);
     }
   };
 

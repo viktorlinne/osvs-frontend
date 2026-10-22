@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
+import { Link, useLocation, useNavigate, useParams } from "react-router";
 import { EventDetailEditForm, EventDetailView } from "../components/events";
 import type { EventFormState } from "../components/events/EventDetailEditForm";
 import { NotFoundPanel, PageContainer, useConfirm } from "../components";
@@ -288,7 +288,14 @@ export const EventDetail = () => {
         description: form.description,
         startDate: form.startDate || null,
         endDate: form.endDate || null,
-        price: form.price !== "" && Number.isFinite(Number(form.price)) ? Number(form.price) : undefined,
+        // An emptied field means "no fee": send 0. `undefined` is dropped from
+        // the JSON body and the backend would silently keep the old price.
+        price:
+          form.price.trim() === ""
+            ? 0
+            : Number.isFinite(Number(form.price))
+              ? Number(form.price)
+              : undefined,
         lodgeMeeting: form.lodgeMeeting,
         lodgeIds: normalizeNumericIds(selectedLodgeIds),
         groupIds: normalizeNumericIds(selectedGroupIds),
@@ -297,6 +304,8 @@ export const EventDetail = () => {
 
       await runAction(() => updateEvent(id, payload));
 
+      // The save has succeeded at this point. A failing refetch is shown by
+      // useFetch's banner and must not be reported as "Kunde inte spara".
       await run(async () => {
         const fetchedEvent = await getEvent(id);
         if (fetchedEvent) {
@@ -313,7 +322,7 @@ export const EventDetail = () => {
           setSelectedUserIds(normalizeSelection(fetchedEvent.userIds));
         }
         return fetchedEvent;
-      });
+      }).catch(() => undefined);
 
       navigate(`/events/${eventId}`);
     } catch (error: unknown) {
@@ -348,8 +357,8 @@ export const EventDetail = () => {
     try {
       await runAction(() => deleteEvent(eventId));
       navigate("/events");
-    } catch {
-      setGlobalError("Kunde inte ta bort mötet.");
+    } catch (error: unknown) {
+      setGlobalError(getApiErrorMessage(error) ?? "Kunde inte ta bort mötet.");
     }
   }
 
@@ -433,7 +442,10 @@ export const EventDetail = () => {
           return prev.map((item) => (item.uid === uid ? row : item));
         });
       } else {
-        await runAttendances(() => listEventAttendances(eventId));
+        // Saved already; a failed reload is reported by useFetch.
+        await runAttendances(() => listEventAttendances(eventId)).catch(
+          () => undefined,
+        );
       }
       if (uid === authUserId) {
         await runRegistrationFetch(() => getRegistration(eventId)).catch(() => {

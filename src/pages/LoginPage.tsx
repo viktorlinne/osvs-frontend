@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useForm } from "react-hook-form";
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router";
 import { Button, PageContainer, errorTextClass, inputClass } from "../components";
 import { useError } from "../context";
 import { useAuth } from "../context/useAuth";
@@ -50,7 +50,15 @@ export const LoginPage = () => {
       else setError("Kunde inte logga in.");
     } catch (error: unknown) {
       if (isApiError(error) && error.status === 401) {
-        setError("Felaktig e-postadress eller lösenord");
+        // An archived account gets its own message (who to contact) from the
+        // backend; every other 401 is a wrong e-mail or password.
+        const reason = (error.details as { reason?: unknown } | undefined)
+          ?.reason;
+        setError(
+          reason === "ACCOUNT_INACTIVE" && error.message
+            ? error.message
+            : "Felaktig e-postadress eller lösenord",
+        );
       }
     } finally {
       setLoading(false);

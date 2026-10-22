@@ -1,5 +1,5 @@
 import { useLayoutEffect, useRef } from "react";
-import { Link } from "react-router-dom";
+import { Link } from "react-router";
 import type { Group, Lodge, PublicUser } from "../../types";
 import { Button, errorTextClass } from "../ui";
 import { EventAudienceFields } from "./EventAudienceFields";

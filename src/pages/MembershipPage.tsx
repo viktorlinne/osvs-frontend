@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link } from "react-router";
 import { PageContainer } from "../components";
 import useFetch from "../hooks/useFetch";
 import { getMyMemberships } from "../services/";
@@ -124,20 +124,18 @@ export const MembershipPage = () => {
                   </div>
                 </dl>
                 <div className="flex flex-col items-start gap-2 sm:items-end">
-                  <div>
+                  <dl>
                     <dt className="ui-label sm:text-right">Registrerad</dt>
                     <dd className="text-xs text-neutral-600">
                       {formatDate(p.createdAt)}
                     </dd>
-                  </div>
+                  </dl>
+                  {/* No online payment yet (OSVS-29): a "Betala" button
+                      without an action only confused members. */}
                   {p.status === "Pending" && (
-                    <button
-                      type="button"
-                      className="ui-btn ui-btn-primary ui-btn-sm"
-                      aria-label={`Betala avgift för år ${p.year}`}
-                    >
-                      Betala
-                    </button>
+                    <p className="text-xs text-neutral-600 sm:text-right">
+                      Betalning hanteras separat.
+                    </p>
                   )}
                 </div>
               </li>

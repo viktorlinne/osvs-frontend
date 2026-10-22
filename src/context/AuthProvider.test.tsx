@@ -99,4 +99,34 @@ describe("AuthProvider", () => {
     );
     expect(authMock.logout).not.toHaveBeenCalled();
   });
+
+  it("explains why when the server cannot be reached at startup", async () => {
+    authMock.restoreSession.mockRejectedValueOnce({
+      status: 0,
+      message: "Kunde inte nå servern. Kontrollera anslutningen och försök igen.",
+    });
+    renderProvider();
+
+    await waitFor(() =>
+      expect(screen.getByRole("alert")).toHaveTextContent("Kunde inte nå servern"),
+    );
+    expect(screen.getByText("logged-out")).toBeInTheDocument();
+  });
+
+  it("clears the local session even when the server logout fails, and reports it", async () => {
+    authMock.restoreSession.mockResolvedValueOnce({ user: USER, session: SESSION });
+    authMock.logout.mockRejectedValueOnce({ status: 0, message: "offline" });
+    renderProvider();
+    await screen.findByText("logged-in");
+
+    let caught: unknown;
+    await act(async () => {
+      await auth!.logout().catch((e: unknown) => {
+        caught = e;
+      });
+    });
+
+    expect(caught).toMatchObject({ status: 0 });
+    expect(screen.getByText("logged-out")).toBeInTheDocument();
+  });
 });

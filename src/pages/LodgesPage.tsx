@@ -1,5 +1,5 @@
 ﻿import { useCallback, useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link } from "react-router";
 import { AsyncState, PageContainer } from "../components";
 import { SkeletonLabel, SkeletonText } from "../components/PageSkeleton";
 import useFetch from "../hooks/useFetch";

@@ -50,12 +50,8 @@ npm run lint
 npm run build
 ```
 
-CI workflow:
-
-- [`.github/workflows/ci.yml`](./.github/workflows/ci.yml)
-
-There is currently no automated frontend test suite, so regressions are still
-caught through lint, build, and manual verification.
+Unit and component tests run with Vitest (`npm test`). UI changes
+still need a manual check in the browser.
 
 ## Development Notes
 
@@ -63,12 +59,12 @@ caught through lint, build, and manual verification.
 - the shared axios layer is in [`src/services/api.ts`](./src/services/api.ts)
 - the global error banner lives in
   [`src/context/ErrorProvider.tsx`](./src/context/ErrorProvider.tsx)
-- `AuthGuard` currently redirects both unauthenticated and unauthorized users to
-  `/login`
+- `AuthGuard` redirects unauthenticated users to `/login` and users without the
+  required role to `/forbidden`
 
 ## Current Gaps
 
-- no automated frontend tests yet
 - some legacy localized strings still contain encoding issues
 - date and time handling remains a risk area
-- `MapPage` is still the largest lazy-loaded chunk
+- Leaflet (~150 kB) is the largest lazy chunk; it loads only on `/map` and when
+  editing the map pin on the profile

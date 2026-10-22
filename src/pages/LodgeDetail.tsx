@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link, useBlocker, useLocation, useNavigate, useParams } from "react-router-dom";
+import { Link, useBlocker, useLocation, useNavigate, useParams } from "react-router";
 import { toast } from "sonner";
 import {
   Button,
@@ -28,9 +28,8 @@ export const LodgeDetail = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const isEditRoute = location.pathname.endsWith("/edit");
-  const canEdit = Boolean(
-    user && (user.roles ?? []).some((r) => ["Admin", "Editor"].includes(r)),
-  );
+  // PUT /lodges/:id is Admin-only in the backend; Editors only got 403s.
+  const canEdit = Boolean(user && (user.roles ?? []).includes("Admin"));
 
   const [form, setForm] = useState(emptyForm);
   const [initialForm, setInitialForm] = useState(emptyForm);

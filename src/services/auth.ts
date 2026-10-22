@@ -245,7 +245,29 @@ export async function heartbeat(): Promise<SessionInfo> {
   return readSessionInfo(await renewSession("/auth/heartbeat"));
 }
 
+/**
+ * Logs out on the server. `/auth/logout` requires a valid access token, but
+ * the access cookie (15 min) can already be gone while the refresh token is
+ * still valid. Without a renewal the server would answer 401, the refresh
+ * token would stay valid and the next page load would silently log the member
+ * back in (e.g. on a shared computer). So on 401 renew once and retry; a 401
+ * from the renewal means the session is already gone server-side.
+ * Rejects when the server could not confirm the logout.
+ */
 export async function logout(): Promise<void> {
+  try {
+    await fetchData(api.post<void>("/auth/logout"));
+    return;
+  } catch (error) {
+    if (!isUnauthorizedError(error)) throw error;
+  }
+
+  try {
+    await renewSession("/auth/refresh");
+  } catch (error) {
+    if (isUnauthorizedError(error)) return;
+    throw error;
+  }
   await fetchData(api.post<void>("/auth/logout"));
 }
 

@@ -1,7 +1,7 @@
 import { useEffect, useRef } from "react";
 import { Outlet, ScrollRestoration, useLocation, useNavigate } from "react-router";
 import { useAuth, useError } from "../context";
-import { Navbar, Footer } from "../components";
+import { Navbar, Footer } from "../components/layout";
 import { Toaster } from "@/components/shadcn/sonner";
 import {
   registerUnauthorizedHandler,

@@ -1,12 +1,12 @@
 import { describe, expect, it, vi } from "vitest";
 import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { MemoryRouter } from "react-router-dom";
+import { MemoryRouter } from "react-router";
 import { AuthContext, type AuthContextValue } from "../../context/AuthContext";
 import ErrorContext from "../../context/ErrorContext";
 import { Navbar } from "./Navbar";
 
-function renderNavbar(roles: string[] | null) {
+function renderNavbar(roles: string[] | null, setError = vi.fn()) {
   const auth: AuthContextValue = {
     user: roles
       ? ({ matrikelnummer: 1, email: "x@osvs.invalid", roles } as AuthContextValue["user"])
@@ -19,7 +19,7 @@ function renderNavbar(roles: string[] | null) {
     clearUser: vi.fn(),
   };
   render(
-    <ErrorContext.Provider value={{ error: null, setError: vi.fn(), clearError: vi.fn() }}>
+    <ErrorContext.Provider value={{ error: null, setError, clearError: vi.fn() }}>
       <AuthContext.Provider value={auth}>
         <MemoryRouter>
           <Navbar />
@@ -113,6 +113,21 @@ describe("Navbar logout", () => {
     const dialog = await screen.findByRole("alertdialog", { name: "Logga ut?" });
     await user.click(within(dialog).getByRole("button", { name: "Logga ut" }));
     expect(auth.logout).toHaveBeenCalledTimes(1);
+  });
+
+  it("tells the member when the server could not confirm the logout", async () => {
+    const user = userEvent.setup();
+    const setError = vi.fn();
+    const auth = renderNavbar(["Member"], setError);
+    vi.mocked(auth.logout).mockRejectedValueOnce({ status: 0, message: "Kunde inte nå servern." });
+    await user.click(screen.getByRole("button", { name: "Logga ut" }));
+    const dialog = await screen.findByRole("alertdialog", { name: "Logga ut?" });
+    await user.click(within(dialog).getByRole("button", { name: "Logga ut" }));
+
+    expect(setError).toHaveBeenCalledWith(
+      expect.stringContaining("Servern kunde inte bekräfta utloggningen"),
+    );
+    expect(screen.queryByRole("alertdialog")).not.toBeInTheDocument();
   });
 
   it("Escape closes only the dialog, not the mobile menu", async () => {

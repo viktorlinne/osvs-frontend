@@ -264,7 +264,7 @@ const routes = [
       },
       {
         path: "lodges/:id/edit",
-        element: renderProtectedPage(LodgeDetail, ["Admin", "Editor"]),
+        element: renderProtectedPage(LodgeDetail, ["Admin"]),
       },
       {
         path: "events",

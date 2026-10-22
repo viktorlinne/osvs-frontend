@@ -56,14 +56,22 @@ Core characteristics:
 - hosts the shared Axios instance
 - uses `withCredentials`
 - uses `/api` in dev and `VITE_BACKEND_URL` in production
+  (`src/services/apiBaseUrl.ts`; empty/unset means same origin)
+- `fetchData` normalises every failure to an `ApiError`: no response
+  (offline/timeout) becomes status 0 with a Swedish message, and proxy HTML
+  error pages (nginx 502/504) are never shown verbatim
+- multipart uploads get a 120 s timeout instead of the default 10 s
 - reports unauthorized responses through the shared auth flow
 - on a 401 while a session is active, renews once via `/auth/refresh` and
   retries the request; `renewSession()` keeps at most one renewal
   (refresh or heartbeat) in flight per tab, and a Web Lock serialises tabs,
-  because the backend rotates the refresh token and treats concurrent reuse
-  as theft
+  because the backend rotates the refresh token and only one of two
+  parallel renewals with the same token wins (the loser gets a 401)
 - only a 401 from the renewal logs the user out; a 429 (rate limited) keeps
   the auth state and surfaces a Swedish "try again later" message
+- logout: `/auth/logout` revokes via the refresh cookie and works with an
+  expired access token; a 401 there still renews once and retries; local
+  state is always cleared and a failed server logout is reported
 
 ### Session lifecycle
 
@@ -100,8 +108,4 @@ Local commands:
 - `npm run build`
 - `npm run preview`
 
-CI workflow:
-
-- `.github/workflows/ci.yml`
-
-There is still no automated frontend test suite.
+Tests: `npm test` (Vitest + Testing Library, jsdom).

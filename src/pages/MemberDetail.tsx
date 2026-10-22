@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
-import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
+import { Link, useLocation, useNavigate, useParams } from "react-router";
 import { useForm } from "react-hook-form";
 import { Button, NotFoundPanel, PageContainer } from "../components";
 import { MemberDetailSkeleton } from "../components/MemberDetailSkeleton";
@@ -309,8 +309,10 @@ export const MemberDetail = () => {
     rolesChanged;
 
   const handleMemberSave = handleSubmit(async (values) => {
-    // Inner steps report their own errors; only toast when all succeeded.
-    let partialFailure = false;
+    // Failed inner steps are collected and shown after the final reload:
+    // useFetch.run() clears the global banner, so reporting them immediately
+    // let a later step wipe the message and a failed change looked saved.
+    const failures: string[] = [];
     clearGlobalError();
     clearErrors();
     setSaving(true);
@@ -338,8 +340,7 @@ export const MemberDetail = () => {
         try {
           await runAction(() => setRoles(userId, selectedRoleIds));
         } catch {
-          partialFailure = true;
-          setGlobalError("Kunde inte uppdatera rollerna.");
+          failures.push("Kunde inte uppdatera rollerna.");
         }
       }
 
@@ -348,8 +349,7 @@ export const MemberDetail = () => {
           await runAction(() => setMemberAllergies(userId, selectedAllergyIds));
         }
       } catch {
-        partialFailure = true;
-        setGlobalError("Kunde inte uppdatera allergierna.");
+        failures.push("Kunde inte uppdatera allergierna.");
       }
 
       if (lodgeChanged) {
@@ -362,14 +362,14 @@ export const MemberDetail = () => {
           );
           setInitialLid(selectedLid);
         } catch {
-          partialFailure = true;
-          setGlobalError("Kunde inte uppdatera logen.");
+          failures.push("Kunde inte uppdatera logen.");
         }
       }
       setSelectedAllergyIds(null);
 
-      await run(loadMember);
-      if (!partialFailure) toast.success("Ändringarna har sparats.");
+      await run(loadMember).catch(() => undefined);
+      if (failures.length > 0) setGlobalError(failures.join(" "));
+      else toast.success("Ändringarna har sparats.");
       navigate(`/members/${matrikelnummer}`, { replace: true });
     } catch (error: unknown) {
       if (applyApiFieldErrors(error, setFieldError)) {

@@ -245,6 +245,13 @@ export const GdprPage = () => {
               enligt lag. Uppgifter kan delas mellan logerna inom samfundet i
               samband med gradsarbete och ordensmöten.
             </p>
+            <p>
+              För medlemskartan skickas medlemmens adress (gatuadress,
+              postnummer och ort) till OpenStreetMaps söktjänst Nominatim
+              (OpenStreetMap Foundation), som räknar ut kartpositionen. Inga
+              namn eller andra uppgifter skickas med, och positionen sparas i
+              föreningens egen databas.
+            </p>
           </section>
 
         </div>

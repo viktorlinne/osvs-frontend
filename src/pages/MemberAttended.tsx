@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link, useParams } from "react-router";
 import { AttendedEventsView, PageContainer } from "../components";
 import useFetch from "../hooks/useFetch";
 import { getUserAttendedEvents } from "../services/users";

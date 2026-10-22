@@ -36,8 +36,8 @@ and architecture map.
 
 ## Build and Verification
 
-See README.md for build commands and CI configuration.
-There is still no automated frontend test suite, so manual verification remains
+See README.md for build commands.
+Vitest tests run with `npm test`; manual verification is still
 required for UI changes.
 
 ## Output Format

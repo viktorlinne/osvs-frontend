@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router";
 import { Button, PageContainer, AsyncState, inputClass, selectClass } from "../components";
 import { SkeletonCircle, SkeletonLabel, SkeletonText } from "../components/PageSkeleton";
 import { useAuth } from "../context";

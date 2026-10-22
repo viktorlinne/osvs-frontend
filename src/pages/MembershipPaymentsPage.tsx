@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Button, AsyncState, PageContainer, inputClass, selectClass } from "../components";
 import { SkeletonLabel, SkeletonText } from "../components/PageSkeleton";
 import useFetch from "../hooks/useFetch";
@@ -73,7 +73,17 @@ export const MembershipPaymentsPage = () => {
     return () => clearTimeout(timer);
   }, [result]);
 
+  // Rows with a status change in flight. The ref guards against a second
+  // toggle before re-render; the state disables the checkbox. Without it a
+  // double click sent PATCH Paid and PATCH Pending concurrently and the
+  // final server state depended on arrival order.
+  const pendingIdsRef = useRef(new Set<number>());
+  const [pendingIds, setPendingIds] = useState<ReadonlySet<number>>(() => new Set());
+
   async function handleStatusToggle(id: number, currentStatus: "Pending" | "Paid") {
+    if (pendingIdsRef.current.has(id)) return;
+    pendingIdsRef.current.add(id);
+    setPendingIds(new Set(pendingIdsRef.current));
     const nextStatus = currentStatus === "Paid" ? "Pending" : "Paid";
     setToggleError(null);
     setLocalPayments((prev) =>
@@ -86,6 +96,9 @@ export const MembershipPaymentsPage = () => {
         prev.map((p) => (p.id === id ? { ...p, status: currentStatus } : p)),
       );
       setToggleError("Kunde inte uppdatera statusen. Försök igen.");
+    } finally {
+      pendingIdsRef.current.delete(id);
+      setPendingIds(new Set(pendingIdsRef.current));
     }
   }
 
@@ -276,6 +289,7 @@ export const MembershipPaymentsPage = () => {
                   <PaymentRow
                     key={payment.id}
                     payment={payment}
+                    pending={pendingIds.has(payment.id)}
                     onToggle={handleStatusToggle}
                   />
                 ))}
@@ -315,9 +329,11 @@ export const MembershipPaymentsPage = () => {
 
 function PaymentRow({
   payment,
+  pending,
   onToggle,
 }: {
   payment: MembershipPaymentWithUser;
+  pending: boolean;
   onToggle: (id: number, current: "Pending" | "Paid") => void;
 }) {
   const isPaid = payment.status === "Paid";
@@ -327,9 +343,11 @@ function PaymentRow({
         <input
           type="checkbox"
           checked={isPaid}
+          disabled={pending}
+          aria-busy={pending || undefined}
           onChange={() => onToggle(payment.id, payment.status)}
           aria-label={`${payment.firstname} ${payment.lastname}, ${payment.year}: ${isPaid ? "Betald" : "Väntande"}`}
-          className="h-4 w-4 cursor-pointer rounded border-neutral-300 text-primary-600 focus-visible:ring-primary-600"
+          className="h-4 w-4 cursor-pointer rounded border-neutral-300 text-primary-600 focus-visible:ring-primary-600 disabled:cursor-wait disabled:opacity-60"
         />
       </td>
       <td className="px-4 py-3 font-medium text-neutral-900">

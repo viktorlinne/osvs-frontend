@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link } from "react-router";
 import { useForm } from "react-hook-form";
 import { Button, PageContainer, errorTextClass, inputClass } from "../components";
 import useError from "../context/useError";

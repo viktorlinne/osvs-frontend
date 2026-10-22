@@ -10,10 +10,9 @@ import {
   setAuthenticatedSession,
 } from "./globalAuth";
 import type { ApiError } from "../types";
+import { API_BASE_URL } from "./apiBaseUrl";
 
-const BASE_URL = import.meta.env.DEV
-  ? "/api"
-  : `${import.meta.env.VITE_BACKEND_URL}/api`;
+const BASE_URL = API_BASE_URL;
 
 // Simple axios instance. `withCredentials` is required because the
 // backend stores access/refresh tokens in HTTP-only cookies.
@@ -22,6 +21,56 @@ export const api = axios.create({
   withCredentials: true,
   timeout: 10000,
 });
+
+/**
+ * Multipart uploads (profile pictures, posts, PDFs up to 5 MB) need far more
+ * than the default 10 s on a slow uplink. A client-side timeout does not stop
+ * the server from finishing the request, so a too-short timeout reports a
+ * failure for an upload that actually succeeded (and invites a duplicate).
+ */
+export const UPLOAD_TIMEOUT_MS = 120_000;
+
+api.interceptors.request.use((config) => {
+  if (
+    typeof FormData !== "undefined" &&
+    config.data instanceof FormData &&
+    (config.timeout ?? 0) < UPLOAD_TIMEOUT_MS
+  ) {
+    config.timeout = UPLOAD_TIMEOUT_MS;
+  }
+  return config;
+});
+
+export const NETWORK_ERROR_MESSAGE =
+  "Kunde inte nå servern. Kontrollera anslutningen och försök igen.";
+export const TIMEOUT_ERROR_MESSAGE =
+  "Servern svarade inte i tid. Kontrollera om ändringen sparades innan du försöker igen.";
+const UNAVAILABLE_MESSAGE =
+  "Tjänsten är tillfälligt otillgänglig. Försök igen om en stund.";
+
+const STATUS_MESSAGES: Record<number, string> = {
+  400: "Felaktig förfrågan",
+  401: "Vänligen logga in",
+  403: "Åtkomst nekad",
+  404: "Hittades inte",
+  413: "Filen är för stor.",
+  429: "För många förfrågningar. Försök igen senare.",
+  500: "Serverfel. Försök igen senare.",
+  502: UNAVAILABLE_MESSAGE,
+  503: UNAVAILABLE_MESSAGE,
+  504: UNAVAILABLE_MESSAGE,
+};
+
+/**
+ * A plain-text body is only shown when it looks like a short message. Proxy
+ * error pages (nginx 502/504 HTML while the backend restarts) must never end
+ * up verbatim in the error banner.
+ */
+function plainTextServerMessage(raw: string): string | undefined {
+  const text = raw.trim();
+  if (!text || text.length > 300 || /^</.test(text)) return undefined;
+  return text;
+}
 
 type ApiRequestConfig = AxiosRequestConfig & {
   _unauthorizedNotified?: boolean;
@@ -46,8 +95,8 @@ function errorStatus(error: unknown): number | undefined {
  * Renews the session (POST /auth/refresh or /auth/heartbeat) with at most one
  * renewal in flight: concurrent callers in this tab share the same promise,
  * and other tabs wait on a Web Lock where supported. The backend rotates the
- * refresh token on every renewal and treats concurrent reuse of one token as
- * theft (revoking all sessions), so renewals must never run in parallel.
+ * refresh token on every renewal; of two parallel renewals with one token only
+ * the first wins and the other gets a 401, so renewals must not run in parallel.
  *
  * Rejects with an ApiError. A 401 means the session is gone; a 429 is mapped
  * to a Swedish "try again later" message and does NOT mean logged out.
@@ -218,27 +267,21 @@ export async function fetchData<T = unknown>(
         else if (typeof rec.message === "string") serverMsg = rec.message;
         if (typeof rec.code === "string") code = rec.code;
       } else if (typeof raw === "string") {
-        serverMsg = raw;
+        serverMsg = plainTextServerMessage(raw);
       }
 
-      const STATUS_MESSAGES: Record<number, string> = {
-        400: "Felaktig förfrågan",
-        401: "Vänligen logga in",
-        403: "Åtkomst nekad",
-        404: "Hittades inte",
-        429: "För många förfrågningar. Försök igen senare.",
-        500: "Serverfel. Försök igen senare.",
-      };
-
       const message =
-        (serverMsg as string) ??
+        serverMsg ??
         STATUS_MESSAGES[status] ??
         `Begäran misslyckades (status ${status})`;
       const apiErr: ApiError = {
         status,
         code,
         message,
-        details: (raw as Record<string, unknown>)?.details,
+        details:
+          typeof raw === "object" && raw !== null
+            ? (raw as Record<string, unknown>).details
+            : undefined,
       };
 
       if (status === 401) {
@@ -255,6 +298,19 @@ export async function fetchData<T = unknown>(
         }
       }
 
+      throw apiErr;
+    }
+    // No response: offline, DNS/TLS failure, or our own timeout. Normalise to
+    // an ApiError with a Swedish message instead of axios' English text
+    // ("Network Error", "timeout of 10000ms exceeded"). Cancellations are
+    // passed through untouched so callers can ignore them.
+    if (axios.isAxiosError(e) && !axios.isCancel(e)) {
+      const timedOut = e.code === "ECONNABORTED" || e.code === "ETIMEDOUT";
+      const apiErr: ApiError = {
+        status: 0,
+        code: timedOut ? "TIMEOUT" : "NETWORK_ERROR",
+        message: timedOut ? TIMEOUT_ERROR_MESSAGE : NETWORK_ERROR_MESSAGE,
+      };
       throw apiErr;
     }
     throw e;

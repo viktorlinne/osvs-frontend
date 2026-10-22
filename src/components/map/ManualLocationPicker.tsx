@@ -7,6 +7,7 @@ import {
   useMap,
   useMapEvents,
 } from "react-leaflet";
+import "leaflet/dist/leaflet.css";
 
 export type ManualLocationValue = { lat: number; lng: number } | null;
 

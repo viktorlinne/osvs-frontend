@@ -24,11 +24,19 @@ function isUnauthorizedError(error: unknown) {
   );
 }
 
-/** Message for a failed session check that is not a real logout (429, network). */
+/**
+ * Message for a failed session check that is not a real logout: rate limited
+ * (429), server unreachable/timed out (status 0, see fetchData) or a server
+ * error (5xx, e.g. the backend restarting during a deploy). Without it the
+ * member is sent to the login page with no hint why.
+ */
 function sessionCheckErrorMessage(error: unknown): string | null {
   if (!error || typeof error !== "object") return null;
   const { status, message } = error as { status?: unknown; message?: unknown };
-  if (status === 429 && typeof message === "string" && message) return message;
+  if (typeof status !== "number" || typeof message !== "string" || !message) {
+    return null;
+  }
+  if (status === 429 || status === 0 || status >= 500) return message;
   return null;
 }
 
@@ -94,13 +102,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return authState.user;
   }, []);
 
+  // Local state is always cleared. A failure is rethrown so the caller can
+  // tell the member that the server did not confirm the logout (the session
+  // cookies may still be valid on this device).
   const logout = useCallback(async () => {
     try {
       await authService.logout();
-    } catch {
-      // ignore
+    } finally {
+      clearUser();
     }
-    clearUser();
   }, [clearUser]);
 
   const refresh = useCallback(async () => {

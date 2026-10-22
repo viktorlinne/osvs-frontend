@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { Link, useSearchParams } from "react-router-dom";
+import { Link, useSearchParams } from "react-router";
 import {
   Button,
   PageContainer,
@@ -102,7 +102,11 @@ export const NewsPage = () => {
   );
   const [debouncedTitleQuery, setDebouncedTitleQuery] = useState(titleQuery);
   const [page, setPage] = useState(
-    () => Math.max(1, Number(searchParams.get("sida") ?? 1)),
+    () => {
+      // ?sida=abc must not render "Sida NaN".
+      const requested = Math.trunc(Number(searchParams.get("sida") ?? 1));
+      return Number.isFinite(requested) ? Math.max(1, requested) : 1;
+    },
   );
   const { user } = useAuth();
   const canCreate = (user?.roles ?? []).some((r) => ["Admin", "Editor"].includes(r));

@@ -75,10 +75,9 @@ Run simultaneously:
 
 ```bash
 npm run lint &
-npm run build
+npm run build &
+npm test
 ```
-
-CI exists, but there is still no automated frontend test suite.
 
 Always provide a manual checklist covering:
 
