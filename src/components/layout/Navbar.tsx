@@ -132,7 +132,10 @@ function NavbarLinks({
                 <NavItem to="/admin/groups">Grupper</NavItem>
               ) : null}
               {(user.roles ?? []).includes("Admin") ? (
-                <NavItem to="/admin/membership-payments">Avgifter</NavItem>
+                <NavItem to="/admin/membership-payments">Medlemsavgifter</NavItem>
+              ) : null}
+              {canManageGroups(user) ? (
+                <NavItem to="/admin/event-payments">Mötesavgifter</NavItem>
               ) : null}
             </NavDropdown>
           </div>
@@ -321,7 +324,12 @@ export const Navbar: React.FC = () => {
                 ) : null}
                 {(user.roles ?? []).includes("Admin") ? (
                   <NavItem to="/admin/membership-payments" onClick={closeMenu}>
-                    Avgifter
+                    Medlemsavgifter
+                  </NavItem>
+                ) : null}
+                {canManageGroups(user) ? (
+                  <NavItem to="/admin/event-payments" onClick={closeMenu}>
+                    Mötesavgifter
                   </NavItem>
                 ) : null}
                 <div className="my-2 border-t border-neutral-200" />

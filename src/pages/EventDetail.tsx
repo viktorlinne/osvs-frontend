@@ -3,6 +3,7 @@ import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
 import { EventDetailEditForm, EventDetailView } from "../components/events";
 import type { EventFormState } from "../components/events/EventDetailEditForm";
 import { NotFoundPanel, PageContainer, useConfirm } from "../components";
+import { useEventPaymentAction } from "../components/payments/useEventPaymentAction";
 import { useAuth, useError } from "../context";
 import useFetch from "../hooks/useFetch";
 import useEventAudience from "../hooks/useEventAudience";
@@ -43,7 +44,7 @@ import type {
 import { normalizeNumericIds } from "../utils/normalizeNumericIds";
 import { SkeletonBlock } from "../components/PageSkeleton";
 
-type AttendanceField = "rsvp" | "bookFood" | "attended" | "paymentPaid";
+type AttendanceField = "rsvp" | "bookFood" | "attended";
 
 function normalizeSelection(values?: number[] | null): string[] {
   return Array.from(
@@ -126,6 +127,27 @@ export const EventDetail = () => {
   const [attendanceSavingUid, setAttendanceSavingUid] = useState<number | null>(
     null,
   );
+  const { requestPaymentChange, paymentDialog } = useEventPaymentAction({
+    onSaved: async (target, row) => {
+      if (row) {
+        setAttendancesData((prev) =>
+          Array.isArray(prev)
+            ? prev.map((item) => (item.uid === target.uid ? row : item))
+            : prev,
+        );
+        return;
+      }
+      await runAttendances(() => listEventAttendances(target.eventId)).catch(() => {
+        // useFetch handles global error presentation
+      });
+    },
+    onFailed: async (target) => {
+      // e.g. 409: someone else changed it; show the current state.
+      await runAttendances(() => listEventAttendances(target.eventId)).catch(() => {
+        // useFetch handles global error presentation
+      });
+    },
+  });
   const clientErrors = getEventFormErrors(form);
   const formErrors = { ...serverErrors, ...clientErrors };
   const canSave = Object.keys(clientErrors).length === 0;
@@ -361,6 +383,21 @@ export const EventDetail = () => {
     }
   }
 
+  function handlePaymentAction(row: EventAttendanceRow) {
+    if (!event || !canEdit) return;
+    const eventId = Number(event.id);
+    if (!Number.isFinite(eventId)) return;
+    requestPaymentChange({
+      eventId,
+      uid: row.uid,
+      memberName: `${row.firstname} ${row.lastname}`.trim(),
+      eventTitle: event.title,
+      amount: row.paymentAmount ?? Number(event.price),
+      paid: row.paymentStatus === "Paid",
+      method: row.paymentMethod ?? null,
+    });
+  }
+
   async function handleAttendanceToggle(
     uid: number,
     field: AttendanceField,
@@ -378,9 +415,6 @@ export const EventDetail = () => {
         if (row.uid !== uid) return row;
         const next = { ...row, [field]: value } as EventAttendanceRow;
         if (field === "rsvp" && !value) next.bookFood = false;
-        if (field === "paymentPaid") {
-          next.paymentStatus = value ? "Paid" : "Pending";
-        }
         return next;
       });
     });
@@ -496,6 +530,7 @@ export const EventDetail = () => {
               attendances={attendances}
               attendanceSavingUid={attendanceSavingUid}
               onAttendanceToggle={handleAttendanceToggle}
+              onPaymentAction={handlePaymentAction}
               hasStarted={hasStarted}
             />
           )}
@@ -509,6 +544,7 @@ export const EventDetail = () => {
         />
       ) : null}
       {confirmDialog}
+      {paymentDialog}
     </PageContainer>
   );
 };

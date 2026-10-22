@@ -12,7 +12,7 @@ import type {
 import { AdminAttendances } from "./AdminAttendances";
 import { EventRegistrationFlow } from "./EventRegistrationFlow";
 
-type AttendanceField = "rsvp" | "bookFood" | "attended" | "paymentPaid";
+type AttendanceField = "rsvp" | "bookFood" | "attended";
 
 type Props = {
   event: EventRecord;
@@ -41,6 +41,8 @@ type Props = {
     field: AttendanceField,
     value: boolean,
   ) => void | Promise<void>;
+  /** Admin/Editor: open the mark-paid / undo dialog for an invitee. */
+  onPaymentAction?: (row: EventAttendanceRow) => void;
   hasStarted: boolean;
 };
 
@@ -65,9 +67,15 @@ export function EventDetailView({
   attendances,
   attendanceSavingUid,
   onAttendanceToggle,
+  onPaymentAction,
   hasStarted,
 }: Props) {
   const canEditRsvpAndBookFood = !hasStarted;
+  // Free events have nothing to pay; keep the column if a payment exists anyway.
+  const showPayment =
+    canViewPayments &&
+    (Number(event.price) > 0 ||
+      (attendances ?? []).some((row) => row.paymentStatus === "Paid"));
   const canEditAttended = hasStarted;
 
   return (
@@ -172,11 +180,12 @@ export function EventDetailView({
           rows={attendances}
           loading={attendancesLoading}
           isAdmin={isAdmin}
-          showPayment={canViewPayments}
+          showPayment={showPayment}
           savingUid={attendanceSavingUid}
           canEditRsvpAndBookFood={canEditRsvpAndBookFood}
           canEditAttended={canEditAttended}
           onToggle={onAttendanceToggle}
+          onPaymentAction={canViewPayments ? onPaymentAction : undefined}
         />
       </div>
     </div>

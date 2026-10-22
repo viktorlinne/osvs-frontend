@@ -1,6 +1,7 @@
 ﻿import type { EventAttendanceRow } from "../../types";
+import { PaymentStatusCell } from "../payments/PaymentStatusCell";
 
-type AttendanceField = "rsvp" | "bookFood" | "attended" | "paymentPaid";
+type AttendanceField = "rsvp" | "bookFood" | "attended";
 
 type Props = {
   rows: EventAttendanceRow[] | null | undefined;
@@ -17,6 +18,8 @@ type Props = {
     field: AttendanceField,
     value: boolean,
   ) => void | Promise<void>;
+  /** Admin/Editor: open the mark-paid / undo dialog for a row. */
+  onPaymentAction?: (row: EventAttendanceRow) => void;
 };
 
 export function AdminAttendances({
@@ -28,6 +31,7 @@ export function AdminAttendances({
   canEditRsvpAndBookFood = true,
   canEditAttended = true,
   onToggle,
+  onPaymentAction,
 }: Props) {
   const canEdit = isAdmin && typeof onToggle === "function";
 
@@ -44,7 +48,7 @@ export function AdminAttendances({
           </div>
         ) : Array.isArray(rows) && rows.length > 0 ? (
           <div
-            className="max-h-80 overflow-y-auto overflow-x-hidden focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-600"
+            className="max-h-80 overflow-y-auto overflow-x-auto focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-600"
             // Scrollable region: focusable so keyboard users can scroll it even
             // when every checkbox is disabled (members' read-only view).
             // eslint-disable-next-line jsx-a11y/no-noninteractive-tabindex
@@ -131,20 +135,11 @@ export function AdminAttendances({
                         />
                       </td>
                       {showPayment && (
-                        <td className="py-2 pr-3">
-                          <input
-                            type="checkbox"
-                            checked={row.paymentPaid ?? false}
-                            aria-label={`Betalning – ${row.firstname} ${row.lastname}`}
-                            disabled={disableBase}
-                            className="h-4 w-4 rounded border-neutral-300 text-primary-600 focus-visible:ring-primary-600"
-                            onChange={(event) =>
-                              onToggle?.(
-                                row.uid,
-                                "paymentPaid",
-                                event.target.checked,
-                              )
-                            }
+                        <td className="py-2 pr-3 align-top">
+                          <PaymentStatusCell
+                            row={row}
+                            onAction={onPaymentAction}
+                            disabled={rowSaving}
                           />
                         </td>
                       )}

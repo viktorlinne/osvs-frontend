@@ -43,7 +43,28 @@ describe("Navbar mobile menu", () => {
     expect(toggle).toHaveAccessibleName("Stäng meny");
     const menu = document.getElementById("mobile-menu")!;
     expect(within(menu).getByRole("link", { name: "Grupper" })).toBeInTheDocument();
-    expect(within(menu).getByRole("link", { name: "Avgifter" })).toBeInTheDocument();
+    expect(within(menu).getByRole("link", { name: "Medlemsavgifter" })).toBeInTheDocument();
+    expect(within(menu).getByRole("link", { name: "Mötesavgifter" })).toHaveAttribute(
+      "href",
+      "/admin/event-payments",
+    );
+  });
+
+  it("shows Mötesavgifter but not Medlemsavgifter to an Editor", async () => {
+    const user = userEvent.setup();
+    renderNavbar(["Editor"]);
+    await user.click(screen.getByRole("button", { name: "Öppna meny" }));
+    const menu = document.getElementById("mobile-menu")!;
+    expect(within(menu).getByRole("link", { name: "Mötesavgifter" })).toBeInTheDocument();
+    expect(within(menu).queryByRole("link", { name: "Medlemsavgifter" })).toBeNull();
+  });
+
+  it("hides the payment pages from members", async () => {
+    const user = userEvent.setup();
+    renderNavbar(["Member"]);
+    await user.click(screen.getByRole("button", { name: "Öppna meny" }));
+    const menu = document.getElementById("mobile-menu")!;
+    expect(within(menu).queryByRole("link", { name: /avgifter/i })).toBeNull();
   });
 
   it("closes on Escape from inside the menu and returns focus to the toggle", async () => {

@@ -74,12 +74,36 @@ describe("EventDetailView payment visibility", () => {
     expect(screen.queryByRole("columnheader", { name: "Betalning" })).not.toBeInTheDocument();
   });
 
-  it("shows the Betalning column for Admin/Editor", () => {
+  const pricedEvent = {
+    id: 1,
+    title: "Höstmöte",
+    description: "",
+    startDate: "2026-11-01T18:00:00",
+    endDate: "2026-11-01T21:00:00",
+    price: 350,
+    lodgeIds: [],
+    groupIds: [7],
+  } as ViewProps["event"];
+
+  it("shows the Betalning column with status and action for Admin/Editor", () => {
+    const onPaymentAction = vi.fn();
+    renderView(true, {
+      event: pricedEvent,
+      canViewPayments: true,
+      onPaymentAction,
+      attendances: [{ ...attendances[0], paymentStatus: "Pending", paymentPaid: false }],
+    });
+    expect(screen.getByRole("columnheader", { name: "Betalning" })).toBeInTheDocument();
+    expect(screen.getByText("Ej betald")).toBeInTheDocument();
+    screen.getByRole("button", { name: "Markera betald – Per Ås" }).click();
+    expect(onPaymentAction).toHaveBeenCalledWith(expect.objectContaining({ uid: 3 }));
+  });
+
+  it("hides the Betalning column for a free event without payments", () => {
     renderView(true, {
       canViewPayments: true,
       attendances: [{ ...attendances[0], paymentStatus: "Pending", paymentPaid: false }],
     });
-    expect(screen.getByRole("columnheader", { name: "Betalning" })).toBeInTheDocument();
-    expect(screen.getByRole("checkbox", { name: "Betalning – Per Ås" })).not.toBeChecked();
+    expect(screen.queryByRole("columnheader", { name: "Betalning" })).not.toBeInTheDocument();
   });
 });
