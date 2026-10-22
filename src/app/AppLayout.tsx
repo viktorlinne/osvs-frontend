@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react";
-import { Outlet, useLocation, useNavigate } from "react-router";
+import { Outlet, ScrollRestoration, useLocation, useNavigate } from "react-router";
 import { useAuth, useError } from "../context";
 import { Navbar, Footer } from "../components";
 import { Toaster } from "@/components/shadcn/sonner";
@@ -57,6 +57,10 @@ export function AppLayout() {
       </main>
       <Footer />
       <Toaster />
+      {/* New pages start at the top; Back restores the previous position.
+          Keyed by pathname so filter/page changes in the query string keep
+          the scroll position. */}
+      <ScrollRestoration getKey={(loc) => loc.pathname} />
     </div>
   );
 }
