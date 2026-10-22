@@ -281,7 +281,7 @@ export const GroupDetail = () => {
             ) : (
               <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                 <div className="min-w-0">
-                  <h1 id="group-heading" className="ui-page-title break-words">
+                  <h1 id="group-heading" className="ui-page-title wrap-break-word">
                     {group.name}
                   </h1>
                   {group.description ? (
@@ -333,7 +333,7 @@ export const GroupDetail = () => {
               id="members-heading"
               ref={membersHeadingRef}
               tabIndex={-1}
-              className="mb-3 text-lg font-semibold text-neutral-900 focus:outline-none"
+              className="mb-3 text-lg font-semibold text-neutral-900 focus:outline-hidden"
             >
               Medlemmar
             </h2>

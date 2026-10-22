@@ -3,7 +3,7 @@ import { cn } from "@/lib/utils";
 
 /** Decorative shimmer placeholder (hidden from assistive tech). */
 export const SkeletonBlock = ({ className = "" }: { className?: string }) => (
-  <div className={cn("rounded skeleton-shimmer", className)} aria-hidden="true" />
+  <div className={cn("rounded-sm skeleton-shimmer", className)} aria-hidden="true" />
 );
 
 export const SkeletonCircle = ({ className = "" }: { className?: string }) => (
@@ -11,7 +11,7 @@ export const SkeletonCircle = ({ className = "" }: { className?: string }) => (
 );
 
 export const SkeletonText = ({ width = "w-32" }: { width?: string }) => (
-  <SkeletonBlock className={`h-[0.875rem] ${width}`} />
+  <SkeletonBlock className={`h-3.5 ${width}`} />
 );
 
 export const SkeletonLabel = ({ width = "w-20" }: { width?: string }) => (

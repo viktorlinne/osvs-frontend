@@ -18,7 +18,7 @@ export function NavItem({
       onClick={onClick}
       className={({ isActive }) =>
         inDropdown
-          ? `flex min-h-11 w-full items-center px-4 py-1.5 text-xs font-semibold uppercase tracking-widest whitespace-nowrap transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-600 focus-visible:ring-offset-2 ${
+          ? `flex min-h-11 w-full items-center px-4 py-1.5 text-xs font-semibold uppercase tracking-widest whitespace-nowrap transition-colors duration-150 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-primary-600 focus-visible:ring-offset-2 ${
               isActive
                 ? "bg-primary-50 text-primary-800"
                 : "text-neutral-600 hover:bg-neutral-100 hover:text-neutral-900"

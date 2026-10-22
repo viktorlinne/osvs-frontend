@@ -85,7 +85,7 @@ export function EventDetailView({
       <h1 className="ui-page-title">{event.title}</h1>
 
       {event.lodgeMeeting && (
-        <span className="mt-2 inline-flex items-center rounded px-2 py-0.5 text-xs font-semibold uppercase tracking-widest bg-primary-100 text-primary-800">
+        <span className="mt-2 inline-flex items-center rounded-sm px-2 py-0.5 text-xs font-semibold uppercase tracking-widest bg-primary-100 text-primary-800">
           Logemöte
         </span>
       )}

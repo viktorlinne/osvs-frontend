@@ -198,7 +198,7 @@ export const EventsPage = () => {
           <div className="divide-y divide-neutral-200" aria-busy="true" aria-label="Laddar möten">
             {Array.from({ length: 3 }, (_, i) => (
               <div key={i} className="flex items-start gap-3 p-3">
-                <SkeletonBlock className="h-[3.25rem] w-14" />
+                <SkeletonBlock className="h-13 w-14" />
                 <div className="flex-1 pt-1">
                   <SkeletonBlock className="h-7" />
                 </div>
@@ -223,7 +223,7 @@ export const EventsPage = () => {
                 className="flex items-start gap-3 border-b border-neutral-200 p-3 last:border-b-0"
               >
                 <div
-                  className={`w-14 shrink-0 rounded py-2 text-center ${isToday ? "bg-primary-600 text-white" : "bg-neutral-100 text-neutral-700"}`}
+                  className={`w-14 shrink-0 rounded-sm py-2 text-center ${isToday ? "bg-primary-600 text-white" : "bg-neutral-100 text-neutral-700"}`}
                 >
                   <div className="text-xs font-semibold uppercase tracking-widest opacity-70">
                     {weekday}
@@ -237,7 +237,7 @@ export const EventsPage = () => {
                       <Link
                         key={e.id}
                         to={`/events/${e.id}`}
-                        className="block truncate rounded bg-primary-50 px-2 py-1 text-sm text-primary-800 transition-colors duration-150 hover:bg-primary-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-600 focus-visible:ring-offset-1"
+                        className="block truncate rounded-sm bg-primary-50 px-2 py-1 text-sm text-primary-800 transition-colors duration-150 hover:bg-primary-100 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-primary-600 focus-visible:ring-offset-1"
                         aria-label={`${time ? `${time} – ` : ""}${e.title}`}
                         title={e.title}
                       >
@@ -319,7 +319,7 @@ export const EventsPage = () => {
                                 <Link
                                   key={e.id}
                                   to={`/events/${e.id}`}
-                                  className="block w-full overflow-hidden truncate rounded bg-primary-50 px-1 py-0.5 text-xs text-primary-800 transition-colors duration-150 hover:bg-primary-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-600 focus-visible:ring-offset-1"
+                                  className="block w-full overflow-hidden truncate rounded-sm bg-primary-50 px-1 py-0.5 text-xs text-primary-800 transition-colors duration-150 hover:bg-primary-100 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-primary-600 focus-visible:ring-offset-1"
                                   aria-label={`${time ? `${time} – ` : ""}${e.title}`}
                                   title={e.title}
                                 >

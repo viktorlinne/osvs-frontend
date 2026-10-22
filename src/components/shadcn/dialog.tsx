@@ -49,7 +49,7 @@ function DialogContent({
       <DialogOverlay>
         <DialogPrimitive.Content
           className={cn(
-            "relative w-full max-w-lg rounded-card border border-neutral-200 bg-white p-5 text-neutral-900 shadow-card focus:outline-none",
+            "relative w-full max-w-lg rounded-card border border-neutral-200 bg-white p-5 text-neutral-900 shadow-card focus:outline-hidden",
             "duration-150 data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95 data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95",
             className,
           )}
@@ -58,7 +58,7 @@ function DialogContent({
           {children}
           {showCloseButton ? (
             <DialogPrimitive.Close
-              className="absolute right-3 top-3 flex h-11 w-11 items-center justify-center rounded-md text-neutral-600 transition-colors hover:bg-neutral-100 hover:text-neutral-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-600 focus-visible:ring-offset-2"
+              className="absolute right-3 top-3 flex h-11 w-11 items-center justify-center rounded-md text-neutral-600 transition-colors hover:bg-neutral-100 hover:text-neutral-900 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-primary-600 focus-visible:ring-offset-2"
               aria-label={closeLabel}
             >
               <span aria-hidden="true">✕</span>

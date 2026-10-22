@@ -8,7 +8,7 @@ import { cn } from "@/lib/utils";
  * text, never by colour alone.
  */
 const badgeVariants = cva(
-  "inline-flex items-center rounded border px-2 py-0.5 text-xs font-semibold uppercase tracking-widest",
+  "inline-flex items-center rounded-sm border px-2 py-0.5 text-xs font-semibold uppercase tracking-widest",
   {
     variants: {
       variant: {

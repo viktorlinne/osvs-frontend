@@ -143,7 +143,7 @@ export const MembersPage = () => {
           <button
             type="button"
             onClick={() => setCreatedNotice(null)}
-            className="-my-2 -mr-2 ml-4 inline-flex h-11 w-11 shrink-0 items-center justify-center rounded text-success-700 hover:bg-success-600/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-600"
+            className="-my-2 -mr-2 ml-4 inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-sm text-success-700 hover:bg-success-600/10 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-primary-600"
             aria-label="Stäng"
           >
             ×
@@ -219,7 +219,7 @@ export const MembersPage = () => {
             type="checkbox"
             checked={accommodationOnly}
             onChange={(event) => handleAccommodationChange(event.target.checked)}
-            className="h-4 w-4 rounded border-neutral-300 text-primary-600 focus-visible:ring-primary-600"
+            className="h-4 w-4 rounded-sm border-neutral-300 text-primary-600 focus-visible:ring-primary-600"
           />
           <span>Tillgängligt boende</span>
         </label>

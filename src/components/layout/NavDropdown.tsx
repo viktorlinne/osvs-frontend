@@ -87,7 +87,7 @@ export function NavDropdown({
       <div
         id={panelId}
         hidden={!open}
-        className="absolute left-0 top-full z-50 mt-1 min-w-[10rem] rounded border border-neutral-200 bg-neutral-50 py-1 shadow-card"
+        className="absolute left-0 top-full z-50 mt-1 min-w-40 rounded-sm border border-neutral-200 bg-neutral-50 py-1 shadow-card"
       >
         <ul>
           {React.Children.map(children, (child) =>

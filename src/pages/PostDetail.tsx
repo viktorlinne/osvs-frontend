@@ -227,21 +227,21 @@ export const PostDetail = () => {
           </div>
           <div className="md:col-span-2 flex flex-col gap-3">
             <h1 className="ui-section-title">{post.title}</h1>
-            <p className="whitespace-pre-line break-words text-neutral-900">{post.description}</p>
+            <p className="whitespace-pre-line wrap-break-word text-neutral-900">{post.description}</p>
             <div className="mt-auto flex flex-wrap items-center gap-2 pt-2 border-t border-neutral-100">
               {post.publicum ? (
-                <span className="ui-chapter rounded px-2 py-0.5 bg-primary-50 text-primary-800">
+                <span className="ui-chapter rounded-sm px-2 py-0.5 bg-primary-50 text-primary-800">
                   Publicum
                 </span>
               ) : (
-                <span className="ui-chapter rounded px-2 py-0.5 bg-neutral-100 text-neutral-600">
+                <span className="ui-chapter rounded-sm px-2 py-0.5 bg-neutral-100 text-neutral-600">
                   Logeexklusivt
                 </span>
               )}
               {(post.lodges ?? []).map((lodge) => (
                 <span
                   key={lodge.id}
-                  className="ui-chapter rounded px-2 py-0.5 bg-neutral-100 text-neutral-600"
+                  className="ui-chapter rounded-sm px-2 py-0.5 bg-neutral-100 text-neutral-600"
                 >
                   {lodge.name}
                 </span>
@@ -302,7 +302,7 @@ export const PostDetail = () => {
               id="publicum"
               type="checkbox"
               {...register("publicum")}
-              className="h-4 w-4 rounded border-neutral-300 text-primary-600 focus-visible:ring-2 focus-visible:ring-primary-600 focus-visible:ring-offset-2"
+              className="h-4 w-4 rounded-sm border-neutral-300 text-primary-600 focus-visible:ring-2 focus-visible:ring-primary-600 focus-visible:ring-offset-2"
             />
             <label htmlFor="publicum" className={labelClass}>
               Publicum (synligt utanför logen)

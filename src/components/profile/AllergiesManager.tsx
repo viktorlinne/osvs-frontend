@@ -91,7 +91,7 @@ export const AllergiesManager = ({
                         type="checkbox"
                         value={allergy.id}
                         checked={effectiveSelected?.includes(allergy.id) ?? false}
-                        className="h-4 w-4 rounded border-neutral-300 text-primary-600 focus-visible:ring-primary-600"
+                        className="h-4 w-4 rounded-sm border-neutral-300 text-primary-600 focus-visible:ring-primary-600"
                         onChange={(event) =>
                           toggleAllergy(allergy.id, event.target.checked)
                         }

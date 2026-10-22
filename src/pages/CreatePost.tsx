@@ -188,7 +188,7 @@ export const CreatePost = () => {
               id="publicum"
               type="checkbox"
               {...register("publicum")}
-              className="h-4 w-4 rounded border-neutral-300 text-primary-600 focus-visible:ring-primary-600"
+              className="h-4 w-4 rounded-sm border-neutral-300 text-primary-600 focus-visible:ring-primary-600"
             />
             <label htmlFor="publicum" className={labelClass + " mb-0"}>
               Publicum

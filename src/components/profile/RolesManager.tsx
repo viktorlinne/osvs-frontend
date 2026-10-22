@@ -37,7 +37,7 @@ export const RolesManager = ({
                   type="checkbox"
                   value={r.id}
                   checked={selectedRoleIds.includes(r.id)}
-                  className="h-4 w-4 rounded border-neutral-300 text-primary-600 focus-visible:ring-primary-600"
+                  className="h-4 w-4 rounded-sm border-neutral-300 text-primary-600 focus-visible:ring-primary-600"
                   onChange={(e) => {
                     const next = e.target.checked
                       ? [...selectedRoleIds, r.id]
@@ -63,7 +63,7 @@ export const RolesManager = ({
           {viewModeRoles.map((role) => (
             <span
               key={role}
-              className="rounded border border-neutral-200 bg-neutral-50 px-2.5 py-1 text-xs font-medium text-neutral-700"
+              className="rounded-sm border border-neutral-200 bg-neutral-50 px-2.5 py-1 text-xs font-medium text-neutral-700"
             >
               {role}
             </span>

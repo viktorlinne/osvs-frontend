@@ -190,7 +190,7 @@ export function UserSelection({
             </span>
           </button>
         </PopoverTrigger>
-        <PopoverContent className="w-[var(--radix-popover-trigger-width)] min-w-[18rem] p-2">
+        <PopoverContent className="w-(--radix-popover-trigger-width) min-w-[18rem] p-2">
           <Command shouldFilter={false} label={label} loop>
             <CommandInput
               value={query}
@@ -269,7 +269,7 @@ export function UserSelection({
                   onClick={() => removeExplicit(id)}
                   disabled={disabled}
                   aria-label={`Ta bort ${display}`}
-                  className="flex h-11 w-11 items-center justify-center rounded-md text-neutral-600 hover:bg-primary-100 hover:text-neutral-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-600 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
+                  className="flex h-11 w-11 items-center justify-center rounded-md text-neutral-600 hover:bg-primary-100 hover:text-neutral-900 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-primary-600 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
                 >
                   <span aria-hidden="true">✕</span>
                 </button>

@@ -41,13 +41,13 @@ export function ErrorProvider({ children }: { children: React.ReactNode }) {
             role="alert"
             aria-live="assertive"
             aria-atomic="true"
-            className="pointer-events-auto flex items-start gap-3 rounded-md bg-red-600 p-3 text-white shadow transition"
+            className="pointer-events-auto flex items-start gap-3 rounded-md bg-red-600 p-3 text-white shadow-sm transition"
           >
             <p className="flex-1 text-sm font-medium">{error}</p>
             <button
               type="button"
               onClick={clearError}
-              className="rounded px-2 py-1 text-sm font-medium underline underline-offset-2 transition hover:bg-red-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-red-600"
+              className="rounded-sm px-2 py-1 text-sm font-medium underline underline-offset-2 transition hover:bg-red-700 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-red-600"
               aria-label="Stäng felmeddelandet"
             >
               Stäng

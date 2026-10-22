@@ -4,7 +4,7 @@ import { useAuth } from "../../context";
 export const Footer: React.FC = () => {
   const { user } = useAuth();
   const footerLinkClass =
-    "rounded px-2 py-1 text-xs font-semibold uppercase tracking-widest text-neutral-600 transition-colors hover:bg-neutral-100 hover:text-neutral-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-600 focus-visible:ring-offset-2";
+    "rounded-sm px-2 py-1 text-xs font-semibold uppercase tracking-widest text-neutral-600 transition-colors hover:bg-neutral-100 hover:text-neutral-900 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-primary-600 focus-visible:ring-offset-2";
 
   return (
     <footer className="border-t border-neutral-200 bg-white">
@@ -13,7 +13,7 @@ export const Footer: React.FC = () => {
           <div className="text-center md:text-left">
             <NavLink
               to="/"
-              className="text-xs font-semibold uppercase tracking-widest text-neutral-700 transition-colors duration-150 hover:text-neutral-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-600 focus-visible:ring-offset-2"
+              className="text-xs font-semibold uppercase tracking-widest text-neutral-700 transition-colors duration-150 hover:text-neutral-900 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-primary-600 focus-visible:ring-offset-2"
             >
               Ordenssamfundet VS
             </NavLink>
@@ -74,13 +74,13 @@ export const Footer: React.FC = () => {
           <div className="text-center md:text-right">
             <a
               href="mailto:info@osvs.se"
-              className="block text-sm transition hover:text-primary-800 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-600 focus-visible:ring-offset-2"
+              className="block text-sm transition hover:text-primary-800 hover:underline focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-primary-600 focus-visible:ring-offset-2"
             >
               info@osvs.se
             </a>
             <a
               href="https://www.osvs.se"
-              className="mt-2 block text-sm transition hover:text-primary-800 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-600 focus-visible:ring-offset-2"
+              className="mt-2 block text-sm transition hover:text-primary-800 hover:underline focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-primary-600 focus-visible:ring-offset-2"
             >
               osvs.se
             </a>

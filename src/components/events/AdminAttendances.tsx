@@ -48,7 +48,7 @@ export function AdminAttendances({
           </div>
         ) : Array.isArray(rows) && rows.length > 0 ? (
           <div
-            className="max-h-80 overflow-y-auto overflow-x-auto focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-600"
+            className="max-h-80 overflow-y-auto overflow-x-auto focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-primary-600"
             // Scrollable region: focusable so keyboard users can scroll it even
             // when every checkbox is disabled (members' read-only view).
             // eslint-disable-next-line jsx-a11y/no-noninteractive-tabindex
@@ -81,7 +81,7 @@ export function AdminAttendances({
                       key={row.uid}
                       className="border-b border-neutral-200 last:border-b-0"
                     >
-                      <td className="py-2 pr-3 break-words">
+                      <td className="py-2 pr-3 wrap-break-word">
                         {row.firstname} {row.lastname}
                       </td>
                       <td className="py-2 pr-3">
@@ -90,7 +90,7 @@ export function AdminAttendances({
                           checked={row.rsvp}
                           aria-label={`Kommer – ${row.firstname} ${row.lastname}`}
                           disabled={disableRsvp}
-                          className="h-4 w-4 rounded border-neutral-300 text-primary-600 focus-visible:ring-primary-600"
+                          className="h-4 w-4 rounded-sm border-neutral-300 text-primary-600 focus-visible:ring-primary-600"
                           onChange={(event) =>
                             onToggle?.(row.uid, "rsvp", event.target.checked)
                           }
@@ -102,7 +102,7 @@ export function AdminAttendances({
                           checked={row.bookFood}
                           aria-label={`Boka mat – ${row.firstname} ${row.lastname}`}
                           disabled={disableBookFood}
-                          className="h-4 w-4 rounded border-neutral-300 text-primary-600 focus-visible:ring-primary-600"
+                          className="h-4 w-4 rounded-sm border-neutral-300 text-primary-600 focus-visible:ring-primary-600"
                           onChange={(event) =>
                             onToggle?.(
                               row.uid,
@@ -112,7 +112,7 @@ export function AdminAttendances({
                           }
                         />
                       </td>
-                      <td className="py-2 pr-3 break-words">
+                      <td className="py-2 pr-3 wrap-break-word">
                         {Array.isArray(row.allergies) &&
                         row.allergies.length > 0
                           ? row.allergies.join(", ")
@@ -124,7 +124,7 @@ export function AdminAttendances({
                           checked={row.attended}
                           aria-label={`Deltagande – ${row.firstname} ${row.lastname}`}
                           disabled={disableBase || !canEditAttended}
-                          className="h-4 w-4 rounded border-neutral-300 text-primary-600 focus-visible:ring-primary-600"
+                          className="h-4 w-4 rounded-sm border-neutral-300 text-primary-600 focus-visible:ring-primary-600"
                           onChange={(event) =>
                             onToggle?.(
                               row.uid,

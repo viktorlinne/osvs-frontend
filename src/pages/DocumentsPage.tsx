@@ -96,7 +96,7 @@ export const DocumentsPage = () => {
                   target="_blank"
                   rel="noreferrer"
                   aria-label={`${document.title} (öppnas i ny flik)`}
-                  className="flex items-center justify-between gap-3 border-b border-neutral-200 px-5 py-3.5 last:border-b-0 bg-white transition-colors duration-150 hover:bg-neutral-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary-600"
+                  className="flex items-center justify-between gap-3 border-b border-neutral-200 px-5 py-3.5 last:border-b-0 bg-white transition-colors duration-150 hover:bg-neutral-50 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary-600"
                 >
                   <span className="min-w-0 truncate font-semibold leading-snug tracking-tight text-neutral-900">
                     {document.title}

@@ -38,7 +38,7 @@ export function AsyncState({
           <button
             type="button"
             onClick={onRetry}
-            className="shrink-0 font-medium underline underline-offset-2 hover:text-danger-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-danger-600 focus-visible:ring-offset-2"
+            className="shrink-0 font-medium underline underline-offset-2 hover:text-danger-600 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-danger-600 focus-visible:ring-offset-2"
           >
             {retryLabel}
           </button>

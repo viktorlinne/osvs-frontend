@@ -454,7 +454,7 @@ export const MapPage = () => {
               <p
                 ref={editHintRef}
                 tabIndex={-1}
-                className="mb-2 text-sm text-neutral-700 focus:outline-none"
+                className="mb-2 text-sm text-neutral-700 focus:outline-hidden"
               >
                 Klicka i kartan för att markera positionen.
               </p>

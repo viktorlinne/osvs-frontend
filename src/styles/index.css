@@ -1,6 +1,301 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import 'tailwindcss';
+@import 'tw-animate-css';
+
+/* Same output as the Tailwind 3 config (center, 1rem padding, one 72rem
+   breakpoint; its sm/lg paddings never applied). */
+@utility container {
+  width: 100%;
+  margin-inline: auto;
+  padding-inline: 1rem;
+  @media (width >= 72rem) {
+    max-width: 72rem;
+  }
+}
+
+@theme {
+  --font-*: initial;
+  --font-sans: 'EB Garamond Variable', Georgia, serif;
+
+  --color-border: hsl(var(--border));
+  --color-input: hsl(var(--input));
+  --color-ring: hsl(var(--ring));
+  --color-background: hsl(var(--background));
+  --color-foreground: hsl(var(--foreground));
+
+  --color-secondary: hsl(var(--secondary));
+  --color-secondary-foreground: hsl(var(--secondary-foreground));
+
+  --color-destructive: hsl(var(--destructive));
+  --color-destructive-foreground: hsl(var(--destructive-foreground));
+
+  --color-muted: hsl(var(--muted));
+  --color-muted-foreground: hsl(var(--muted-foreground));
+
+  --color-accent: hsl(var(--accent));
+  --color-accent-foreground: hsl(var(--accent-foreground));
+
+  --color-popover: hsl(var(--popover));
+  --color-popover-foreground: hsl(var(--popover-foreground));
+
+  --color-primary-50: #eef7f3;
+  --color-primary-100: #d3eee3;
+  --color-primary-200: #a8dbc6;
+  --color-primary-600: #00a460;
+  --color-primary-700: #008a51;
+  --color-primary-800: #006f41;
+  --color-primary: hsl(var(--primary));
+  --color-primary-foreground: hsl(var(--primary-foreground));
+
+  --color-neutral-50: #faf8f4;
+  --color-neutral-100: #f2ede6;
+  --color-neutral-200: #e3dcd2;
+  --color-neutral-300: #c2b5ab;
+  --color-neutral-400: #9b8e84;
+  --color-neutral-500: #796d63;
+  --color-neutral-600: #5c5248;
+  --color-neutral-700: #3c3028;
+  --color-neutral-900: #1c1610;
+
+  --color-success-50: #f0fdf4;
+  --color-success-600: #16a34a;
+  --color-success-700: #15803d;
+
+  --color-warning-50: #fffbeb;
+  --color-warning-600: #d97706;
+  --color-warning-700: #b45309;
+
+  --color-danger-50: #fef2f2;
+  --color-danger-600: #dc2626;
+  --color-danger-700: #b91c1c;
+
+  --shadow-card:
+    0 1px 3px rgba(28, 22, 16, 0.07), 0 1px 2px rgba(28, 22, 16, 0.04);
+  --shadow-card-hover:
+    0 8px 24px rgba(28, 22, 16, 0.12), 0 2px 8px rgba(28, 22, 16, 0.06);
+
+  --radius-card: 0.5rem;
+  --radius-lg: var(--radius);
+  --radius-md: calc(var(--radius) - 2px);
+
+  --animate-accordion-down: accordion-down 0.2s ease-out;
+  --animate-accordion-up: accordion-up 0.2s ease-out;
+
+  @keyframes accordion-down {
+    from {
+      height: 0;
+    }
+    to {
+      height: var(--radix-accordion-content-height);
+    }
+  }
+  @keyframes accordion-up {
+    from {
+      height: var(--radix-accordion-content-height);
+    }
+    to {
+      height: 0;
+    }
+  }
+}
+
+/*
+  Tailwind 3 preflight defaults that Tailwind 4 changed, kept so the UI looks
+  the same: border colour gray-200 (v4: currentcolor), placeholder gray-400
+  (v4: 50% currentcolor), a pointer cursor on buttons (v4: default), the
+  search-input look, and the browser's padding on table cells and <option>
+  (v4 resets all padding).
+  Removing them needs an explicit utility wherever an element relies on them.
+*/
+@layer base {
+  *,
+  ::after,
+  ::before,
+  ::backdrop,
+  ::file-selector-button {
+    border-color: #e5e7eb;
+  }
+
+  input::placeholder,
+  textarea::placeholder {
+    color: #9ca3af;
+  }
+
+  button:not(:disabled),
+  [role='button']:not(:disabled) {
+    cursor: pointer;
+  }
+
+  [type='search'] {
+    -webkit-appearance: textfield;
+    appearance: textfield;
+    outline-offset: -2px;
+  }
+
+  th,
+  td {
+    padding: 1px;
+  }
+
+  option {
+    padding: 0 2px 1px;
+  }
+}
+
+/*
+  Tailwind 3 `space-y-*` and `divide-y` semantics. Tailwind 4 gives every child but the last
+  a zero-specificity margin-bottom, so a child's own `mb-*` now adds to the
+  gap (e.g. the audience pickers on "Skapa möte"). Tailwind 3 gave every child
+  but the first a margin-top through a selector that also overrode the child's
+  own margins. `divide-y` moved the same way, from a top border on every
+  child but the first to a bottom border on every child but the last. The
+  `:where` rules undo Tailwind 4's versions; the rest restore Tailwind 3's for
+  the values in use. Add a value here before using a new `space-y-*` or
+  `divide-*`; or replace them with `gap-*`/borders and drop this.
+*/
+@layer utilities {
+  :where([class*='space-y-'] > *) {
+    margin-block: 0;
+  }
+  :where(.divide-y > *) {
+    border-block-width: 0;
+  }
+  .divide-y > :not([hidden]) ~ :not([hidden]) {
+    border-top-width: 1px;
+    border-bottom-width: 0;
+  }
+  .divide-neutral-200 > :not([hidden]) ~ :not([hidden]) {
+    border-color: var(--color-neutral-200);
+  }
+  .space-y-0\.5 > :not([hidden]) ~ :not([hidden]) {
+    margin-top: calc(var(--spacing) * 0.5);
+    margin-bottom: 0;
+  }
+  .space-y-1 > :not([hidden]) ~ :not([hidden]) {
+    margin-top: calc(var(--spacing) * 1);
+    margin-bottom: 0;
+  }
+  .space-y-1\.5 > :not([hidden]) ~ :not([hidden]) {
+    margin-top: calc(var(--spacing) * 1.5);
+    margin-bottom: 0;
+  }
+  .space-y-2 > :not([hidden]) ~ :not([hidden]) {
+    margin-top: calc(var(--spacing) * 2);
+    margin-bottom: 0;
+  }
+  .space-y-3 > :not([hidden]) ~ :not([hidden]) {
+    margin-top: calc(var(--spacing) * 3);
+    margin-bottom: 0;
+  }
+  .space-y-4 > :not([hidden]) ~ :not([hidden]) {
+    margin-top: calc(var(--spacing) * 4);
+    margin-bottom: 0;
+  }
+  .space-y-5 > :not([hidden]) ~ :not([hidden]) {
+    margin-top: calc(var(--spacing) * 5);
+    margin-bottom: 0;
+  }
+  .space-y-6 > :not([hidden]) ~ :not([hidden]) {
+    margin-top: calc(var(--spacing) * 6);
+    margin-bottom: 0;
+  }
+  .space-y-8 > :not([hidden]) ~ :not([hidden]) {
+    margin-top: calc(var(--spacing) * 8);
+    margin-bottom: 0;
+  }
+  .space-y-10 > :not([hidden]) ~ :not([hidden]) {
+    margin-top: calc(var(--spacing) * 10);
+    margin-bottom: 0;
+  }
+}
+
+@utility ui-page {
+  /* ── Page structure ── */
+  @apply w-full py-8 md:py-12;
+}
+
+@utility ui-page-title {
+  @apply text-4xl font-semibold tracking-tight text-primary-600 md:text-5xl;
+}
+
+@utility ui-section-title {
+  @apply text-xl font-semibold tracking-tight text-neutral-900 md:text-2xl;
+}
+
+@utility ui-chapter {
+  /* Chapter heading — column/section label, like a printed register */
+  @apply text-xs font-semibold uppercase tracking-widest text-neutral-600;
+}
+
+@utility ui-nav-item {
+  /* Nav item — used in the flat institutional navigation bar */
+  @apply block rounded-sm px-2.5 py-1.5 text-xs font-semibold uppercase tracking-widest whitespace-nowrap transition-colors duration-150 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-primary-600 focus-visible:ring-offset-2;
+}
+
+@utility ui-entry {
+  /* Registry entry — list item alternative to cards */
+  @apply border-b border-neutral-200 py-3.5 first:pt-0 last:border-b-0 last:pb-0;
+}
+
+@utility ui-card {
+  /* ── Surface ── */
+  @apply rounded-card border border-neutral-200 bg-white p-5 shadow-card;
+}
+
+@utility ui-card-hover {
+  @apply transition-shadow duration-200 hover:shadow-card-hover;
+}
+
+@utility ui-label {
+  /* ── Form ── */
+  @apply mb-1.5 block text-xs font-semibold uppercase tracking-widest text-neutral-600;
+}
+
+@utility ui-input {
+  @apply h-10 w-full rounded-md border border-neutral-200 bg-white px-3 py-2.5 text-sm text-neutral-900 shadow-xs placeholder:text-neutral-600 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-primary-600 focus-visible:ring-offset-2 focus-visible:ring-offset-neutral-50;
+}
+
+@utility ui-select {
+  @apply h-10 w-full rounded-md border border-neutral-200 bg-white px-3 py-2.5 text-sm text-neutral-900 shadow-xs focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-primary-600 focus-visible:ring-offset-2 focus-visible:ring-offset-neutral-50;
+}
+
+@utility ui-textarea {
+  @apply w-full rounded-md border border-neutral-200 bg-white px-3 py-2.5 text-sm text-neutral-900 shadow-xs placeholder:text-neutral-600 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-primary-600 focus-visible:ring-offset-2 focus-visible:ring-offset-neutral-50;
+}
+
+@utility ui-error {
+  @apply mt-1 text-xs text-danger-600 tracking-wide;
+}
+
+@utility ui-btn {
+  /* ── Buttons ── */
+  @apply inline-flex min-h-11 cursor-pointer items-center justify-center rounded-md px-4 py-2 text-sm font-medium tracking-wide transition-colors duration-150 disabled:cursor-not-allowed disabled:opacity-60 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-primary-600 focus-visible:ring-offset-2 focus-visible:ring-offset-neutral-50;
+}
+
+@utility ui-btn-sm {
+  @apply min-h-10 px-3 py-1.5 text-xs tracking-widest;
+}
+
+@utility ui-btn-primary {
+  @apply bg-primary-600 text-white hover:bg-primary-700 active:bg-primary-800;
+}
+
+@utility ui-btn-secondary {
+  @apply border border-neutral-200 bg-white text-neutral-700 hover:bg-neutral-100 hover:border-neutral-300 active:bg-neutral-100;
+}
+
+@utility ui-btn-danger {
+  @apply bg-danger-600 text-white hover:bg-danger-700 active:bg-danger-700;
+}
+
+@utility ui-link {
+  @apply text-sm font-medium text-primary-800 underline-offset-2 transition hover:underline focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-primary-600 focus-visible:ring-offset-2;
+}
+
+@utility leaflet-popup-content {
+  font-family: 'EB Garamond Variable', Georgia, serif;
+  font-size: 0.875rem;
+  line-height: 1.65;
+}
 
 @layer base {
   /*
@@ -58,104 +353,6 @@
   }
 }
 
-@layer components {
-  /* ── Page structure ── */
-  .ui-page {
-    @apply w-full py-8 md:py-12;
-  }
-
-  .ui-page-title {
-    @apply text-4xl font-semibold tracking-tight text-primary-600 md:text-5xl;
-  }
-
-  .ui-section-title {
-    @apply text-xl font-semibold tracking-tight text-neutral-900 md:text-2xl;
-  }
-
-  /* Chapter heading — column/section label, like a printed register */
-  .ui-chapter {
-    @apply text-xs font-semibold uppercase tracking-widest text-neutral-600;
-  }
-
-  /* Nav item — used in the flat institutional navigation bar */
-  .ui-nav-item {
-    @apply block rounded px-2.5 py-1.5 text-xs font-semibold uppercase tracking-widest whitespace-nowrap transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-600 focus-visible:ring-offset-2;
-  }
-
-  /* Registry entry — list item alternative to cards */
-  .ui-entry {
-    @apply border-b border-neutral-200 py-3.5 first:pt-0 last:border-b-0 last:pb-0;
-  }
-
-  /* ── Surface ── */
-  .ui-card {
-    @apply rounded-card border border-neutral-200 bg-white p-5 shadow-card;
-  }
-
-  .ui-card-hover {
-    @apply transition-shadow duration-200 hover:shadow-card-hover;
-  }
-
-  /* ── Form ── */
-  .ui-label {
-    @apply mb-1.5 block text-xs font-semibold uppercase tracking-widest text-neutral-600;
-  }
-
-  .ui-input {
-    @apply h-10 w-full rounded-md border border-neutral-200 bg-white px-3 py-2.5 text-sm text-neutral-900 shadow-sm placeholder:text-neutral-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-600 focus-visible:ring-offset-2 focus-visible:ring-offset-neutral-50;
-  }
-
-  .ui-select {
-    @apply h-10 w-full rounded-md border border-neutral-200 bg-white px-3 py-2.5 text-sm text-neutral-900 shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-600 focus-visible:ring-offset-2 focus-visible:ring-offset-neutral-50;
-  }
-
-  .ui-textarea {
-    @apply w-full rounded-md border border-neutral-200 bg-white px-3 py-2.5 text-sm text-neutral-900 shadow-sm placeholder:text-neutral-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-600 focus-visible:ring-offset-2 focus-visible:ring-offset-neutral-50;
-  }
-
-  .ui-error {
-    @apply mt-1 text-xs text-danger-600 tracking-wide;
-  }
-
-  /* ── Buttons ── */
-  .ui-btn {
-    @apply inline-flex min-h-11 cursor-pointer items-center justify-center rounded-md px-4 py-2 text-sm font-medium tracking-wide transition-colors duration-150 disabled:cursor-not-allowed disabled:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-600 focus-visible:ring-offset-2 focus-visible:ring-offset-neutral-50;
-  }
-
-  .ui-btn-sm {
-    @apply min-h-10 px-3 py-1.5 text-xs tracking-widest;
-  }
-
-  .ui-btn-primary {
-    @apply bg-primary-600 text-white hover:bg-primary-700 active:bg-primary-800;
-  }
-
-  .ui-btn-secondary {
-    @apply border border-neutral-200 bg-white text-neutral-700 hover:bg-neutral-100 hover:border-neutral-300 active:bg-neutral-100;
-  }
-
-  .ui-btn-danger {
-    @apply bg-danger-600 text-white hover:bg-danger-700 active:bg-danger-700;
-  }
-
-  .ui-link {
-    @apply text-sm font-medium text-primary-800 underline-offset-2 transition hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-600 focus-visible:ring-offset-2;
-  }
-
-  .leaflet-popup-content {
-  font-family: 'EB Garamond Variable', Georgia, serif;
-  font-size: 0.875rem;
-  line-height: 1.65;
-}
-
-.line-clamp-2 {
-    display: -webkit-box;
-    overflow: hidden;
-    -webkit-box-orient: vertical;
-    -webkit-line-clamp: 2;
-  }
-}
-
 @keyframes step-in {
   from {
     opacity: 0;
@@ -207,7 +404,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  /* tailwindcss-animate enter/exit animations (Radix overlays). With
+  /* tw-animate-css enter/exit animations (Radix overlays). With
      animation: none Radix unmounts immediately instead of waiting. */
   .animate-in,
   .animate-out,

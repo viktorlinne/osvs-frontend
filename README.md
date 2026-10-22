@@ -10,7 +10,8 @@ React + TypeScript frontend for the OSVS platform.
 - React Router
 - Axios
 - react-hook-form
-- Tailwind-based utility styling
+- Tailwind 4 utility styling (`@tailwindcss/vite`; theme tokens and `ui-*`
+  classes in `src/styles/index.css`, no `tailwind.config.js`)
 
 ## Key Commands
 

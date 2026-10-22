@@ -270,7 +270,7 @@ export const EventPaymentsPage = () => {
             id="outstanding-summary"
             ref={summaryHeadingRef}
             tabIndex={-1}
-            className="ui-chapter focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-600"
+            className="ui-chapter focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-primary-600"
           >
             Totalt utestående
           </h2>

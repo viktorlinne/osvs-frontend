@@ -71,7 +71,7 @@ function CommandGroup({ className, ...props }: ComponentProps<typeof CommandPrim
   return (
     <CommandPrimitive.Group
       className={cn(
-        "overflow-hidden p-1 text-neutral-900 [&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:pb-1 [&_[cmdk-group-heading]]:pt-2 [&_[cmdk-group-heading]]:text-xs [&_[cmdk-group-heading]]:font-semibold [&_[cmdk-group-heading]]:uppercase [&_[cmdk-group-heading]]:tracking-widest [&_[cmdk-group-heading]]:text-neutral-600",
+        "overflow-hidden p-1 text-neutral-900 **:[[cmdk-group-heading]]:px-2 **:[[cmdk-group-heading]]:pb-1 **:[[cmdk-group-heading]]:pt-2 **:[[cmdk-group-heading]]:text-xs **:[[cmdk-group-heading]]:font-semibold **:[[cmdk-group-heading]]:uppercase **:[[cmdk-group-heading]]:tracking-widest **:[[cmdk-group-heading]]:text-neutral-600",
         className,
       )}
       {...props}
@@ -95,8 +95,8 @@ function CommandItem({ className, ...props }: ComponentProps<typeof CommandPrimi
   return (
     <CommandPrimitive.Item
       className={cn(
-        "relative flex min-h-11 cursor-pointer select-none items-center gap-2 rounded-md px-2 py-1.5 text-sm text-neutral-700 outline-none",
-        "data-[selected=true]:bg-primary-50 data-[selected=true]:text-neutral-900 data-[selected=true]:shadow-[inset_3px_0_0_theme(colors.primary.600)]",
+        "relative flex min-h-11 cursor-pointer select-none items-center gap-2 rounded-md px-2 py-1.5 text-sm text-neutral-700 outline-hidden",
+        "data-[selected=true]:bg-primary-50 data-[selected=true]:text-neutral-900 data-[selected=true]:shadow-[inset_3px_0_0_var(--color-primary-600)]",
         "data-[disabled=true]:pointer-events-none data-[disabled=true]:opacity-60",
         className,
       )}

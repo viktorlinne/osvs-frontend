@@ -214,7 +214,7 @@ export const RevisionsPage = () => {
                     href={revision.pictureUrl!}
                     target="_blank"
                     rel="noreferrer"
-                    className="flex items-baseline justify-between gap-4 rounded transition-colors hover:text-primary-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-600 focus-visible:ring-offset-2 focus-visible:ring-offset-neutral-50"
+                    className="flex items-baseline justify-between gap-4 rounded-sm transition-colors hover:text-primary-800 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-primary-600 focus-visible:ring-offset-2 focus-visible:ring-offset-neutral-50"
                   >
                     <span className="text-sm">{revision.title}</span>
                     {meta}

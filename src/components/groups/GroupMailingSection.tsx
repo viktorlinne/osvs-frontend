@@ -379,7 +379,7 @@ export function GroupMailingSection({ groupId, membersVersion }: GroupMailingSec
                 >
                   <div className="flex flex-wrap items-start justify-between gap-3">
                     <div className="min-w-0">
-                      <p className="font-semibold break-words text-neutral-900">{mailing.subject}</p>
+                      <p className="font-semibold wrap-break-word text-neutral-900">{mailing.subject}</p>
                       <p className="text-sm text-neutral-600">
                         {formatMailingDate(mailing.createdAt)}
                         {mailing.senderName || mailing.senderEmail

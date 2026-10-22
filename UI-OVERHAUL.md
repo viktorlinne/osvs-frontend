@@ -29,9 +29,9 @@ Tabs (part of phase 7) were deliberately **not** added; see the open questions.
 | Package | Version |
 | --- | --- |
 | clsx | ^2.1.1 |
-| tailwind-merge | ^2.6.1 (v2 = Tailwind 3 compatible) |
+| tailwind-merge | ^2.6.1 (v2 = Tailwind 3 compatible; ^3.7.0 since Tailwind 4) |
 | class-variance-authority | ^0.7.1 |
-| tailwindcss-animate | ^1.0.7 |
+| tailwindcss-animate | ^1.0.7 (replaced by tw-animate-css ^1.4.0 with Tailwind 4) |
 | @radix-ui/react-dialog | ^1.3.1 |
 | @radix-ui/react-alert-dialog | ^1.2.1 |
 | @radix-ui/react-popover | ^1.3.1 |
@@ -454,3 +454,73 @@ admin payment pages, revisions, lodges, GDPR, mobile menu): the only
 remaining violations are white text on #00a460, kept by decision: the
 `ui-btn-primary` labels (3.24:1) and the date badges on the events page
 (white 3.24:1, the month label at `opacity-70` 2.3:1).
+
+## Tailwind 4 (2026-10-22)
+
+Tailwind 3.4 → 4.3.3, in its own commit after the contrast and font work.
+
+- `npx @tailwindcss/upgrade@4.3.3`, then reviewed by hand. The theme
+  (`primary`, `neutral`, `success`/`warning`/`danger`, the shadcn colours,
+  `shadow-card*`, `rounded-card`, `--radius`, the accordion keyframes) is in
+  `@theme` in `src/styles/index.css`. `tailwind.config.js` and
+  `postcss.config.js` are gone, and so are `autoprefixer` and `postcss` as
+  direct dependencies. The build uses `@tailwindcss/vite`.
+- The `ui-*` classes are `@utility` blocks with the same `@apply` lists.
+- `tailwindcss-animate` → `tw-animate-css` (`@import`). `tailwind-merge` 2 → 3;
+  `cn()` extends the theme scales `radius: card` and `shadow: card, card-hover`.
+- The codemod renamed utilities in 45 files: `rounded` → `rounded-sm`,
+  `shadow-sm` → `shadow-xs`, `outline-none` →
+  `outline-hidden`, `break-words` → `wrap-break-word`, `!x` → `x!`,
+  `[&_x]:` → `**:`, `theme(colors.primary.600)` → `var(--color-primary-600)`.
+- `container`: Tailwind 3 emitted only `width:100%`, auto margins, 1rem
+  padding and `max-width:72rem` from 72rem (the config's sm/lg paddings never
+  applied, because `container.screens` had only 72rem). The `@utility
+  container` emits exactly that.
+- The custom `line-clamp-2` was dropped; the built-in one is the same.
+
+**Compatibility CSS** (in `index.css`, commented). It keeps the UI identical
+where Tailwind 4 changed behaviour:
+
+- Preflight: border colour `#e5e7eb` (v4: currentcolor), placeholder
+  `#9ca3af`, pointer cursor on buttons, search-input `appearance: textfield`,
+  and the browser's padding on `th`/`td` (1px) and `option` (v4 sets
+  `padding: 0` on everything). Without the cell padding, the attendance
+  table's columns were 1px narrower each.
+- `space-y-*` and `divide-y`: Tailwind 4 puts the margin/border on every child
+  but the last, with zero specificity. Tailwind 3 put it on every child but
+  the first and overrode the child's own margins. Without the shim, "Skapa
+  möte" was 24px taller (the audience pickers' `mb-4` plus the space) and the
+  mobile menu shifted. The shim lists the values in use
+  (0.5/1/1.5/2/3/4/5/6/8/10). A new `space-y-*` value needs a line there, or
+  use `gap-*`.
+
+**Verification** against a live Tailwind 3 build of the previous commit (a
+separate worktree with its own `npm ci`, port 5174, same backend and data):
+
+- Screenshots: 30 pages/states (login, posts, post detail, events, event
+  detail, members, member detail, map, profile, profile edit, both admin
+  payment pages, group detail, create event, GDPR, open mobile menu) at 1280
+  and 390 px. All match within 0.2 % pixels (the baseline itself reruns
+  identical).
+- Computed styles of every element, 24 page/state cases × 2 widths (also the
+  open "Arkiv" dropdown, the member picker, keyboard focus and the delete
+  dialog). The only differences left are invisible or intended:
+  - longer `transition-property` lists and transparent extra shadow layers;
+  - `rounded-full` as `calc(infinity)`;
+  - border colour on borders with width 0;
+  - `outline-hidden` on focus. It is transparent as before, but stays
+    visible in Windows high-contrast mode, which is an improvement.
+- axe `color-contrast`: the same counts as on Tailwind 3 (only white on the
+  logo green).
+- `npm audit` (with dev): 0 vulnerabilities (was 7: tailwindcss 3 → chokidar,
+  braces, micromatch, fast-glob, postcss-nested, postcss-selector-parser).
+
+Size: the main CSS went from 52.1 kB to 69.3 kB raw (9.2 → 11.4 kB gzip), from
+the theme variables, `@property` rules and the compat CSS. The main JS went
+from 481.8 to 490.1 kB (155.9 → 157.6 kB gzip), mostly from tailwind-merge 3.
+
+Not done: the leftover `.leaflet-popup-content` rule (EB Garamond in map
+popups) never reached the CSS in Tailwind 3, because it was in `@layer
+components` and Leaflet's class is not in the scanned sources. It is still
+inert as an `@utility`; making it a plain rule would change how map popups
+look.

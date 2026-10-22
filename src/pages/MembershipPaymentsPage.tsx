@@ -195,7 +195,7 @@ export const MembershipPaymentsPage = () => {
             type="button"
             onClick={() => setToggleError(null)}
             aria-label="Stäng felmeddelande"
-            className="ml-4 text-danger-600 hover:text-danger-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-danger-600 focus-visible:ring-offset-2"
+            className="ml-4 text-danger-600 hover:text-danger-700 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-danger-600 focus-visible:ring-offset-2"
           >
             ✕
           </button>
@@ -235,7 +235,7 @@ export const MembershipPaymentsPage = () => {
           <div className="ui-card divide-y divide-neutral-200">
             {Array.from({ length: 8 }, (_, i) => (
               <div key={i} className="flex items-center gap-4 px-4 py-3">
-                <div className="h-4 w-4 shrink-0 rounded border border-neutral-300 bg-neutral-100" />
+                <div className="h-4 w-4 shrink-0 rounded-sm border border-neutral-300 bg-neutral-100" />
                 <SkeletonText width="w-36" />
                 <SkeletonLabel width="w-24" />
                 <SkeletonLabel width="w-16" />
@@ -347,7 +347,7 @@ function PaymentRow({
           aria-busy={pending || undefined}
           onChange={() => onToggle(payment.id, payment.status)}
           aria-label={`${payment.firstname} ${payment.lastname}, ${payment.year}: ${isPaid ? "Betald" : "Väntande"}`}
-          className="h-4 w-4 cursor-pointer rounded border-neutral-300 text-primary-600 focus-visible:ring-primary-600 disabled:cursor-wait disabled:opacity-60"
+          className="h-4 w-4 cursor-pointer rounded-sm border-neutral-300 text-primary-600 focus-visible:ring-primary-600 disabled:cursor-wait disabled:opacity-60"
         />
       </td>
       <td className="px-4 py-3 font-medium text-neutral-900">

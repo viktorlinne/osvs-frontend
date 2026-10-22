@@ -121,7 +121,7 @@ export function EventRegistrationFlow({
           id="registration-heading"
           ref={headingRef}
           tabIndex={-1}
-          className="ui-chapter mb-2 focus:outline-none"
+          className="ui-chapter mb-2 focus:outline-hidden"
         >
           Din anmälan
         </p>
@@ -187,7 +187,7 @@ export function EventRegistrationFlow({
         id="registration-heading"
         ref={headingRef}
         tabIndex={-1}
-        className="ui-chapter mb-2 focus:outline-none"
+        className="ui-chapter mb-2 focus:outline-hidden"
       >
         Anmälan
       </p>
@@ -244,7 +244,7 @@ export function EventRegistrationFlow({
               role="switch"
               checked={active.bookFood}
               aria-checked={active.bookFood}
-              className="h-4 w-4 rounded border-neutral-300 text-primary-600 focus-visible:ring-primary-600"
+              className="h-4 w-4 rounded-sm border-neutral-300 text-primary-600 focus-visible:ring-primary-600"
               onChange={(e) => setFlow(chooseFood(active, e.target.checked))}
             />
             {foodLabel(active.bookFood)}

@@ -310,7 +310,7 @@ export const CreateEvent = () => {
                 id="lodgeMeeting"
                 type="checkbox"
                 checked={form.lodgeMeeting}
-                className="h-4 w-4 rounded border-neutral-300 text-primary-600 focus-visible:ring-primary-600"
+                className="h-4 w-4 rounded-sm border-neutral-300 text-primary-600 focus-visible:ring-primary-600"
                 onChange={(e) => {
                   clearServerField("lodgeMeeting");
                   setForm({ ...form, lodgeMeeting: e.target.checked });

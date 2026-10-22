@@ -82,7 +82,7 @@ export function AudienceSelection({
                     value={value}
                     checked={isChecked}
                     disabled={isDisabled}
-                    className="h-4 w-4 rounded border-neutral-300 text-primary-600 focus-visible:ring-primary-600"
+                    className="h-4 w-4 rounded-sm border-neutral-300 text-primary-600 focus-visible:ring-primary-600"
                     onChange={(event) => toggle(item.id, event.target.checked)}
                   />
                   <span>{item.label}</span>

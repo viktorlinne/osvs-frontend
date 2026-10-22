@@ -11,8 +11,14 @@ describe("cn", () => {
   });
 
   it("knows the custom rounded-card and shadow-card tokens", () => {
-    expect(cn("rounded-md shadow-sm", "rounded-card shadow-card")).toBe(
+    expect(cn("rounded-md shadow-xs", "rounded-card shadow-card")).toBe(
       "rounded-card shadow-card",
+    );
+  });
+
+  it("tells project colours apart from font sizes", () => {
+    expect(cn("text-sm text-neutral-600", "text-primary-800")).toBe(
+      "text-sm text-primary-800",
     );
   });
 

@@ -59,14 +59,14 @@ export function PublicumList({ onSelect, selectedId }: PublicumListProps) {
 
   return (
     <div className="relative">
-      <ul className="max-h-[40rem] overflow-y-auto pb-6">
+      <ul className="max-h-160 overflow-y-auto pb-6">
         {posts.map((post) => {
           const isSelected = selectedId != null && post.id === selectedId;
           return (
             <li key={post.id} className="ui-entry">
               <button
                 type="button"
-                className={`flex w-full items-baseline gap-4 rounded px-1 py-0.5 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-600 focus-visible:ring-offset-2 focus-visible:ring-offset-neutral-50 ${
+                className={`flex w-full items-baseline gap-4 rounded px-1 py-0.5 text-left transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-primary-600 focus-visible:ring-offset-2 focus-visible:ring-offset-neutral-50 ${
                   isSelected
                     ? "bg-primary-50 text-primary-800"
                     : "hover:bg-neutral-100"
@@ -84,7 +84,7 @@ export function PublicumList({ onSelect, selectedId }: PublicumListProps) {
           );
         })}
       </ul>
-      <div className="pointer-events-none absolute bottom-0 left-0 right-0 h-6 bg-gradient-to-t from-neutral-50 to-transparent" />
+      <div className="pointer-events-none absolute bottom-0 left-0 right-0 h-6 bg-linear-to-t from-neutral-50 to-transparent" />
     </div>
   );
 }

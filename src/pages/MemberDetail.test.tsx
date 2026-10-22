@@ -171,7 +171,7 @@ describe("MemberDetail edit", () => {
 
   it("shows why Spara is disabled when loaded data is invalid", async () => {
     usersMock.getPublicUserById.mockResolvedValue({
-      user: { ...migratedMember, mobile: "ring kansliet" },
+      user: { ...migratedMember, mobile: "ring-3 kansliet" },
       achievements: [],
       allergies: [],
       officials: [],

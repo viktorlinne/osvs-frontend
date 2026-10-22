@@ -49,7 +49,7 @@ function DocumentViewer() {
           type="button"
           onClick={openViewer}
           onKeyDown={handleThumbnailKeyDown}
-          className="group relative block w-full overflow-hidden rounded-md border border-neutral-200 bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-600 focus-visible:ring-offset-2"
+          className="group relative block w-full overflow-hidden rounded-md border border-neutral-200 bg-white focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-primary-600 focus-visible:ring-offset-2"
           aria-label="Visa originaldokumentet i helskärm"
         >
           <img
@@ -78,7 +78,7 @@ function DocumentViewer() {
             tabIndex={-1}
             onClick={closeViewer}
             onKeyDown={handleOverlayKeyDown}
-            className="fixed inset-0 z-50 flex cursor-zoom-out items-center justify-center bg-neutral-900/90 p-4 focus-visible:outline-none"
+            className="fixed inset-0 z-50 flex cursor-zoom-out items-center justify-center bg-neutral-900/90 p-4 focus-visible:outline-hidden"
           >
             <img
               src={GDPR_DOC_URL}
@@ -88,7 +88,7 @@ function DocumentViewer() {
             <button
               type="button"
               onClick={closeViewer}
-              className="absolute right-4 top-4 flex h-11 w-11 items-center justify-center rounded-md bg-neutral-900/60 text-white hover:bg-neutral-900/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
+              className="absolute right-4 top-4 flex h-11 w-11 items-center justify-center rounded-md bg-neutral-900/60 text-white hover:bg-neutral-900/80 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-white"
               aria-label="Stäng"
             >
               ✕

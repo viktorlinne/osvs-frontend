@@ -36,7 +36,7 @@ function PostSkeleton({ featured = false }: { featured?: boolean }) {
   }
   return (
     <div className="overflow-hidden rounded-card border border-neutral-200 bg-white shadow-card">
-      <div className="aspect-[16/9] skeleton-shimmer" />
+      <div className="aspect-video skeleton-shimmer" />
       <div className="flex flex-col gap-2 p-4 md:p-5">
         <SkeletonBlock className="h-3 w-16" />
         <SkeletonBlock className="h-5 w-3/4" />
@@ -270,7 +270,7 @@ export const NewsPage = () => {
                     {featured.lodges!.map((l) => l.name).join(", ")}
                   </span>
                 )}
-                <h3 className="break-words text-2xl font-semibold leading-snug tracking-tight text-neutral-900 md:text-3xl">
+                <h3 className="wrap-break-word text-2xl font-semibold leading-snug tracking-tight text-neutral-900 md:text-3xl">
                   {featured.title}
                 </h3>
                 {featured.description && (
@@ -294,7 +294,7 @@ export const NewsPage = () => {
                     src={p.pictureUrl || mediaPlaceholderUrl("post")}
                     alt=""
                     loading="lazy"
-                    className="aspect-[16/9] w-full object-cover"
+                    className="aspect-video w-full object-cover"
                   />
                   <div className="flex min-w-0 flex-1 flex-col gap-1.5 p-4 md:p-5">
                     {(p.lodges ?? []).length > 0 && (
@@ -302,7 +302,7 @@ export const NewsPage = () => {
                         {p.lodges!.map((l) => l.name).join(", ")}
                       </span>
                     )}
-                    <h3 className="break-words text-lg font-semibold leading-snug tracking-tight text-neutral-900">
+                    <h3 className="wrap-break-word text-lg font-semibold leading-snug tracking-tight text-neutral-900">
                       {p.title}
                     </h3>
                     {p.description && (

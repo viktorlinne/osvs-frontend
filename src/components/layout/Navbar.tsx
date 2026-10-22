@@ -57,7 +57,7 @@ function NavbarUserMenu({
       <NavLink
         to="/profile"
         onClick={onClose}
-        className="text-xs font-semibold uppercase tracking-widest text-neutral-600 transition-colors hover:text-neutral-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-600 focus-visible:ring-offset-2"
+        className="text-xs font-semibold uppercase tracking-widest text-neutral-600 transition-colors hover:text-neutral-900 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-primary-600 focus-visible:ring-offset-2"
       >
         Profil
       </NavLink>
@@ -217,7 +217,7 @@ export const Navbar: React.FC = () => {
     <header>
       <a
         href="#main-content"
-        className="sr-only focus:not-sr-only focus:absolute focus:left-2 focus:top-2 focus:z-50 focus:rounded focus:bg-neutral-900 focus:px-4 focus:py-2 focus:text-xs focus:font-semibold focus:uppercase focus:tracking-widest focus:text-neutral-50"
+        className="sr-only focus:not-sr-only focus:absolute focus:left-2 focus:top-2 focus:z-50 focus:rounded-sm focus:bg-neutral-900 focus:px-4 focus:py-2 focus:text-xs focus:font-semibold focus:uppercase focus:tracking-widest focus:text-neutral-50"
       >
         Hoppa till innehåll
       </a>
@@ -232,7 +232,7 @@ export const Navbar: React.FC = () => {
               aria-controls="mobile-menu"
               aria-label={open ? "Stäng meny" : "Öppna meny"}
               onClick={() => setOpen((s) => !s)}
-              className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-md p-2 text-neutral-700 lg:hidden transition-colors hover:bg-neutral-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-600 focus-visible:ring-offset-2"
+              className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-md p-2 text-neutral-700 lg:hidden transition-colors hover:bg-neutral-200 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-primary-600 focus-visible:ring-offset-2"
             >
               <svg
                 className="h-6 w-6"
@@ -255,7 +255,7 @@ export const Navbar: React.FC = () => {
             <NavLink
               to="/"
               onClick={closeMenu}
-              className="rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-600 focus-visible:ring-offset-2"
+              className="rounded-sm focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-primary-600 focus-visible:ring-offset-2"
             >
               <img
                 src="/osvs.png"
@@ -282,7 +282,7 @@ export const Navbar: React.FC = () => {
               <NavLink
                 to="/login"
                 onClick={closeMenu}
-                className="text-xs font-semibold uppercase tracking-widest text-neutral-600 transition-colors hover:text-neutral-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-600 focus-visible:ring-offset-2"
+                className="text-xs font-semibold uppercase tracking-widest text-neutral-600 transition-colors hover:text-neutral-900 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-primary-600 focus-visible:ring-offset-2"
               >
                 Logga in
               </NavLink>

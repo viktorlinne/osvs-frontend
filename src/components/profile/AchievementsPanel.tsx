@@ -97,7 +97,7 @@ export const AchievementsPanel = ({
               {achievements.map((a) => (
                 <li
                   key={a.id}
-                  className="rounded border border-primary-200 bg-primary-50 px-2.5 py-1 text-xs text-primary-800"
+                  className="rounded-sm border border-primary-200 bg-primary-50 px-2.5 py-1 text-xs text-primary-800"
                 >
                   {a.title}
                   {a.awardedAt ? (

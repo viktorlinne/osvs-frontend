@@ -118,7 +118,7 @@ export const GroupsPage = () => {
               <li key={group.id} className="border-b border-neutral-200 last:border-b-0">
                 <Link
                   to={`/admin/groups/${group.id}`}
-                  className="flex items-center justify-between gap-3 bg-white px-5 py-3.5 transition-colors duration-150 hover:bg-neutral-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary-600"
+                  className="flex items-center justify-between gap-3 bg-white px-5 py-3.5 transition-colors duration-150 hover:bg-neutral-50 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary-600"
                 >
                   <span className="min-w-0">
                     <span className="block truncate font-semibold leading-snug tracking-tight text-neutral-900">
