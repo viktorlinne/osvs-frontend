@@ -63,7 +63,7 @@ export const LoginPage = () => {
       className="ui-page flex min-h-full items-center justify-center"
     >
       <form onSubmit={submit} className="ui-card w-full max-w-md">
-        <p className="ui-chapter mb-3">Ordensamfundet VS</p>
+        <p className="ui-chapter mb-3">Ordenssamfundet VS</p>
         <h1 className="ui-section-title mb-5">Logga in</h1>
         <label htmlFor="email" className="ui-label">
           E-post <span aria-hidden="true" className="text-danger-600">*</span>

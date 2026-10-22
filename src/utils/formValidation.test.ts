@@ -35,6 +35,6 @@ describe("formValidation", () => {
 
     expect(errors.startDate).toBe("Ogiltigt datum eller tid");
     expect(errors.endDate).toBe("Ogiltigt datum eller tid");
-    expect(errors.price).toBe("Pris måste vara 0 eller större");
+    expect(errors.price).toBe("Avgiften måste vara 0 eller större");
   });
 });

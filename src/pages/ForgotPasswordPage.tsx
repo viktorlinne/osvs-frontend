@@ -49,7 +49,7 @@ export const ForgotPasswordPage = () => {
       className="ui-page flex min-h-full items-center justify-center"
     >
       <div className="ui-card w-full max-w-md">
-        <p className="ui-chapter mb-3">Ordensamfundet VS</p>
+        <p className="ui-chapter mb-3">Ordenssamfundet VS</p>
         <h2 className="ui-section-title mb-3">Glömt lösenord</h2>
         <p className="mb-5 text-sm text-neutral-600">
           Ange din e-postadress så skickar vi en länk där du kan välja ett nytt

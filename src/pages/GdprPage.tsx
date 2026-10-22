@@ -88,7 +88,7 @@ function DocumentViewer() {
             <button
               type="button"
               onClick={closeViewer}
-              className="absolute right-4 top-4 flex h-9 w-9 items-center justify-center rounded-md bg-neutral-900/60 text-white hover:bg-neutral-900/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
+              className="absolute right-4 top-4 flex h-11 w-11 items-center justify-center rounded-md bg-neutral-900/60 text-white hover:bg-neutral-900/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
               aria-label="Stäng"
             >
               ✕
@@ -152,7 +152,7 @@ export const GdprPage = () => {
           <section className="space-y-3">
             <h2 className="ui-section-title">Personuppgiftsansvarig</h2>
             <p>
-              Ordensamfundet VS är personuppgiftsansvarig för den behandling av
+              Ordenssamfundet VS är personuppgiftsansvarig för den behandling av
               personuppgifter som sker inom ramen för logeverksamheten. Varje
               loge ansvarar för behandlingen av uppgifter om sina egna
               medlemmar.
@@ -241,7 +241,7 @@ export const GdprPage = () => {
             <h2 className="ui-section-title">Utlämning av uppgifter</h2>
             <p>
               Personuppgifter delas inte med tredje part utanför
-              Ordensamfundet VS, med undantag för situationer där det krävs
+              Ordenssamfundet VS, med undantag för situationer där det krävs
               enligt lag. Uppgifter kan delas mellan logerna inom samfundet i
               samband med gradsarbete och ordensmöten.
             </p>

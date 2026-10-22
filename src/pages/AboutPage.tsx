@@ -4,7 +4,7 @@ export const AboutPage = () => {
   return (
     <PageContainer size="xl" className="ui-page">
       <h1 className="mb-8 text-2xl font-semibold tracking-tight text-neutral-900 md:text-3xl">
-        Om Ordensamfundet VS
+        Om Ordenssamfundet VS
       </h1>
 
       <div className="grid w-full grid-cols-1 gap-8 lg:grid-cols-3">
@@ -12,7 +12,7 @@ export const AboutPage = () => {
           <div className="flex h-56 w-full items-center justify-center overflow-hidden rounded-md border border-neutral-200 bg-neutral-100">
             <img
               src="/info.png"
-              alt="Ordensamfundet VS"
+              alt="Ordenssamfundet VS"
               className="h-full w-full object-contain"
             />
           </div>
@@ -71,9 +71,9 @@ export const AboutPage = () => {
           <div className="space-y-3">
             <h2 className="ui-section-title">Vad är VS?</h2>
             <p>
-              Initialenerna VS bär olika betydelse i graderna. Den slutliga
-              avsöjas inte förrän medlemmen recipierar i högsta graden. Den
-              medmänskliga livssynen är grunden för Ordenssamfundets VS:s etik
+              Initialerna VS bär olika betydelse i graderna. Den slutliga
+              avslöjas inte förrän medlemmen recipierar i högsta graden. Den
+              medmänskliga livssynen är grunden för Ordenssamfundet VS:s etik
               och ideal. VS tvingar inga medlemmar någon viss
               religionsuppfattning. En broder i VS deltar med den egna tron.
             </p>
@@ -85,7 +85,7 @@ export const AboutPage = () => {
             <h2 className="ui-section-title">Varför bara män?</h2>
             <p>
               I vår tid, när jämställdheten mellan man och kvinna är en
-              självklarhet, kan det verka egendomligt att Ordern är öppen endast
+              självklarhet, kan det verka egendomligt att Orden är öppen endast
               för män. När samfundet grundades 1924 hade några av grundarna den
               erfarenheten från andra ordenssamfund med enbart manliga medlemmar
               enligt traditioner, som går tillbaka till medeltiden. Än idag
@@ -99,8 +99,8 @@ export const AboutPage = () => {
             <p>
               Våra damer kan knytas till Ordenssamfundet genom ett medlemskap i
               Damklubben. Klubben har till syfte, förutom nöjet av gemensamt
-              umgänge, att genom aktivitet stödja och främja arbetet inom "sin
-              loge". Damklubbens i logen insatser har visat sig ha en mycket
+              umgänge, att genom aktivitet stödja och främja arbetet inom ”sin
+              loge”. Damklubbens i logen insatser har visat sig ha en mycket
               stor betydelse för logerna, och Damernas arbete har rönt en stor
               uppskattning bland bröderna.
             </p>

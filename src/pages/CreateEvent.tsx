@@ -276,7 +276,7 @@ export const CreateEvent = () => {
           <div className="space-y-4 py-5">
             <div>
               <label htmlFor="price" className={labelClass}>
-                Pris
+                Avgift
               </label>
               <input
                 id="price"

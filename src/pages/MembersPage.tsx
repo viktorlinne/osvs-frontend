@@ -264,7 +264,7 @@ export const MembersPage = () => {
         >
           {total > 0
             ? `Visar ${from}–${to} av ${total} medlemmar`
-            : "Inga medlemmar hittades"}
+            : "Inga medlemmar hittades."}
         </div>
       ) : null}
 
@@ -291,7 +291,11 @@ export const MembersPage = () => {
       >
       {members.length === 0 ? (
         <div className="ui-card flex flex-col gap-3 text-neutral-600 sm:flex-row sm:items-center sm:justify-between">
-          <span>Inga medlemmar matchar de valda filtren.</span>
+          <span>
+            {hasActiveFilters
+              ? "Inga medlemmar matchar de valda filtren."
+              : "Inga medlemmar hittades."}
+          </span>
           {hasActiveFilters && (
             <button
               type="button"

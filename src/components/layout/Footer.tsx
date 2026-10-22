@@ -15,7 +15,7 @@ export const Footer: React.FC = () => {
               to="/"
               className="text-xs font-semibold uppercase tracking-widest text-neutral-700 transition-colors duration-150 hover:text-neutral-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-600 focus-visible:ring-offset-2"
             >
-              Ordensamfundet VS
+              Ordenssamfundet VS
             </NavLink>
             <p className="mt-1.5 text-[10px] font-medium uppercase tracking-widest text-neutral-400">
               est. MCMXXIV
