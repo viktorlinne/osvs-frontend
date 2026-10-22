@@ -335,14 +335,18 @@ export function GroupMailingSection({ groupId, membersVersion }: GroupMailingSec
               <p className="text-sm text-neutral-600">
                 Inga utskick har skickats till gruppen ännu.
               </p>
-              <Button
-                type="button"
-                size="sm"
-                variant="secondary"
-                onClick={() => setFocus("subject")}
-              >
-                Skriv ett utskick
-              </Button>
+              {/* No action when nobody in the group can receive mail:
+                  "Skicka utskick" would be disabled anyway. */}
+              {noRecipients ? null : (
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="secondary"
+                  onClick={() => setFocus("subject")}
+                >
+                  Skriv ett utskick
+                </Button>
+              )}
             </div>
           }
           loadingFallback={
