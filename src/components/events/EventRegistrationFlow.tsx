@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   STEP_LABELS,
   attendanceLabel,
@@ -76,6 +76,15 @@ export function EventRegistrationFlow({
 }: Props) {
   const [flow, setFlow] = useState<RegistrationFlowState | null>(null);
   const [justConfirmed, setJustConfirmed] = useState(false);
+  // "Ändra anmälan" and "Bekräfta" unmount the button that was clicked. Move
+  // focus to the section heading instead of letting it fall to <body>.
+  const headingRef = useRef<HTMLParagraphElement>(null);
+  const focusHeadingRef = useRef(false);
+  useEffect(() => {
+    if (!focusHeadingRef.current) return;
+    focusHeadingRef.current = false;
+    headingRef.current?.focus();
+  });
 
   const savedRsvp = saved?.rsvp ?? null;
   const hasAnswer = savedRsvp !== null;
@@ -98,7 +107,12 @@ export function EventRegistrationFlow({
   if (!active) {
     return (
       <section aria-labelledby="registration-heading">
-        <p id="registration-heading" className="ui-chapter mb-2">
+        <p
+          id="registration-heading"
+          ref={headingRef}
+          tabIndex={-1}
+          className="ui-chapter mb-2 focus:outline-none"
+        >
           Din anmälan
         </p>
         {hasAnswer ? (
@@ -124,6 +138,7 @@ export function EventRegistrationFlow({
             className="ui-btn ui-btn-sm ui-btn-secondary mt-3"
             onClick={() => {
               setJustConfirmed(false);
+              focusHeadingRef.current = true;
               setFlow(startRegistrationFlow(saved, eventHasFood));
             }}
           >
@@ -146,13 +161,19 @@ export function EventRegistrationFlow({
     const ok = await onConfirm(payload);
     if (ok) {
       setJustConfirmed(true);
+      focusHeadingRef.current = true;
       setFlow(null);
     }
   }
 
   return (
     <section aria-labelledby="registration-heading">
-      <p id="registration-heading" className="ui-chapter mb-2">
+      <p
+        id="registration-heading"
+        ref={headingRef}
+        tabIndex={-1}
+        className="ui-chapter mb-2 focus:outline-none"
+      >
         Anmälan
       </p>
 
@@ -202,7 +223,7 @@ export function EventRegistrationFlow({
       {active.step === "food" && (
         <div>
           <p className="mb-2 text-sm text-neutral-700">Äter du på mötet?</p>
-          <label className="inline-flex cursor-pointer items-center gap-2 text-sm font-medium text-neutral-900">
+          <label className="inline-flex min-h-11 cursor-pointer items-center gap-2 pr-2 text-sm font-medium text-neutral-900">
             <input
               type="checkbox"
               role="switch"

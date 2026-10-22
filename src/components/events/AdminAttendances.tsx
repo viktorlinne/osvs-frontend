@@ -39,7 +39,15 @@ export function AdminAttendances({
             Läser deltagare…
           </div>
         ) : Array.isArray(rows) && rows.length > 0 ? (
-          <div className="max-h-80 overflow-y-auto overflow-x-hidden">
+          <div
+            className="max-h-80 overflow-y-auto overflow-x-hidden focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-600"
+            // Scrollable region: focusable so keyboard users can scroll it even
+            // when every checkbox is disabled (members' read-only view).
+            // eslint-disable-next-line jsx-a11y/no-noninteractive-tabindex
+            tabIndex={0}
+            role="region"
+            aria-label="Inbjudna medlemmar"
+          >
             <table className="w-full text-sm">
               <thead className="sticky top-0 bg-white">
                 <tr className="border-b border-neutral-200 text-left text-neutral-600">
@@ -70,6 +78,7 @@ export function AdminAttendances({
                         <input
                           type="checkbox"
                           checked={row.rsvp}
+                          aria-label={`RSVP – ${row.firstname} ${row.lastname}`}
                           disabled={disableRsvp}
                           className="h-4 w-4 rounded border-neutral-300 text-primary-600 focus-visible:ring-primary-600"
                           onChange={(event) =>
@@ -81,6 +90,7 @@ export function AdminAttendances({
                         <input
                           type="checkbox"
                           checked={row.bookFood}
+                          aria-label={`Boka mat – ${row.firstname} ${row.lastname}`}
                           disabled={disableBookFood}
                           className="h-4 w-4 rounded border-neutral-300 text-primary-600 focus-visible:ring-primary-600"
                           onChange={(event) =>
@@ -102,6 +112,7 @@ export function AdminAttendances({
                         <input
                           type="checkbox"
                           checked={row.attended}
+                          aria-label={`Deltagande – ${row.firstname} ${row.lastname}`}
                           disabled={disableBase || !canEditAttended}
                           className="h-4 w-4 rounded border-neutral-300 text-primary-600 focus-visible:ring-primary-600"
                           onChange={(event) =>
@@ -117,6 +128,7 @@ export function AdminAttendances({
                         <input
                           type="checkbox"
                           checked={row.paymentPaid}
+                          aria-label={`Betalning – ${row.firstname} ${row.lastname}`}
                           disabled={disableBase}
                           className="h-4 w-4 rounded border-neutral-300 text-primary-600 focus-visible:ring-primary-600"
                           onChange={(event) =>

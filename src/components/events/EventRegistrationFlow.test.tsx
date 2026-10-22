@@ -42,6 +42,26 @@ describe("EventRegistrationFlow", () => {
     cleanup();
   });
 
+  it("keeps focus in the section when the clicked button unmounts", async () => {
+    const user = userEvent.setup();
+    renderFlow({ rsvp: true, bookFood: true });
+
+    await user.click(screen.getByRole("button", { name: "Ändra anmälan" }));
+    expect(screen.getByText("Anmälan")).toHaveFocus();
+
+    await user.click(screen.getByRole("button", { name: "Nästa" }));
+    await user.click(screen.getByRole("button", { name: "Nästa" }));
+    await user.click(screen.getByRole("button", { name: "Bekräfta" }));
+
+    expect(await screen.findByText("Din anmälan är bekräftad.")).toBeInTheDocument();
+    expect(screen.getByText("Din anmälan")).toHaveFocus();
+  });
+
+  it("does not steal focus on first render", () => {
+    renderFlow({ rsvp: true, bookFood: true });
+    expect(document.body).toHaveFocus();
+  });
+
   it("runs Närvaro -> Mat -> Bekräfta and saves both choices together", async () => {
     const user = userEvent.setup();
     const { onConfirm } = renderFlow({ rsvp: null, bookFood: false });

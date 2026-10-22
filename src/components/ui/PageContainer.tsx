@@ -19,8 +19,10 @@ function cx(...classes: Array<string | undefined | false>) {
   return classes.filter(Boolean).join(" ");
 }
 
+// Pages render inside AppLayout's <main id="main-content">, so the default is
+// a plain <div>; a second <main> would nest landmarks.
 export function PageContainer({
-  as = "main",
+  as = "div",
   size = "md",
   className,
   children,
