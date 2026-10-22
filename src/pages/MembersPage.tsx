@@ -143,7 +143,7 @@ export const MembersPage = () => {
           <button
             type="button"
             onClick={() => setCreatedNotice(null)}
-            className="ml-4 text-success-700 hover:text-success-800"
+            className="-my-2 -mr-2 ml-4 inline-flex h-11 w-11 shrink-0 items-center justify-center rounded text-success-700 hover:bg-success-600/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-600"
             aria-label="Stäng"
           >
             ×

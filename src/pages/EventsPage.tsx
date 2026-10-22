@@ -244,7 +244,7 @@ export const EventsPage = () => {
                         {time && (
                           <>
                             <span className="font-semibold tabular-nums">{time}</span>
-                            <span className="mx-1.5 text-primary-400" aria-hidden="true">·</span>
+                            <span className="mx-1.5 text-primary-600" aria-hidden="true">·</span>
                           </>
                         )}
                         {e.title}
@@ -326,7 +326,7 @@ export const EventsPage = () => {
                                   {time && (
                                     <>
                                       <span className="font-semibold tabular-nums">{time}</span>
-                                      <span className="mx-0.5 text-primary-400" aria-hidden="true">·</span>
+                                      <span className="mx-0.5 text-primary-600" aria-hidden="true">·</span>
                                     </>
                                   )}
                                   {e.title}

@@ -172,7 +172,7 @@ export const CreateMember = () => {
                 i < step
                   ? "bg-primary-600"
                   : i === step
-                    ? "bg-primary-400"
+                    ? "bg-primary-200"
                     : "bg-neutral-200"
               }`}
             />
