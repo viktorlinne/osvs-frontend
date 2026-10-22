@@ -140,7 +140,7 @@ export const RevisionsPage = () => {
         <AsyncState
           loading={false}
           error
-          errorMessage="Logfilter kunde inte laddas."
+          errorMessage="Logefiltret kunde inte laddas."
           onRetry={() => {
             setFiltersError(false);
             runLodges(async () => {

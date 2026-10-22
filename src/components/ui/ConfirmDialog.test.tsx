@@ -15,15 +15,15 @@ function Harness({ onResult }: { onResult: (value: boolean) => void }) {
         variant="danger"
         onClick={async () => {
           const ok = await confirm({
-            title: "Radera mötet?",
-            description: "Mötet raderas permanent.",
-            confirmLabel: "Radera",
+            title: "Ta bort mötet?",
+            description: "Mötet tas bort permanent.",
+            confirmLabel: "Ta bort",
           });
           onResult(ok);
           setCount((c) => c + 1);
         }}
       >
-        Radera
+        Ta bort
       </Button>
       <span data-testid="count">{count}</span>
       {confirmDialog}
@@ -35,10 +35,10 @@ describe("useConfirm / ConfirmDialog", () => {
   it("opens an alertdialog with name and description, focusing Avbryt", async () => {
     const user = userEvent.setup();
     render(<Harness onResult={vi.fn()} />);
-    await user.click(screen.getByRole("button", { name: "Radera" }));
+    await user.click(screen.getByRole("button", { name: "Ta bort" }));
 
-    const dialog = await screen.findByRole("alertdialog", { name: "Radera mötet?" });
-    expect(dialog).toHaveAccessibleDescription("Mötet raderas permanent.");
+    const dialog = await screen.findByRole("alertdialog", { name: "Ta bort mötet?" });
+    expect(dialog).toHaveAccessibleDescription("Mötet tas bort permanent.");
     await waitFor(() =>
       expect(within(dialog).getByRole("button", { name: "Avbryt" })).toHaveFocus(),
     );
@@ -48,9 +48,9 @@ describe("useConfirm / ConfirmDialog", () => {
     const user = userEvent.setup();
     const onResult = vi.fn();
     render(<Harness onResult={onResult} />);
-    await user.click(screen.getByRole("button", { name: "Radera" }));
+    await user.click(screen.getByRole("button", { name: "Ta bort" }));
     const dialog = await screen.findByRole("alertdialog");
-    await user.click(within(dialog).getByRole("button", { name: "Radera" }));
+    await user.click(within(dialog).getByRole("button", { name: "Ta bort" }));
 
     await waitFor(() => expect(onResult).toHaveBeenCalledWith(true));
     await waitFor(() => expect(screen.queryByRole("alertdialog")).not.toBeInTheDocument());
@@ -60,7 +60,7 @@ describe("useConfirm / ConfirmDialog", () => {
     const user = userEvent.setup();
     const onResult = vi.fn();
     render(<Harness onResult={onResult} />);
-    const opener = screen.getByRole("button", { name: "Radera" });
+    const opener = screen.getByRole("button", { name: "Ta bort" });
 
     await user.click(opener);
     await user.click(

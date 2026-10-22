@@ -36,7 +36,7 @@ export function EventList() {
   if (failed)
     return (
       <p className="text-sm text-danger-600">
-        Kunde inte hämta kommande möten
+        Kommande möten kunde inte laddas.
       </p>
     );
   if (!events.length)

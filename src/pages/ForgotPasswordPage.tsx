@@ -37,7 +37,7 @@ export const ForgotPasswordPage = () => {
       setSubmitted(true);
     } catch (error: unknown) {
       if (applyApiFieldErrors(error, setFieldError)) return;
-      setError(getApiErrorMessage(error) ?? "Kunde inte skicka återställningsmejlet");
+      setError(getApiErrorMessage(error) ?? "Kunde inte skicka återställningsmejlet.");
     } finally {
       setSubmitting(false);
     }

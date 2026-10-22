@@ -116,7 +116,7 @@ export const NewsPage = () => {
         setLodges(data);
       })
       .catch(() => {
-        setError("Misslyckades att hämta loger");
+        setError("Kunde inte hämta logerna.");
       });
     return () => {
       mounted = false;

@@ -40,7 +40,7 @@ function memberDisplayName(member: GroupMember) {
 function formatAddResult(added: number, alreadyMembers: number) {
   const parts: string[] = [];
   if (added > 0) {
-    parts.push(added === 1 ? "1 medlem lades till." : `${added} medlemmar lades till.`);
+    parts.push(added === 1 ? "1 medlem har lagts till." : `${added} medlemmar har lagts till.`);
   }
   if (alreadyMembers > 0) {
     parts.push(
@@ -162,7 +162,7 @@ export const GroupDetail = () => {
     const updated = await updateGroup(id, values);
     setGroup(updated);
     setEditing(false);
-    toast.success("Gruppen sparades.");
+    toast.success("Ändringarna har sparats.");
   }
 
   async function handleDelete() {
@@ -171,11 +171,11 @@ export const GroupDetail = () => {
     setDeleting(true);
     try {
       await deleteGroup(id);
-      toast.success(group ? `Gruppen ${group.name} togs bort.` : "Gruppen togs bort.");
+      toast.success(group ? `Gruppen ”${group.name}” har tagits bort.` : "Gruppen har tagits bort.");
       navigate("/admin/groups");
     } catch (error: unknown) {
       setConfirmDelete(false);
-      setGlobalError(getApiErrorMessage(error) ?? "Kunde inte ta bort gruppen");
+      setGlobalError(getApiErrorMessage(error) ?? "Kunde inte ta bort gruppen.");
     } finally {
       setDeleting(false);
     }
@@ -198,7 +198,7 @@ export const GroupDetail = () => {
     } catch (error: unknown) {
       const fieldError = getApiFieldErrors(error)?.userIds;
       if (fieldError) setAddError(fieldError);
-      else setGlobalError(getApiErrorMessage(error) ?? "Kunde inte lägga till medlemmar");
+      else setGlobalError(getApiErrorMessage(error) ?? "Kunde inte lägga till medlemmarna.");
     } finally {
       setAdding(false);
     }
@@ -215,8 +215,8 @@ export const GroupDetail = () => {
       focusAfterRemoveRef.current = Math.max(removedIndex, 0);
       toast.success(
         removed
-          ? `${memberDisplayName(removed)} togs bort ur gruppen.`
-          : "Medlemmen togs bort ur gruppen.",
+          ? `${memberDisplayName(removed)} har tagits bort ur gruppen.`
+          : "Medlemmen har tagits bort ur gruppen.",
       );
       setConfirmRemoveId(null);
       setAddResult(null);
@@ -224,7 +224,7 @@ export const GroupDetail = () => {
     } catch (error: unknown) {
       // Close the dialog so the global error banner is visible.
       setConfirmRemoveId(null);
-      setGlobalError(getApiErrorMessage(error) ?? "Kunde inte ta bort medlemmen");
+      setGlobalError(getApiErrorMessage(error) ?? "Kunde inte ta bort medlemmen.");
     } finally {
       setRemovingId(null);
     }
@@ -273,7 +273,7 @@ export const GroupDetail = () => {
                   initialValues={group}
                   submitLabel="Spara"
                   submittingLabel="Sparar…"
-                  fallbackErrorMessage="Kunde inte spara gruppen"
+                  fallbackErrorMessage="Kunde inte spara gruppen."
                   onSubmit={handleUpdate}
                   onCancel={() => setEditing(false)}
                 />
@@ -308,11 +308,11 @@ export const GroupDetail = () => {
                   <ConfirmDialog
                     open={confirmDelete}
                     onOpenChange={setConfirmDelete}
-                    title={`Ta bort gruppen ${group.name}?`}
+                    title="Ta bort gruppen?"
                     description={
                       group.memberCount > 0
-                        ? `${group.memberCount} medlemskap tas bort, men medlemmarnas konton påverkas inte.`
-                        : "Gruppen tas bort permanent."
+                        ? `Gruppen ”${group.name}” tas bort permanent, med ${group.memberCount} medlemskap. Medlemmarnas konton påverkas inte.`
+                        : `Gruppen ”${group.name}” tas bort permanent.`
                     }
                     confirmLabel="Ta bort"
                     pendingLabel="Tar bort…"
@@ -431,7 +431,7 @@ export const GroupDetail = () => {
               title="Ta bort ur gruppen?"
               description={
                 confirmRemoveMember
-                  ? `${memberDisplayName(confirmRemoveMember)} tas bort ur gruppen ${group.name}. Medlemmens konto påverkas inte.`
+                  ? `${memberDisplayName(confirmRemoveMember)} tas bort ur gruppen ”${group.name}”. Medlemmens konto påverkas inte.`
                   : undefined
               }
               confirmLabel="Ta bort"

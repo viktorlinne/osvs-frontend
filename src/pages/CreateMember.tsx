@@ -127,12 +127,12 @@ export const CreateMember = () => {
       await runSubmit(() => registerMember(fd));
       navigate("/members", {
         state: {
-          createdNotice: `Medlemmen skapades och ett mejl skickades till ${email} för att välja lösenord.`,
+          createdNotice: `Medlemmen har registrerats. Ett mejl har skickats till ${email} så att medlemmen kan välja sitt lösenord.`,
         },
       });
     } catch (error: unknown) {
       if (applyApiFieldErrors(error, setFieldError)) return;
-      setError(getApiErrorMessage(error) ?? "Kunde inte registrera ledamoten");
+      setError(getApiErrorMessage(error) ?? "Kunde inte registrera medlemmen.");
     } finally {
       setLoading(false);
     }

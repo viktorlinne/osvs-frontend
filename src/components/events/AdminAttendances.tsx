@@ -34,13 +34,13 @@ export function AdminAttendances({
   return (
     <div>
       <div className="mb-2">
-        <strong>Inbjudna medlemmar</strong>
+        <strong>Inbjudna bröder</strong>
       </div>
 
       <div className="rounded-md border border-neutral-200 bg-white p-2">
         {loading ? (
           <div className="py-2 text-sm text-neutral-600">
-            Läser deltagare…
+            Laddar inbjudna…
           </div>
         ) : Array.isArray(rows) && rows.length > 0 ? (
           <div
@@ -50,13 +50,13 @@ export function AdminAttendances({
             // eslint-disable-next-line jsx-a11y/no-noninteractive-tabindex
             tabIndex={0}
             role="region"
-            aria-label="Inbjudna medlemmar"
+            aria-label="Inbjudna bröder"
           >
             <table className="w-full text-sm">
               <thead className="sticky top-0 bg-white">
                 <tr className="border-b border-neutral-200 text-left text-neutral-600">
                   <th className="py-2 pr-3 font-medium">Namn</th>
-                  <th className="py-2 pr-3 font-medium">RSVP</th>
+                  <th className="py-2 pr-3 font-medium">Kommer</th>
                   <th className="py-2 pr-3 font-medium">Boka mat</th>
                   <th className="py-2 pr-3 font-medium">Allergier</th>
                   <th className="py-2 pr-3 font-medium">Deltagande</th>
@@ -84,7 +84,7 @@ export function AdminAttendances({
                         <input
                           type="checkbox"
                           checked={row.rsvp}
-                          aria-label={`RSVP – ${row.firstname} ${row.lastname}`}
+                          aria-label={`Kommer – ${row.firstname} ${row.lastname}`}
                           disabled={disableRsvp}
                           className="h-4 w-4 rounded border-neutral-300 text-primary-600 focus-visible:ring-primary-600"
                           onChange={(event) =>
@@ -156,7 +156,7 @@ export function AdminAttendances({
           </div>
         ) : (
           <div className="py-2 text-sm text-neutral-600">
-            Inga inbjudna deltagare
+            Inga inbjudna bröder.
           </div>
         )}
       </div>

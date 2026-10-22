@@ -196,7 +196,7 @@ export const Profile = () => {
           }
         } catch {
           partialFailure = true;
-          setGlobalError("Misslyckades att uppdatera roller");
+          setGlobalError("Kunde inte uppdatera rollerna.");
         }
 
         try {
@@ -205,7 +205,7 @@ export const Profile = () => {
           }
         } catch {
           partialFailure = true;
-          setGlobalError("Misslyckades att uppdatera tjänster");
+          setGlobalError("Kunde inte uppdatera tjänsterna.");
         }
 
         try {
@@ -214,7 +214,7 @@ export const Profile = () => {
           }
         } catch {
           partialFailure = true;
-          setGlobalError("Misslyckades att uppdatera allergier");
+          setGlobalError("Kunde inte uppdatera allergierna.");
         }
 
         try {
@@ -227,7 +227,7 @@ export const Profile = () => {
           }
         } catch {
           partialFailure = true;
-          setGlobalError("Misslyckades att tilldela utmärkelse");
+          setGlobalError("Kunde inte tilldela utmärkelsen.");
         }
 
         if (lodgeChanged) {
@@ -240,7 +240,7 @@ export const Profile = () => {
             );
           } catch {
             partialFailure = true;
-            setGlobalError("Misslyckades att uppdatera loge");
+            setGlobalError("Kunde inte uppdatera logen.");
           }
         }
       }
@@ -250,14 +250,14 @@ export const Profile = () => {
       setSelectedAllergyIds(null);
 
       await refresh();
-      if (!partialFailure) toast.success("Profilen sparades.");
+      if (!partialFailure) toast.success("Ändringarna har sparats.");
       navigate("/profile", { replace: true });
     } catch (error: unknown) {
       if (applyApiFieldErrors(error, setFieldError)) {
         return;
       }
 
-      setGlobalError("Misslyckades att uppdatera profilen");
+      setGlobalError("Kunde inte spara profilen.");
     } finally {
       setSaving(false);
     }
@@ -307,7 +307,7 @@ export const Profile = () => {
                 );
                 await refresh();
               } catch {
-                setGlobalError("Misslyckades att uppdatera loge");
+                setGlobalError("Kunde inte uppdatera logen.");
               } finally {
                 setSaving(false);
               }

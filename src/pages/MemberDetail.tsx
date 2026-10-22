@@ -339,7 +339,7 @@ export const MemberDetail = () => {
           await runAction(() => setRoles(userId, selectedRoleIds));
         } catch {
           partialFailure = true;
-          setGlobalError("Misslyckades att uppdatera roller");
+          setGlobalError("Kunde inte uppdatera rollerna.");
         }
       }
 
@@ -349,7 +349,7 @@ export const MemberDetail = () => {
         }
       } catch {
         partialFailure = true;
-        setGlobalError("Misslyckades att uppdatera allergier");
+        setGlobalError("Kunde inte uppdatera allergierna.");
       }
 
       if (lodgeChanged) {
@@ -363,20 +363,20 @@ export const MemberDetail = () => {
           setInitialLid(selectedLid);
         } catch {
           partialFailure = true;
-          setGlobalError("Misslyckades att uppdatera loge");
+          setGlobalError("Kunde inte uppdatera logen.");
         }
       }
       setSelectedAllergyIds(null);
 
       await run(loadMember);
-      if (!partialFailure) toast.success("Medlemmen sparades.");
+      if (!partialFailure) toast.success("Ändringarna har sparats.");
       navigate(`/members/${matrikelnummer}`, { replace: true });
     } catch (error: unknown) {
       if (applyApiFieldErrors(error, setFieldError)) {
         return;
       }
 
-      setGlobalError("Misslyckades att uppdatera medlem");
+      setGlobalError("Kunde inte spara medlemmen.");
     } finally {
       setSaving(false);
     }
@@ -445,7 +445,7 @@ export const MemberDetail = () => {
                   );
                   await run(loadMember);
                 } catch {
-                  setGlobalError("Misslyckades att uppdatera loge");
+                  setGlobalError("Kunde inte uppdatera logen.");
                 } finally {
                   setSaving(false);
                 }
@@ -577,7 +577,7 @@ export const MemberDetail = () => {
         </div>
       ) : memberNotFound || !member ? (
         <NotFoundPanel
-          title="Brodern hittades inte"
+          title="Medlemmen hittades inte"
           description="Kontrollera länken eller gå tillbaka till medlemslistan."
           backTo="/members"
           backLabel="Till medlemslistan"

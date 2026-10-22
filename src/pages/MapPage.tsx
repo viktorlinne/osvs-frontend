@@ -2,7 +2,8 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import L from "leaflet";
 import { MapContainer, Marker, Popup, TileLayer, useMap } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
-import { PageContainer, AsyncState, selectClass } from "../components";
+import { toast } from "sonner";
+import { PageContainer, AsyncState, ConfirmDialog, selectClass } from "../components";
 import { useAuth } from "../context";
 import useDebouncedUserSearch from "../hooks/useDebouncedUserSearch";
 import useFetch from "../hooks/useFetch";
@@ -149,9 +150,7 @@ export const MapPage = () => {
     Record<number, { lat: number; lng: number }>
   >({});
   const [isEditing, setIsEditing] = useState(false);
-  const [actionStatus, setActionStatus] = useState<"idle" | "saved" | "removed">("idle");
   const [pendingReset, setPendingReset] = useState(false);
-  const statusTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const isAdmin = Boolean(
     authUser && (authUser.roles ?? []).some((role) => role === "Admin"),
@@ -219,11 +218,6 @@ export const MapPage = () => {
     [effectiveSelectedUserId],
   );
 
-  const scheduleStatusReset = useCallback(() => {
-    if (statusTimeoutRef.current) clearTimeout(statusTimeoutRef.current);
-    statusTimeoutRef.current = setTimeout(() => setActionStatus("idle"), 4000);
-  }, []);
-
   const handleSave = async () => {
     if (effectiveSelectedUserId === null || !currentDraftLocation) return;
     try {
@@ -234,9 +228,8 @@ export const MapPage = () => {
         }),
       );
       await refreshPins();
-      setActionStatus("saved");
+      toast.success("Positionen har sparats.");
       setIsEditing(false);
-      scheduleStatusReset();
     } catch {
       // error surfaced via global error banner
     }
@@ -253,13 +246,15 @@ export const MapPage = () => {
       });
       await refreshPins();
       setPendingReset(false);
-      setActionStatus("removed");
+      toast.success("Positionen har tagits bort.");
       setIsEditing(false);
-      scheduleStatusReset();
     } catch {
       setPendingReset(false);
     }
   };
+
+  const selectedUserName =
+    editableUsers.find((entry) => entry.id === effectiveSelectedUserId)?.name ?? null;
 
   const hasExistingPin =
     effectiveSelectedUserId !== null && pinByUserId.has(effectiveSelectedUserId);
@@ -384,7 +379,7 @@ export const MapPage = () => {
         {isAdmin && (
         <div className="ui-card">
           <label htmlFor="mapTargetUserSearch" className="ui-label">
-            Sök broder
+            Sök medlem
           </label>
           <input
             id="mapTargetUserSearch"
@@ -395,7 +390,7 @@ export const MapPage = () => {
             placeholder="Sök på namn…"
           />
           <label htmlFor="mapTargetUser" className="ui-label">
-            Välj broder
+            Välj medlem
           </label>
           <select
             id="mapTargetUser"
@@ -417,17 +412,6 @@ export const MapPage = () => {
             ))}
           </select>
 
-          {actionStatus !== "idle" && (
-            <p
-              role="status"
-              className="mt-3 text-sm font-medium text-success-600"
-            >
-              {actionStatus === "saved"
-                ? "Position sparad."
-                : "Manuell position borttagen."}
-            </p>
-          )}
-
           {!isEditing ? (
             <div className="mt-4">
               <p className="text-sm text-neutral-600">
@@ -441,7 +425,6 @@ export const MapPage = () => {
                 disabled={effectiveSelectedUserId === null}
                 onClick={() => {
                   setIsEditing(true);
-                  setActionStatus("idle");
                   setPendingReset(false);
                 }}
               >
@@ -476,42 +459,28 @@ export const MapPage = () => {
                   {actionLoading && !pendingReset ? "Sparar…" : "Spara position"}
                 </button>
 
-                {!pendingReset ? (
-                  <button
-                    type="button"
-                    className="ui-btn ui-btn-secondary"
-                    disabled={actionLoading || effectiveSelectedUserId === null}
-                    onClick={() => setPendingReset(true)}
-                  >
-                    Ta bort manuell position
-                  </button>
-                ) : (
-                  <div className="rounded-md border border-neutral-200 p-3">
-                    <p className="mb-2 text-sm text-neutral-700">
-                      Positionen tas bort. Är du säker?
-                    </p>
-                    <div className="flex gap-2">
-                      <button
-                        type="button"
-                        className="ui-btn ui-btn-sm ui-btn-danger flex-1"
-                        disabled={actionLoading}
-                        onClick={() => {
-                          void handleReset();
-                        }}
-                      >
-                        {actionLoading ? "Tar bort…" : "Bekräfta"}
-                      </button>
-                      <button
-                        type="button"
-                        className="ui-btn ui-btn-sm ui-btn-secondary flex-1"
-                        disabled={actionLoading}
-                        onClick={() => setPendingReset(false)}
-                      >
-                        Avbryt
-                      </button>
-                    </div>
-                  </div>
-                )}
+                <button
+                  type="button"
+                  className="ui-btn ui-btn-secondary"
+                  disabled={actionLoading || effectiveSelectedUserId === null}
+                  onClick={() => setPendingReset(true)}
+                >
+                  Ta bort manuell position
+                </button>
+                <ConfirmDialog
+                  open={pendingReset}
+                  onOpenChange={setPendingReset}
+                  title="Ta bort positionen?"
+                  description={
+                    selectedUserName
+                      ? `Den manuellt angivna positionen för ${selectedUserName} tas bort från medlemskartan.`
+                      : "Den manuellt angivna positionen tas bort från medlemskartan."
+                  }
+                  confirmLabel="Ta bort"
+                  pendingLabel="Tar bort…"
+                  pending={actionLoading}
+                  onConfirm={() => void handleReset()}
+                />
 
                 <button
                   type="button"

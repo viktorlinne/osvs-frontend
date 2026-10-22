@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, useBlocker, useLocation, useNavigate, useParams } from "react-router-dom";
+import { toast } from "sonner";
 import {
   Button,
   PageContainer,
@@ -34,9 +35,6 @@ export const LodgeDetail = () => {
   const [form, setForm] = useState(emptyForm);
   const [initialForm, setInitialForm] = useState(emptyForm);
   const [serverErrors, setServerErrors] = useState<Record<string, string>>({});
-  const [showSavedNotice, setShowSavedNotice] = useState(
-    Boolean((location.state as { saved?: boolean } | null)?.saved),
-  );
 
   const clientErrors = getLodgeFormErrors(form);
   const formErrors = { ...serverErrors, ...clientErrors };
@@ -98,7 +96,8 @@ export const LodgeDetail = () => {
       };
       await runAction(() => updateLodge(id, payload));
       await run(() => getLodge(id));
-      navigate(`/lodges/${id}`, { state: { saved: true } });
+      toast.success("Ändringarna har sparats.");
+      navigate(`/lodges/${id}`);
     } catch (error: unknown) {
       const fields = getApiFieldErrors(error);
       if (fields) {
@@ -106,7 +105,7 @@ export const LodgeDetail = () => {
         return;
       }
 
-      setGlobalError(getApiErrorMessage(error) ?? "Misslyckades att spara logen");
+      setGlobalError(getApiErrorMessage(error) ?? "Kunde inte spara logen.");
     }
   }
 
@@ -270,19 +269,6 @@ export const LodgeDetail = () => {
             </div>
           ) : (
             <div className="space-y-4">
-              {showSavedNotice && (
-                <div className="flex items-center justify-between rounded-md border border-ordensgreen-pale bg-ordensgreen-faint px-4 py-3 text-sm text-ink-secondary">
-                  <span>Logen sparad.</span>
-                  <button
-                    type="button"
-                    onClick={() => setShowSavedNotice(false)}
-                    className="text-ink-secondary hover:text-ink-mid ml-4"
-                    aria-label="Stäng"
-                  >
-                    ×
-                  </button>
-                </div>
-              )}
               {lodge.picture ? (
                 <img
                   className="h-28 w-28 rounded-lg object-cover md:h-40 md:w-40"

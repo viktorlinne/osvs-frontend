@@ -90,7 +90,7 @@ export const useProfile = ({ isEditRoute }: { isEditRoute: boolean }) => {
       await postAchievement(targetUserId, { achievementId, awardedAt });
       await refresh();
     } catch {
-      setGlobalError("Misslyckades att tilldela utmärkelse");
+      setGlobalError("Kunde inte tilldela utmärkelsen.");
     }
   }
 
@@ -99,7 +99,7 @@ export const useProfile = ({ isEditRoute }: { isEditRoute: boolean }) => {
       await setRoles(targetUserId, ids);
       await refresh();
     } catch {
-      setGlobalError("Misslyckades att uppdatera roller");
+      setGlobalError("Kunde inte uppdatera rollerna.");
     }
   }
 

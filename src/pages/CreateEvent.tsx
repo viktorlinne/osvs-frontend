@@ -103,7 +103,7 @@ export const CreateEvent = () => {
     setServerErrors({});
 
     if (!canCreate) {
-      setGlobalError("Du har inte behörighet att skapa möten");
+      setGlobalError("Du saknar behörighet att skapa möten.");
       return;
     }
 
@@ -140,7 +140,7 @@ export const CreateEvent = () => {
       }
 
       setGlobalError(
-        getApiErrorMessage(error) ?? "Misslyckades att skapa mötet",
+        getApiErrorMessage(error) ?? "Kunde inte skapa mötet.",
       );
     }
   }

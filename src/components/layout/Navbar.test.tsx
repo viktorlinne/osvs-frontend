@@ -27,6 +27,7 @@ function renderNavbar(roles: string[] | null) {
       </AuthContext.Provider>
     </ErrorContext.Provider>,
   );
+  return auth;
 }
 
 describe("Navbar mobile menu", () => {
@@ -65,5 +66,46 @@ describe("Navbar mobile menu", () => {
     const menu = document.getElementById("mobile-menu")!;
     await user.click(within(menu).getByRole("link", { name: "Kontakt" }));
     expect(document.getElementById("mobile-menu")).toBeNull();
+  });
+});
+
+describe("Navbar logout", () => {
+  it("asks for confirmation in the standard dialog; Avbryt keeps the session", async () => {
+    const user = userEvent.setup();
+    const auth = renderNavbar(["Member"]);
+    const logoutButton = screen.getByRole("button", { name: "Logga ut" });
+    await user.click(logoutButton);
+
+    const dialog = await screen.findByRole("alertdialog", { name: "Logga ut?" });
+    expect(within(dialog).getByRole("button", { name: "Avbryt" })).toHaveFocus();
+    await user.click(within(dialog).getByRole("button", { name: "Avbryt" }));
+
+    expect(screen.queryByRole("alertdialog")).not.toBeInTheDocument();
+    expect(auth.logout).not.toHaveBeenCalled();
+    expect(logoutButton).toHaveFocus();
+  });
+
+  it("logs out on confirm", async () => {
+    const user = userEvent.setup();
+    const auth = renderNavbar(["Member"]);
+    await user.click(screen.getByRole("button", { name: "Logga ut" }));
+    const dialog = await screen.findByRole("alertdialog", { name: "Logga ut?" });
+    await user.click(within(dialog).getByRole("button", { name: "Logga ut" }));
+    expect(auth.logout).toHaveBeenCalledTimes(1);
+  });
+
+  it("Escape closes only the dialog, not the mobile menu", async () => {
+    const user = userEvent.setup();
+    renderNavbar(["Member"]);
+    await user.click(screen.getByRole("button", { name: "Öppna meny" }));
+    const menu = document.getElementById("mobile-menu")!;
+    const mobileLogout = within(menu).getByRole("button", { name: "Logga ut" });
+    await user.click(mobileLogout);
+    await screen.findByRole("alertdialog", { name: "Logga ut?" });
+
+    await user.keyboard("{Escape}");
+    expect(screen.queryByRole("alertdialog")).not.toBeInTheDocument();
+    expect(document.getElementById("mobile-menu")).not.toBeNull();
+    expect(mobileLogout).toHaveFocus();
   });
 });

@@ -71,7 +71,7 @@ export const UploadDocument = () => {
         return;
       }
 
-      setGlobalError(getApiErrorMessage(error) ?? "Kunde inte skapa dokumentet");
+      setGlobalError(getApiErrorMessage(error) ?? "Kunde inte skapa dokumentet.");
     }
   }
 
@@ -124,7 +124,7 @@ export const UploadDocument = () => {
           loading={loading}
           disabled={!isValid || Boolean(fileError)}
         >
-          {loading ? "Sparar…" : "Skapa"}
+          {loading ? "Skapar…" : "Skapa"}
         </Button>
       </form>
     </PageContainer>

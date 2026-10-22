@@ -37,7 +37,7 @@ export const GroupsPage = () => {
 
   async function handleCreate(values: { name: string; description: string | null }) {
     const group = await createGroup(values);
-    toast.success(`Gruppen ${group.name} skapades.`);
+    toast.success(`Gruppen ”${group.name}” har skapats.`);
     navigate(`/admin/groups/${group.id}`);
   }
 
@@ -67,7 +67,7 @@ export const GroupsPage = () => {
             idPrefix="create-group"
             submitLabel="Skapa"
             submittingLabel="Skapar…"
-            fallbackErrorMessage="Kunde inte skapa gruppen"
+            fallbackErrorMessage="Kunde inte skapa gruppen."
             onSubmit={handleCreate}
             onCancel={() => setCreating(false)}
           />

@@ -235,7 +235,7 @@ export function EventDetailEditForm({
             onClick={onDelete}
             disabled={saving}
           >
-            Radera
+            Ta bort
           </Button>
         )}
         <Link to=".." relative="path" className="ui-btn ui-btn-secondary">

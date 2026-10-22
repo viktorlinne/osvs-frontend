@@ -21,11 +21,11 @@ describe("AdminAttendances", () => {
         rows={[{ ...baseRow, paymentStatus: null, paymentPaid: false }]}
       />,
     );
-    for (const label of ["RSVP", "Boka mat", "Deltagande", "Betalning"]) {
+    for (const label of ["Kommer", "Boka mat", "Deltagande", "Betalning"]) {
       expect(screen.getByRole("checkbox", { name: `${label} – Bo Ek` })).toBeInTheDocument();
     }
     // The scrollable list is a focusable, named region.
-    expect(screen.getByRole("region", { name: "Inbjudna medlemmar" })).toHaveAttribute(
+    expect(screen.getByRole("region", { name: "Inbjudna bröder" })).toHaveAttribute(
       "tabindex",
       "0",
     );
@@ -47,6 +47,6 @@ describe("AdminAttendances", () => {
     expect(screen.queryByRole("columnheader", { name: "Betalning" })).not.toBeInTheDocument();
     expect(screen.queryByRole("checkbox", { name: /Betalning/ })).not.toBeInTheDocument();
     // The rest of the row is still shown.
-    expect(screen.getByRole("checkbox", { name: "RSVP – Bo Ek" })).toBeInTheDocument();
+    expect(screen.getByRole("checkbox", { name: "Kommer – Bo Ek" })).toBeInTheDocument();
   });
 });

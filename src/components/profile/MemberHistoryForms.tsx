@@ -212,7 +212,7 @@ export function OfficialEntryForm({
           datesConfirmed: startConfirmed && endConfirmed,
           note: note.trim() || null,
         }),
-      "Kunde inte spara tjänsten",
+      "Kunde inte spara tjänsten.",
     );
   }
 
@@ -403,7 +403,7 @@ export function AchievementEntryForm({
           awardedAt,
           note: note.trim() || null,
         }),
-      "Kunde inte spara utmärkelsen",
+      "Kunde inte spara utmärkelsen.",
     );
   }
 
@@ -494,7 +494,7 @@ export function DeleteEntryForm({
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (!canSave) return;
-    void submit(() => onSubmit(note.trim()), "Kunde inte ta bort posten");
+    void submit(() => onSubmit(note.trim()), "Kunde inte ta bort posten.");
   }
 
   return (

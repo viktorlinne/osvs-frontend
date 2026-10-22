@@ -114,7 +114,7 @@ describe("GroupMailingSection", () => {
     expect(mailingsMock.createMailing).not.toHaveBeenCalled();
 
     await user.click(screen.getByRole("button", { name: "Skicka utskick" }));
-    await user.click(await screen.findByRole("button", { name: "Ja, skicka" }));
+    await user.click(await screen.findByRole("button", { name: "Skicka" }));
 
     await waitFor(() =>
       expect(mailingsMock.createMailing).toHaveBeenCalledWith("5", {
@@ -143,7 +143,7 @@ describe("GroupMailingSection", () => {
     await user.type(screen.getByLabelText("Ämne"), "Kallelse");
     await user.type(screen.getByLabelText("Meddelande"), "Hej");
     await user.click(screen.getByRole("button", { name: "Skicka utskick" }));
-    await user.click(await screen.findByRole("button", { name: "Ja, skicka" }));
+    await user.click(await screen.findByRole("button", { name: "Skicka" }));
 
     expect(await screen.findByText("Ämnet får vara högst 200 tecken")).toBeInTheDocument();
     expect(setError).not.toHaveBeenCalled();

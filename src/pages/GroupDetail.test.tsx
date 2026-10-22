@@ -69,9 +69,9 @@ describe("GroupDetail confirmations", () => {
 
     await user.click(screen.getByRole("button", { name: "Ta bort" }));
     let dialog = await screen.findByRole("alertdialog", {
-      name: "Ta bort gruppen Styrelsen?",
+      name: "Ta bort gruppen?",
     });
-    expect(dialog).toHaveTextContent("2 medlemskap tas bort");
+    expect(dialog).toHaveTextContent("Gruppen ”Styrelsen” tas bort permanent, med 2 medlemskap.");
     await user.click(within(dialog).getByRole("button", { name: "Avbryt" }));
     await waitFor(() => expect(screen.queryByRole("alertdialog")).not.toBeInTheDocument());
     expect(groupsMock.deleteGroup).not.toHaveBeenCalled();
@@ -82,7 +82,7 @@ describe("GroupDetail confirmations", () => {
 
     await waitFor(() => expect(groupsMock.deleteGroup).toHaveBeenCalledWith("3"));
     expect(await screen.findByText("Grupplista")).toBeInTheDocument();
-    expect(await screen.findByText("Gruppen Styrelsen togs bort.")).toBeInTheDocument();
+    expect(await screen.findByText("Gruppen ”Styrelsen” har tagits bort.")).toBeInTheDocument();
   });
 
   it("confirms before removing a member", async () => {
@@ -92,13 +92,13 @@ describe("GroupDetail confirmations", () => {
       await screen.findByRole("button", { name: "Ta bort Bo Ek ur gruppen" }),
     );
     const dialog = await screen.findByRole("alertdialog", { name: "Ta bort ur gruppen?" });
-    expect(dialog).toHaveTextContent("Bo Ek tas bort ur gruppen Styrelsen");
+    expect(dialog).toHaveTextContent("Bo Ek tas bort ur gruppen ”Styrelsen”");
 
     groupsMock.listGroupMembers.mockResolvedValue([members[0]]);
     await user.click(within(dialog).getByRole("button", { name: "Ta bort" }));
 
     await waitFor(() => expect(groupsMock.removeGroupMember).toHaveBeenCalledWith("3", 12));
-    expect(await screen.findByText("Bo Ek togs bort ur gruppen.")).toBeInTheDocument();
+    expect(await screen.findByText("Bo Ek har tagits bort ur gruppen.")).toBeInTheDocument();
     await waitFor(() => expect(screen.queryByRole("alertdialog")).not.toBeInTheDocument());
     await waitFor(() =>
       expect(screen.queryByRole("link", { name: "Bo Ek" })).not.toBeInTheDocument(),
@@ -171,6 +171,6 @@ describe("GroupDetail confirmations", () => {
 
     await user.click(screen.getByRole("button", { name: "Lägg till (1)" }));
     await waitFor(() => expect(groupsMock.addGroupMembers).toHaveBeenCalledWith("3", [13]));
-    expect(await screen.findByText("1 medlem lades till.")).toBeInTheDocument();
+    expect(await screen.findByText("1 medlem har lagts till.")).toBeInTheDocument();
   });
 });

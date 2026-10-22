@@ -82,7 +82,7 @@ export const PostDetail = () => {
         setLodges(res);
       })
       .catch(() => {
-        if (mounted) setGlobalError("Misslyckades att hämta loger");
+        if (mounted) setGlobalError("Kunde inte hämta logerna.");
       })
       .finally(() => {
         if (mounted) setLodgesLoading(false);
@@ -158,7 +158,7 @@ export const PostDetail = () => {
       }
 
       setGlobalError(
-        getApiErrorMessage(error) ?? "Misslyckades att spara inlägget",
+        getApiErrorMessage(error) ?? "Kunde inte spara inlägget.",
       );
     }
   }
@@ -170,7 +170,7 @@ export const PostDetail = () => {
       navigate("/posts");
     } catch {
       setConfirmDelete(false);
-      setGlobalError("Misslyckades att radera inlägget");
+      setGlobalError("Kunde inte ta bort inlägget.");
     }
   }
 
@@ -341,7 +341,7 @@ export const PostDetail = () => {
                 onClick={() => setConfirmDelete(true)}
                 disabled={submitting}
               >
-                Radera
+                Ta bort
               </Button>
             )}
           </div>
@@ -351,10 +351,14 @@ export const PostDetail = () => {
         <ConfirmDialog
           open={confirmDelete}
           onOpenChange={setConfirmDelete}
-          title="Radera inlägget?"
-          description="Inlägget raderas permanent. Det går inte att ångra."
-          confirmLabel="Radera"
-          pendingLabel="Raderar…"
+          title="Ta bort inlägget?"
+          description={
+            post?.title
+              ? `Inlägget ”${post.title}” tas bort permanent. Det går inte att ångra.`
+              : "Inlägget tas bort permanent. Det går inte att ångra."
+          }
+          confirmLabel="Ta bort"
+          pendingLabel="Tar bort…"
           pending={submitting && confirmDelete}
           onConfirm={() => void handleConfirmDelete()}
         />

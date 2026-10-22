@@ -10,7 +10,7 @@ export type ConfirmOptions = Pick<
  * Promise-based replacement for `window.confirm`:
  *
  *   const { confirm, confirmDialog } = useConfirm();
- *   if (!(await confirm({ title: "Radera mötet?" }))) return;
+ *   if (!(await confirm({ title: "Ta bort mötet?" }))) return;
  *   ...
  *   return <>{...}{confirmDialog}</>;
  *

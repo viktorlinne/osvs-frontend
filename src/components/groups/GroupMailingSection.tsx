@@ -196,7 +196,7 @@ export function GroupMailingSection({ groupId, membersVersion }: GroupMailingSec
     } catch (error: unknown) {
       setPendingValues(null);
       if (applyApiFieldErrors(error, setFieldError)) return;
-      setGlobalError(getApiErrorMessage(error) ?? "Kunde inte skicka utskicket");
+      setGlobalError(getApiErrorMessage(error) ?? "Kunde inte skicka utskicket.");
     } finally {
       setSending(false);
     }
@@ -312,7 +312,7 @@ export function GroupMailingSection({ groupId, membersVersion }: GroupMailingSec
                 : undefined
             }
             variant="primary"
-            confirmLabel="Ja, skicka"
+            confirmLabel="Skicka"
             pendingLabel="Skickar…"
             pending={sending}
             onConfirm={() => void confirmSend()}

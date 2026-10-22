@@ -188,7 +188,7 @@ export const EventsPage = () => {
 
       {fetchError && (
         <div className="mb-4 rounded-md border border-danger-600/20 bg-danger-50 px-4 py-3 text-sm text-danger-700" role="alert">
-          Kunde inte hämta mötena. Kontrollera din anslutning och försök igen.
+          Mötena kunde inte laddas. Kontrollera din anslutning och försök igen.
         </div>
       )}
 

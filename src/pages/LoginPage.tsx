@@ -47,7 +47,7 @@ export const LoginPage = () => {
     try {
       const user = await run(() => login(email.trim(), password));
       if (user) navigate(redirectTo, { replace: true });
-      else setError("Kunde inte logga in");
+      else setError("Kunde inte logga in.");
     } catch (error: unknown) {
       if (isApiError(error) && error.status === 401) {
         setError("Felaktig e-postadress eller lösenord");

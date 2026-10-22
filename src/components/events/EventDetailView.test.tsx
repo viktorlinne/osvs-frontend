@@ -70,7 +70,7 @@ describe("EventDetailView payment visibility", () => {
 
   it("hides the Betalning column for members", () => {
     renderView(false, { attendances });
-    expect(screen.getByRole("checkbox", { name: "RSVP – Per Ås" })).toBeInTheDocument();
+    expect(screen.getByRole("checkbox", { name: "Kommer – Per Ås" })).toBeInTheDocument();
     expect(screen.queryByRole("columnheader", { name: "Betalning" })).not.toBeInTheDocument();
   });
 

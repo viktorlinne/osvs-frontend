@@ -126,7 +126,7 @@ export const SetPasswordPage = () => {
       if (applyApiFieldErrors(error, setFieldError)) return;
 
       const message =
-        getApiErrorMessage(error) ?? "Kunde inte uppdatera lösenordet";
+        getApiErrorMessage(error) ?? "Kunde inte spara lösenordet.";
       if (/länk/i.test(message)) {
         clearStoredToken();
         setLinkError(message);

@@ -132,7 +132,7 @@ export const MembersPage = () => {
         {user &&
           (user.roles ?? []).some((r) => ["Admin", "Editor"].includes(r)) && (
             <Link to="/members/create" className="ui-btn ui-btn-primary">
-              Ny broder
+              Ny medlem
             </Link>
           )}
       </div>
@@ -291,7 +291,7 @@ export const MembersPage = () => {
       >
       {members.length === 0 ? (
         <div className="ui-card flex flex-col gap-3 text-neutral-600 sm:flex-row sm:items-center sm:justify-between">
-          <span>Ingen broder matchar de valda filtren.</span>
+          <span>Inga medlemmar matchar de valda filtren.</span>
           {hasActiveFilters && (
             <button
               type="button"

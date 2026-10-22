@@ -301,7 +301,7 @@ export const EventDetail = () => {
         return;
       }
 
-      setGlobalError(getApiErrorMessage(error) ?? "Misslyckades att spara mötet");
+      setGlobalError(getApiErrorMessage(error) ?? "Kunde inte spara mötet.");
     }
   }
 
@@ -315,11 +315,11 @@ export const EventDetail = () => {
     }
 
     const confirmed = await confirm({
-      title: "Radera mötet?",
+      title: "Ta bort mötet?",
       description: event?.title
-        ? `”${event.title}” raderas permanent. Det går inte att ångra.`
-        : "Mötet raderas permanent. Det går inte att ångra.",
-      confirmLabel: "Radera",
+        ? `Mötet ”${event.title}” tas bort permanent, med alla anmälningar. Det går inte att ångra.`
+        : "Mötet tas bort permanent, med alla anmälningar. Det går inte att ångra.",
+      confirmLabel: "Ta bort",
     });
     if (!confirmed) return;
 
@@ -327,7 +327,7 @@ export const EventDetail = () => {
       await runAction(() => deleteEvent(eventId));
       navigate("/events");
     } catch {
-      setGlobalError("Misslyckades att radera mötet");
+      setGlobalError("Kunde inte ta bort mötet.");
     }
   }
 
@@ -355,7 +355,7 @@ export const EventDetail = () => {
         return false;
       }
       setGlobalError(
-        getApiErrorMessage(error) ?? "Misslyckades att spara anmälan",
+        getApiErrorMessage(error) ?? "Kunde inte spara anmälan.",
       );
       return false;
     }
@@ -407,7 +407,7 @@ export const EventDetail = () => {
         });
       }
     } catch {
-      setGlobalError("Misslyckades att uppdatera närvaron");
+      setGlobalError("Kunde inte uppdatera närvaron.");
       await runAttendances(() => listEventAttendances(eventId)).catch(() => {
         // useFetch handles global error presentation
       });

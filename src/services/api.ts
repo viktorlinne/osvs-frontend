@@ -136,8 +136,8 @@ export async function fetchData<T = unknown>(
         401: "Vänligen logga in",
         403: "Åtkomst nekad",
         404: "Hittades inte",
-        429: "För många förfrågningar - försök igen senare",
-        500: "Serverfel - försök igen senare",
+        429: "För många förfrågningar. Försök igen senare.",
+        500: "Serverfel. Försök igen senare.",
       };
 
       const message =

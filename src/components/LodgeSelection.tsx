@@ -25,7 +25,7 @@ export function LodgeSelection({
   derivedSelectedIds,
   derivedNote = "täckt av urvalet",
   onChange,
-  label = "Associera loger",
+  label = "Välj loger",
   name = "lodge-selection",
   disabled = false,
   emptyLabel = "Inga loger",

@@ -108,7 +108,7 @@ export const UploadRevisions = () => {
         return;
       }
 
-      setGlobalError(getApiErrorMessage(error) ?? "Kunde inte skapa revisionen");
+      setGlobalError(getApiErrorMessage(error) ?? "Kunde inte skapa revisionen.");
     }
   }
 

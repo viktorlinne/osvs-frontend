@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import { useAuth, useError } from "../../context";
 import { getApiErrorMessage } from "../../utils/apiErrors";
+import { ConfirmDialog } from "../ui/ConfirmDialog";
 import { NavDropdown } from "./NavDropdown";
 import { NavItem } from "./NavItem";
 
@@ -15,13 +16,11 @@ function formatSessionCountdown(expiresAt: string, nowMs: number) {
 
 function NavbarUserMenu({
   countdown,
-  confirmingLogout,
   onLogoutClick,
   onClose,
   mobile = false,
 }: {
   countdown: string | null;
-  confirmingLogout: boolean;
   onLogoutClick: () => void;
   onClose: () => void;
   mobile?: boolean;
@@ -40,9 +39,9 @@ function NavbarUserMenu({
         <button
           type="button"
           onClick={onLogoutClick}
-          className={`ui-btn ui-btn-sm mt-2 w-full ${confirmingLogout ? "ui-btn-danger" : "ui-btn-secondary"}`}
+          className="ui-btn ui-btn-sm ui-btn-secondary mt-2 w-full"
         >
-          {confirmingLogout ? "Bekräfta utloggning?" : "Logga ut"}
+          Logga ut
         </button>
       </>
     );
@@ -65,9 +64,9 @@ function NavbarUserMenu({
       <button
         type="button"
         onClick={onLogoutClick}
-        className={`ui-btn ui-btn-sm ${confirmingLogout ? "ui-btn-danger" : "ui-btn-secondary"}`}
+        className="ui-btn ui-btn-sm ui-btn-secondary"
       >
-        {confirmingLogout ? "Bekräfta?" : "Logga ut"}
+        Logga ut
       </button>
     </>
   );
@@ -149,8 +148,15 @@ export const Navbar: React.FC = () => {
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
   const [nowMs, setNowMs] = useState(() => Date.now());
-  const [confirmingLogout, setConfirmingLogout] = useState(false);
-  const confirmTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [logoutDialogOpen, setLogoutDialogOpen] = useState(false);
+  const [loggingOut, setLoggingOut] = useState(false);
+  // Read by the document-level Escape handler: while the logout dialog is
+  // open, Escape belongs to the dialog and must not also close the menu
+  // (that would unmount the button focus should return to).
+  const logoutDialogOpenRef = useRef(false);
+  useEffect(() => {
+    logoutDialogOpenRef.current = logoutDialogOpen;
+  }, [logoutDialogOpen]);
   const menuButtonRef = useRef<HTMLButtonElement>(null);
   const mobileMenuRef = useRef<HTMLDivElement>(null);
 
@@ -161,13 +167,11 @@ export const Navbar: React.FC = () => {
 
   const closeMenu = () => {
     setOpen(false);
-    setConfirmingLogout(false);
-    if (confirmTimerRef.current) clearTimeout(confirmTimerRef.current);
   };
 
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
-      if (e.key !== "Escape") return;
+      if (e.key !== "Escape" || logoutDialogOpenRef.current) return;
       // Return focus to the toggle when Escape closes the mobile menu from
       // inside it, so keyboard users are not dropped at the top of the page.
       const focusInMobileMenu = mobileMenuRef.current?.contains(document.activeElement);
@@ -184,34 +188,24 @@ export const Navbar: React.FC = () => {
     return () => window.clearInterval(timer);
   }, [user, session]);
 
-  useEffect(() => {
-    return () => {
-      if (confirmTimerRef.current) clearTimeout(confirmTimerRef.current);
-    };
-  }, []);
-
   const handleLogout = async () => {
+    setLoggingOut(true);
     try {
       await logout();
       clearError();
+      setLogoutDialogOpen(false);
       closeMenu();
       navigate("/login");
     } catch (error: unknown) {
-      setError(getApiErrorMessage(error) ?? "Kunde inte logga ut");
+      setLogoutDialogOpen(false);
+      setError(getApiErrorMessage(error) ?? "Kunde inte logga ut.");
       setTimeout(() => clearError(), 6000);
+    } finally {
+      setLoggingOut(false);
     }
   };
 
-  const handleLogoutClick = () => {
-    if (!confirmingLogout) {
-      setConfirmingLogout(true);
-      confirmTimerRef.current = setTimeout(() => setConfirmingLogout(false), 3000);
-      return;
-    }
-    if (confirmTimerRef.current) clearTimeout(confirmTimerRef.current);
-    setConfirmingLogout(false);
-    void handleLogout();
-  };
+  const handleLogoutClick = () => setLogoutDialogOpen(true);
 
   return (
     <header>
@@ -275,7 +269,6 @@ export const Navbar: React.FC = () => {
             {user ? (
               <NavbarUserMenu
                 countdown={countdown}
-                confirmingLogout={confirmingLogout}
                 onLogoutClick={handleLogoutClick}
                 onClose={closeMenu}
               />
@@ -334,7 +327,6 @@ export const Navbar: React.FC = () => {
                 <div className="my-2 border-t border-neutral-200" />
                 <NavbarUserMenu
                   countdown={countdown}
-                  confirmingLogout={confirmingLogout}
                   onLogoutClick={handleLogoutClick}
                   onClose={closeMenu}
                   mobile
@@ -351,6 +343,17 @@ export const Navbar: React.FC = () => {
           </div>
         </div>
       ) : null}
+
+      <ConfirmDialog
+        open={logoutDialogOpen}
+        onOpenChange={setLogoutDialogOpen}
+        title="Logga ut?"
+        variant="primary"
+        confirmLabel="Logga ut"
+        pendingLabel="Loggar ut…"
+        pending={loggingOut}
+        onConfirm={() => void handleLogout()}
+      />
     </header>
   );
 };

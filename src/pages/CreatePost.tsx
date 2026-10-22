@@ -64,7 +64,7 @@ export const CreatePost = () => {
       })
       .catch(() => {
         if (mounted) {
-          setGlobalError("Misslyckades att hämta loger");
+          setGlobalError("Kunde inte hämta logerna.");
         }
       })
       .finally(() => {
@@ -111,7 +111,7 @@ export const CreatePost = () => {
       }
 
       setGlobalError(
-        getApiErrorMessage(error) ?? "Misslyckades att skapa inlägget",
+        getApiErrorMessage(error) ?? "Kunde inte skapa inlägget.",
       );
     }
   }

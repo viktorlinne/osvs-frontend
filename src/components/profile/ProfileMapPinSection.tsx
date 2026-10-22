@@ -1,4 +1,5 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
+import { toast } from "sonner";
 import useFetch from "../../hooks/useFetch";
 import {
   clearUserLocationOverride,
@@ -10,6 +11,7 @@ import {
   ManualLocationPicker,
   type ManualLocationValue,
 } from "../map/ManualLocationPicker";
+import { ConfirmDialog } from "../ui/ConfirmDialog";
 
 type Props = {
   userId: number;
@@ -24,8 +26,6 @@ export function ProfileMapPinSection({ userId }: Props) {
   const [isEditing, setIsEditing] = useState(false);
   const [draftLocation, setDraftLocation] = useState<ManualLocationValue>(null);
   const [pendingReset, setPendingReset] = useState(false);
-  const [actionStatus, setActionStatus] = useState<"idle" | "saved" | "removed">("idle");
-  const statusTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const refreshPin = useCallback(async () => {
     const pins = await runPins(() => listUsersMapPins());
@@ -50,15 +50,9 @@ export function ProfileMapPinSection({ userId }: Props) {
     };
   }, [refreshPin]);
 
-  const scheduleStatusReset = useCallback(() => {
-    if (statusTimeoutRef.current) clearTimeout(statusTimeoutRef.current);
-    statusTimeoutRef.current = setTimeout(() => setActionStatus("idle"), 4000);
-  }, []);
-
   const handleStartEditing = () => {
     setDraftLocation(existingPin);
     setIsEditing(true);
-    setActionStatus("idle");
     setPendingReset(false);
   };
 
@@ -69,9 +63,8 @@ export function ProfileMapPinSection({ userId }: Props) {
         setUserLocation(userId, { lat: draftLocation.lat, lng: draftLocation.lng }),
       );
       await refreshPin();
-      setActionStatus("saved");
+      toast.success("Positionen har sparats.");
       setIsEditing(false);
-      scheduleStatusReset();
     } catch {
       // surfaced via global error banner
     }
@@ -83,9 +76,8 @@ export function ProfileMapPinSection({ userId }: Props) {
       setExistingPin(null);
       setDraftLocation(null);
       setPendingReset(false);
-      setActionStatus("removed");
+      toast.success("Positionen har tagits bort.");
       setIsEditing(false);
-      scheduleStatusReset();
     } catch {
       setPendingReset(false);
     }
@@ -94,12 +86,6 @@ export function ProfileMapPinSection({ userId }: Props) {
   return (
     <div className="ui-card mt-4 flex flex-col gap-4">
       <h2 className="ui-chapter">Kartposition</h2>
-
-      {actionStatus !== "idle" && (
-        <p role="status" className="text-sm font-medium text-success-600">
-          {actionStatus === "saved" ? "Position sparad." : "Manuell position borttagen."}
-        </p>
-      )}
 
       {!isEditing ? (
         <>
@@ -142,7 +128,7 @@ export function ProfileMapPinSection({ userId }: Props) {
               {actionLoading && !pendingReset ? "Sparar…" : "Spara position"}
             </button>
 
-            {existingPin !== null && !pendingReset && (
+            {existingPin !== null && (
               <button
                 type="button"
                 className="ui-btn ui-btn-secondary"
@@ -153,33 +139,16 @@ export function ProfileMapPinSection({ userId }: Props) {
               </button>
             )}
 
-            {pendingReset && (
-              <div className="rounded-md border border-neutral-200 bg-neutral-50 p-3">
-                <p className="mb-2 text-sm text-neutral-700">
-                  Positionen tas bort. Är du säker?
-                </p>
-                <div className="flex gap-2">
-                  <button
-                    type="button"
-                    className="ui-btn ui-btn-sm ui-btn-danger flex-1"
-                    disabled={actionLoading}
-                    onClick={() => {
-                      void handleRemove();
-                    }}
-                  >
-                    {actionLoading ? "Tar bort…" : "Bekräfta"}
-                  </button>
-                  <button
-                    type="button"
-                    className="ui-btn ui-btn-sm ui-btn-secondary flex-1"
-                    disabled={actionLoading}
-                    onClick={() => setPendingReset(false)}
-                  >
-                    Avbryt
-                  </button>
-                </div>
-              </div>
-            )}
+            <ConfirmDialog
+              open={pendingReset}
+              onOpenChange={setPendingReset}
+              title="Ta bort positionen?"
+              description="Den manuellt angivna positionen tas bort från medlemskartan."
+              confirmLabel="Ta bort"
+              pendingLabel="Tar bort…"
+              pending={actionLoading}
+              onConfirm={() => void handleRemove()}
+            />
 
             <button
               type="button"

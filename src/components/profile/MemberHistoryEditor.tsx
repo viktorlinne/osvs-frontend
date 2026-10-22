@@ -185,7 +185,7 @@ export function MemberHistoryEditor({
       await memberHistoryService.createOfficialEntry(matrikelnummer, payload);
     }
     await afterMutation(
-      dialog.mode === "edit" ? "Tjänsten sparades." : "Tjänsten lades till.",
+      dialog.mode === "edit" ? "Ändringarna har sparats." : "Tjänsten har lagts till.",
     );
   }
 
@@ -201,7 +201,7 @@ export function MemberHistoryEditor({
       await memberHistoryService.createAchievementEntry(matrikelnummer, payload);
     }
     await afterMutation(
-      dialog.mode === "edit" ? "Utmärkelsen sparades." : "Utmärkelsen lades till.",
+      dialog.mode === "edit" ? "Ändringarna har sparats." : "Utmärkelsen har lagts till.",
     );
   }
 
@@ -221,7 +221,7 @@ export function MemberHistoryEditor({
       );
     }
     await afterMutation(
-      dialog.kind === "official" ? "Tjänsten togs bort." : "Utmärkelsen togs bort.",
+      dialog.kind === "official" ? "Tjänsten har tagits bort." : "Utmärkelsen har tagits bort.",
     );
   }
 
@@ -293,7 +293,7 @@ export function MemberHistoryEditor({
     historyState === "loading" ? (
       <p className="text-sm text-neutral-600">Laddar…</p>
     ) : historyState === "error" ? (
-      <p className="text-sm text-danger-600">Kunde inte ladda historiken</p>
+      <p className="text-sm text-danger-600">Historiken kunde inte laddas.</p>
     ) : null;
 
   return (
@@ -424,7 +424,7 @@ export function MemberHistoryEditor({
         {logState === "loading" ? (
           <p className="text-sm text-neutral-600">Laddar…</p>
         ) : logState === "error" ? (
-          <p className="text-sm text-danger-600">Kunde inte ladda ändringsloggen</p>
+          <p className="text-sm text-danger-600">Ändringsloggen kunde inte laddas.</p>
         ) : (
           <ChangeLogList entries={changeLog} />
         )}

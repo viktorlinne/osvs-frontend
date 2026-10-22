@@ -54,7 +54,7 @@ export const ContactPage = () => {
           </section>
 
           <section>
-            <h2 className="ui-section-title mb-4">Logernas Kontakt</h2>
+            <h2 className="ui-section-title mb-4">Logernas kontakt</h2>
             <div>
               {lodges.map(({ name, city, email }) => (
                 <div key={name} className="ui-entry">

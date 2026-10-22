@@ -50,7 +50,7 @@ export function PublicumList({ onSelect, selectedId }: PublicumListProps) {
     return <p className="text-sm text-neutral-600">Laddar publicum…</p>;
   if (failed)
     return (
-      <p className="text-sm text-danger-600">Kunde inte hämta publicum</p>
+      <p className="text-sm text-danger-600">Publicum kunde inte laddas.</p>
     );
   if (!posts.length)
     return (

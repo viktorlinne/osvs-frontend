@@ -45,7 +45,7 @@ export const MemberAttended = () => {
       <AttendedEventsView
         loading={loading}
         notFound={notFound}
-        notFoundMessage="Brodern hittades inte."
+        notFoundMessage="Medlemmen hittades inte."
         events={events}
         sinceLastAchievementCount={sinceLastAchievementCount}
         totalMeetingsCount={totalMeetingsCount}

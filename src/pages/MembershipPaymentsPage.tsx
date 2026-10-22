@@ -85,7 +85,7 @@ export const MembershipPaymentsPage = () => {
       setLocalPayments((prev) =>
         prev.map((p) => (p.id === id ? { ...p, status: currentStatus } : p)),
       );
-      setToggleError("Kunde inte uppdatera status, försök igen.");
+      setToggleError("Kunde inte uppdatera statusen. Försök igen.");
     }
   }
 
@@ -193,7 +193,7 @@ export const MembershipPaymentsPage = () => {
         <AsyncState
           loading={false}
           error
-          errorMessage="Logfilter kunde inte laddas."
+          errorMessage="Logefiltret kunde inte laddas."
           onRetry={() => {
             setFiltersError(false);
             runLodges(() => listLodges()).catch(() => setFiltersError(true));

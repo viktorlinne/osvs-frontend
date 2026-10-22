@@ -75,7 +75,7 @@ export const AllergiesManager = ({
         {isEditRoute ? (
           <div className="mt-1.5 flex w-full flex-col gap-2">
             {loadError ? (
-              <p className="py-1 text-sm text-danger-600">Kunde inte ladda allergier</p>
+              <p className="py-1 text-sm text-danger-600">Allergierna kunde inte laddas.</p>
             ) : allergies.length > 0 ? (
               <div className="max-h-48 overflow-y-auto rounded-md border border-neutral-200 bg-white px-3 py-2">
                 <div className="flex flex-col gap-2">

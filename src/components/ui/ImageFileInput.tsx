@@ -132,14 +132,14 @@ export function ImageFileInput({
           <div className="animate-step-in py-7 text-center">
             <ImageIcon className="mx-auto h-8 w-8 text-neutral-300" />
             <p className="mt-3 text-xs font-semibold uppercase tracking-widest text-neutral-400">
-              Bild - max 5 MB
+              Bild · max 5 MB
             </p>
             <button
               type="button"
               onClick={openPicker}
               className="ui-btn ui-btn-secondary ui-btn-sm mt-3 tracking-normal"
             >
-              Valj bild
+              Välj bild
             </button>
             <p className="mt-2 text-xs text-neutral-400">eller dra hit</p>
           </div>
