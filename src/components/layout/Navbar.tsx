@@ -104,7 +104,7 @@ function NavbarLinks({
 
       {user ? (
         <>
-          <span className="mx-2 select-none text-neutral-300" aria-hidden>
+          <span className="mx-2 hidden select-none text-neutral-300 lg:inline" aria-hidden>
             ·
           </span>
           <NavItem to="/posts" onClick={onClose}>
@@ -223,7 +223,8 @@ export const Navbar: React.FC = () => {
       </a>
       <div className="border-b border-neutral-200 bg-neutral-100">
         <div className="container grid grid-cols-[1fr_auto_1fr] items-center gap-4 py-4">
-          <div className="flex items-center lg:hidden">
+          {/* Always rendered so the logo stays in the middle column on desktop. */}
+          <div className="flex items-center">
             <button
               ref={menuButtonRef}
               type="button"
@@ -231,7 +232,7 @@ export const Navbar: React.FC = () => {
               aria-controls="mobile-menu"
               aria-label={open ? "Stäng meny" : "Öppna meny"}
               onClick={() => setOpen((s) => !s)}
-              className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-md p-2 text-neutral-700 transition-colors hover:bg-neutral-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-600 focus-visible:ring-offset-2"
+              className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-md p-2 text-neutral-700 lg:hidden transition-colors hover:bg-neutral-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-600 focus-visible:ring-offset-2"
             >
               <svg
                 className="h-6 w-6"
@@ -308,7 +309,8 @@ export const Navbar: React.FC = () => {
           ref={mobileMenuRef}
           className="border-b border-neutral-200 bg-neutral-50 lg:hidden"
         >
-          <div className="container space-y-0.5 py-3">
+          {/* 44px touch targets for every link in the mobile menu. */}
+          <div className="container space-y-0.5 py-3 [&_.ui-nav-item]:flex [&_.ui-nav-item]:min-h-11 [&_.ui-nav-item]:items-center">
             <NavbarLinks user={user} onClose={closeMenu} />
             {user ? (
               <>

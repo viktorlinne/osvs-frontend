@@ -84,7 +84,7 @@ export const LoginPage = () => {
           <div className="relative mt-1.5">
             <input
               id="password"
-              className={inputClass}
+              className={`${inputClass} pr-12`}
               type={showPassword ? "text" : "password"}
               autoComplete="current-password"
               aria-invalid={Boolean(errors.password)}
@@ -93,7 +93,7 @@ export const LoginPage = () => {
             <button
               type="button"
               onClick={() => setShowPassword((prev) => !prev)}
-              className="absolute right-3 top-1/2 -translate-y-1/2 cursor-pointer text-neutral-600 transition-colors hover:text-neutral-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-600 focus-visible:ring-offset-1"
+              className="absolute right-0 top-1/2 inline-flex h-11 w-11 -translate-y-1/2 cursor-pointer items-center justify-center rounded-md text-neutral-600 transition-colors hover:text-neutral-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-600 focus-visible:ring-offset-1"
               aria-label={showPassword ? "Dölj lösenord" : "Visa lösenord"}
             >
               {showPassword ? (
