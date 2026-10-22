@@ -102,10 +102,10 @@ The main JS chunk grew from 512.9 kB to 570.1 kB (gzip: 162 → 179 kB). It was 
 
 ## Known gaps
 
-- Not checked in a real browser overnight (there was no backend). All verification is Vitest/jsdom plus build. Please run the checklist above.
-- After removing a group member, the button that opened the dialog no longer exists, so focus falls back to the page body.
-- Sonner's close (✕) button is smaller than 44px. Toasts also auto-dismiss, can be swiped away, and can be reached with Alt+T.
-- Empty states with a "next action" (phase 8) were not reworked beyond what already existed.
+- ~~Not checked in a real browser~~: checked on night 2, see "Browser test (night 2)" below. The manual checklist is still worth a human pass.
+- ~~Focus falls to the page body after removing a group member~~: fixed in `0a44c87`.
+- ~~Sonner's close (✕) button is smaller than 44px~~: the hit area is 44×44px since `aba2117` and `faa1f2c`. Toasts also auto-dismiss, can be swiped away, and can be reached with Alt+T.
+- ~~Empty states with a "next action" were not reworked~~: done in `a2e6571`.
 - `MemberDetailSkeleton` / `PageSkeleton` were left as they are. Only the inline shimmer divs were consolidated. Two non-rounded image placeholders in PostsPage stay inline.
 - `AudienceSelection` (lodge/group checkbox lists) still uses native checkboxes, by design.
 - Lint still has the same 2 old warnings (CreateEvent `autoFocus`, GdprPage). There are no new warnings.
@@ -115,3 +115,137 @@ The main JS chunk grew from 512.9 kB to 570.1 kB (gzip: 162 → 179 kB). It was 
 - `npm run lint`: 0 errors, 2 warnings (pre-existing)
 - `npm run build`: OK
 - `npm test`: 26 files, 90 tests passed (baseline: 19 files, 63 tests)
+
+## Browser test (night 2)
+
+The tests ran in real Chromium (Playwright, headless) against the dev servers:
+
+- Frontend: `npm run dev` on port 5173, this branch.
+- Backend: `C:\OSVS\osvs-backend` on port 4000, unchanged, branch `chore/ubuntu-deploy`. It ran with env overrides for the throwaway trial DB (`osvs-migration-trial`, port 3307) and for Mailpit (SMTP 127.0.0.1:1025, no auth, `MAIL_DEV_ALLOWLIST=@osvs.invalid`). The effective SMTP config was checked before anything was sent.
+- Logins: `test.admin` (4089), `test.editor` (333) and `test.member` (308).
+
+Where things are:
+
+- Specs and tooling are outside the repo, in `C:\Users\VIKTOR~1\AppData\Local\Temp\claude\C--OSVS\a2d7cb2d-6a2e-433d-817f-0a4cfb4445dd\scratchpad\e2e\tests\`.
+- Screenshots (60 of them, desktop 1280×800 and mobile 390×844) are in `C:\Users\VIKTOR~1\AppData\Local\Temp\claude\C--OSVS\a2d7cb2d-6a2e-433d-817f-0a4cfb4445dd\scratchpad\e2e\screenshots\`.
+- The axe JSON for each page is in `C:\Users\VIKTOR~1\AppData\Local\Temp\claude\C--OSVS\a2d7cb2d-6a2e-433d-817f-0a4cfb4445dd\scratchpad\e2e\axe\`.
+
+Final run: **16/16 tests passed**, split across two runs (see "Test notes").
+
+### Part 1: known gaps fixed
+
+| Commit | Fix |
+| --- | --- |
+| `0a44c87` | **Group detail focus.** After a member is removed, focus moves to the next row's "Ta bort", or to the previous row's if the last row was removed. When the group becomes empty, focus goes to the "Medlemmar" heading. Unit-tested (3 cases) and checked in the browser. |
+| `aba2117`, `faa1f2c` | **Toast ✕.** An invisible `::before` makes the hit area 44×44px; the visible 20px circle is unchanged. Measured in the browser: the first version gave only 42px, because the inset is relative to the padding box. |
+| `a2e6571` | **Empty states with a next action.** Each one has unit tests:<br>- Grupper: "Skapa grupp".<br>- Group members: "Lägg till medlemmar", which focuses the picker.<br>- Tidigare utskick: "Skriv ett utskick", which focuses Ämne.<br>- Möteskalender: "Skapa möte" for Admin/Editor, shown in the mobile list and under the desktop grid. Members get a hint to use Förra/Nästa.<br>- Nyheter: "Skriv det första inlägget" for Admin/Editor.<br>- Tjänster/Utmärkelser: the empty text points to "Lägg till". |
+
+### Results per flow
+
+**1. Login and navigation.** Pass after fixes (header layout, mobile menu). Checked:
+
+- The login page shows the "Första gången…" hint, and the UI login as admin works.
+- Navbar and "Arkiv" by keyboard: Enter opens it and sets `aria-expanded`, the links are 44px tall, Escape closes it and returns focus, and tabbing out closes it.
+- Mobile menu: the toggle is 44px, Escape from inside the menu returns focus to the toggle, and following a link closes the menu.
+
+**2. Member edit.** Pass. Checked:
+
+- Searching the members list and opening 308: every image loads, including the profile photo.
+- On the edit page, Befriad and Ständiga listan toggle with Space, with Enter and with a click on the label.
+- "Spara" stays disabled until something changes, and is disabled again when the change is undone.
+- Saving shows the "Medlemmen sparades." toast, and its ✕ responds to a click 18px off centre.
+- The original values were saved back afterwards.
+
+**3. History dialog ("Lägg till tjänst").** Pass; nothing was saved. Checked:
+
+- Focus starts in Tjänst. 25 Tabs and 5 Shift+Tabs all stay inside the dialog.
+- An outside click does not close it. Escape closes it and focus returns to "Lägg till"; Avbryt does the same.
+- The date checkbox stays disabled until a start date exists.
+- "För att spara:" lists 4 items, and the list empties once everything is filled in.
+
+**4. Groups and mailing.** Pass. Checked:
+
+- Creating a group shows the empty states.
+- Combobox: Enter opens it, typing "skäremo" filters to 1 match, ↓ reaches #308 among 18 "nilsson" matches, and Enter toggles. Escape returns focus to the trigger. 4 chips appeared and one was removed with its ✕. "Lägg till (3)" added the rest.
+- Removing the middle member: the dialog opens with Avbryt focused, and afterwards focus lands on the next row.
+- Mailing: the preview says "2 mottagare", the confirm dialog shows the subject, and the toast says "lagts i kö". One mail-worker tick was then run.
+- **Mailpit got exactly 2 messages, to test.admin@ and test.editor@osvs.invalid, and nothing else.**
+- "Tidigare utskick" shows KLAR and "2 skickade".
+- Deleting the group: Escape cancels the dialog with focus back on "Ta bort". Confirming navigates away and shows a toast.
+
+**5. Events.** Pass after a fix (focus). Checked:
+
+- As test.member: calendar, then November, then Mårtensloge (499). "Ändra anmälan" leads through Närvaro (Kommer is pressed), Mat (the switch works with Space) and Bekräfta; Tillbaka works. The result is "Din anmälan är bekräftad." The same values were chosen as before, so the DB is unchanged.
+- As admin, on the create-event page: 2 lodges ticked by keyboard and click. The member picker shows 197 members as "via annat val", plus 1 explicit chip. **Not saved.**
+
+**6. Posts.** Pass. Checked:
+
+- Every image on the Nyheter list loads once the page is scrolled (they are lazy-loaded).
+- Post 36: the picture loads and the text keeps its line breaks (`white-space: pre-line`, 17 lines, no HTML).
+- Post 38 renders with an empty description.
+- No horizontal overflow on mobile.
+
+**7. axe.** Rules: wcag2a/aa, wcag21a/aa, wcag22aa and best-practice. Pages: login, members, member edit, group detail, and event detail as both admin and member. Results are in "axe findings remaining" below.
+
+**8. Scroll position.** Pass after a fix. A member card far down the list opens the detail page at the top, and Back restores the list position.
+
+On mobile (390×844) there is no horizontal overflow on any page tested: login, home, menu, members list, member detail and edit, groups, group detail, calendar, event and posts.
+
+### Bugs found and fixed (frontend)
+
+| Commit | Bug |
+| --- | --- |
+| `91a149b` | **Desktop header layout** (pre-existing on `main`). The menu-toggle grid cell was `display:none` on `lg`, so the logo sat in the left column and Profil/Logga ut in the middle. The logo is centred again, with the user menu on the right. |
+| `91a149b` | **Mobile menu and password toggle.** The mobile menu had a stray "·" separator row, and its links were 30px tall (now 44px). The password show/hide button was 16×16px (axe `target-size`) and is now 44×44px with the same icon. |
+| `174114b` | **Two `<main>` landmarks on every page.** AppLayout's `<main>` contained a second one from `PageContainer`'s default `as="main"`. `PageContainer` now defaults to `<div>`, which clears the axe rules `landmark-no-duplicate-main`, `landmark-main-is-top-level` and `landmark-unique` on all pages. |
+| `174114b` | **"Inbjudna medlemmar" table.** 76 checkboxes had no name (axe `label`, critical). They are now named like "RSVP – Namn". The scrollable list is a focusable, named region (axe `scrollable-region-focusable`). |
+| `174114b` | **Event registration focus.** "Ändra anmälan" and "Bekräfta" removed the clicked button, so focus fell to `<body>`. Focus now moves to the section heading. The food switch label is 44px tall. |
+| `ef8e22b` | **No scroll handling.** A page opened from far down a list kept the old scroll offset, and so did the detail page after saving a member. Both could open showing the footer. `ScrollRestoration` is now keyed by pathname, so filter and page changes in the query string keep their position. |
+
+### axe findings remaining (serious/critical)
+
+No critical findings remain. These serious ones are left for a decision:
+
+- **color-contrast** (every page; the palette):
+  - `primary-600` #208f44 text on white is 4.13:1, and 3.9:1 on #faf8f4. This affects `ui-link` and the white text on `ui-btn-primary`. Normal text needs 4.5:1; `primary-700` would pass.
+  - `neutral-400` #9b8e84 on small text is 2.7–3.2:1. Seen on "est. MCMXXIV", "Bild – ma…" and the muted "Inga …" texts.
+  - `neutral-500` #796d63 at 12px is 4.31:1. Seen on the session countdown.
+  - These are design-token choices, so they were not changed.
+- **label-content-name-mismatch** (members list, 24 cards). Each card has `aria-label="Visa profil för <namn>"`, but its visible text also includes the initials and the lodge. Dropping the `aria-label` fixes it, but changes what screen readers announce.
+- Moderate: the member detail/edit page has no `<h1>` (`page-has-heading-one`).
+
+### Backend findings (not changed; backend is read-only here)
+
+1. **Every invitee's allergies and payment status are visible to any logged-in member.**
+   - `GET /api/events/:id/attendances` has only `authMiddleware`.
+   - As test.member, event 499 returns 19 rows with `allergies`, `paymentStatus` and `paymentPaid`. The UI shows them under "Inbjudna medlemmar".
+   - Allergies are health data under GDPR, so this needs a product/GDPR decision. One option is to restrict the route, or those fields, to Admin/Editor.
+2. **The refresh rate limit logs users out in the UI.**
+   - `refreshLimiter` allows 30 requests per 15 min per IP, and every full page load calls `POST /auth/refresh`.
+   - Past the limit, `/auth/refresh` returns 429. The frontend treats that as not logged in and shows "Logga in", even though the session is still valid.
+   - Production sets `TRUST_PROXY=1`, so the limit is per client IP. Members behind one NAT, such as lodge Wi‑Fi, share it.
+   - Decide whether the limit should be higher, or whether the frontend should show an error on 429 instead of logging out.
+3. **`CRON_RUNNER=false` also turns off the mail worker**, so locally a mailing stays queued. The test ran one `runMailWorkerTick()` through a scratchpad script with the same env overrides. This is expected; it is noted for anyone repeating the test.
+
+### Remaining issues and open questions (night 2)
+
+1. Should the `primary` colour be darkened for text and buttons? See the contrast findings above.
+2. Should the `aria-label` on the member cards be dropped? See above.
+3. **Registration flow steps.** Moving between steps keeps focus on "Nästa", and the new question is not announced. The food choice is still a native checkbox with `role="switch"`: the box is 16px, though its label is now 44px. Should it become the Radix switch, or should focus move to the step question?
+4. The `AudienceSelection` lodge/group labels are 38px tall, under 44px. So far this has been by design.
+5. On mobile the tab order is toggle, then logo, then menu items, because the menu is rendered after the header. That works, but it could be reordered.
+6. Back restores the members list only partly (356 of 688 px), because the list is still loading when the position is restored.
+7. "Skriv ett utskick" (the empty "Tidigare utskick" state) shows even when nobody in the group can receive mail. "Skicka utskick" is disabled in that case.
+8. **Test data.** Everything that was created has been removed: the test groups and their memberships, the 3 mailings with their outbox rows, and the 6 test messages in Mailpit. Member 308's flags are back to `feeExempt=0` and `standingList=1`, and the registration on 499 is unchanged. Refresh-token rows from the test logins remain in the trial DB.
+
+### Test notes
+
+- Refresh tokens rotate on every use, and `/auth/refresh` requires an `Origin` header. Playwright's global setup refreshes the saved session (or logs in), and each test writes the rotated cookies back.
+- The login limit (15 per 15 min) and the refresh limit (30 per 15 min) are kept in memory, so the backend was restarted between runs to reset them.
+
+### Verification (night 2)
+
+- `npm run lint`: 0 errors, 2 warnings (the same pre-existing ones)
+- `npm run build`: OK
+- `npm test`: 30 files, 104 tests passed (night 1: 26 files, 90 tests)
+- Playwright: 16/16 passed
