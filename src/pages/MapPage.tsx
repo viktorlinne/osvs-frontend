@@ -78,7 +78,7 @@ function toRomanGrade(rank: number | null): string | null {
 
 function buildMarkerIcon(color: GradeColorPair, selected: boolean): L.DivIcon {
   const glow = selected
-    ? '<div style="position:absolute;inset:0;border-radius:9999px;box-shadow:0 0 0 3px rgba(32,143,68,0.45);"></div>'
+    ? '<div style="position:absolute;inset:0;border-radius:9999px;box-shadow:0 0 0 3px rgba(0,164,96,0.45);"></div>'
     : "";
   const html = [
     '<div style="position:relative;width:24px;height:24px;">',

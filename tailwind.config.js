@@ -53,16 +53,19 @@ export default {
         // NOTE: shadcn's `card` color is deliberately omitted: a `card` color
         // key would make `shadow-card` also match boxShadowColor and turn the
         // existing card shadow transparent-white. Use bg-white / ui-card.
-        // Existing project scales (unchanged) + shadcn DEFAULT/foreground.
+        // Existing project scales + shadcn DEFAULT/foreground.
+        // primary-600 is the exact logo green (public/osvs.png, #00a460,
+        // hsl 155.1 100% 32.2%). 700/800 (hover/active) lower the lightness
+        // on the same hue; 50-200 keep the old tints' S/L on the logo hue.
         primary: {
           DEFAULT: 'hsl(var(--primary))',
           foreground: 'hsl(var(--primary-foreground))',
-          50: '#eef7f1',
-          100: '#d3eedd',
-          200: '#a8dbb8',
-          600: '#208f44',
-          700: '#15803d',
-          800: '#166534',
+          50: '#eef7f3',
+          100: '#d3eee3',
+          200: '#a8dbc6',
+          600: '#00a460',
+          700: '#008a51',
+          800: '#006f41',
         },
         neutral: {
           50: '#faf8f4',
