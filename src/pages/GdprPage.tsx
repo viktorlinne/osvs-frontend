@@ -252,6 +252,11 @@ export const GdprPage = () => {
               namn eller andra uppgifter skickas med, och positionen sparas i
               föreningens egen databas.
             </p>
+            <p>
+              Webbplatsens typsnitt ligger på föreningens egen server. Din
+              webbläsare hämtar dem inte från Google eller någon annan
+              typsnittstjänst.
+            </p>
           </section>
 
         </div>

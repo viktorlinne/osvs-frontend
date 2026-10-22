@@ -131,7 +131,7 @@ export function ImageFileInput({
         ) : (
           <div className="animate-step-in py-7 text-center">
             <ImageIcon className="mx-auto h-8 w-8 text-neutral-300" />
-            <p className="mt-3 text-xs font-semibold uppercase tracking-widest text-neutral-400">
+            <p className="mt-3 text-xs font-semibold uppercase tracking-widest text-neutral-500">
               Bild · max 5 MB
             </p>
             <button
@@ -141,7 +141,7 @@ export function ImageFileInput({
             >
               Välj bild
             </button>
-            <p className="mt-2 text-xs text-neutral-400">eller dra hit</p>
+            <p className="mt-2 text-xs text-neutral-500">eller dra hit</p>
           </div>
         )}
       </div>

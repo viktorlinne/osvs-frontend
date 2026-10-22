@@ -167,6 +167,11 @@ export type Event = {
   price: number;
   startDate: string;
   endDate: string;
+  /**
+   * Only on GET /events/:id. Stockholm wall time when member registration
+   * closes (21:00 on the Sunday before the meeting).
+   */
+  registrationClosesAt?: string | null;
   lodgeIds?: number[];
   groupIds?: number[];
   userIds?: number[];

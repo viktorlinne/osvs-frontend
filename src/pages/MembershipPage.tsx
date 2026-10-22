@@ -87,7 +87,7 @@ export const MembershipPage = () => {
             </div>
             {totalPending > 0 && (
               <div>
-                <dt className="ui-label text-warning-600">Utestående</dt>
+                <dt className="ui-label text-warning-700">Utestående</dt>
                 <dd className="text-lg font-semibold text-warning-700">
                   {formatAmount(totalPending)}
                 </dd>

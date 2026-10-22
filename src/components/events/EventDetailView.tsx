@@ -11,6 +11,7 @@ import type {
 } from "../../services/events";
 import { AdminAttendances } from "./AdminAttendances";
 import { EventRegistrationFlow } from "./EventRegistrationFlow";
+import { formatRegistrationClosesAt } from "../../pages/events/dateUtils";
 
 type AttendanceField = "rsvp" | "bookFood" | "attended";
 
@@ -117,6 +118,7 @@ export function EventDetailView({
             loading={registrationLoading && !registration}
             saving={saving}
             canChange={canChangeRegistration}
+            closesAtLabel={formatRegistrationClosesAt(event.registrationClosesAt)}
             fieldErrors={registrationErrors}
             onConfirm={onConfirmRegistration}
           />

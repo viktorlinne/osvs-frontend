@@ -17,7 +17,7 @@ export const Footer: React.FC = () => {
             >
               Ordenssamfundet VS
             </NavLink>
-            <p className="mt-1.5 text-[10px] font-medium uppercase tracking-widest text-neutral-400">
+            <p className="mt-1.5 text-[10px] font-medium uppercase tracking-widest text-neutral-500">
               est. MCMXXIV
             </p>
             <p className="mt-1 text-xs text-neutral-500">
@@ -74,13 +74,13 @@ export const Footer: React.FC = () => {
           <div className="text-center md:text-right">
             <a
               href="mailto:info@osvs.se"
-              className="block text-sm transition hover:text-primary-700 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-600 focus-visible:ring-offset-2"
+              className="block text-sm transition hover:text-primary-800 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-600 focus-visible:ring-offset-2"
             >
               info@osvs.se
             </a>
             <a
               href="https://www.osvs.se"
-              className="mt-2 block text-sm transition hover:text-primary-700 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-600 focus-visible:ring-offset-2"
+              className="mt-2 block text-sm transition hover:text-primary-800 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-600 focus-visible:ring-offset-2"
             >
               osvs.se
             </a>

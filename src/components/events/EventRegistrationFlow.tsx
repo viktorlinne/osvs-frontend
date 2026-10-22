@@ -22,8 +22,10 @@ type Props = {
   saved: SavedRegistration | null;
   loading: boolean;
   saving: boolean;
-  /** False when registration is closed (event started or too close). */
+  /** False when registration is closed (after registrationClosesAt). */
   canChange: boolean;
+  /** Cutoff in Swedish, e.g. "söndag 8 november kl. 21:00"; empty if unknown. */
+  closesAtLabel?: string;
   fieldErrors: Record<string, string>;
   /** Saves attendance + food together. Resolves true on success. */
   onConfirm: (payload: { rsvp: boolean; bookFood: boolean }) => Promise<boolean>;
@@ -64,6 +66,13 @@ function PaymentNotice({ price, rsvp }: { price: number; rsvp: boolean | null })
   );
 }
 
+function ClosesAtNotice({ label }: { label: string }) {
+  if (!label) return null;
+  return (
+    <p className="mt-2 text-xs text-neutral-600">Anmälan stänger {label}.</p>
+  );
+}
+
 export function EventRegistrationFlow({
   eventHasFood,
   price,
@@ -71,6 +80,7 @@ export function EventRegistrationFlow({
   loading,
   saving,
   canChange,
+  closesAtLabel = "",
   fieldErrors,
   onConfirm,
 }: Props) {
@@ -133,20 +143,25 @@ export function EventRegistrationFlow({
           <p className="text-sm text-neutral-600">Du har inte svarat.</p>
         )}
         {canChange ? (
-          <button
-            type="button"
-            className="ui-btn ui-btn-sm ui-btn-secondary mt-3"
-            onClick={() => {
-              setJustConfirmed(false);
-              focusHeadingRef.current = true;
-              setFlow(startRegistrationFlow(saved, eventHasFood));
-            }}
-          >
-            Ändra anmälan
-          </button>
+          <>
+            <button
+              type="button"
+              className="ui-btn ui-btn-sm ui-btn-secondary mt-3"
+              onClick={() => {
+                setJustConfirmed(false);
+                focusHeadingRef.current = true;
+                setFlow(startRegistrationFlow(saved, eventHasFood));
+              }}
+            >
+              Ändra anmälan
+            </button>
+            <ClosesAtNotice label={closesAtLabel} />
+          </>
         ) : (
           <p className="mt-2 text-xs text-neutral-600">
-            Anmälan är stängd för det här mötet.
+            {closesAtLabel
+              ? `Anmälan stängde ${closesAtLabel}.`
+              : "Anmälan är stängd för det här mötet."}
           </p>
         )}
       </section>
@@ -295,6 +310,7 @@ export function EventRegistrationFlow({
           </button>
         )}
       </div>
+      <ClosesAtNotice label={closesAtLabel} />
     </section>
   );
 }

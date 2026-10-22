@@ -29,7 +29,7 @@ function NavbarUserMenu({
     return (
       <>
         {countdown ? (
-          <p className="px-2.5 py-1.5 text-xs font-medium tabular-nums text-neutral-500">
+          <p className="px-2.5 py-1.5 text-xs font-medium tabular-nums text-neutral-600">
             {countdown}
           </p>
         ) : null}
@@ -50,7 +50,7 @@ function NavbarUserMenu({
   return (
     <>
       {countdown ? (
-        <span className="text-xs font-medium tabular-nums text-neutral-500">
+        <span className="text-xs font-medium tabular-nums text-neutral-600">
           {countdown}
         </span>
       ) : null}
@@ -266,7 +266,7 @@ export const Navbar: React.FC = () => {
             <p className="text-xs font-semibold uppercase tracking-widest text-neutral-700">
               Ordenssamfundet VS
             </p>
-            <p className="text-[10px] font-medium uppercase tracking-widest text-neutral-400">
+            <p className="text-[10px] font-medium uppercase tracking-widest text-neutral-600">
               est. MCMXXIV
             </p>
           </div>

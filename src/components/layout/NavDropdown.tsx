@@ -64,7 +64,7 @@ export function NavDropdown({
         aria-controls={panelId}
         className={`ui-nav-item inline-flex items-center gap-1 ${
           open
-            ? "bg-primary-50 text-primary-700"
+            ? "bg-primary-50 text-primary-800"
             : "text-neutral-600 hover:bg-neutral-100 hover:text-neutral-900"
         }`}
       >

@@ -119,29 +119,6 @@ function compareSqlDateTimes(left: string, right: string): number {
   return left < right ? -1 : 1;
 }
 
-function addHoursToSqlDateTime(value: string, hours: number): string | null {
-  const parsed = parseSqlLike(value);
-  if (!parsed) return null;
-  const baseUtc = Date.UTC(
-    parsed.year,
-    parsed.month - 1,
-    parsed.day,
-    parsed.hour,
-    parsed.minute,
-    parsed.second,
-  );
-  if (!Number.isFinite(baseUtc)) return null;
-  const next = new Date(baseUtc + hours * 60 * 60 * 1000);
-  return toSqlDateTime({
-    year: next.getUTCFullYear(),
-    month: next.getUTCMonth() + 1,
-    day: next.getUTCDate(),
-    hour: next.getUTCHours(),
-    minute: next.getUTCMinutes(),
-    second: next.getUTCSeconds(),
-  });
-}
-
 function monthNameSv(parts: DateParts): string {
   const date = new Date(Date.UTC(parts.year, parts.month - 1, parts.day, 12, 0, 0));
   const raw = STOCKHOLM_MONTH_FORMATTER.format(date);
@@ -193,13 +170,35 @@ export function isEventStartedNowStockholm(value?: string): boolean {
   return compareSqlDateTimes(normalized, now) <= 0;
 }
 
-export function isMoreThan48HoursFromNowStockholm(value?: string): boolean {
-  const normalized = normalizeEventDateTime(value);
+/**
+ * Whether member registration is still open, given the event's
+ * `registrationClosesAt` from the backend (21:00 Stockholm on the Sunday
+ * before the meeting). Missing or invalid values count as closed; the
+ * backend enforces the same rule.
+ */
+export function isRegistrationOpenStockholm(
+  closesAt?: string | null,
+  now: Date = new Date(),
+): boolean {
+  const normalized = normalizeEventDateTime(closesAt ?? undefined);
   if (!normalized) return false;
-  const now = getNowStockholmSqlDateTime();
-  if (!now) return false;
-  const nowPlus48 = addHoursToSqlDateTime(now, 48);
-  if (!nowPlus48) return false;
-  return compareSqlDateTimes(normalized, nowPlus48) > 0;
+  const nowSql = getNowStockholmSqlDateTime(now);
+  if (!nowSql) return false;
+  return compareSqlDateTimes(nowSql, normalized) < 0;
+}
+
+/** "söndag 8 november kl. 21:00" for a Stockholm wall-time value. */
+export function formatRegistrationClosesAt(value?: string | null): string {
+  const normalized = normalizeEventDateTime(value ?? undefined);
+  if (!normalized) return "";
+  const parts = parseSqlLike(normalized);
+  if (!parts) return "";
+  const date = new Intl.DateTimeFormat("sv-SE", {
+    timeZone: "UTC",
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+  }).format(new Date(Date.UTC(parts.year, parts.month - 1, parts.day)));
+  return `${date} kl. ${pad2(parts.hour)}:${pad2(parts.minute)}`;
 }
 

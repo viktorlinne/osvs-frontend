@@ -237,7 +237,7 @@ export const EventsPage = () => {
                       <Link
                         key={e.id}
                         to={`/events/${e.id}`}
-                        className="block truncate rounded bg-primary-50 px-2 py-1 text-sm text-primary-700 transition-colors duration-150 hover:bg-primary-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-600 focus-visible:ring-offset-1"
+                        className="block truncate rounded bg-primary-50 px-2 py-1 text-sm text-primary-800 transition-colors duration-150 hover:bg-primary-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-600 focus-visible:ring-offset-1"
                         aria-label={`${time ? `${time} – ` : ""}${e.title}`}
                         title={e.title}
                       >
@@ -319,7 +319,7 @@ export const EventsPage = () => {
                                 <Link
                                   key={e.id}
                                   to={`/events/${e.id}`}
-                                  className="block w-full overflow-hidden truncate rounded bg-primary-50 px-1 py-0.5 text-xs text-primary-700 transition-colors duration-150 hover:bg-primary-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-600 focus-visible:ring-offset-1"
+                                  className="block w-full overflow-hidden truncate rounded bg-primary-50 px-1 py-0.5 text-xs text-primary-800 transition-colors duration-150 hover:bg-primary-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-600 focus-visible:ring-offset-1"
                                   aria-label={`${time ? `${time} – ` : ""}${e.title}`}
                                   title={e.title}
                                 >

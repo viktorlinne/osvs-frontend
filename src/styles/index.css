@@ -41,7 +41,7 @@
 
   body {
     @apply bg-neutral-50 text-neutral-900 antialiased;
-    font-family: 'EB Garamond', Georgia, serif;
+    font-family: 'EB Garamond Variable', Georgia, serif;
     line-height: 1.65;
     font-feature-settings: 'kern' 1, 'liga' 1;
   }
@@ -139,11 +139,11 @@
   }
 
   .ui-link {
-    @apply text-sm font-medium text-primary-600 underline-offset-2 transition hover:text-primary-700 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-600 focus-visible:ring-offset-2;
+    @apply text-sm font-medium text-primary-800 underline-offset-2 transition hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-600 focus-visible:ring-offset-2;
   }
 
   .leaflet-popup-content {
-  font-family: 'EB Garamond', Georgia, serif;
+  font-family: 'EB Garamond Variable', Georgia, serif;
   font-size: 0.875rem;
   line-height: 1.65;
 }

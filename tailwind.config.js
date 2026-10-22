@@ -19,7 +19,7 @@ export default {
       },
     },
     fontFamily: {
-      sans: ['"EB Garamond"', 'Georgia', 'serif'],
+      sans: ['"EB Garamond Variable"', 'Georgia', 'serif'],
     },
     extend: {
       colors: {

@@ -57,7 +57,7 @@ export const LodgesPage = () => {
               key={lodge.id}
               className="group flex items-baseline justify-between gap-4 py-3.5"
             >
-              <span className="font-semibold text-neutral-900 transition-colors duration-150 group-hover:text-primary-600">
+              <span className="font-semibold text-neutral-900 transition-colors duration-150 group-hover:text-primary-800">
                 {lodge.name}
               </span>
               <span className="ui-chapter shrink-0">{lodge.city}</span>

@@ -266,7 +266,7 @@ export const NewsPage = () => {
               />
               <div className="flex min-w-0 flex-1 flex-col justify-center gap-3 p-6 md:p-8">
                 {(featured.lodges ?? []).length > 0 && (
-                  <span className="ui-chapter truncate text-primary-600">
+                  <span className="ui-chapter truncate text-primary-800">
                     {featured.lodges!.map((l) => l.name).join(", ")}
                   </span>
                 )}
@@ -298,7 +298,7 @@ export const NewsPage = () => {
                   />
                   <div className="flex min-w-0 flex-1 flex-col gap-1.5 p-4 md:p-5">
                     {(p.lodges ?? []).length > 0 && (
-                      <span className="ui-chapter truncate text-primary-600">
+                      <span className="ui-chapter truncate text-primary-800">
                         {p.lodges!.map((l) => l.name).join(", ")}
                       </span>
                     )}

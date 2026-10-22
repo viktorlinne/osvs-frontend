@@ -365,8 +365,9 @@ use `primary-800` (#006f41, 6.27:1) only for small *text* (links), and keep
 
 ### Left for Viktor
 
-1. **Contrast.** With the logo green, small green text and button labels are
-   below AA (3.24:1). See the trade-off above.
+1. **Contrast.** ~~Small green text is below AA~~: text now uses `primary-800`
+   (see "Text contrast" below). Button labels on the logo green are still
+   3.24:1, kept by decision.
 2. ~~**Tailwind classes that do nothing.**~~ Fixed in `9a3b378`.
 3. ~~**DESIGN.md** still lists an older Material-style palette.~~ Fixed (the
    file is not in git).
@@ -426,3 +427,30 @@ gruppen?" dialog. They contained no "RSVP – …", "Inbjudna medlemmar" or
 - `npm run lint`: 0 errors, 2 warnings (the same pre-existing ones)
 - `npm run build`: OK
 - `npm test`: 31 files, 114 tests passed (before: 30 files, 111 tests)
+
+## Text contrast (2026-10-22)
+
+Decision: the logo green #00a460 (`primary-600`) stays for the logo, buttons,
+focus rings, checkboxes and large headings. Only text colours changed. No
+tokens were added or changed.
+
+| Element | Before | After |
+| --- | --- | --- |
+| `ui-link` (and its hover) | `primary-600` 3.06:1 on #faf8f4, hover `primary-700` 4.16:1 | `primary-800` 5.91:1 (6.27:1 on white); hover only underlines |
+| Footer link hover | `primary-700` 4.42:1 on white | `primary-800` 6.27:1 |
+| Active nav item / "Arkiv" item, event calendar chips, post "Logemöte" chip, Publicum selection (on `primary-50`) | `primary-700` 4.05:1 | `primary-800` 5.74:1 |
+| Posts list chapter label, lodge name hover, revision hover | `primary-600` 3.06–3.24:1 | `primary-800` 5.91–6.27:1 |
+| Member initials (on `primary-100`), achievement date | `primary-700` 3.60 / 4.05:1 | `primary-800` 5.11 / 5.74:1 |
+| Membership "Utestående" | `warning-600` 3.0:1 | `warning-700` 4.73:1 (5.02:1 on white) |
+| Navbar session countdown (on `neutral-100`) | `neutral-500` 4.31:1 (axe saw `neutral-400` 2.73:1 earlier) | `neutral-600` 6.54:1 |
+| Navbar "est. MCMXXIV" (10px, `neutral-100`) | `neutral-400` 2.73:1 | `neutral-600` 6.54:1 |
+| Footer "est. MCMXXIV" (white) | `neutral-400` 3.18:1 | `neutral-500` 5.02:1 |
+| File-input "Bild/PDF" and "eller dra hit" | `neutral-400` 3.0:1 | `neutral-500` 4.74:1 (4.60:1 on `primary-50` drag-over) |
+| Payments table "—" | `neutral-400` 3.18:1 | `neutral-500` 5.02:1 |
+
+axe `color-contrast` (Playwright, admin, desktop 1280 and mobile 390, pages:
+login, posts, events, event detail, members, map, profile, memberships, both
+admin payment pages, revisions, lodges, GDPR, mobile menu): the only
+remaining violations are white text on #00a460, kept by decision: the
+`ui-btn-primary` labels (3.24:1) and the date badges on the events page
+(white 3.24:1, the month label at `opacity-70` 2.3:1).

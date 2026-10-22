@@ -19,7 +19,7 @@ function Toaster(props: ToasterProps) {
           "--normal-text": "#1c1610",
           "--normal-border": "#e3dcd2",
           "--border-radius": "0.5rem",
-          fontFamily: '"EB Garamond", Georgia, serif',
+          fontFamily: '"EB Garamond Variable", Georgia, serif',
         } as CSSProperties
       }
       // A little longer than sonner's 4s default; toasts also pause on

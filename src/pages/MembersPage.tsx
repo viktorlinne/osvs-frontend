@@ -367,7 +367,7 @@ function MemberCard({ member }: { member: PublicUser }) {
           />
         ) : (
           <div className="flex h-14 w-14 items-center justify-center rounded-full bg-primary-100 ring-2 ring-primary-100">
-            <span className="text-sm font-semibold text-primary-700">{initials}</span>
+            <span className="text-sm font-semibold text-primary-800">{initials}</span>
           </div>
         )}
       </div>

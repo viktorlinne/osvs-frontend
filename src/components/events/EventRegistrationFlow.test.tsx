@@ -8,7 +8,12 @@ type Saved = { rsvp: boolean | null; bookFood: boolean };
 
 function renderFlow(
   saved: Saved | null,
-  options: { food?: boolean; price?: number; canChange?: boolean } = {},
+  options: {
+    food?: boolean;
+    price?: number;
+    canChange?: boolean;
+    closesAtLabel?: string;
+  } = {},
 ) {
   const onConfirm = vi.fn();
 
@@ -23,6 +28,7 @@ function renderFlow(
         loading={false}
         saving={false}
         canChange={options.canChange ?? true}
+        closesAtLabel={options.closesAtLabel}
         fieldErrors={{}}
         onConfirm={async (payload) => {
           onConfirm(payload);
@@ -110,5 +116,28 @@ describe("EventRegistrationFlow", () => {
     expect(
       screen.getByText("Anmälan är stängd för det här mötet."),
     ).toBeInTheDocument();
+  });
+
+  it("shows when registration closes while it is open", () => {
+    renderFlow(
+      { rsvp: true, bookFood: false },
+      { closesAtLabel: "söndag 8 november kl. 21:00" },
+    );
+    expect(
+      screen.getByText("Anmälan stänger söndag 8 november kl. 21:00."),
+    ).toBeInTheDocument();
+  });
+
+  it("shows when registration closed once it is closed", () => {
+    renderFlow(
+      { rsvp: true, bookFood: false },
+      { canChange: false, closesAtLabel: "söndag 8 november kl. 21:00" },
+    );
+    expect(
+      screen.getByText("Anmälan stängde söndag 8 november kl. 21:00."),
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: "Ändra anmälan" }),
+    ).not.toBeInTheDocument();
   });
 });

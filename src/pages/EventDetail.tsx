@@ -9,7 +9,7 @@ import useFetch from "../hooks/useFetch";
 import useEventAudience from "../hooks/useEventAudience";
 import {
   isEventStartedNowStockholm,
-  isMoreThan48HoursFromNowStockholm,
+  isRegistrationOpenStockholm,
   formatEventDisplayDate,
   toEventDateInputValue,
 } from "./events/dateUtils";
@@ -171,14 +171,14 @@ export const EventDetail = () => {
     selectedLodgeIds: selectedLodgeNumericIds,
   });
 
-  const canRsvp = isMoreThan48HoursFromNowStockholm(event?.startDate);
+  const canRsvp = isRegistrationOpenStockholm(event?.registrationClosesAt);
   const authUserId = Number(user?.matrikelnummer);
   const isUserInvitedToEvent =
     Number.isFinite(authUserId) &&
     Array.isArray(attendances) &&
     attendances.some((row) => Number(row.uid) === authUserId);
-  // The registration flow is open while the member may still OSA
-  // (existing rule: more than 48 hours before start).
+  // The registration flow is open until 21:00 Stockholm on the Sunday before
+  // the meeting (registrationClosesAt from the backend, which enforces it).
   const canChangeRegistration =
     Boolean(user) && isUserInvitedToEvent && canRsvp;
   const showRegistration = Boolean(user) && isUserInvitedToEvent;

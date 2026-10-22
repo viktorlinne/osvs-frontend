@@ -127,7 +127,7 @@ export function PdfFileInput({
         ) : (
           <div className="animate-step-in py-7 text-center">
             <DocIcon className="mx-auto h-8 w-8 text-neutral-300" />
-            <p className="mt-3 text-xs font-semibold uppercase tracking-widest text-neutral-400">
+            <p className="mt-3 text-xs font-semibold uppercase tracking-widest text-neutral-500">
               PDF · max 5 MB
             </p>
             <button
@@ -137,7 +137,7 @@ export function PdfFileInput({
             >
               Välj fil
             </button>
-            <p className="mt-2 text-xs text-neutral-400">eller dra hit</p>
+            <p className="mt-2 text-xs text-neutral-500">eller dra hit</p>
           </div>
         )}
       </div>

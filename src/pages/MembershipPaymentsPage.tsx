@@ -354,7 +354,7 @@ function PaymentRow({
         {payment.firstname} {payment.lastname}
       </td>
       <td className="px-4 py-3 text-neutral-600">
-        {payment.lodgeName ?? <span className="text-neutral-400">—</span>}
+        {payment.lodgeName ?? <span className="text-neutral-500">—</span>}
       </td>
       <td className="px-4 py-3 text-neutral-600">{payment.year}</td>
       <td className="px-4 py-3 text-right text-neutral-600">

@@ -68,7 +68,7 @@ export function PublicumList({ onSelect, selectedId }: PublicumListProps) {
                 type="button"
                 className={`flex w-full items-baseline gap-4 rounded px-1 py-0.5 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-600 focus-visible:ring-offset-2 focus-visible:ring-offset-neutral-50 ${
                   isSelected
-                    ? "bg-primary-50 text-primary-700"
+                    ? "bg-primary-50 text-primary-800"
                     : "hover:bg-neutral-100"
                 }`}
                 onClick={() => onSelect?.(post)}
@@ -76,7 +76,7 @@ export function PublicumList({ onSelect, selectedId }: PublicumListProps) {
                 <span className="w-12 shrink-0 tabular-nums text-xs text-neutral-600">
                   {formatYear(post.createdAt)}
                 </span>
-                <span className={`text-sm ${isSelected ? "text-primary-700" : "text-neutral-900"}`}>
+                <span className={`text-sm ${isSelected ? "text-primary-800" : "text-neutral-900"}`}>
                   {post.title}
                 </span>
               </button>

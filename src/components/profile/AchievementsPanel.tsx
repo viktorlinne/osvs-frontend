@@ -52,7 +52,7 @@ export const AchievementsPanel = ({
           />
         ) : (
           <div className="flex h-28 w-28 items-center justify-center rounded-full bg-primary-100 ring-2 ring-primary-100 sm:h-32 sm:w-32">
-            <span className="text-2xl font-semibold text-primary-700">{initials}</span>
+            <span className="text-2xl font-semibold text-primary-800">{initials}</span>
           </div>
         )}
       </div>
@@ -101,7 +101,7 @@ export const AchievementsPanel = ({
                 >
                   {a.title}
                   {a.awardedAt ? (
-                    <span className="ml-1.5 text-primary-700">
+                    <span className="ml-1.5 text-primary-800">
                       {new Date(a.awardedAt).toLocaleDateString("sv-SE")}
                     </span>
                   ) : null}
