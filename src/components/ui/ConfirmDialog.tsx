@@ -31,6 +31,8 @@ export type ConfirmDialogProps = {
    * show `pending` while the request runs.
    */
   onConfirm: () => void;
+  /** Optional extra content between the text and the buttons (e.g. a note field). */
+  children?: ReactNode;
 };
 
 /**
@@ -49,6 +51,7 @@ export function ConfirmDialog({
   variant = "danger",
   pending = false,
   onConfirm,
+  children,
 }: ConfirmDialogProps) {
   // Controlled without a Radix Trigger: remember the opener ourselves so
   // focus can be returned to it when the dialog closes.
@@ -82,6 +85,7 @@ export function ConfirmDialog({
             <AlertDialogDescription>{description}</AlertDialogDescription>
           ) : null}
         </AlertDialogHeader>
+        {children}
         <AlertDialogFooter>
           <AlertDialogCancel disabled={pending}>{cancelLabel}</AlertDialogCancel>
           <Button type="button" variant={variant} loading={pending} onClick={onConfirm}>

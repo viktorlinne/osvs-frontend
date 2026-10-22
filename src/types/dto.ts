@@ -75,6 +75,8 @@ export type PatchEventAttendanceBody = Partial<{
   bookFood: boolean;
   attended: boolean;
   paymentPaid: boolean;
+  /** With paymentPaid only; required when reverting a payment. */
+  paymentNote: string;
 }>;
 
 export type ListPostsQuery = {

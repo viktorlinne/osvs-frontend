@@ -242,6 +242,50 @@ export type EventAttendanceRow = {
   paymentStatus?: "Pending" | "Paid" | null;
   /** Only returned to Admin/Editor (omitted for members). */
   paymentPaid?: boolean;
+  /** Payment audit, Admin/Editor only. Amount due or paid. */
+  paymentAmount?: number | null;
+  /** "YYYY-MM-DD HH:mm:ss", Stockholm time; null when not paid. */
+  paymentPaidAt?: string | null;
+  paymentPaidBy?: number | null;
+  paymentPaidByName?: string | null;
+  /** How the current Paid state was set. */
+  paymentMethod?: EventPaymentMethod | null;
+  /** Note of the latest payment change. */
+  paymentNote?: string | null;
+};
+
+export type EventPaymentMethod = "manual" | "swish";
+
+export type OutstandingEventPayment = {
+  uid: number;
+  firstname: string;
+  lastname: string;
+  lodgeName: string | null;
+  amount: number;
+  rsvp: boolean;
+  attended: boolean;
+};
+
+export type OutstandingEvent = {
+  id: number;
+  title: string;
+  startDate: string;
+  price: number;
+  /** Whole days since the event date; negative for upcoming events. */
+  daysSinceEvent: number;
+  lodges: Array<{ id: number; name: string }>;
+  count: number;
+  amount: number;
+  payments: OutstandingEventPayment[];
+};
+
+export type OutstandingPeriod = "3m" | "12m" | "all";
+
+export type OutstandingEventPayments = {
+  period: OutstandingPeriod;
+  fromDate: string | null;
+  totals: { events: number; count: number; amount: number };
+  events: OutstandingEvent[];
 };
 
 export type MembershipPayment = {
